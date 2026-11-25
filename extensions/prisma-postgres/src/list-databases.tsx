@@ -72,14 +72,14 @@ ${database.connectionString}
 
 ## 🎁 Claim URL
 
-Your database will be automatically deleted in 24 hours. Want to keep it? Claim via this link for free:
+Unclaimed databases are deleted 24 hours after creation. Want to keep it? Claim it with a free Prisma account (Free plan: 200,000 operations a month and 2 GB of storage):
 
 ${database.claimUrl}
 
 ---
 
-**Prisma Postgres** • Instant Postgres, Zero Setup  
-[Learn more →](https://www.prisma.io/postgres)
+**Prisma Postgres** • Use it with [Prisma ORM](https://www.prisma.io/orm?utm_source=raycast&utm_medium=prisma-postgres) and host your app next to it on [Prisma Compute](https://www.prisma.io/compute?utm_source=raycast&utm_medium=prisma-postgres)  
+[Learn more →](https://www.prisma.io/postgres?utm_source=raycast&utm_medium=prisma-postgres)
 `;
 
   return (

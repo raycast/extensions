@@ -4,7 +4,7 @@ import { vi, type Mock } from "vitest";
 type AnyFn = (...args: never[]) => unknown;
 type Fixture<F extends AnyFn> = Awaited<ReturnType<F>>;
 
-const fixtures = new Map<AnyFn, { data: unknown } | { error: Error; data?: unknown }>();
+const fixtures = new Map<AnyFn, { data: unknown } | { error: Error; data?: unknown } | { pending: true }>();
 const revalidates = new Map<AnyFn, Mock<() => void>>();
 
 export const runAppleScript = vi.fn<(script: string) => Promise<string>>(async () => "");
@@ -18,6 +18,10 @@ export const useCachedPromiseFixtures = {
   // `data` is what useCachedPromise still holds from its cache when the fresh call fails.
   fail(fn: AnyFn, error: Error, data?: unknown) {
     fixtures.set(fn, { error, data });
+  },
+  // A call still in flight: no data yet and isLoading true.
+  pending(fn: AnyFn) {
+    fixtures.set(fn, { pending: true });
   },
   revalidateOf(fn: AnyFn): Mock<() => void> {
     let revalidate = revalidates.get(fn);
@@ -60,11 +64,12 @@ export function useCachedPromise<F extends AnyFn>(
 
   let data: Fixture<F> | undefined;
   let error: Error | undefined;
-  if (options.execute === false) data = undefined;
+  const pending = options.execute !== false && fixture !== undefined && "pending" in fixture;
+  if (options.execute === false || pending) data = undefined;
   else if (fixture && "error" in fixture) ({ error, data } = fixture as { error: Error; data?: Fixture<F> });
-  else if (fixture) data = fixture.data as Fixture<F>;
+  else if (fixture && "data" in fixture) data = fixture.data as Fixture<F>;
   else if (settled?.key === key) ({ data, error } = settled as { data?: Fixture<F>; error?: Error });
   else if (options.keepPreviousData) data = settled?.data as Fixture<F> | undefined;
 
-  return { data, error, isLoading: false, revalidate: useCachedPromiseFixtures.revalidateOf(fn) };
+  return { data, error, isLoading: pending, revalidate: useCachedPromiseFixtures.revalidateOf(fn) };
 }

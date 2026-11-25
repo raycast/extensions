@@ -48,7 +48,7 @@ The item details show what each type of item holds: a login's username, email, p
 
 ## Preferences
 
-- **CLI Path**: Path to your own `pass-cli` executable, version 2.5.1 or later. With the default, `pass-cli`, the extension uses the version installed on your Mac or downloads version 2.5.1.
+- **CLI Path**: Path to your own `pass-cli` executable, version 2.5.1 or later. With the default, `pass-cli`, the extension uses the version installed on your Mac or downloads version 2.7.1.
 - **Primary Action**: What Enter does on an item: view its details (default), copy or paste the password, fill the login, copy or paste the TOTP code, or open the website. Pasting and filling are for macOS; on Windows, they copy instead. If an item lacks what the selected action needs, it opens its details. A note shows its note.
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes, card numbers and codes, private keys, government ID numbers and hidden fields) out of clipboard history
@@ -84,7 +84,7 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 **Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a TOTP code, the code is then left in the clipboard, ready to paste on the next screen.
 
-For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** (⌘⇧P) and **Paste TOTP Code** (⌘⇧T) instead. Like Fill Login, Paste Password then leaves the item's TOTP code in the clipboard.
 
 Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key, and its message names the app in front.
 

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "metrix-bar",
+  "description": "Search your local Metrix.Bar dashboards and open their panels or settings.",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "miantiao",
+  "type": "module",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "react": "^19.3.1",
+    "typescript": "~6.0.3"
+  },
+  "icon": "icon.png",
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "npm@11.19.1",
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents": false
+  },
+  "commands": [
+    {
+      "name": "search-dashboards",
+      "title": "Search Dashboards",
+      "description": "Open a dashboard panel, configure a disabled dashboard, or create a Quicklink.",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "title": "Local API URL",
+      "placeholder": "http://127.0.0.1:6387",
+      "description": "Copy the local API base URL from Metrix.Bar → Settings → Agent (for example, http://127.0.0.1:6387).",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "placeholder": "Paste API Token",
+      "description": "Copy the Bearer token from Metrix.Bar → Settings → Agent.",
+      "required": true
+    }
+  ],
+  "title": "Metrix.Bar"
+}

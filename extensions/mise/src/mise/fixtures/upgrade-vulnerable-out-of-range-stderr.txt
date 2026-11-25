@@ -1,0 +1,2 @@
+mise WARN  known vulnerabilities, but no newer version in the configured range: jq@1.8.1, npm:lodash@4.17.15
+Run `mise upgrade --vulnerable --bump` to upgrade past the range.

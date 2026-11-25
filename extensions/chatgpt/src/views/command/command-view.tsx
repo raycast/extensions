@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useChat } from "../../hooks/useChat";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { canAccessBrowserExtension } from "../../utils/browser";
 import { PrimaryAction } from "../../actions";
 import { Command, ChatHook, Model } from "../../type";
@@ -26,76 +26,65 @@ type CommandLaunchContext = { commandId?: string };
 export type CommandLaunchProps = LaunchProps<{ launchContext?: CommandLaunchContext }>;
 
 export default function CommandView(props: CommandLaunchProps) {
-  const navigation = useNavigation();
   const commands = useCommand();
-  const chat = useChat([]);
-  const [aiAnswer, setAiAnswer] = useState<string | null>(null);
-  const [userInput, setUserInput] = useState<string | null>(null);
-  const [userInputError, setUserInputError] = useState<string | null>(null);
-  const [frontmostApp, setFrontmostApp] = useState<Application | null>(null);
-
   const requestedCommandId = props.launchContext?.commandId || "";
-  const [request, setRequest] = useState<{ command: Command; model: Model }>();
-  const requestedCommand = request?.command;
-  const requestedModel = request?.model;
-  useEffect(() => {
-    const command = commands.data[requestedCommandId];
-    if (!commands.isLoading && command && !request) {
-      const model = commands.resolveModel(command);
-      setRequest({ command: { ...command, model: model.option }, model });
-    }
-  }, [commands.isLoading, commands.data, requestedCommandId, request]);
-
-  useEffect(() => {
-    getFrontmostApplication().then(setFrontmostApp);
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      if (!requestedCommand) {
-        return;
-      }
-      const { content, error } = await fetchContent(requestedCommand.contentSource);
-      setUserInput(content);
-      setUserInputError(error);
-    })();
-  }, [requestedCommand]);
-
-  useEffect(() => {
-    if (userInput && requestedCommand && requestedModel) {
-      setAiAnswer(null);
-      chat.ask(userInput, [], requestedModel);
-    }
-  }, [userInput, requestedCommand]);
-
-  useEffect(() => {
-    if (!chat.streamData && !chat.isLoading && chat.data.length > 0) {
-      const lastChat = chat.data[chat.data.length - 1];
-      setAiAnswer(lastChat.answer);
-    } else {
-      setAiAnswer(chat.streamData?.answer || null);
-    }
-  }, [chat.streamData, chat.isLoading, chat.data]);
-
-  if (!commands.isLoading && !commands.data[requestedCommandId] && !request) {
-    return buildCommandNotFoundView(requestedCommandId);
-  }
-  if (!requestedCommand || !requestedModel) {
-    return <Detail markdown="" />;
-  }
-  if (requestedCommand.contentSource === "browserTab" && !canAccessBrowserExtension()) {
+  if (commands.isLoading) return <Detail isLoading markdown="" />;
+  const command = commands.data[requestedCommandId];
+  if (!command) return buildCommandNotFoundView(requestedCommandId);
+  if (command.contentSource === "browserTab" && !canAccessBrowserExtension()) {
     return BROWSER_EXTENSION_NOT_AVAILABLE_VIEW;
   }
+  return <CommandInput key={command.id} command={command} model={commands.resolveModel(command)} />;
+}
+
+function CommandInput({ command, model }: { command: Command; model: Model }) {
+  const [input, setInput] = useState<Awaited<ReturnType<typeof fetchContent>>>();
+
+  useEffect(() => {
+    let active = true;
+    void fetchContent(command.contentSource).then((result) => {
+      if (active) setInput(result);
+    });
+    return () => {
+      active = false;
+    };
+  }, [command.contentSource]);
+
+  if (!input) return <Detail isLoading markdown="" />;
+  if (input.error || !input.content) return <Detail markdown={input.error ?? "There is no text to process."} />;
+  return <CommandAnswer command={command} model={model} userInput={input.content} />;
+}
+
+function CommandAnswer({ command, model, userInput }: { command: Command; model: Model; userInput: string }) {
+  const navigation = useNavigation();
+  const chat = useChat([]);
+  const [frontmostApp, setFrontmostApp] = useState<Application | null>(null);
+  const [initialRequest] = useState(() => ({ ask: chat.ask, userInput, model }));
+  const requestStarted = useRef(false);
+  const aiAnswer = chat.streamData?.answer ?? (!chat.isLoading ? chat.data.at(-1)?.answer : undefined) ?? null;
+
+  useEffect(() => {
+    if (command.contentSource !== "clipboard")
+      void getFrontmostApplication()
+        .then(setFrontmostApp)
+        .catch(() => {});
+  }, [command.contentSource]);
+
+  useEffect(() => {
+    if (requestStarted.current) return;
+    requestStarted.current = true;
+    void initialRequest.ask(initialRequest.userInput, [], initialRequest.model);
+  }, [initialRequest]);
 
   const viewBuilder = new CommandViewBuilder(
-    requestedCommand,
+    { ...command, model: model.option },
     chat,
     navigation,
     frontmostApp,
     userInput,
     aiAnswer,
-    userInputError || chat.errorMsg,
-    requestedModel,
+    chat.errorMsg,
+    model,
   );
 
   return <Detail markdown={viewBuilder.buildContent()} actions={viewBuilder.buildActionPanel()} />;

@@ -1,4 +1,4 @@
-import { LaunchProps, Toast, open, showHUD, showToast } from "@raycast/api";
+import { LaunchProps, PopToRootType, Toast, open, showHUD, showToast } from "@raycast/api";
 import { parseNaturalLanguageTask } from "./natural-language";
 import {
   createTaskNote,
@@ -23,7 +23,10 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       vaultName,
     });
 
-    await showHUD(`Created task: ${task.title}`);
+    await showHUD(`Created task: ${task.title}`, {
+      clearRootSearch: true,
+      popToRootType: PopToRootType.Immediate,
+    });
 
     if (props.launchContext && typeof props.launchContext === "object" && "open" in props.launchContext) {
       await open(obsidianUrl(task));

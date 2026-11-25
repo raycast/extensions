@@ -45,7 +45,7 @@ const getFFmpegCommand = (args: string) => {
   const customPathExists = ffmpegPathExists();
 
   if (isInPath) {
-    return `zsh -l -c 'PATH=${PATH} ffmpeg ${args}'`;
+    return zshCommand(`PATH=${PATH} ffmpeg ${args}`);
   } else if (customPathExists) {
     return `${FFMPEG_BINARY_CUSTOM_PATH} ${args}`;
   } else {
@@ -58,15 +58,20 @@ const getFFmpegCommand = (args: string) => {
   }
 };
 
+/**
+ * Escapes a path for the shell with a backslash before every character that isn't plainly safe,
+ * so spaces, &, ;, |, quotes, brackets, globs and the like stay part of the path.
+ */
 export function sanitizeFileName(file: string): string {
-  return file
-    .replace(/\\/g, "\\\\")
-    .replace(/ /g, "\\ ")
-    .replace(/`/g, "\\`")
-    .replace(/"/g, `\\"`)
-    .replace(/\$/g, `\\$`)
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)");
+  return file.replace(/[^\w/.,:@%+=\-\u0080-\uffff]/g, "\\$&");
+}
+
+/**
+ * Wraps a command in `zsh -l -c '…'`. A single quote in the command would end the quoted
+ * string early, so each one becomes '\'' (close, escaped quote, reopen).
+ */
+export function zshCommand(command: string): string {
+  return `zsh -l -c '${command.replace(/'/g, "'\\''")}'`;
 }
 
 export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {
