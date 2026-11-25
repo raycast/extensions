@@ -1,6 +1,6 @@
 # Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-11-25
 
 - Declare Windows as a supported platform.
 - Open Webchat: start the local dashboard with `spawn` instead of a `nohup` shell command, which Windows can't run. On Windows it starts `%LOCALAPPDATA%\hermes\bin\hermes.exe`. If Hermes can't be started, the error says to run `hermes dashboard`.
