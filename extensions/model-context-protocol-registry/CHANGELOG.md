@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Fix Tap.Giving Description] - {PR_MERGE_DATE}
+## [Fix Tap.Giving Description] - 2026-11-25
 
 - Correct the NFC Tap Builder listing: placing an order does not require an API key or login.
 
