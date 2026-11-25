@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add PersonaXpand MCP Server] - {PR_MERGE_DATE}
+## [Add PersonaXpand MCP Server] - 2026-11-25
 
 - Add PersonaXpand to the official registry: write, publish and schedule posts to Instagram, Facebook, X, LinkedIn, YouTube, Threads and Bluesky, answer comments, DMs and mentions in your own voice (automatically or after approval), and read analytics and best times to post. Hosted Streamable HTTP server at https://personaxpand.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
