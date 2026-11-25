@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial release] - {PR_MERGE_DATE}
+## [Initial release] - 2026-11-25
 
 - Browse apps on paired PCs and stream or resume directly through Glimmer’s CLI.
 - Wake a PC and wait for it to answer.
