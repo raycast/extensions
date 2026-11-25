@@ -188,14 +188,17 @@ function CopySvgAction({ slug, title }: { slug: string; title: string }) {
     <Action
       title="Copy SVG"
       icon={Icon.Clipboard}
-      shortcut={Keyboard.Shortcut.Common.Copy}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "c" },
+        Windows: { modifiers: ["ctrl"], key: "c" },
+      }}
       onAction={async () => {
         try {
           const toast = await showToast({
             style: Toast.Style.Animated,
             title: "Fetching SVG...",
           });
-          const detail = await getIcon(slug);
+          const detail = await getIcon(slug, defaultVariant);
           const variant = detail.variants[defaultVariant];
           if (variant?.svg) {
             await Clipboard.copy(variant.svg);
@@ -379,6 +382,12 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
             title="Variants"
             text={variantKeys.join(", ")}
           />
+          {icon.failedVariants.length > 0 && (
+            <Detail.Metadata.Label
+              title="Unavailable Variants"
+              text={icon.failedVariants.join(", ")}
+            />
+          )}
           <Detail.Metadata.Separator />
           {icon.url && (
             <Detail.Metadata.Link
@@ -399,6 +408,13 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
       }
       actions={
         <ActionPanel>
+          {icon.failedVariants.length > 0 && (
+            <Action
+              title="Retry Unavailable Variants"
+              icon={Icon.ArrowClockwise}
+              onAction={revalidate}
+            />
+          )}
           <ActionPanel.Section title="Copy SVG">
             {variantKeys.map((variant) => (
               <Action

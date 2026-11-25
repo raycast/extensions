@@ -24,6 +24,7 @@ export interface IconDetail {
   hex: string;
   url: string | null;
   variants: Record<string, { url: string; svg: string }>;
+  failedVariants: string[];
   cdn: {
     hosted: string;
     direct: string;
@@ -111,19 +112,36 @@ async function fetchSvg(url: string): Promise<string> {
   return res.text();
 }
 
-export async function getIcon(slug: string): Promise<IconDetail> {
+export async function getIcon(
+  slug: string,
+  requestedVariant?: string,
+): Promise<IconDetail> {
   const data = await fetchRegistry();
   const entry = data.icons.find((i) => i.slug === slug);
   if (!entry) throw new Error(`Icon not found: ${slug}`);
 
-  // Fetch SVG content for all variants in parallel
-  const variantEntries = await Promise.all(
-    entry.variants.map(async (v) => {
+  const variants = requestedVariant
+    ? entry.variants.filter((variant) => variant === requestedVariant)
+    : entry.variants;
+  const results = await Promise.allSettled(
+    variants.map(async (v) => {
       const url = getIconUrl(slug, v);
       const svg = await fetchSvg(url);
       return [v, { url, svg }] as const;
     }),
   );
+  const variantEntries = results.flatMap((result) =>
+    result.status === "fulfilled" ? [result.value] : [],
+  );
+  const failedVariants = variants.filter(
+    (_, index) => results[index].status === "rejected",
+  );
+  if (variants.length > 0 && variantEntries.length === 0) {
+    const failure = results.find((result) => result.status === "rejected");
+    throw failure?.reason instanceof Error
+      ? failure.reason
+      : new Error("Could not load icon artwork");
+  }
 
   return {
     slug: entry.slug,
@@ -133,6 +151,7 @@ export async function getIcon(slug: string): Promise<IconDetail> {
     hex: entry.hex,
     url: entry.url,
     variants: Object.fromEntries(variantEntries),
+    failedVariants,
     cdn: {
       hosted: getCdnUrl(slug),
       direct: getIconUrl(slug),

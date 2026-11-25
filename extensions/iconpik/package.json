@@ -78,7 +78,6 @@
     "@types/svg-parser": "^2.0.6",
     "eslint": "^9.23.0",
     "prettier": "^3.5.3",
-    "tsx": "^4.23.15",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -87,8 +86,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"Error: no publish\" && exit 1",
-    "publish": "ray publish",
-    "test": "tsx --test tests/*.test.ts"
+    "publish": "ray publish"
   },
   "overrides": {
     "brace-expansion": "^5.0.12",

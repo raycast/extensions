@@ -33,7 +33,7 @@ export default async function CopyIcon(
     toast.title = `Fetching ${match.title} SVG...`;
 
     // Get full icon data with inline SVG
-    const detail = await getIcon(match.slug);
+    const detail = await getIcon(match.slug, defaultVariant);
     const variant = detail.variants[defaultVariant];
 
     if (!variant?.svg) {
