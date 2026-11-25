@@ -54,11 +54,12 @@ export function resolvePaperDir(configPath: string, prefPaperDir: string): strin
 }
 
 export function resolveDeliveryDirs(configPath: string, prefPaperDir: string): DeliveryDirs {
+  const absolute = (value: string) => (value ? path.resolve(path.dirname(configPath), value) : "");
   const preferred = prefPaperDir.trim();
   if (preferred) {
     return {
-      paperDir: preferred,
-      libraryDir: path.join(preferred, "library"),
+      paperDir: absolute(preferred),
+      libraryDir: absolute(path.join(preferred, "library")),
     };
   }
 
@@ -69,7 +70,7 @@ export function resolveDeliveryDirs(configPath: string, prefPaperDir: string): D
 
   const paperDir = getPaperDirFromConfigObject(config);
   const libraryDir = getLibraryDirFromConfigObject(config) || (paperDir ? path.join(paperDir, "library") : "");
-  return { paperDir, libraryDir };
+  return { paperDir: absolute(paperDir), libraryDir: absolute(libraryDir) };
 }
 
 export function applyPaperDirOverride(config: YamlObject, prefPaperDir: string): YamlObject {
@@ -92,13 +93,12 @@ export function withEffectiveConfigPath<T>(
   runner: (effectiveConfigPath: string) => T,
 ): T {
   const preferred = prefPaperDir.trim();
-  if (!preferred) {
-    throw new Error("Paper directory is required in extension Preferences.");
-  }
-
   const config = readConfigObject(configPath);
   if (!config) {
     throw new Error("Config file is missing or invalid.");
+  }
+  if (!preferred && !getPaperDirFromConfigObject(config)) {
+    throw new Error("Set Paper Directory in Preferences or delivery.paper_dir in config.yaml.");
   }
 
   let tempConfigPath = "";
@@ -127,13 +127,12 @@ export async function withEffectiveConfigPathAsync<T>(
   runner: (effectiveConfigPath: string) => Promise<T>,
 ): Promise<T> {
   const preferred = prefPaperDir.trim();
-  if (!preferred) {
-    throw new Error("Paper directory is required in extension Preferences.");
-  }
-
   const config = readConfigObject(configPath);
   if (!config) {
     throw new Error("Config file is missing or invalid.");
+  }
+  if (!preferred && !getPaperDirFromConfigObject(config)) {
+    throw new Error("Set Paper Directory in Preferences or delivery.paper_dir in config.yaml.");
   }
 
   let tempConfigPath = "";

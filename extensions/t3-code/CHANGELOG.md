@@ -1,5 +1,12 @@
 # T3 Code Changelog
 
+## [Threads from other machines] - 2026-11-23
+
+- Waiting T3 Threads and Search T3 Threads also list threads from the servers in the new `Additional Servers` preference, one `<origin> <token>` pair per entry. Each thread shows its machine, and opening it uses that machine's environment ID.
+- A server that does not answer is reported in a toast while the others still show.
+- Requests to a server stop after 15 seconds, so a machine that is asleep or offline no longer leaves a command loading forever.
+- The access token may go over plain HTTP to Tailscale MagicDNS names (`*.ts.net`), which Tailscale encrypts, as well as to loopback.
+
 ## [Fix opening threads on recent T3 Code versions] - 2026-11-11
 
 - Open threads by environment and thread ID on supported desktops, avoiding failed title and branch searches and non-ASCII keystroke input.

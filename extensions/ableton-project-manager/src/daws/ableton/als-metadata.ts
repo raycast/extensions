@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { createGunzip } from "node:zlib";
 import { StringDecoder } from "node:string_decoder";
 import { SaxesParser } from "saxes";
+import { LOG_PREFIX } from "@/core/log";
 
 export type AlsMetadata = {
   bpm: number | null;
@@ -89,7 +90,7 @@ export function getAlsMetadata(filePath: string): Promise<AlsMetadata> {
         return;
       }
 
-      console.error(`[Ableton Project Manager] Failed to parse ALS: ${filePath}`, error);
+      console.error(`${LOG_PREFIX} Failed to parse ALS: ${filePath}`, error);
       finish(emptyMetadata());
       input.destroy();
       gunzip.destroy();

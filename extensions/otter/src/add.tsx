@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from '@raycast/api'
-import urlJoin from 'proper-url-join'
+import { urlJoin } from './utils/urlJoin'
 import { copy } from './utils/copy'
 import { URL } from 'url'
 import { useEffect, useState } from 'react'

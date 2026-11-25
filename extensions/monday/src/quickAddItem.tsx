@@ -9,7 +9,7 @@ export default function QuickAddItem() {
     const boardId =
       getPreferenceValues<Preferences.QuickAddItem>().quickAddBoardId;
     const response = await getBoardAndUser(+boardId);
-    if (!response.boards.length) throw "Board not found";
+    if (!response?.boards?.length) throw "Board not found";
     return response.boards[0];
   }, []);
 
