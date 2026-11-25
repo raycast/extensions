@@ -318,11 +318,23 @@ export async function netbirdSelectExitNode(id: string): Promise<void> {
   const routes = await getNetbirdNetworks();
   const othersToDeselect = routes.filter((n) => isExitNodeRoute(n) && n.selected && n.id !== id);
 
-  for (const node of othersToDeselect) {
-    await netbirdNetworksDeselect(node.id);
-  }
+  try {
+    for (const node of othersToDeselect) {
+      await netbirdNetworksDeselect(node.id);
+    }
 
-  await netbirdNetworksSelect(id);
+    await netbirdNetworksSelect(id);
+  } catch (error) {
+    for (const node of othersToDeselect) {
+      try {
+        await netbirdNetworksSelect(node.id);
+      } catch {
+        // ignore restore errors; the original error is rethrown below
+      }
+    }
+
+    throw error;
+  }
 }
 
 export async function netbirdDeselectExitNode(id: string): Promise<void> {
