@@ -12,26 +12,19 @@ itself has no SMC knowledge — it renders what the core reports.
 
 ## Setup
 
-The core must be installed once, root-owned, before the extension can read or write fans.
-Reading fan speed needs no privileges, but changing it writes SMC keys and requires root.
+Run **Set Up Fan Control** from Raycast and approve the administrator prompt once — Touch ID
+works. It installs the helper the extension ships with, plus the single rule it needs:
 
-```sh
-git clone https://github.com/triuzzi/macos-fan-control.git
-cd macos-fan-control
-sudo ./scripts/install.sh
-```
-
-`install.sh` builds the C core, installs it as `/usr/local/bin/fan_control`
-(`root:wheel 0755`), and adds one scoped sudoers rule:
-
-```
-<you> ALL=(root) NOPASSWD: /usr/local/bin/fan_control
-```
+- `/usr/local/bin/fan_control` — the helper, owned by `root:wheel`, mode `0755`
+- `/etc/sudoers.d/macos-fan-control` — `<you> ALL=(root) NOPASSWD: /usr/local/bin/fan_control`,
+  validated with `visudo` before it is written
 
 That rule lets the extension change fan speed **without a password prompt**. It is scoped to
 that single binary, which lives in a root-only-writable directory, so no user process can swap
-the binary and inherit root — the installer verifies both before writing the rule and validates
-it with `visudo` first.
+the binary and inherit root — the setup checks both before writing the rule. Reading fan speed
+needs no privileges at all.
+
+Every command that needs the helper offers the same setup action when it is missing.
 
 Remove everything with:
 
@@ -43,6 +36,7 @@ sudo rm /etc/sudoers.d/macos-fan-control /usr/local/bin/fan_control
 
 | Command | What it does |
 |---|---|
+| **Set Up Fan Control** | Install or repair the helper and its passwordless write rule with one administrator prompt. |
 | **Fan Status** | Live actual RPM, load, target, hardware range, mode, and rolled-up CPU/GPU temperatures. Actions to cool until below a temperature, arm a thermal trigger, force maximum or restore automatic, showing any active cooldown or trigger. |
 | **Set Fan Speed** | Force every fan to 100/85/70/55/40/25/0% of its own hardware range, with the resulting RPM previewed. Settings below 50% ask for confirmation. |
 | **Cool Until Below** | Hold a speed (maximum by default, pick it from a dropdown) until the hottest sensor drops below a chosen temperature, then release the fans to firmware. Runs in the background; a new speed, `auto` or another cooldown replaces it. |
@@ -63,9 +57,9 @@ renders their state.
 
 ## Troubleshooting
 
-- **"fan_control is not installed"** — run the setup above.
-- **"sudo needs a password, the NOPASSWD rule is missing"** — re-run `sudo ./scripts/install.sh`
-  from the repo.
+- **"fan_control is not installed"** — run **Set Up Fan Control**.
+- **"sudo needs a password, the NOPASSWD rule is missing"** — run **Set Up Fan Control** to
+  rewrite the rule (for example after renaming your macOS user).
 - **No fans listed** — the machine is not Apple Silicon, or no fans are present.
 
 ## License

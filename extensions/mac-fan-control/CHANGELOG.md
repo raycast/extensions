@@ -1,5 +1,12 @@
 # Mac Fan Control Changelog
 
+## [In-App Setup] - {PR_MERGE_DATE}
+
+- New **Set Up Fan Control** command: installs the helper and its passwordless write rule with
+  one administrator prompt, so no terminal setup is needed
+- Fan Status, Cool Until Below, Thermal Trigger and the menu bar offer the setup action when the
+  helper is missing
+
 ## [Thermal Trigger] - 2026-11-25
 
 - New **Thermal Trigger** command: arm a hysteresis thermostat that spins the fans to a chosen

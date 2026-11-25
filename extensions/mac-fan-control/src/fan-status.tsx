@@ -20,6 +20,7 @@ import {
   setPercent,
 } from "macos-fan-control-client";
 import { sensorLabel, triggerDetail, triggerLabel } from "./labels";
+import { needsSetup } from "./install";
 import { openCommand } from "./launch";
 
 // Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
@@ -142,6 +143,18 @@ export default function Command() {
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
+          {error && needsSetup(error) ? (
+            <Action
+              title="Set up Fan Control…"
+              icon={Icon.Download}
+              onAction={() =>
+                openCommand(
+                  "fan-control-setup",
+                  "Could not open Set Up Fan Control",
+                )
+              }
+            />
+          ) : null}
           <Action
             title="Cool Until Below…"
             icon={Icon.Snowflake}

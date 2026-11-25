@@ -10,6 +10,7 @@ import {
   setPercent,
 } from "macos-fan-control-client";
 import { triggerDetail, triggerLabel } from "./labels";
+import { needsSetup } from "./install";
 import { openCommand } from "./launch";
 
 // The menu is often left open while watching a workload, and the `interval` in
@@ -76,6 +77,18 @@ export default function Command() {
             title={error.message}
             icon={Icon.ExclamationMark}
           />
+          {needsSetup(error) ? (
+            <MenuBarExtra.Item
+              title="Set Up Fan Control…"
+              icon={Icon.Download}
+              onAction={() =>
+                openCommand(
+                  "fan-control-setup",
+                  "Could not open Set Up Fan Control",
+                )
+              }
+            />
+          ) : null}
         </MenuBarExtra.Section>
       ) : null}
       <MenuBarExtra.Section title={current}>
