@@ -698,14 +698,14 @@ export default function Command() {
           actions={
             <ActionPanel>
               {skillsInstalled ? (
-                <Action.Push title="See How to Use Them" icon={Icon.Book} target={<AgentSkillsHelp />} />
+                <Action.Push title="View README" icon={Icon.Book} target={<AgentSkillsHelp />} />
               ) : (
                 <Action
                   title="Install for Me"
                   icon={Icon.Download}
                   onAction={() =>
                     run("Installing Agent Skills…", installAgentSkills, "Agent Skills Installed", {
-                      then: { title: "See How to Use Them", onAction: () => push(<AgentSkillsHelp />) },
+                      then: { title: "View README", onAction: () => push(<AgentSkillsHelp />) },
                     })
                   }
                 />
@@ -717,7 +717,7 @@ export default function Command() {
                   onAction={() => run("Updating Agent Skills…", installAgentSkills, "Agent Skills Updated")}
                 />
               ) : (
-                <Action.Push title="See How to Use Them" icon={Icon.Book} target={<AgentSkillsHelp />} />
+                <Action.Push title="View README" icon={Icon.Book} target={<AgentSkillsHelp />} />
               )}
               <Action.CopyToClipboard title="Copy Install Command" content={SKILLS_COMMAND} />
               <Action.OpenInBrowser title="Open Skills Repository" url={SKILLS_REPO_URL} />

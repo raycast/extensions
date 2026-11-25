@@ -1,12 +1,45 @@
 // Pure helpers with no @raycast/api import, so `npm test` can run them under plain Node.
 
+import { join, resolve, sep } from "node:path";
+
 /** The oldest CLI release this extension was built and tested against. */
-export const MIN_CLI_VERSION = "0.22.1";
+export const MIN_CLI_VERSION = "0.23.1";
 
 /** Reads `dayone 0.22.1` (the CLI's `--version` line). Returns null for anything else, including the legacy Mac CLI. */
 export function parseCliVersion(output: string): string | null {
   const match = /^dayone (\d+\.\d+\.\d+)\s*$/m.exec(output.trim());
   return match ? match[1] : null;
+}
+
+/**
+ * Where the CLI (0.23+) keeps its search model: HF_HOME, then FASTEMBED_CACHE_DIR, then the platform's per-user cache
+ * folder (DayOne-Cli src/entry_embeddings.rs, embedding_model). Doctor looks here to tell whether it's downloaded.
+ * A relative override is resolved against `cwd`, the folder the extension runs the CLI in.
+ */
+export function cliModelCacheDir(
+  env: Record<string, string | undefined>,
+  platform: string,
+  home: string,
+  cwd = "/",
+): string {
+  const override = env.HF_HOME || env.FASTEMBED_CACHE_DIR;
+  if (override) return resolve(cwd, override);
+  const cache =
+    platform === "darwin"
+      ? join(home, "Library", "Caches")
+      : platform === "win32"
+        ? env.LOCALAPPDATA || join(home, "AppData", "Local")
+        : env.XDG_CACHE_HOME || join(home, ".cache");
+  return join(cache, "dayone-cli", "models");
+}
+
+/** The folder fastembed keeps Day One's search model in, inside the model cache. */
+export const SEARCH_MODEL_REPO = "models--Qdrant--all-MiniLM-L6-v2-onnx";
+
+/** True when two folders are the same, or one is inside the other. */
+export function pathsOverlap(a: string, b: string): boolean {
+  const [ra, rb] = [resolve(a), resolve(b)];
+  return ra === rb || ra.startsWith(rb + sep) || rb.startsWith(ra + sep);
 }
 
 export function compareVersions(a: string, b: string): number {

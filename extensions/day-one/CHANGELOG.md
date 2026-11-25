@@ -1,5 +1,10 @@
 # Day One Changelog
 
+## [Shared Search Model] - {PR_MERGE_DATE}
+
+- Needs Day One CLI 0.23.1 or newer; Run Doctor offers the update. The search model now lives in the CLI's own folder, shared with the CLI in Terminal and AI agents, instead of a second 90 MB copy for Raycast. The copy already downloaded moves there, so nothing downloads again.
+- The Agent Skills help page can remove the skills (Remove Agent Skills, after a confirmation), and Run Doctor's action to open it is now View README.
+
 ## [Update Check for the Day One CLI] - 2026-11-25
 
 - Run Doctor checks npm for a newer Day One CLI. When there is one, the CLI row shows the new version and offers to update to it; when yours is the latest, it says so and no longer offers an update.

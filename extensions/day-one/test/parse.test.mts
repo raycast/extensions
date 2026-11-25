@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 import {
   canSignOut,
   classifyCliError,
+  cliModelCacheDir,
+  pathsOverlap,
   cleanBody,
   compareVersions,
   entryTitle,
@@ -29,6 +31,43 @@ describe("parseCliVersion", () => {
     const legacy =
       "Day One CLI\nVersion: 2026.19\nLoaded From: /Applications/Day One.app/Contents/Frameworks/CLIKit.framework";
     assert.equal(parseCliVersion(legacy), null);
+  });
+});
+
+describe("cliModelCacheDir", () => {
+  const home = "/Users/someone";
+  it("resolves a relative override against the folder the CLI runs in", () => {
+    assert.equal(
+      cliModelCacheDir({ FASTEMBED_CACHE_DIR: "search-model" }, "darwin", home, "/support"),
+      "/support/search-model",
+    );
+  });
+  it("uses HF_HOME first, then FASTEMBED_CACHE_DIR, as the CLI does", () => {
+    assert.equal(cliModelCacheDir({ HF_HOME: "/hf", FASTEMBED_CACHE_DIR: "/fe" }, "darwin", home), "/hf");
+    assert.equal(cliModelCacheDir({ FASTEMBED_CACHE_DIR: "/fe" }, "darwin", home), "/fe");
+  });
+  it("falls back to the platform's per-user cache folder", () => {
+    assert.equal(cliModelCacheDir({}, "darwin", home), "/Users/someone/Library/Caches/dayone-cli/models");
+    assert.equal(cliModelCacheDir({}, "linux", home), "/Users/someone/.cache/dayone-cli/models");
+    assert.equal(cliModelCacheDir({ XDG_CACHE_HOME: "/xdg" }, "linux", home), "/xdg/dayone-cli/models");
+  });
+  it("ignores empty variables", () => {
+    assert.equal(
+      cliModelCacheDir({ HF_HOME: "", FASTEMBED_CACHE_DIR: "" }, "darwin", home),
+      "/Users/someone/Library/Caches/dayone-cli/models",
+    );
+  });
+});
+
+describe("pathsOverlap", () => {
+  it("is true for the same folder, or one inside the other", () => {
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model/"), true);
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model/hf"), true);
+    assert.equal(pathsOverlap("/a", "/a/search-model"), true);
+  });
+  it("is false for siblings that only share a prefix", () => {
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model-2"), false);
+    assert.equal(pathsOverlap("/a/search-model", "/Users/someone/Library/Caches/dayone-cli/models"), false);
   });
 });
 

@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, realpathSync, renameSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { logger } from "@chrismessina/raycast-logger";
@@ -7,11 +7,14 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { DEMO_LATENCY_MS, demoStdout, isDemo } from "./demo";
 import {
   classifyCliError,
+  cliModelCacheDir,
   compareVersions,
   ErrorKind,
   MIN_CLI_VERSION,
   parseCliVersion,
   parseNpmLatest,
+  pathsOverlap,
+  SEARCH_MODEL_REPO,
   subcommand,
 } from "./parse";
 
@@ -26,22 +29,50 @@ const PLATFORM_PACKAGE = `cli-${process.platform}-${process.arch}`;
 
 const log = logger.child("[cli]");
 
-/**
- * The CLI's embedding library caches its ~90 MB search model in `./.fastembed_cache`, relative to the working
- * directory. Raycast runs commands from `/`, which is read-only, so every search failed. Give it a fixed,
- * writable home instead (and use that as the working directory, so nothing else lands in `/` either).
- */
+/** Where the CLI keeps its ~90 MB search model, shared with the CLI run from a terminal or an agent. */
 function modelCacheDir(): string {
-  return join(environment.supportPath, "search-model");
+  return cliModelCacheDir(process.env, process.platform, homedir(), environment.supportPath);
+}
+
+/** Where versions before 0.23.1 told the CLI to keep the model, since it used to follow the working directory. */
+const OLD_MODEL_CACHE = () => join(environment.supportPath, "search-model");
+
+let oldCacheChecked = false;
+
+/**
+ * Moves a model downloaded by an earlier version of this extension to where the CLI now looks, so updating doesn't
+ * download 90 MB again. Only Day One's own model folder moves (a rename: same home folder), and nothing already in
+ * the CLI's cache is touched, since it may be a shared HF_HOME. The old folder is ours, and goes once it's redundant.
+ */
+function adoptOldModelCache(): void {
+  if (oldCacheChecked || isDemo()) return;
+  oldCacheChecked = true;
+  const old = OLD_MODEL_CACHE();
+  if (!existsSync(old)) return;
+  const current = modelCacheDir();
+  try {
+    // An override pointing at (or into) the old folder, even through a symlink, makes it the CLI's cache: leave it.
+    if (pathsOverlap(realpathSync(old), realPathOf(current))) return;
+    if (SEARCHES_BY_MEANING && hasModel(old) && !existsSync(join(current, SEARCH_MODEL_REPO))) {
+      mkdirSync(current, { recursive: true });
+      renameSync(join(old, SEARCH_MODEL_REPO), join(current, SEARCH_MODEL_REPO));
+      log.info("moved the search model to the CLI's cache", { to: current });
+    }
+    // Kept only while it holds the one complete copy (the CLI's has a partial download the CLI will finish).
+    if (!SEARCHES_BY_MEANING || hasModel(current) || !hasModel(old)) {
+      rmSync(old, { recursive: true, force: true });
+      log.debug("removed the old search model folder");
+    }
+  } catch (error) {
+    log.warn("couldn't move the old search model", { error: error instanceof Error ? error.message : String(error) });
+  }
 }
 
 export function cliSpawnOptions() {
-  mkdirSync(modelCacheDir(), { recursive: true });
-  return {
-    cwd: environment.supportPath,
-    env: { ...process.env, FASTEMBED_CACHE_DIR: modelCacheDir() },
-    windowsHide: true,
-  };
+  adoptOldModelCache();
+  // The CLI runs from the support folder, not Raycast's `/`, so nothing it writes lands somewhere read-only.
+  mkdirSync(environment.supportPath, { recursive: true });
+  return { cwd: environment.supportPath, env: process.env, windowsHide: true };
 }
 
 /**
@@ -55,11 +86,26 @@ let modelFound = false;
 
 export function isSearchModelDownloaded(): boolean {
   if (!SEARCHES_BY_MEANING || isDemo() || modelFound) return true;
-  const find = (dir: string, depth: number): boolean =>
-    listDir(dir).some((name) => name === "model.onnx" || (depth > 0 && find(join(dir, name), depth - 1)));
+  adoptOldModelCache();
   // Remembered once true: the weights don't go away, and Doctor asks every second.
-  modelFound = find(modelCacheDir(), 4);
+  modelFound = hasModel(modelCacheDir());
   return modelFound;
+}
+
+/** The real path of `path`, or of its nearest folder that exists, so a cache not created yet still resolves symlinks above it. */
+function realPathOf(path: string): string {
+  const parent = join(path, "..");
+  if (existsSync(path)) return realpathSync(path);
+  return parent === path ? path : join(realPathOf(parent), path.slice(parent.length + 1));
+}
+
+/**
+ * Day One's model is in `cache`: fastembed keeps it as models--Qdrant--…/snapshots/<hash>/model.onnx, a link into
+ * blobs/ that only resolves once the download finished. Another model in a shared cache doesn't count.
+ */
+function hasModel(cache: string): boolean {
+  const snapshots = join(cache, SEARCH_MODEL_REPO, "snapshots");
+  return listDir(snapshots).some((hash) => existsSync(join(snapshots, hash, "model.onnx")));
 }
 
 export type CliErrorKind = ErrorKind | "not-installed" | "outdated";
