@@ -61,7 +61,6 @@ const answerSaves = (outcome: Record<string, unknown>) => {
     requests.push({
       body: init?.body ? JSON.parse(String(init.body)) : undefined,
       method: init?.method ?? "GET",
-      // The API lives under `/api` on teakvault.com.
       path: url.pathname.replace(/^\/api/, ""),
     });
     if (init?.method === "POST" && url.pathname.endsWith("/v1/cards")) {
@@ -96,7 +95,6 @@ describe("Save Current Browser Tab", () => {
     answerSaves({ resaved: true });
     await saveCurrentBrowserTab();
 
-    // One save, no duplicate check first: the save itself moves the card.
     expect(requests.map(({ method, path }) => `${method} ${path}`)).toEqual([
       "POST /v1/cards",
     ]);

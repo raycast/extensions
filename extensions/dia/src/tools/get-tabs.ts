@@ -1,4 +1,5 @@
-import { getTabs } from "../dia";
+import { isWindows } from "../platform";
+import { getTabs, getSpaces } from "../dia";
 import { AUTOMATION_PERMISSION_MESSAGE } from "../find-tab";
 import { filterTabs } from "../utils";
 
@@ -26,8 +27,17 @@ type Input = {
  * (isActiveSpace), and whether it is pinned or focused.
  */
 export default async function tool(input: Input) {
+  if (isWindows && input.space?.trim()) {
+    const requestedSpace = input.space.trim().toLowerCase();
+    const spaces = await getSpaces();
+    if (!Object.values(spaces.activeByWindow).some((name) => name.toLowerCase() === requestedSpace)) {
+      throw new Error(
+        "Windows can search only active spaces. Switch to the requested space first, then search its tabs.",
+      );
+    }
+  }
   // A space remembers its last tab even when hidden; only the space a window shows has the tab the user sees
-  const tabs = (await getTabs({ allSpaces: true })).map((tab) => ({
+  const tabs = (await getTabs({ allSpaces: !isWindows })).map((tab) => ({
     ...tab,
     isFocused: tab.isFocused && tab.isActiveSpace,
   }));

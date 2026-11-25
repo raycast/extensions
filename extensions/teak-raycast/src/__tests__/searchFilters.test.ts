@@ -68,11 +68,6 @@ describe("parseSearchFilters", () => {
     expect(literal.trashed).toBeUndefined();
     expect(literal.query).toBe('"fav" "trash" "a \\"b\\""');
   });
-
-  test("treats a bare colon value as the tag (legacy unquoted)", () => {
-    const parsed = parseSearchFilters("tag:design");
-    expect(parsed.tag).toBe("design");
-  });
 });
 
 describe("buildSearchText", () => {

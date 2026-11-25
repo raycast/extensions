@@ -17,7 +17,6 @@ export const isHiddenTag = (tag: string | undefined): boolean =>
 export const hasHiddenTag = (tags: readonly string[]): boolean =>
   tags.some(isHiddenTag);
 
-/** The hidden tag a card gains when `after` is saved over `before`, if any. */
 export const newlyHiddenTag = (
   before: readonly string[],
   after: readonly string[],
@@ -29,17 +28,12 @@ export const newlyHiddenTag = (
 const queryWords = (filters: ParsedSearchFilters): string[] =>
   filters.query.toLowerCase().split(/\s+/).filter(Boolean);
 
-/** Whether the search itself asks for hidden cards: `tag:secret` or `#hidden`. */
 export const searchNamesHiddenTag = (filters: ParsedSearchFilters): boolean =>
   isHiddenTag(filters.tag) ||
   queryWords(filters).some(
     (word) => word.startsWith("#") && isHiddenTag(word.slice(1)),
   );
 
-/**
- * Whether an empty result may be hiding cards: the search is blank, or only
- * has the plain word `secret` or `hidden`, which doesn't reveal them.
- */
 export const shouldCheckForHiddenCards = (
   filters: ParsedSearchFilters,
 ): boolean =>

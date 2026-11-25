@@ -3,7 +3,7 @@
   "name": "aztu-lms",
   "title": "AzTU LMS",
   "version": "1.0.0",
-  "description": "Check your AzTU LMS class schedule, announcements, transcript, grades, attendance and lectures at Azerbaijan Technical University.",
+  "description": "Log in to the AzTU LMS of Azerbaijan Technical University in one step.",
   "icon": "icon.png",
   "author": "yusifaliyevpro",
   "categories": [
@@ -25,44 +25,8 @@
     {
       "name": "delete-session",
       "title": "Delete Session",
-      "description": "Delete old session to get new link and token",
+      "description": "Delete old session to get a new login link",
       "mode": "no-view"
-    },
-    {
-      "name": "schedule",
-      "title": "Class Schedule",
-      "description": "View and manage your upcoming classes and schedule",
-      "mode": "view"
-    },
-    {
-      "name": "announcements",
-      "title": "Announcements",
-      "description": "Get important updates from AzTU LMS",
-      "mode": "view"
-    },
-    {
-      "name": "profile-info",
-      "title": "Profile Information",
-      "description": "View and manage your AzTU LMS profile information",
-      "mode": "view"
-    },
-    {
-      "name": "transcript",
-      "title": "Academic Transcript",
-      "description": "View your academic transcript and grades",
-      "mode": "view"
-    },
-    {
-      "name": "attendance",
-      "title": "Attendance",
-      "description": "View your attendance and results",
-      "mode": "view"
-    },
-    {
-      "name": "lectures",
-      "title": "Lectures",
-      "description": "View your lectures",
-      "mode": "view"
     }
   ],
   "preferences": [
@@ -80,19 +44,10 @@
       "description": "Enter your AzTU LMS password",
       "type": "password",
       "required": true
-    },
-    {
-      "name": "downloadPath",
-      "title": "Download Path",
-      "description": "Enter the directory path where materials will be downloaded",
-      "type": "directory",
-      "required": true
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.18",
-    "@raycast/utils": "^2.2.5",
-    "date-fns": "^4.2.1",
     "fetch-cookie": "3.2.0",
     "tough-cookie": "^6.0.1"
   },
@@ -110,5 +65,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
   }
 }

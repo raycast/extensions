@@ -7,6 +7,7 @@ export interface FmErrorExplanation {
 
 const CHECK_SETUP_HINT = "Open Check Setup to fix this.";
 const MODEL_ERROR_EXPLANATION = "The on-device model returned an error.";
+const CLOUD_MODEL_EXPLANATION = "Set the model to system in the command or in the Local AI preferences.";
 const OVERFLOW_BASE_EXPLANATION =
   "The on-device model handles about 4,096 tokens per request, counting the text and the answer together.";
 const OVERFLOW_SINGLE_EXPLANATION = `${OVERFLOW_BASE_EXPLANATION} Try shorter text or ask for a shorter answer.`;
@@ -37,6 +38,8 @@ export function explainFmError(error: FmError, options: ExplainOptions = {}): Fm
     case "license":
     case "unavailable":
       return { title: error.message, explanation: CHECK_SETUP_HINT };
+    case "cloudModelUnavailable":
+      return { title: error.message, explanation: CLOUD_MODEL_EXPLANATION };
     case "invalidModel":
     case "unknown":
       return { title: error.message, explanation: modelErrorExplanation(error) };

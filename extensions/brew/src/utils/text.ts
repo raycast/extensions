@@ -43,3 +43,14 @@ export function pluralize(count: number, singular: string, plural?: string): str
 export function formatCount(count: number, singular: string, plural?: string): string {
   return `${count} ${pluralize(count, singular, plural)}`;
 }
+
+/**
+ * A fenced Markdown code block. The fence is one backtick longer than the
+ * longest run inside `body`, so text that holds its own ``` (a stack trace, a
+ * README line, JSON) cannot close the block early.
+ */
+export function codeBlock(body: string, language: string): string {
+  const longest = [...body.matchAll(/`+/g)].reduce((max, run) => Math.max(max, run[0].length), 0);
+  const fence = "`".repeat(Math.max(3, longest + 1));
+  return `${fence}${language}\n${body}\n${fence}`;
+}
