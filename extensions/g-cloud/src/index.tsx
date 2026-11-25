@@ -10,6 +10,8 @@ import {
   useNavigation,
   Color,
   Keyboard,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { execFile } from "child_process";
@@ -298,13 +300,33 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     [gcloudPath, push],
   );
 
-  const handleRemoveRecentResource = useCallback((resource: RecentResource) => {
+  const handleRemoveRecentResource = useCallback(async (resource: RecentResource) => {
+    const confirmed = await confirmAlert({
+      title: "Remove from Quick Access",
+      message: `Remove "${resource.name}" from Quick Access?`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
     const updated = CacheManager.removeRecentResource(resource.id, resource.type, resource.projectId);
     setRecentResources(updated);
     showToast({ style: Toast.Style.Success, title: "Removed from Quick Access", message: resource.name });
   }, []);
 
-  const handleClearRecentResources = useCallback(() => {
+  const handleClearRecentResources = useCallback(async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear Quick Access",
+      message: "Remove all recent resources from Quick Access? This cannot be undone.",
+      primaryAction: {
+        title: "Clear All",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
     CacheManager.clearRecentResources();
     setRecentResources([]);
     showToast({ style: Toast.Style.Success, title: "Quick Access cleared" });
@@ -534,6 +556,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     <Action
                       title="Remove from Quick Access"
                       icon={Icon.XMarkCircle}
+                      style={Action.Style.Destructive}
                       shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => handleRemoveRecentResource(resource)}
                     />
