@@ -1,12 +1,12 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Formfeed MCP Server] - 2026-11-25
-
-- Add Formfeed to the official registry: PDFs and images from templates or HTML, Word and PowerPoint templates, Markdown and Office files to PDF, ZUGFeRD / Factur-X e-invoices, and PDF tools that fill, redact, split and compress existing PDFs. 18 tools. Hosted Streamable HTTP server at https://mcp.formfeed.dev/mcp with OAuth 2.1 sign-in or a Formfeed API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
-
 ## [Add ACE Music MCP Server] - {PR_MERGE_DATE}
 
 - Add ACE Music for generating songs, covering and blending tracks, and retrieving results through an Ace Data Cloud account.
+
+## [Add Formfeed MCP Server] - 2026-11-25
+
+- Add Formfeed to the official registry: PDFs and images from templates or HTML, Word and PowerPoint templates, Markdown and Office files to PDF, ZUGFeRD / Factur-X e-invoices, and PDF tools that fill, redact, split and compress existing PDFs. 18 tools. Hosted Streamable HTTP server at https://mcp.formfeed.dev/mcp with OAuth 2.1 sign-in or a Formfeed API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
 ## [Add Who Got Hacked MCP Server] - 2026-11-20
 
