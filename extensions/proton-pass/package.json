@@ -326,7 +326,7 @@
       "name": "cliPath",
       "type": "textfield",
       "title": "CLI Path",
-      "description": "Leave as pass-cli: the extension picks your Mac's pass-cli or downloads 2.5.1.",
+      "description": "Leave as pass-cli: the extension picks your Mac's pass-cli or downloads 2.7.1.",
       "default": "pass-cli",
       "required": false
     },

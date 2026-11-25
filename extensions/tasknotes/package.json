@@ -5,6 +5,9 @@
   "description": "Create TaskNotes tasks in Obsidian from natural language, search tasks and see an agenda of tasks by due and scheduled date.",
   "icon": "icon.png",
   "author": "robinradx",
+  "contributors": [
+    "alewkinr"
+  ],
   "platforms": [
     "macOS"
   ],

@@ -2,19 +2,32 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  aliasNames,
   airlinesUrl,
   countryName,
   earlierMarks,
   flagCarrierCountries,
   formerNames,
   getAssetTiles,
+  tileKind,
+  typeSections,
+  previewSource,
+  previewUrl,
   groupAirlines,
   markTitle,
   searchKeywords,
   isAirlineList,
   isLineRelease,
   setDataVersion,
+  DATA_LINE,
 } from "../src/utils/airlines.ts";
+
+// Releases of the line the extension reads, and of other lines, so moving
+// DATA_LINE to a new line needs no change here
+const [major, minor] = DATA_LINE.split(".").map(Number);
+const release = (patch: number) => `${DATA_LINE}.${patch}`;
+const nextLine = `${major}.${minor + 1}.0`;
+const earlierLine = `${major}.${Math.max(minor - 1, 0)}.9`;
 
 const airline = { name: "Vietnam Airlines", slug: "vietnam-airlines", assets: { logo: { color: true, mono: true } } };
 
@@ -73,7 +86,7 @@ describe("getAssetTiles and earlierMarks", () => {
       { since: 1984, assets: { logo: info(true, false), icon: info(true, true) } },
     ],
   };
-  const base = "https://cdn.jsdelivr.net/npm/soaring-symbols@0.4/dist/assets/korean-air";
+  const base = `https://cdn.jsdelivr.net/npm/soaring-symbols@${DATA_LINE}/dist/assets/korean-air`;
 
   it("lists the current files without a mark", () => {
     assert.deepEqual(
@@ -98,6 +111,78 @@ describe("getAssetTiles and earlierMarks", () => {
     );
   });
 
+  it("lists a stacked logo after the logo", () => {
+    const stacked = {
+      ...korean,
+      assets: { logo: info(true, false), "logo-stacked": info(true, true), icon: info(true, false) },
+    };
+    assert.deepEqual(
+      getAssetTiles(stacked).map(({ variant, fileName, mono }) => [variant, fileName, mono]),
+      [
+        ["logo", "korean-air-logo.svg", false],
+        ["logo-stacked", "korean-air-logo-stacked.svg", false],
+        ["logo-stacked-mono", "korean-air-logo-stacked-mono.svg", true],
+        ["icon", "korean-air-icon.svg", false],
+      ],
+    );
+  });
+
+  it("gives a color tile its -dark.svg when the data ships one", () => {
+    const withDark = { ...korean, assets: { logo: { ...info(true, true), dark: true } } };
+    const [color, mono] = getAssetTiles(withDark);
+    assert.deepEqual(color.dark, { url: `${base}/logo-dark.svg`, fileName: "korean-air-logo-dark.svg" });
+    assert.equal(mono.dark, undefined);
+    // Data from before 0.5.0 has no dark files
+    assert.equal(getAssetTiles(korean)[0].dark, undefined);
+  });
+
+  it("previews the -dark.svg in dark mode when there is one", () => {
+    const withDark = { ...korean, assets: { logo: { ...info(true, true), dark: true } } };
+    assert.equal(previewUrl(withDark, "logo", { dark: true }), `${base}/logo-dark.svg`);
+    assert.equal(previewUrl(withDark, "logo"), `${base}/logo.svg`);
+    assert.equal(previewUrl(korean, "logo", { dark: true }), `${base}/logo.svg`);
+  });
+
+  it("gives a preview source that follows the theme when there is a -dark.svg", () => {
+    const withDark = { ...korean, assets: { logo: { ...info(true, true), dark: true } } };
+    assert.deepEqual(previewSource(withDark, "logo"), {
+      light: `${base}/logo.svg`,
+      dark: `${base}/logo-dark.svg`,
+    });
+    assert.equal(previewSource(korean, "logo"), `${base}/logo.svg`);
+    assert.equal(previewSource(korean, "tail"), undefined);
+  });
+
+  it("groups the files by mark type, color then mono then dark", () => {
+    const withAll = {
+      ...korean,
+      assets: {
+        logo: { ...info(true, true), dark: true },
+        "logo-stacked": info(true, false),
+        icon: info(true, true),
+      },
+    };
+    const sections = (dark: boolean) =>
+      typeSections(getAssetTiles(withAll), { dark }).map(({ key, title, tiles }) => [
+        key,
+        title,
+        tiles.map((tile) => tileKind(tile.variant).title),
+      ]);
+    assert.deepEqual(sections(true), [
+      ["logo", "Logo", ["Color", "Monochrome", "Dark Background"]],
+      ["logo-stacked", "Logo Stacked", ["Color"]],
+      ["icon", "Icon", ["Color", "Monochrome"]],
+    ]);
+    // Without `dark` (light mode), no dark tiles
+    assert.deepEqual(sections(false)[0], ["logo", "Logo", ["Color", "Monochrome"]]);
+  });
+
+  it("reads a tile's type and kind from its variant", () => {
+    assert.deepEqual(tileKind("logo-stacked-mono"), { type: "logo-stacked", title: "Monochrome" });
+    assert.deepEqual(tileKind("icon-dark"), { type: "icon", title: "Dark Background" });
+    assert.deepEqual(tileKind("logo-stacked"), { type: "logo-stacked", title: "Color" });
+  });
+
   it("orders older marks newest first and handles data without history", () => {
     assert.deepEqual(
       earlierMarks(korean).map((mark) => mark.since),
@@ -112,25 +197,25 @@ describe("exact release URLs", () => {
   const cdn = "https://cdn.jsdelivr.net/npm/soaring-symbols";
 
   it("accepts only exact releases of the line", () => {
-    assert.equal(isLineRelease("0.4.0"), true);
-    for (const version of ["0.4", "0.3.3", "0.5.0", "0.4.0-beta", "10.4.0", undefined, 24]) {
+    assert.equal(isLineRelease(release(0)), true);
+    for (const version of [DATA_LINE, earlierLine, nextLine, `${release(0)}-beta`, `1${release(0)}`, undefined, 24]) {
       assert.equal(isLineRelease(version), false, String(version));
     }
   });
 
   it("loads airlines.json from the release, or the line when it's unknown", () => {
-    assert.equal(airlinesUrl("0.4.0"), `${cdn}@0.4.0/dist/airlines.json`);
-    assert.equal(airlinesUrl(undefined), `${cdn}@0.4/dist/airlines.json`);
-    assert.equal(airlinesUrl("latest"), `${cdn}@0.4/dist/airlines.json`);
+    assert.equal(airlinesUrl(release(0)), `${cdn}@${release(0)}/dist/airlines.json`);
+    assert.equal(airlinesUrl(undefined), `${cdn}@${DATA_LINE}/dist/airlines.json`);
+    assert.equal(airlinesUrl("latest"), `${cdn}@${DATA_LINE}/dist/airlines.json`);
   });
 
   it("loads files from the release the list came from", () => {
-    setDataVersion("0.4.1");
-    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.4.1/dist/assets/korean-air/logo.svg`);
-    setDataVersion("0.3.3");
-    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.4/dist/assets/korean-air/logo.svg`);
+    setDataVersion(release(1));
+    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@${release(1)}/dist/assets/korean-air/logo.svg`);
+    setDataVersion(earlierLine);
+    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@${DATA_LINE}/dist/assets/korean-air/logo.svg`);
     setDataVersion();
-    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.4/dist/assets/korean-air/logo.svg`);
+    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@${DATA_LINE}/dist/assets/korean-air/logo.svg`);
   });
 });
 
@@ -166,6 +251,23 @@ describe("searchKeywords", () => {
     };
     assert.ok(searchKeywords(trinity as never).includes("T'way Air"));
     assert.deepEqual(formerNames(trinity as never), ["Hansung Airlines", "T'way Air"]);
+  });
+
+  it("finds a cargo airline by the word cargo", () => {
+    assert.ok(searchKeywords({ ...airline, cargo: true } as never).includes("cargo"));
+    assert.ok(!searchKeywords(airline as never).includes("cargo"));
+  });
+
+  it("finds an airline by its aliases", () => {
+    const swiss = {
+      ...airline,
+      name: "Swiss International Air Lines",
+      slug: "swiss-international-air-lines",
+      aliases: [{ name: "SWISS", slug: "swiss" }],
+    };
+    assert.ok(searchKeywords(swiss as never).includes("SWISS"));
+    assert.deepEqual(aliasNames(swiss as never), ["SWISS"]);
+    assert.deepEqual(aliasNames(airline as never), []);
   });
 });
 

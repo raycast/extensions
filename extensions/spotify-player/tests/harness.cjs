@@ -40,6 +40,7 @@ const component = (name) =>
   };
 const Action = component("Action");
 Action.Push = component("Action.Push"); // targets mount only after explicit navigation
+Action.Style = { Destructive: "destructive" };
 for (const name of ["OpenInBrowser", "CopyToClipboard", "CreateQuicklink"]) Action[name] = component(`Action.${name}`);
 const ActionPanel = component("ActionPanel");
 for (const name of ["Submenu", "Section"]) ActionPanel[name] = component(`ActionPanel.${name}`);
@@ -56,14 +57,23 @@ for (const type of [List, Grid]) {
     type[name] = component(`${type === List ? "List" : "Grid"}.${name}`);
   type.Dropdown.Item = component("Dropdown.Item");
 }
+const MenuBarExtra = component("MenuBarExtra");
+for (const name of ["Item", "Section", "Submenu"]) MenuBarExtra[name] = component(`MenuBarExtra.${name}`);
 const preferences = { "Default-View": "all", duplicateSongCheck: true };
 const toasts = [];
 const api = {
   Action,
+  Alert: { ActionStyle: { Destructive: "destructive" } },
+  // The user confirms every alert.
+  confirmAlert: async (options) => {
+    await options.primaryAction?.onAction?.();
+    return true;
+  },
   ActionPanel,
   List,
   Detail,
   Grid,
+  MenuBarExtra,
   Cache,
   Icon: new Proxy({}, { get: (_, k) => k }),
   Image: { Mask: {} },
@@ -98,7 +108,7 @@ const api = {
 };
 let client;
 // Spotify app detection and AppleScript, which tests can replace.
-const host = { spotifyInstalled: false, runSpotifyScript: async () => {} };
+const host = { spotifyInstalled: false, runSpotifyScript: async () => {}, spotifyAppData: async () => undefined };
 const originalLoad = Module._load;
 Module._load = function (name, parent, main) {
   if (name === "@raycast/api") return api;
@@ -108,12 +118,21 @@ Module._load = function (name, parent, main) {
       setSpotifyClient: async () => {},
       withSpotifyClient: (fn) => fn,
     };
-  if (name.includes("isSpotifyInstalled")) return { checkSpotifyApp: async () => host.spotifyInstalled };
+  // Counts lookups of installed apps, so tests can check when they happen.
+  if (name.includes("isSpotifyInstalled"))
+    return {
+      checkSpotifyApp: async () => {
+        stats.calls.apps = (stats.calls.apps ?? 0) + 1;
+        return host.spotifyInstalled;
+      },
+    };
   if (name.endsWith("/script"))
     return { ...originalLoad(name, parent, main), runSpotifyScript: (...args) => host.runSpotifyScript(...args) };
   if (name.endsWith("/StartRadioAction")) return { StartRadioAction: () => null };
   if (name.endsWith("/FooterAction")) return { FooterAction: () => null };
   if (name.endsWith("/triggerMenuBarRefresh")) return { triggerMenuBarRefresh: () => {} };
+  if (name.endsWith("/getSpotifyAppData"))
+    return { ...originalLoad(name, parent, main), getSpotifyAppData: () => host.spotifyAppData() };
   return originalLoad(name, parent, main);
 };
 for (const ext of [".ts", ".tsx"])

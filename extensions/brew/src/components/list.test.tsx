@@ -17,7 +17,7 @@ vi.mock("./listItemDetail", () => ({
   FormulaListItemDetail: () => null,
 }));
 vi.mock("../utils", () => ({
-  brewFormatVersion: () => "1.0",
+  brewInstalledVersion: () => "1.0",
   brewInstalledDate: () => undefined,
   brewIsInstalled: () => true,
   brewIsOutdated: () => false,

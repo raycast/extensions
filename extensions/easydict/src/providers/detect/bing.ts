@@ -12,10 +12,6 @@ import { detectionObject, detectionString } from "./response";
 export class BingDetectProvider extends BaseDetectProvider {
   type = LanguageDetectType.Bing;
 
-  isEnabled() {
-    return true;
-  }
-
   protected async doDetect(text: string, options?: DetectOptions): Promise<DetectionObservation> {
     const { data } = await requestBing({
       text,

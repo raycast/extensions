@@ -27,7 +27,7 @@ Picked up after third-party taps ship. Closing the Raycast window mid-install en
 
 - **Run brew detached**, in `execBrewWithProgress` (`src/utils/brew/progress.ts`) and in the paths that still use the buffered `execBrew` for long work — uninstall (`brewUninstall`) and Upgrade All (`brewUpgradeAll`) in `src/utils/brew/actions.ts` — or move those onto it: its own process group, output to a log file instead of pipes. While the extension is alive it reads that file for the progress toast; cancel kills the process group.
 - **Report the result with a native macOS notification when nobody else does.** A small shell wrapper records brew's exit code; the extension, if still running, shows its usual toast or HUD and marks the result handled; if nothing has marked it shortly after brew exits, the wrapper posts "Installed omlx" / "Failed to install omlx" itself. raycast-downloader does exactly this (`/Users/messina/Developer/GitHub/chrismessina/raycast-downloader/src/runner.ts:683`, `osascript display notification`), and it reads well in Notification Center.
-- **Show progress through brew's quiet stretches.** The omlx install that did finish went 3.5 minutes (23:31:31 → 23:35:00) with the toast frozen on "Auto-updating Homebrew…": brew prints nothing while pip builds from source, because pip writes to per-step files under `~/Library/Logs/Homebrew/<name>/` (`02.pip.log`, `03.pip.log`, …). Add an elapsed clock to the message (Adopt's `adoptProgressText` already ticks one), and consider tailing the newest of those files for the current step. Log each step as it starts, so a stall is attributable afterwards.
+- **Show progress through brew's quiet stretches.** The omlx install that did finish went 3.5 minutes (23:31:31 → 23:35:00) with the toast frozen on "Auto-updating Homebrew…": brew prints nothing while pip builds from source, because pip writes to per-step files under `~/Library/Logs/Homebrew/<name>/` (`02.pip.log`, `03.pip.log`, …). Add an elapsed clock to the message (Adopt's `adoptProgressText` already ticks one), and consider tailing the newest of those files for the current step. Log each step as it starts, so a stall is attributable afterward.
 - **Revisit the 5-minute stale watchdog** once output arrives via a file: a quiet source build can legitimately run longer than that without a line of output.
 
 ### Keep cached search results trustworthy
@@ -47,6 +47,15 @@ Replace the unconditional `brew update` used by the outdated refresh and Check f
 ### Do not report a no-op as a completed package change
 
 Homebrew can exit successfully after declining work. Close the remaining gaps around install and uninstall: an already-installed cask can be a silent install no-op, and a package pinned after the extension's preflight can make uninstall exit 0. Confirm the resulting installed/pin state before showing a success HUD, and describe a refusal as skipped with the next action rather than as installed or uninstalled.
+
+### Stop the package detail from refetching itself
+
+Selecting a row in Search fetches that package's record from formulae.brew.sh (`usePackageDetail`, a `useFetch`), and a dev-build trace on 2026-11-02 showed every one of those requests created, aborted and recreated in the same millisecond. The request is wasted, and on Raycast 2.10.1 the abort is what crashes Search: Node 26's undici throws `InformationalError: socket idle timeout` 4 s after an HTTP/2 request is aborted before its response ([nodejs/undici#5936](https://github.com/nodejs/undici/issues/5936), fixed by #5983 but unreleased as of 2026-11-02; reported to Raycast).
+
+Not yet known is whether brew or Raycast causes the double run. Ruled out: the inline `onError` (`useFetch` strips it before comparing arguments) and unstable row keys (rows are keyed by package name in `src/components/list.tsx`). Left: Raycast remounting the detail element on a selection change, or `@raycast/utils` `useCachedPromise` (2.3.0) re-running the effect.
+
+- **Find out which,** with a temporary dev-build trace that logs `FormulaListItemDetail` mounts and unmounts alongside the `undici:request:create` diagnostics channel.
+- **If it is brew,** fix it there. **If it is Raycast,** report it with the trace, and leave the code alone.
 
 ## Not planned
 

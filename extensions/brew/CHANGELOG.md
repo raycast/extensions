@@ -1,6 +1,48 @@
 # Brew Changelog
 
-## [Handle missing package descriptions] - {PR_MERGE_DATE}
+## [Show Installed filters, and the version in use] - 2026-11-24
+
+- Changed: Show Installed's filter now offers Installed by You and Dependencies beside All, Formulae and Casks. It replaces Hide Dependencies (⌘D), which could leave dependencies hidden with nothing on screen saying so
+- Fixed: with an older version still installed beside a newer one, such as `rust`, rows in Show Installed and Search show the version Homebrew links rather than the leftover one, Show Installed dates the row by it, and Show in Finder opens that version's folder
+- Improved: rows show the version alone, without letters such as `(DO)`. The Outdated tag and the pin icon already say the same, and whether a package is a dependency shows in Show Installed's Dependencies section and in the sidebar's Version row
+- New: the sidebar shows when a package was installed, in Show Installed and in Search
+
+## [Unused tag and build dependencies] - 2026-11-24
+
+- Fixed: Show Installed no longer tags a dependency "Unused" while a package built from source needs it to build again, such as `rust` for a formula built with it. From Homebrew 7.0.16, Uninstall refuses to remove one
+
+## [Homebrew 7.0.15 previews and pins] - 2026-11-21
+
+- Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package
+- Fixed: Preview Upgrades with two or more packages shows clean versions, and its total download size includes every package Homebrew gives a size for
+- Fixed: a formula pinned under another name, such as an alias or a former name, now reads as pinned, so Uninstall asks to unpin it first and Upgrade All leaves it alone
+- Fixed: Search launched from Raycast's root with a trailing space, such as `vgmstream `, finds results again
+
+## [Tap checks before adding, and readable warnings] - 2026-11-20
+
+- New: pasting a tap or repository into Manage Taps shows what it holds before you add it. A repository that isn't a Homebrew tap says so, and offers the install its README names or a tap from the same owner
+- New: when a paste names a package, or the tap has only one, the first row installs it after one confirmation
+- Improved: once the check finishes, a misspelled `user/repo/name` lists the tap's real packages, in Search and Manage Taps
+- Improved: typing `user/name` for a package rather than a tap, such as `thousandflowers/rcc`, offers to install it from the owner's own tap when it is there
+- Improved: Add Tap trusts a tap only once brew lists packages in it. Adding an empty tap doesn't trust it, and Manage Taps shows "No packages found" with Remove Tap
+- Improved: a shorter confirmation when installing from a tap, and progress that names each step
+- Improved: after an install from Manage Taps, the list moves to that tap's section
+- Changed: Remove Tap also clears the tap's trust, so adding it again asks first
+- Improved: a suggested package that is already installed opens its details instead of offering Install again
+- Improved: trusting a tap with no packages asks first, since trust covers whatever it adds later
+- Improved: the sidebar action says Show Sidebar or Hide Sidebar, and each list remembers the choice
+- Improved: shorter preference descriptions, code on error screens is marked as text, and Debug is now Show Debug Info
+- Fixed: a Disabled or Deprecated row shows a label, such as "Fails Gatekeeper Check", instead of Homebrew's internal code, such as `fails_gatekeeper_check`
+- Improved: the Disabled or Deprecated row shows a short reason, such as "Requires a signed download URL". Show Details gives the full reason, the date and any replacement
+- Improved: a Disabled or Deprecated package that names a replacement shows it in its own Use Instead row
+- Improved: Refresh in Manage Taps checks a pasted tap again from scratch, so a private repository can be read once git is signed in
+- Fixed: installing a package from a tap Homebrew doesn't trust yet failed with "Refusing to load" on Homebrew 7.0.14 and later. It now trusts that one package first
+- Fixed: one untrusted tap no longer stops Manage Taps from loading. Packages from it that aren't trusted on their own are listed by name, marked Not Trusted, with Install and Trust Tap
+- Improved: Stop Trusting Tap lists the tap's installed formulae first. They stay installed, but won't appear in Show Installed or Show Upgrades
+- Fixed: Show Installed refreshes after a tap is trusted or untrusted, in Raycast or in the terminal
+- Changed: Run Install in Terminal and Run Upgrade in Terminal use ⌘⇧T in the install and upgrade previews, as in Show Upgrades
+
+## [Handle missing package descriptions] - 2026-11-14
 
 - Omit missing formula and cask descriptions from list subtitles instead of passing `null` to the UI.
 

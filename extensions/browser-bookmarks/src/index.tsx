@@ -810,7 +810,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.arc}
                     name="Arc"
                     icon="arc.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "a" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+                    }}
                     profiles={arc.profiles}
                     currentProfile={arc.currentProfile}
                     setCurrentProfile={arc.setCurrentProfile}
@@ -833,7 +836,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.brave}
                     name="Brave"
                     icon="brave.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "b" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+                    }}
                     profiles={brave.profiles}
                     currentProfile={brave.currentProfile}
                     setCurrentProfile={brave.setCurrentProfile}
@@ -843,7 +849,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.braveBeta}
                     name="Brave Beta"
                     icon="brave-beta.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "b" },
+                      Windows: { modifiers: ["alt", "shift"], key: "b" },
+                    }}
                     profiles={braveBeta.profiles}
                     currentProfile={braveBeta.currentProfile}
                     setCurrentProfile={braveBeta.setCurrentProfile}
@@ -853,7 +862,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.braveNightly}
                     name="Brave Nightly"
                     icon="brave-nightly.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "b" },
+                      Windows: { modifiers: ["ctrl", "alt", "shift"], key: "b" },
+                    }}
                     profiles={braveNightly.profiles}
                     currentProfile={braveNightly.currentProfile}
                     setCurrentProfile={braveNightly.setCurrentProfile}
@@ -863,7 +875,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.chatGPTAtlas}
                     name="ChatGPT Atlas"
                     icon="chatgpt-atlas.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "g" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "g" },
+                    }}
                     profiles={chatGPTAtlas.profiles}
                     currentProfile={chatGPTAtlas.currentProfile}
                     setCurrentProfile={chatGPTAtlas.setCurrentProfile}
@@ -873,7 +888,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.chrome}
                     name="Chrome"
                     icon="chrome.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                    }}
                     profiles={chrome.profiles}
                     currentProfile={chrome.currentProfile}
                     setCurrentProfile={chrome.setCurrentProfile}
@@ -883,7 +901,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.chromeBeta}
                     name="Chrome Beta"
                     icon="chrome-beta.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                      Windows: { modifiers: ["alt", "shift"], key: "c" },
+                    }}
                     profiles={chromeBeta.profiles}
                     currentProfile={chromeBeta.currentProfile}
                     setCurrentProfile={chromeBeta.setCurrentProfile}
@@ -893,7 +914,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.chromeDev}
                     name="Chrome Dev"
                     icon="chrome-dev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                      Windows: { modifiers: ["ctrl", "alt", "shift"], key: "c" },
+                    }}
                     profiles={chromeDev.profiles}
                     currentProfile={chromeDev.currentProfile}
                     setCurrentProfile={chromeDev.setCurrentProfile}
@@ -903,7 +927,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.comet}
                     name="Comet"
                     icon="comet.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "o" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+                    }}
                     profiles={comet.profiles}
                     currentProfile={comet.currentProfile}
                     setCurrentProfile={comet.setCurrentProfile}
@@ -913,7 +940,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.dia}
                     name="Dia"
                     icon="dia.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                    }}
                     profiles={dia.profiles}
                     currentProfile={dia.currentProfile}
                     setCurrentProfile={dia.setCurrentProfile}
@@ -923,7 +953,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"
                     icon="edge.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                    }}
                     profiles={edge.profiles}
                     currentProfile={edge.currentProfile}
                     setCurrentProfile={edge.setCurrentProfile}
@@ -933,7 +966,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
                     name="Edge Canary"
                     icon="edgeCanary.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                      Windows: { modifiers: ["alt", "shift"], key: "e" },
+                    }}
                     profiles={edgeCanary.profiles}
                     currentProfile={edgeCanary.currentProfile}
                     setCurrentProfile={edgeCanary.setCurrentProfile}
@@ -943,7 +979,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.edgeDev}
                     name="Edge Dev"
                     icon="edgeDev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                      Windows: { modifiers: ["ctrl", "alt", "shift"], key: "e" },
+                    }}
                     profiles={edgeDev.profiles}
                     currentProfile={edgeDev.currentProfile}
                     setCurrentProfile={edgeDev.setCurrentProfile}
@@ -953,7 +992,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.firefox}
                     name="Firefox"
                     icon="firefox.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "f" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+                    }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
@@ -963,7 +1005,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
                     name="Firefox Dev"
                     icon="firefoxDev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "f" },
+                      Windows: { modifiers: ["alt", "shift"], key: "f" },
+                    }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
@@ -974,7 +1019,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.helium}
                     name="Helium"
                     icon="helium.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "h" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+                    }}
                     profiles={helium.profiles}
                     currentProfile={helium.currentProfile}
                     setCurrentProfile={helium.setCurrentProfile}
@@ -984,7 +1032,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.island}
                     name="Island"
                     icon="island.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "i" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+                    }}
                     profiles={island.profiles}
                     currentProfile={island.currentProfile}
                     setCurrentProfile={island.setCurrentProfile}
@@ -994,7 +1045,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.libreWolf}
                     name="LibreWolf"
                     icon="LibreWolf.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "l" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+                    }}
                     profiles={libreWolf.profiles}
                     currentProfile={libreWolf.currentProfile}
                     setCurrentProfile={libreWolf.setCurrentProfile}
@@ -1004,7 +1058,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.prismaAccess}
                     name="Prisma Access"
                     icon="prisma-access.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+                    }}
                     profiles={prismaAccess.profiles}
                     currentProfile={prismaAccess.currentProfile}
                     setCurrentProfile={prismaAccess.setCurrentProfile}
@@ -1014,7 +1071,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.search}
                     name="Search"
                     icon="search.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "x" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "x" },
+                    }}
                     profiles={searchBrowser.profiles}
                     currentProfile={searchBrowser.currentProfile}
                     setCurrentProfile={searchBrowser.setCurrentProfile}
@@ -1024,7 +1084,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.vivaldi}
                     name="Vivaldi"
                     icon="vivaldi.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                    }}
                     profiles={vivaldi.profiles}
                     currentProfile={vivaldi.currentProfile}
                     setCurrentProfile={vivaldi.setCurrentProfile}
@@ -1034,7 +1097,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.vivaldiSnapshot}
                     name="Vivaldi Snapshot"
                     icon="vivaldi.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                      Windows: { modifiers: ["alt", "shift"], key: "v" },
+                    }}
                     profiles={vivaldiSnapshot.profiles}
                     currentProfile={vivaldiSnapshot.currentProfile}
                     setCurrentProfile={vivaldiSnapshot.setCurrentProfile}
@@ -1044,7 +1110,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.whale}
                     name="Whale"
                     icon="whale.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+                    }}
                     profiles={whale.profiles}
                     currentProfile={whale.currentProfile}
                     setCurrentProfile={whale.setCurrentProfile}
@@ -1054,7 +1123,10 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.zen}
                     name="Zen"
                     icon="zen.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "z" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "z" },
+                    }}
                     profiles={zen.profiles}
                     currentProfile={zen.currentProfile}
                     setCurrentProfile={zen.setCurrentProfile}
@@ -1069,7 +1141,10 @@ export default function Command() {
                       name: item.title,
                       link: item.url,
                     }}
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "s" },
+                      Windows: { modifiers: ["ctrl"], key: "s" },
+                    }}
                   />
                 </ActionPanel.Section>
 
@@ -1077,7 +1152,7 @@ export default function Command() {
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={mutateBookmarks}
                   />
                 </ActionPanel.Section>
@@ -1112,7 +1187,10 @@ function SelectBrowserAction({ browsers, setBrowsers }: SelectBrowsersAction) {
     <Action.Push
       title="Select Browsers"
       icon={Icon.CheckCircle}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "s" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+      }}
       target={<SelectBrowsers browsers={browsers} onSelect={setBrowsers} />}
     />
   );

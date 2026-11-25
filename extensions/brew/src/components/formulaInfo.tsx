@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
-import { Formula, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError, copyLogsAction } from "../utils";
+import {
+  Formula,
+  brewPrefix,
+  brewFetchFormulaInfo,
+  uiLogger,
+  ensureError,
+  copyLogsAction,
+  packageStatus,
+} from "../utils";
 import { DetailMetadata, formulaMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
@@ -106,7 +114,7 @@ export function FormulaInfo(props: {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={formatInfo(formula)}
+      markdown={formatInfo(formula, packageStatus(packageDetail.data)?.detail)}
       metadata={
         <DetailMetadata
           rows={formulaMetadataRows(formula, {
@@ -135,10 +143,12 @@ export function FormulaInfo(props: {
 
 /// Private
 
-function formatInfo(formula: Formula): string {
+function formatInfo(formula: Formula, status: string | undefined): string {
   return `
 # ${formula.name}
 ${formula.desc}
+
+${status ? `> ${status}` : ""}
 
 ${formatCaveats(formula)}
   `;
