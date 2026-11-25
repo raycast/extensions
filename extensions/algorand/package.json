@@ -128,14 +128,16 @@
     }
   ],
   "dependencies": {
-    "@tinymanorg/tinyman-js-sdk": "^3.0.0",
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.17.0",
-    "algosdk": "^2.7.0"
+    "@tinymanorg/tinyman-js-sdk": "^3.0.0",
+    "algosdk": "^2.7.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
