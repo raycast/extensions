@@ -119,15 +119,17 @@ export default function FindLyricsCommand() {
   const [playbackSync, setPlaybackSync] = useState<PlaybackSyncState | null>(null);
   const [displayProgressMs, setDisplayProgressMs] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const [playbackError, setPlaybackError] = useState<string>("");
+  const [lyricsError, setLyricsError] = useState<string>("");
   const [autoFollow, setAutoFollow] = useState(true);
   const [viewMode, setViewMode] = useState<"synced" | "plain">("synced");
   const [searchText, setSearchText] = useState("");
 
   const mountedRef = useRef(true);
-  const requestIdRef = useRef(0);
-  const playbackEpochRef = useRef(0);
-  const isSyncingRef = useRef(false);
+  const syncOwnerRef = useRef(0);
+  const inFlightSyncCountRef = useRef(0);
+  const foregroundLoadingCountRef = useRef(0);
+  const lyricsHandledTrackKeyRef = useRef<string | null>(null);
   const songInfoRef = useRef<SongInfo | null>(null);
   const playbackSyncRef = useRef<PlaybackSyncState | null>(null);
   const lastTrackEndSyncAtRef = useRef(0);
@@ -137,49 +139,65 @@ export default function FindLyricsCommand() {
       background = false,
       forceLyricsRefetch = false,
     }: { background?: boolean; forceLyricsRefetch?: boolean } = {}) => {
-      if (background && isSyncingRef.current) return;
-      isSyncingRef.current = true;
-      const startEpoch = playbackEpochRef.current;
+      if (background && inFlightSyncCountRef.current > 0) return;
+
+      inFlightSyncCountRef.current += 1;
+      const mySyncToken = ++syncOwnerRef.current;
+
+      if (!background) {
+        foregroundLoadingCountRef.current += 1;
+        setIsLoading(true);
+      }
 
       try {
-        if (!background) {
-          setIsLoading(true);
-        }
-
         const snapshot = await getCurrentPlayback();
-        if (!mountedRef.current || (background && playbackEpochRef.current !== startEpoch)) return;
+        if (!mountedRef.current || syncOwnerRef.current !== mySyncToken) return;
 
         const previousTrackKey = songInfoRef.current?.trackKey;
-        const trackChanged = forceLyricsRefetch || previousTrackKey !== snapshot.song.trackKey;
+        const trackChanged = previousTrackKey !== snapshot.song.trackKey;
 
+        setPlaybackError("");
         songInfoRef.current = snapshot.song;
         playbackSyncRef.current = snapshot.sync;
         setSongInfo(snapshot.song);
         setPlaybackSync(snapshot.sync);
         setDisplayProgressMs(getEstimatedProgressMs(snapshot.sync));
 
-        if (!trackChanged) {
+        if (trackChanged) {
+          lyricsHandledTrackKeyRef.current = null;
+          setLyricsResult(null);
+          setLyricsError("");
+        }
+
+        const needsLyricsFetch =
+          forceLyricsRefetch || trackChanged || lyricsHandledTrackKeyRef.current !== snapshot.song.trackKey;
+
+        if (!needsLyricsFetch) {
           return;
         }
 
-        const reqId = ++requestIdRef.current;
-        setError("");
-        if (!background) {
-          setLyricsResult(null);
+        if (forceLyricsRefetch) {
+          lyricsHandledTrackKeyRef.current = null;
+          setLyricsError("");
         }
 
         const nextLyrics = await fetchLyricsWithFallback(snapshot.song);
-        if (!mountedRef.current || requestIdRef.current !== reqId) return;
+        if (!mountedRef.current || syncOwnerRef.current !== mySyncToken) return;
 
         if (nextLyrics.lyrics?.trim()) {
+          lyricsHandledTrackKeyRef.current = snapshot.song.trackKey;
           setLyricsResult(nextLyrics);
-          setError("");
-        } else {
+          setLyricsError("");
+        } else if (nextLyrics.error) {
           setLyricsResult(null);
-          setError(`Oops! Lyrics not available for "${snapshot.song.title}" by ${snapshot.song.artist}`);
+          setLyricsError(`Failed to fetch lyrics for "${snapshot.song.title}" by ${snapshot.song.artist}. Retrying...`);
+        } else {
+          lyricsHandledTrackKeyRef.current = snapshot.song.trackKey;
+          setLyricsResult(null);
+          setLyricsError(`Oops! Lyrics not available for "${snapshot.song.title}" by ${snapshot.song.artist}`);
         }
       } catch (err: unknown) {
-        if (!mountedRef.current) return;
+        if (!mountedRef.current || syncOwnerRef.current !== mySyncToken) return;
         const errorMessage = err instanceof Error ? err.message : "Failed to fetch lyrics. Please try again.";
         const hasLoadedTrack = Boolean(songInfoRef.current);
         const isPlaybackStateError =
@@ -190,18 +208,23 @@ export default function FindLyricsCommand() {
           if (isPlaybackStateError) {
             songInfoRef.current = null;
             playbackSyncRef.current = null;
+            lyricsHandledTrackKeyRef.current = null;
             setSongInfo(null);
             setPlaybackSync(null);
             setLyricsResult(null);
+            setLyricsError("");
           }
-          setError(errorMessage);
+          setPlaybackError(errorMessage);
         } else {
           console.error("Error refreshing playback for lyrics:", err);
         }
       } finally {
-        isSyncingRef.current = false;
-        if (mountedRef.current && !background) {
-          setIsLoading(false);
+        inFlightSyncCountRef.current = Math.max(0, inFlightSyncCountRef.current - 1);
+        if (!background) {
+          foregroundLoadingCountRef.current = Math.max(0, foregroundLoadingCountRef.current - 1);
+          if (mountedRef.current && foregroundLoadingCountRef.current === 0) {
+            setIsLoading(false);
+          }
         }
       }
     },
@@ -266,20 +289,28 @@ export default function FindLyricsCommand() {
   }, [syncPlayback]);
 
   const handleRefresh = async () => {
-    playbackEpochRef.current += 1;
     invalidateCache("api:currently-playing");
     await syncPlayback({ background: false, forceLyricsRefetch: true });
   };
 
   const handleTogglePlayback = async () => {
     const currentSync = playbackSyncRef.current;
+    const actionTrackKey = songInfoRef.current?.trackKey;
     const currentlyPlaying = currentSync?.isPlaying ?? false;
     const nextPlaying = !currentlyPlaying;
-    playbackEpochRef.current += 1;
+    const actionToken = ++syncOwnerRef.current;
 
     try {
       await (nextPlaying ? play() : pause());
       triggerMenuBarRefresh();
+      if (!mountedRef.current) return;
+
+      if (songInfoRef.current?.trackKey !== actionTrackKey || syncOwnerRef.current !== actionToken) {
+        if (songInfoRef.current?.trackKey !== actionTrackKey) {
+          void syncPlayback({ background: true });
+        }
+        return;
+      }
 
       if (currentSync) {
         const now = Date.now();
@@ -302,7 +333,7 @@ export default function FindLyricsCommand() {
   };
 
   const handleSkip = async (direction: "next" | "previous") => {
-    playbackEpochRef.current += 1;
+    syncOwnerRef.current += 1;
     try {
       await (direction === "next" ? skipToNext() : skipToPrevious());
       triggerMenuBarRefresh();
@@ -314,10 +345,13 @@ export default function FindLyricsCommand() {
   };
 
   const handleSeekToLine = async (line: SyncedLyricLine) => {
-    if (!songInfo) return;
-    playbackEpochRef.current += 1;
+    const actionTrack = songInfo;
+    if (!actionTrack) return;
+    const actionToken = ++syncOwnerRef.current;
     try {
-      const result = await seek(line.timeMs / 1000, songInfo.durationMs);
+      const result = await seek(line.timeMs / 1000, actionTrack.durationMs);
+      if (!mountedRef.current) return;
+
       if (result === "error") {
         await showToast({ style: Toast.Style.Failure, title: "Failed to seek" });
         return;
@@ -328,13 +362,18 @@ export default function FindLyricsCommand() {
         return;
       }
 
+      if (songInfoRef.current?.trackKey !== actionTrack.trackKey || syncOwnerRef.current !== actionToken) {
+        void syncPlayback({ background: true });
+        return;
+      }
+
       const now = Date.now();
       const currentSync = playbackSyncRef.current;
       const nextSync: PlaybackSyncState = {
         anchorProgressMs: line.timeMs,
         anchorTimeMs: now,
         isPlaying: currentSync?.isPlaying ?? true,
-        durationMs: songInfo.durationMs,
+        durationMs: actionTrack.durationMs,
       };
       playbackSyncRef.current = nextSync;
       setPlaybackSync(nextSync);
@@ -346,6 +385,7 @@ export default function FindLyricsCommand() {
     }
   };
 
+  const error = playbackError || lyricsError;
   const isPlaying = playbackSync?.isPlaying ?? false;
   const lyricsText = lyricsResult?.lyrics ?? "";
   const navigationTitle = songInfo ? `${songInfo.title} - ${songInfo.artist}` : "Find Lyrics";

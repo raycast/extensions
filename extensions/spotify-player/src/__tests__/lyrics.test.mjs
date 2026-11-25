@@ -39,6 +39,7 @@ const SAMPLE_LRC = [
   "[00:27.100]",
   "[00:30.50][01:10.5]A full commitment's what I'm thinking of",
   "[00:35.00]<00:35.10>You wouldn't get this from <00:36.20>any other guy",
+  "[00:38.00]Hello<00:38.50> world",
 ].join("\n");
 
 test("parseSyncedLyrics parses timestamps, expands multi-tags, strips metadata/word-tags, and collapses breaks", () => {
@@ -49,6 +50,7 @@ test("parseSyncedLyrics parses timestamps, expands multi-tags, strips metadata/w
     { timeMs: 27100, text: "" },
     { timeMs: 30500, text: "A full commitment's what I'm thinking of" },
     { timeMs: 35000, text: "You wouldn't get this from any other guy" },
+    { timeMs: 38000, text: "Hello world" },
     { timeMs: 70500, text: "A full commitment's what I'm thinking of" },
   ]);
 
@@ -85,7 +87,7 @@ test("findLyrics returns syncedLyrics alongside plain lyrics and handles fallbac
       );
 
     const res = await findLyrics({ title: "Song", artist: "Artist", album: "Album", duration: 200 });
-    assert.equal(res.syncedLyrics?.length, 6);
+    assert.equal(res.syncedLyrics?.length, 7);
     assert.equal(
       res.lyrics,
       [
@@ -93,12 +95,17 @@ test("findLyrics returns syncedLyrics alongside plain lyrics and handles fallbac
         "You know the rules and so do I",
         "A full commitment's what I'm thinking of",
         "You wouldn't get this from any other guy",
+        "Hello world",
       ].join("\n"),
     );
 
     globalThis.fetch = async () => new Response("", { status: 404 });
     const missing = await findLyrics({ title: "Missing", artist: "Artist", album: "", duration: 200 });
     assert.deepEqual(missing, { lyrics: null });
+
+    globalThis.fetch = async () => new Response("Internal Server Error", { status: 500 });
+    const failed = await findLyrics({ title: "Broken", artist: "Artist", album: "", duration: 200 });
+    assert.deepEqual(failed, { lyrics: null, error: true });
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -288,12 +295,176 @@ test("FindLyricsCommand falls back to Detail view when only plain lyrics exist a
       await act(async () => releaseOld());
       await act(async () => refreshPromise);
       await settle();
+      assert.equal(renderer.root.findByType("List").props.selectedItemId, "line-1");
 
       // Skip to next track which only has plain lyrics -> switches to Detail view.
       await act(async () => findAction(renderer.root.findAllByType("List.Item")[1], "Next").props.onAction());
       await settle();
       const detail = renderer.root.findByType("Detail");
       assert.match(detail.props.markdown, /Plain only line/);
+    } finally {
+      await unmount(renderer);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("FindLyricsCommand clears stale lyrics on background track change, retries transient lyrics failures, and recovers from playback errors", async (t) => {
+  t.mock.timers.enable({ apis: ["setInterval", "Date"] });
+  resetStats();
+  const originalFetch = globalThis.fetch;
+
+  try {
+    let current = { is_playing: true, progress_ms: 6000, trackId: "t1" };
+    let failPlaybackRead = false;
+    let failT2Lyrics = true;
+    let releaseT2Lyrics;
+
+    globalThis.fetch = async (url) => {
+      if (url.includes("Song+t2")) {
+        if (failT2Lyrics) {
+          return new Response("Upstream error", { status: 500 });
+        }
+        return new Promise((resolve) => {
+          releaseT2Lyrics = () =>
+            resolve(
+              new Response(
+                JSON.stringify({
+                  instrumental: false,
+                  plainLyrics: "Track 2 lyric",
+                  syncedLyrics: "[00:05.00]Track 2 lyric",
+                }),
+                { status: 200, headers: { "Content-Type": "application/json" } },
+              ),
+            );
+        });
+      }
+      return new Response(
+        JSON.stringify({
+          instrumental: false,
+          plainLyrics: "Track 1 lyric",
+          syncedLyrics: "[00:05.00]Track 1 lyric",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    };
+
+    const client = fixture();
+    client.getMePlayerCurrentlyPlaying = async () => {
+      if (failPlaybackRead) {
+        throw new Error("Temporary Spotify outage");
+      }
+      return {
+        is_playing: current.is_playing,
+        progress_ms: current.progress_ms,
+        item: track(current.trackId),
+        currently_playing_type: "track",
+      };
+    };
+
+    const renderer = await mount(React.createElement(FindLyricsCommand));
+    try {
+      assert.equal(renderer.root.findAllByType("List.Item")[0].props.title, "Track 1 lyric");
+
+      // Foreground refresh fails while reading playback -> shows playback error.
+      failPlaybackRead = true;
+      await act(async () => findAction(renderer.root.findAllByType("List.Item")[0], "Refresh").props.onAction());
+      await settle();
+      assert.match(renderer.root.findByType("Detail").props.markdown, /Temporary Spotify outage/);
+
+      // Next background poll succeeds for the same track -> playback error clears and lyrics return.
+      failPlaybackRead = false;
+      await act(async () => t.mock.timers.tick(5000));
+      await settle();
+      assert.equal(renderer.root.findAllByType("List.Item")[0].props.title, "Track 1 lyric");
+
+      // Background poll detects Track 2, fails lyrics with 500 -> Track 1 lyrics are cleared (not shown under Track 2).
+      current = { is_playing: true, progress_ms: 1000, trackId: "t2" };
+      await act(async () => t.mock.timers.tick(5000));
+      await settle();
+      assert.match(renderer.root.findByType("Detail").props.markdown, /Failed to fetch lyrics/);
+
+      // Next background poll retries Track 2 lyrics automatically; Track 1 lyrics stay cleared until retry resolves.
+      failT2Lyrics = false;
+      await act(async () => t.mock.timers.tick(5000));
+      await settle();
+      assert.ok(releaseT2Lyrics);
+      assert.equal(renderer.root.findAllByType("List.Item").length, 0);
+      assert.match(renderer.root.findByType("Detail").props.markdown, /Failed to fetch lyrics/);
+
+      await act(async () => releaseT2Lyrics());
+      await settle();
+      assert.equal(renderer.root.findAllByType("List.Item")[0].props.title, "Track 2 lyric");
+    } finally {
+      await unmount(renderer);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("FindLyricsCommand rejects stale seek completions when track changes while seek is pending", async () => {
+  resetStats();
+  const originalFetch = globalThis.fetch;
+
+  try {
+    globalThis.fetch = async (url) => {
+      if (url.includes("Song+t2")) {
+        return new Response(
+          JSON.stringify({
+            instrumental: false,
+            plainLyrics: "Track 2 A\nTrack 2 B",
+            syncedLyrics: "[00:05.00]Track 2 A\n[00:40.00]Track 2 B",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          instrumental: false,
+          plainLyrics: "Track 1 A\nTrack 1 B",
+          syncedLyrics: "[00:05.00]Track 1 A\n[00:45.00]Track 1 B",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    };
+
+    const client = fixture();
+    let current = { is_playing: true, progress_ms: 6000, trackId: "t1" };
+    client.getMePlayerCurrentlyPlaying = async () => ({
+      is_playing: current.is_playing,
+      progress_ms: current.progress_ms,
+      item: track(current.trackId),
+      currently_playing_type: "track",
+    });
+
+    let releaseSeek;
+    client.putMePlayerSeek = () =>
+      new Promise((resolve) => {
+        releaseSeek = () => resolve();
+      });
+    client.postMePlayerNext = async () => {
+      current = { is_playing: true, progress_ms: 6000, trackId: "t2" };
+    };
+
+    const renderer = await mount(React.createElement(FindLyricsCommand));
+    try {
+      let pendingSeek;
+      await act(async () => {
+        pendingSeek = findAction(renderer.root.findAllByType("List.Item")[1], "Seek to 00:45").props.onAction();
+      });
+
+      // Track changes to t2 at 6s while t1's seek to 45s is still pending.
+      await act(async () => findAction(renderer.root.findAllByType("List.Item")[0], "Next").props.onAction());
+      await settle();
+      assert.equal(renderer.root.findByType("List").props.selectedItemId, "line-0");
+
+      // Completing t1's seek must not jump t2 to 45s (line-1).
+      await act(async () => releaseSeek());
+      await act(async () => pendingSeek);
+      await settle();
+      assert.equal(renderer.root.findByType("List").props.selectedItemId, "line-0");
     } finally {
       await unmount(renderer);
     }

@@ -2,7 +2,7 @@ const REQUEST_TIMEOUT_MS = 10000;
 const LRCLIB_API_URL = "https://lrclib.net/api/get";
 const LEADING_TIMESTAMPS_RE = /^((?:\[\d{1,3}:\d{2}(?:[.:]\d{1,3})?\])+)(.*)$/;
 const SINGLE_TIMESTAMP_RE = /\[(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
-const INLINE_WORD_TIMESTAMP_RE = /<\d{1,3}:\d{2}(?:[.:]\d{1,3})?>\s*/g;
+const INLINE_WORD_TIMESTAMP_RE = /<\d{1,3}:\d{2}(?:[.:]\d{1,3})?>/g;
 const LRC_METADATA_TAG_RE = /^\[(?:ar|al|ti|au|length|by|offset|re|ve|la|id):[^\]]*\]$/i;
 
 export type LyricsQuery = {
@@ -21,6 +21,7 @@ export type LyricsResult = {
   lyrics: string | null;
   syncedLyrics?: SyncedLyricLine[];
   instrumental?: boolean;
+  error?: boolean;
 };
 
 type LrclibLyricsResponse = {
@@ -47,7 +48,7 @@ async function fetchWithTimeout(url: string): Promise<Response> {
 }
 
 function stripInlineWordTimestamps(text: string): string {
-  return text.replace(INLINE_WORD_TIMESTAMP_RE, "").trim();
+  return text.replace(INLINE_WORD_TIMESTAMP_RE, "").replace(/ {2,}/g, " ").trim();
 }
 
 export function parseSyncedLyrics(rawSyncedLyrics: string): SyncedLyricLine[] {
@@ -177,6 +178,6 @@ export async function findLyrics(query: LyricsQuery): Promise<LyricsResult> {
     };
   } catch (error) {
     console.error("Error fetching lyrics:", error);
-    return { lyrics: null };
+    return { lyrics: null, error: true };
   }
 }
