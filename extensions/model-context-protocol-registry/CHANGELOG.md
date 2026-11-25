@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Valkiria MCP Server] - {PR_MERGE_DATE}
+
+- Add Valkiria to the official registry: ask about the ad accounts connected to your Valkiria workspace (spend, results, campaign health), draft campaigns and propose changes that wait for your approval in Valkiria. Hosted Streamable HTTP server at https://valkiria.pro/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) through `mcp-remote`.
+
 ## [Add Scriptivox MCP Server] - 2026-11-25
 
 - Add Scriptivox to the official registry: transcribe audio and video in 119 languages with speaker labels, record Zoom, Google Meet, Teams or Webex calls with a meeting bot, and read, search, correct and export transcripts and subtitles. Hosted Streamable HTTP server at https://platform.scriptivox.com/mcp with OAuth 2.1 sign-in, plus an `mcp-remote` fallback for other clients.
