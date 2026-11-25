@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Prisma MCP Server] - {PR_MERGE_DATE}
+## [Update Prisma MCP Server] - 2026-11-25
 
 - Update the Prisma entry for the remote Prisma MCP server, which now covers the whole platform: [Prisma Postgres](https://www.prisma.io/postgres) databases, [Prisma Compute](https://www.prisma.io/compute) apps and Object Storage, plus Prisma docs search. Hosted Streamable HTTP server at https://mcp.prisma.io/mcp with Prisma account sign-in (OAuth), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. New icon and docs link.
 
