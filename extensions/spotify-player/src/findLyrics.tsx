@@ -426,7 +426,7 @@ export default function FindLyricsCommand() {
         icon={isPlaying ? Icon.Pause : Icon.Play}
         title={isPlaying ? "Pause" : "Play"}
         onAction={handleTogglePlayback}
-        shortcut={{ macOS: { modifiers: ["cmd"], key: "p" }, Windows: { modifiers: ["ctrl"], key: "p" } }}
+        shortcut={{ macOS: { modifiers: ["opt"], key: "p" }, Windows: { modifiers: ["alt"], key: "p" } }}
       />
       <Action
         icon={Icon.Forward}
@@ -577,8 +577,8 @@ export default function FindLyricsCommand() {
                         title="View Plain Lyrics"
                         onAction={() => setViewMode("plain")}
                         shortcut={{
-                          macOS: { modifiers: ["cmd"], key: "m" },
-                          Windows: { modifiers: ["ctrl"], key: "m" },
+                          macOS: { modifiers: ["opt"], key: "m" },
+                          Windows: { modifiers: ["alt"], key: "m" },
                         }}
                       />
                     </ActionPanel.Section>
@@ -617,8 +617,8 @@ export default function FindLyricsCommand() {
                   title="View Synced Lyrics"
                   onAction={() => setViewMode("synced")}
                   shortcut={{
-                    macOS: { modifiers: ["cmd"], key: "m" },
-                    Windows: { modifiers: ["ctrl"], key: "m" },
+                    macOS: { modifiers: ["opt"], key: "m" },
+                    Windows: { modifiers: ["alt"], key: "m" },
                   }}
                 />
               </ActionPanel.Section>
