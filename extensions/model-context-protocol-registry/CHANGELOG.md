@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Scriptivox MCP Server] - 2026-11-25
+
+- Add Scriptivox to the official registry: transcribe audio and video in 119 languages with speaker labels, record Zoom, Google Meet, Teams or Webex calls with a meeting bot, and read, search, correct and export transcripts and subtitles. Hosted Streamable HTTP server at https://platform.scriptivox.com/mcp with OAuth 2.1 sign-in, plus an `mcp-remote` fallback for other clients.
+
 ## [Add Emero MCP Server] - 2026-11-25
 
 - Add Emero to the official registry for making images, video, music and speech with models like Kling, Seedance, Nano Banana Pro and GPT Image, with a brand memory reused across prompts. Hosted Streamable HTTP server at https://mcp.emero.studio/mcp with Emero OAuth sign-in through `mcp-remote`.
