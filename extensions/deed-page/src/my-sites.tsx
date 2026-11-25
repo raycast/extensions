@@ -22,9 +22,8 @@ async function loadSites(): Promise<{ hasToken: boolean; sites: Site[] }> {
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate, mutate } = useCachedPromise(loadSites, [], {
+  const { data, isLoading, error, revalidate, mutate } = useCachedPromise(loadSites, [], {
     keepPreviousData: true,
-    failureToastOptions: { title: "Could not load your sites" },
   });
 
   async function handleDelete(site: Site) {
@@ -54,10 +53,23 @@ export default function Command() {
   }
 
   const sites = data?.sites ?? [];
+  const showError = Boolean(error) && sites.length === 0;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your sites">
-      {data && !data.hasToken ? (
+      {showError ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load your sites"
+          description={error instanceof Error ? error.message : String(error)}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      ) : data && !data.hasToken ? (
         <List.EmptyView
           icon={Icon.Globe}
           title="No sites yet"

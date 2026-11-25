@@ -1,6 +1,6 @@
-import { Clipboard, open, showToast, Toast } from "@raycast/api";
+import { Clipboard, confirmAlert, open, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { looksLikeHtml, publishHtml, suggestSlug } from "./lib/api";
+import { formatBytes, looksLikeHtml, publishHtml, suggestSlug } from "./lib/api";
 import { getOwnerToken, saveIssuedToken } from "./lib/token";
 
 export default async function Command() {
@@ -15,6 +15,17 @@ export default async function Command() {
       title: "No HTML on the clipboard",
       message: "Copy an HTML document or snippet first.",
     });
+    return;
+  }
+
+  const firstLine = html.split(/\r?\n/, 1)[0] ?? "";
+  const preview = firstLine.length > 120 ? `${firstLine.slice(0, 117)}...` : firstLine;
+  const confirmed = await confirmAlert({
+    title: "Publish clipboard HTML?",
+    message: `${formatBytes(Buffer.byteLength(html, "utf8"))}. First line: ${preview}`,
+    primaryAction: { title: "Publish" },
+  });
+  if (!confirmed) {
     return;
   }
 

@@ -17,6 +17,7 @@ const CLIENT = "raycast";
 const REF = "raycast";
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const MAX_FILES = 5000;
+const MAX_BYTES = 100 * 1024 * 1024;
 const SKIPPED_NAMES = new Set([".DS_Store", ".git", "node_modules", "Thumbs.db", ".svn", ".hg"]);
 const HTML_EXTENSIONS = new Set([".html", ".htm"]);
 
@@ -126,11 +127,15 @@ export function makeFile(sitePath: string, data: Buffer): SiteFile {
 /**
  * The files to publish for a file or folder on disk, with site-relative POSIX paths.
  * A single HTML file becomes `index.html` so it is served at the site root.
- * Hidden system folders such as `.git` and `node_modules` and symlinks are skipped.
+ * Hidden names (anything starting with a dot), `node_modules`, and symlinks are skipped.
+ * The walk checks each file size with `fs.stat` and stops if the total exceeds 100 MB.
  */
 export async function collectFiles(inputPath: string): Promise<SiteFile[]> {
   const info = await fs.stat(inputPath);
   if (info.isFile()) {
+    if (info.size > MAX_BYTES) {
+      throw new Error(`The selection is larger than ${formatBytes(MAX_BYTES)}.`);
+    }
     const name = path.basename(inputPath);
     const sitePath = HTML_EXTENSIONS.has(path.extname(name).toLowerCase()) ? "index.html" : name;
     return [makeFile(sitePath, await fs.readFile(inputPath))];
@@ -140,11 +145,12 @@ export async function collectFiles(inputPath: string): Promise<SiteFile[]> {
   }
 
   const files: SiteFile[] = [];
+  let total = 0;
   async function walk(rel: string) {
     const entries = await fs.readdir(path.join(inputPath, rel), { withFileTypes: true });
     entries.sort((a, b) => a.name.localeCompare(b.name));
     for (const entry of entries) {
-      if (SKIPPED_NAMES.has(entry.name)) continue;
+      if (SKIPPED_NAMES.has(entry.name) || entry.name.startsWith(".")) continue;
       const next = rel ? `${rel}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
         await walk(next);
@@ -152,7 +158,12 @@ export async function collectFiles(inputPath: string): Promise<SiteFile[]> {
         if (files.length >= MAX_FILES) {
           throw new Error(`The folder has more than ${MAX_FILES} files.`);
         }
-        files.push(makeFile(next, await fs.readFile(path.join(inputPath, next))));
+        const full = path.join(inputPath, next);
+        total += (await fs.stat(full)).size;
+        if (total > MAX_BYTES) {
+          throw new Error(`The selection is larger than ${formatBytes(MAX_BYTES)}.`);
+        }
+        files.push(makeFile(next, await fs.readFile(full)));
       }
     }
   }
@@ -287,9 +298,9 @@ export async function deleteSite(slug: string, token: string, fetchImpl: typeof 
   );
 }
 
-/** True when the text looks like an HTML document or fragment. */
+/** True when the text contains a real HTML document or fragment marker. */
 export function looksLikeHtml(text: string): boolean {
-  return /<(!doctype\s+html|html|head|body|[a-z][a-z0-9-]*)(\s[^>]*)?\/?>/i.test(text.trim());
+  return /<(?:!doctype\s+html|html|head|body|div|p|h[1-6]|section|script)(?:\s|\/|>)/i.test(text.trim());
 }
 
 export function formatBytes(bytes: number): string {

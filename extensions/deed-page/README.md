@@ -4,8 +4,8 @@ Publish a file, a folder, or the HTML on your clipboard to a permanent `https://
 
 ## Commands
 
-- **Publish File or Folder**: uses the file or folder selected in Finder, or one you pick. A single HTML file is served at the site root; a folder keeps its paths (`.git`, `node_modules`, and `.DS_Store` are skipped). Publishing to a name you already own publishes a new version of that site. The URL is copied when it finishes.
-- **Publish Clipboard HTML**: publishes the HTML document or snippet on your clipboard as a new site and copies the URL.
+- **Publish File or Folder**: uses the file or folder selected in Finder, or one you pick. A single HTML file is served at the site root; a folder keeps its paths. Names that start with a dot, plus `node_modules`, are skipped, and the command stops if the selection is larger than 100 MB. Publishing to a name you already own publishes a new version of that site. The URL is copied when it finishes.
+- **Publish Clipboard HTML**: publishes the HTML document or snippet on your clipboard as a new site and copies the URL, after you confirm the first line and size.
 - **My Sites**: lists your sites with their live version, size, and last update. Open a site, copy its URL, update it from a file or folder, or delete it (with confirmation).
 
 ## Setup
