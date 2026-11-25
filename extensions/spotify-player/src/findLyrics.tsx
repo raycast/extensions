@@ -105,12 +105,147 @@ async function fetchLyricsWithFallback(song: SongInfo): Promise<LyricsResult> {
     return primaryResult;
   }
 
-  return findLyrics({
+  const fallbackResult = await findLyrics({
     title: song.title,
     artist: song.artist,
     album: song.album,
     duration: song.duration,
   });
+
+  if (fallbackResult.lyrics?.trim() || fallbackResult.instrumental || fallbackResult.error) {
+    return fallbackResult;
+  }
+
+  // Keep transient errors retryable when the fallback lookup returns 404.
+  return primaryResult.error ? { lyrics: null, error: true } : fallbackResult;
+}
+
+function buildPlainLyricsMarkdown(songInfo: SongInfo | null, lyricsText: string): string {
+  return `# ${songInfo?.title}\n\n**Artist:** ${songInfo?.artist}\n\n${
+    songInfo?.album ? `**Album:** ${songInfo.album}\n\n` : ""
+  }---\n\n${lyricsText
+    .split("\n")
+    .map((line: string) => line.trim())
+    .filter((line: string) => line.length > 0)
+    .join("\n\n")}`;
+}
+
+function LyricsShareAndSearchSection({ songInfo, lyricsText }: { songInfo: SongInfo; lyricsText: string }) {
+  return (
+    <ActionPanel.Section title="Lyrics">
+      {lyricsText && (
+        <>
+          <Action.CopyToClipboard
+            title="Copy Lyrics"
+            content={lyricsText}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Song Info"
+            content={`${songInfo.title} by ${songInfo.artist}`}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "c" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+            }}
+          />
+        </>
+      )}
+      <Action.OpenInBrowser
+        title="Search Web for Lyrics"
+        url={`https://www.google.com/search?q=${encodeURIComponent(`${songInfo.title} ${songInfo.artist} lyrics`)}`}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
+      />
+    </ActionPanel.Section>
+  );
+}
+
+function RefreshAction({ onRefresh }: { onRefresh: () => void }) {
+  return (
+    <Action
+      icon={Icon.ArrowClockwise}
+      title="Refresh"
+      onAction={onRefresh}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+    />
+  );
+}
+
+function PlaybackControlActions({
+  isPlaying,
+  onTogglePlayback,
+  onSkip,
+  onRefresh,
+}: {
+  isPlaying: boolean;
+  onTogglePlayback: () => void;
+  onSkip: (direction: "next" | "previous") => void;
+  onRefresh?: () => void;
+}) {
+  return (
+    <ActionPanel.Section title="Playback">
+      <Action
+        icon={isPlaying ? Icon.Pause : Icon.Play}
+        title={isPlaying ? "Pause" : "Play"}
+        onAction={onTogglePlayback}
+        shortcut={{ macOS: { modifiers: ["opt"], key: "p" }, Windows: { modifiers: ["alt"], key: "p" } }}
+      />
+      <Action
+        icon={Icon.Forward}
+        title="Next"
+        onAction={() => onSkip("next")}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "arrowRight" },
+          Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+        }}
+      />
+      <Action
+        icon={Icon.Rewind}
+        title="Previous"
+        onAction={() => onSkip("previous")}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+          Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+        }}
+      />
+      {onRefresh && <RefreshAction onRefresh={onRefresh} />}
+    </ActionPanel.Section>
+  );
+}
+
+function PlainLyricsDetail({
+  songInfo,
+  markdown,
+  lyricsText,
+  isPlaying,
+  onTogglePlayback,
+  onSkip,
+  onRefresh,
+}: {
+  songInfo: SongInfo;
+  markdown: string;
+  lyricsText: string;
+  isPlaying: boolean;
+  onTogglePlayback: () => void;
+  onSkip: (direction: "next" | "previous") => void;
+  onRefresh: () => void;
+}) {
+  return (
+    <Detail
+      markdown={markdown}
+      navigationTitle={`${songInfo.title} - ${songInfo.artist}`}
+      actions={
+        <ActionPanel>
+          <LyricsShareAndSearchSection songInfo={songInfo} lyricsText={lyricsText} />
+          <PlaybackControlActions
+            isPlaying={isPlaying}
+            onTogglePlayback={onTogglePlayback}
+            onSkip={onSkip}
+            onRefresh={onRefresh}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 export default function FindLyricsCommand() {
@@ -122,7 +257,6 @@ export default function FindLyricsCommand() {
   const [playbackError, setPlaybackError] = useState<string>("");
   const [lyricsError, setLyricsError] = useState<string>("");
   const [autoFollow, setAutoFollow] = useState(true);
-  const [viewMode, setViewMode] = useState<"synced" | "plain">("synced");
   const [searchText, setSearchText] = useState("");
 
   const mountedRef = useRef(true);
@@ -134,6 +268,9 @@ export default function FindLyricsCommand() {
   const lyricsHandledTrackKeyRef = useRef<string | null>(null);
   const songInfoRef = useRef<SongInfo | null>(null);
   const playbackSyncRef = useRef<PlaybackSyncState | null>(null);
+  const desiredPlayingRef = useRef<boolean | null>(null);
+  const inFlightToggleCountRef = useRef(0);
+  const playbackQueueRef = useRef<Promise<void>>(Promise.resolve());
   const lastTrackEndSyncAtRef = useRef(0);
 
   const syncPlayback = useCallback(
@@ -317,15 +454,30 @@ export default function FindLyricsCommand() {
   };
 
   const handleTogglePlayback = async () => {
-    const currentSync = playbackSyncRef.current;
     const actionTrackKey = songInfoRef.current?.trackKey;
-    const currentlyPlaying = currentSync?.isPlaying ?? false;
-    const nextPlaying = !currentlyPlaying;
-    const actionToken = ++syncOwnerRef.current;
+    const basePlaying =
+      inFlightToggleCountRef.current > 0 && desiredPlayingRef.current !== null
+        ? desiredPlayingRef.current
+        : (playbackSyncRef.current?.isPlaying ?? false);
+    const nextPlaying = !basePlaying;
+    desiredPlayingRef.current = nextPlaying;
+    inFlightToggleCountRef.current += 1;
     inFlightMutationCountRef.current += 1;
+    const actionToken = ++syncOwnerRef.current;
+
+    // Serialize play/pause commands so rapid presses execute in press order rather than racing.
+    const commandPromise = playbackQueueRef.current.then(async () => {
+      try {
+        await (nextPlaying ? play() : pause());
+      } catch (err) {
+        const state = await getCurrentlyPlayingUncached().catch(() => undefined);
+        if (state?.is_playing !== nextPlaying) throw err;
+      }
+    });
+    playbackQueueRef.current = commandPromise.catch(() => undefined);
 
     try {
-      await (nextPlaying ? play() : pause());
+      await commandPromise;
       triggerMenuBarRefresh();
       if (!mountedRef.current) return;
 
@@ -334,6 +486,7 @@ export default function FindLyricsCommand() {
         return;
       }
 
+      const currentSync = playbackSyncRef.current;
       if (currentSync) {
         const now = Date.now();
         const currentProgressMs = getEstimatedProgressMs(currentSync, now);
@@ -352,6 +505,10 @@ export default function FindLyricsCommand() {
     } catch (err) {
       await showFailureToast(err, { title: nextPlaying ? "Failed to play" : "Failed to pause" });
     } finally {
+      inFlightToggleCountRef.current = Math.max(0, inFlightToggleCountRef.current - 1);
+      if (inFlightToggleCountRef.current === 0) {
+        desiredPlayingRef.current = null;
+      }
       releaseMutation();
     }
   };
@@ -418,77 +575,26 @@ export default function FindLyricsCommand() {
   const error = playbackError || lyricsError;
   const isPlaying = playbackSync?.isPlaying ?? false;
   const lyricsText = lyricsResult?.lyrics ?? "";
-  const navigationTitle = songInfo ? `${songInfo.title} - ${songInfo.artist}` : "Find Lyrics";
+
+  const refreshAction = <RefreshAction onRefresh={handleRefresh} />;
+
+  const playbackControlActions = songInfo ? (
+    <PlaybackControlActions isPlaying={isPlaying} onTogglePlayback={handleTogglePlayback} onSkip={handleSkip} />
+  ) : null;
 
   const playbackActions = songInfo ? (
-    <ActionPanel.Section title="Playback">
-      <Action
-        icon={isPlaying ? Icon.Pause : Icon.Play}
-        title={isPlaying ? "Pause" : "Play"}
-        onAction={handleTogglePlayback}
-        shortcut={{ macOS: { modifiers: ["opt"], key: "p" }, Windows: { modifiers: ["alt"], key: "p" } }}
-      />
-      <Action
-        icon={Icon.Forward}
-        title="Next"
-        onAction={() => handleSkip("next")}
-        shortcut={{
-          macOS: { modifiers: ["cmd"], key: "arrowRight" },
-          Windows: { modifiers: ["ctrl"], key: "arrowRight" },
-        }}
-      />
-      <Action
-        icon={Icon.Rewind}
-        title="Previous"
-        onAction={() => handleSkip("previous")}
-        shortcut={{
-          macOS: { modifiers: ["cmd"], key: "arrowLeft" },
-          Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
-        }}
-      />
-      <Action
-        icon={Icon.ArrowClockwise}
-        title="Refresh"
-        onAction={handleRefresh}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-      />
-    </ActionPanel.Section>
+    <PlaybackControlActions
+      isPlaying={isPlaying}
+      onTogglePlayback={handleTogglePlayback}
+      onSkip={handleSkip}
+      onRefresh={handleRefresh}
+    />
   ) : (
-    <ActionPanel.Section>
-      <Action
-        icon={Icon.ArrowClockwise}
-        title="Refresh"
-        onAction={handleRefresh}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-      />
-    </ActionPanel.Section>
+    <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
   );
 
   const shareAndSearchActions = songInfo ? (
-    <ActionPanel.Section title="Lyrics">
-      {lyricsText && (
-        <>
-          <Action.CopyToClipboard
-            title="Copy Lyrics"
-            content={lyricsText}
-            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Song Info"
-            content={`${songInfo.title} by ${songInfo.artist}`}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "c" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-            }}
-          />
-        </>
-      )}
-      <Action.OpenInBrowser
-        title="Search Web for Lyrics"
-        url={`https://www.google.com/search?q=${encodeURIComponent(`${songInfo.title} ${songInfo.artist} lyrics`)}`}
-        shortcut={{ macOS: { modifiers: ["cmd"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
-      />
-    </ActionPanel.Section>
+    <LyricsShareAndSearchSection songInfo={songInfo} lyricsText={lyricsText} />
   ) : null;
 
   if (error) {
@@ -497,11 +603,11 @@ export default function FindLyricsCommand() {
       <Detail
         isLoading={isLoading}
         markdown={errorMarkdown}
-        navigationTitle={navigationTitle}
         actions={
           <ActionPanel>
-            {playbackActions}
+            <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
             {shareAndSearchActions}
+            {playbackControlActions}
           </ActionPanel>
         }
       />
@@ -513,13 +619,19 @@ export default function FindLyricsCommand() {
       <Detail
         isLoading={isLoading}
         markdown={`# Loading lyrics for "${songInfo?.title || "current song"}"\n\nPlease wait while we fetch the lyrics...`}
-        navigationTitle={navigationTitle}
-        actions={<ActionPanel>{playbackActions}</ActionPanel>}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
+            {playbackControlActions}
+          </ActionPanel>
+        }
       />
     );
   }
 
-  if (syncedLines.length > 0 && viewMode === "synced" && songInfo) {
+  const plainMarkdown = buildPlainLyricsMarkdown(songInfo, lyricsText);
+
+  if (syncedLines.length > 0 && songInfo) {
     const activeIndex = findActiveLyricIndex(syncedLines, displayProgressMs);
     const selectedItemId = autoFollow && !searchText ? `line-${activeIndex >= 0 ? activeIndex : 0}` : undefined;
     const sectionSubtitle = `${formatMs(displayProgressMs)} / ${formatMs(songInfo.durationMs)} • ${
@@ -533,7 +645,6 @@ export default function FindLyricsCommand() {
         searchBarPlaceholder="Filter lyrics..."
         onSearchTextChange={setSearchText}
         selectedItemId={selectedItemId}
-        navigationTitle={navigationTitle}
       >
         <List.Section title={`${songInfo.title} — ${songInfo.artist}`} subtitle={sectionSubtitle}>
           {syncedLines.map((line, index) => {
@@ -572,10 +683,20 @@ export default function FindLyricsCommand() {
                           Windows: { modifiers: ["ctrl", "shift"], key: "a" },
                         }}
                       />
-                      <Action
+                      <Action.Push
                         icon={Icon.Document}
                         title="View Plain Lyrics"
-                        onAction={() => setViewMode("plain")}
+                        target={
+                          <PlainLyricsDetail
+                            songInfo={songInfo}
+                            markdown={plainMarkdown}
+                            lyricsText={lyricsText}
+                            isPlaying={isPlaying}
+                            onTogglePlayback={handleTogglePlayback}
+                            onSkip={handleSkip}
+                            onRefresh={handleRefresh}
+                          />
+                        }
                         shortcut={{
                           macOS: { modifiers: ["opt"], key: "m" },
                           Windows: { modifiers: ["alt"], key: "m" },
@@ -594,37 +715,15 @@ export default function FindLyricsCommand() {
     );
   }
 
-  const plainMarkdown = `# ${songInfo?.title}\n\n**Artist:** ${songInfo?.artist}\n\n${
-    songInfo?.album ? `**Album:** ${songInfo.album}\n\n` : ""
-  }---\n\n${lyricsText
-    .split("\n")
-    .map((line: string) => line.trim())
-    .filter((line: string) => line.length > 0)
-    .join("\n\n")}`;
-
   return (
     <Detail
       isLoading={isLoading}
       markdown={plainMarkdown}
-      navigationTitle={navigationTitle}
       actions={
         songInfo ? (
           <ActionPanel>
-            {syncedLines.length > 0 && (
-              <ActionPanel.Section title="Lyrics View">
-                <Action
-                  icon={Icon.Music}
-                  title="View Synced Lyrics"
-                  onAction={() => setViewMode("synced")}
-                  shortcut={{
-                    macOS: { modifiers: ["opt"], key: "m" },
-                    Windows: { modifiers: ["alt"], key: "m" },
-                  }}
-                />
-              </ActionPanel.Section>
-            )}
-            {playbackActions}
             {shareAndSearchActions}
+            {playbackActions}
           </ActionPanel>
         ) : undefined
       }

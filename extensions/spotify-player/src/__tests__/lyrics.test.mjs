@@ -28,7 +28,19 @@ async function unmount(renderer) {
   await act(async () => renderer.unmount());
 }
 
-const findAction = (node, title) => node.findAll((item) => item.type === "Action" && item.props.title === title)[0];
+const findAction = (node, title) =>
+  node.findAll((item) => (item.type === "Action" || item.type === "Action.Push") && item.props.title === title)[0];
+
+const getActionTitles = (node) =>
+  node
+    .findAll(
+      (item) =>
+        item.type === "Action" ||
+        item.type === "Action.Push" ||
+        item.type === "Action.CopyToClipboard" ||
+        item.type === "Action.OpenInBrowser",
+    )
+    .map((item) => item.props.title);
 
 const SAMPLE_LRC = [
   "[ar:Rick Astley]",
@@ -206,14 +218,22 @@ test("FindLyricsCommand displays synced lyrics, advances with playback, seeks, a
       await settle();
       assert.equal(state.is_playing, false);
 
-      // Switch to plain lyrics Detail view and back to synced List view.
-      await act(async () => findAction(thirdItem, "View Plain Lyrics").props.onAction());
-      await settle();
-      const detail = renderer.root.findByType("Detail");
-      assert.match(detail.props.markdown, /First line/);
-      await act(async () => findAction(detail, "View Synced Lyrics").props.onAction());
-      await settle();
-      assert.ok(renderer.root.findByType("List"));
+      // Push plain lyrics Detail view with back navigation (navigationTitle allowed on pushed views, Copy Lyrics before Pause).
+      const pushAction = findAction(thirdItem, "View Plain Lyrics");
+      assert.equal(pushAction.type, "Action.Push");
+      assert.equal(list.props.navigationTitle, undefined);
+      const pushedRenderer = await mount(pushAction.props.target);
+      try {
+        const detail = pushedRenderer.root.findByType("Detail");
+        assert.match(detail.props.markdown, /First line/);
+        assert.ok(detail.props.navigationTitle);
+        const titles = getActionTitles(detail);
+        assert.equal(titles[0], "Copy Lyrics");
+        assert.equal(titles[1], "Copy Song Info");
+        assert.ok(titles.indexOf("Play") > titles.indexOf("Copy Song Info"));
+      } finally {
+        await unmount(pushedRenderer);
+      }
     } finally {
       await unmount(renderer);
     }
@@ -297,11 +317,16 @@ test("FindLyricsCommand falls back to Detail view when only plain lyrics exist a
       await settle();
       assert.equal(renderer.root.findByType("List").props.selectedItemId, "line-1");
 
-      // Skip to next track which only has plain lyrics -> switches to Detail view.
+      // Skip to next track which only has plain lyrics -> switches to Detail view with Copy actions first.
       await act(async () => findAction(renderer.root.findAllByType("List.Item")[1], "Next").props.onAction());
       await settle();
       const detail = renderer.root.findByType("Detail");
+      assert.equal(detail.props.navigationTitle, undefined);
       assert.match(detail.props.markdown, /Plain only line/);
+      const detailTitles = getActionTitles(detail);
+      assert.equal(detailTitles[0], "Copy Lyrics");
+      assert.equal(detailTitles[1], "Copy Song Info");
+      assert.ok(detailTitles.indexOf("Pause") > detailTitles.indexOf("Copy Song Info"));
     } finally {
       await unmount(renderer);
     }
@@ -660,6 +685,138 @@ test("FindLyricsCommand drains deferred recovery when pause finishes while a ref
       await act(async () => pendingRefresh);
       await settle();
       assert.ok(findAction(renderer.root.findAllByType("List.Item")[0], "Play"));
+    } finally {
+      await unmount(renderer);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("FindLyricsCommand serializes rapid Play/Pause presses instead of sending duplicate commands", async () => {
+  resetStats();
+  const originalFetch = globalThis.fetch;
+
+  try {
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          instrumental: false,
+          plainLyrics: "Line 1",
+          syncedLyrics: "[00:05.00]Line 1",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+
+    const client = fixture();
+    const events = [];
+    let isPlaying = true;
+    let releasePause;
+    let releasePlay;
+
+    client.getMePlayerCurrentlyPlaying = async () => ({
+      is_playing: isPlaying,
+      progress_ms: 6000,
+      item: track("t1"),
+      currently_playing_type: "track",
+    });
+    client.putMePlayerPause = () => {
+      events.push("pause:start");
+      return new Promise((resolve) => {
+        releasePause = () => {
+          isPlaying = false;
+          events.push("pause:end");
+          resolve();
+        };
+      });
+    };
+    client.putMePlayerPlay = () => {
+      events.push("play:start");
+      return new Promise((resolve) => {
+        releasePlay = () => {
+          isPlaying = true;
+          events.push("play:end");
+          resolve();
+        };
+      });
+    };
+
+    const renderer = await mount(React.createElement(FindLyricsCommand));
+    try {
+      const item = renderer.root.findAllByType("List.Item")[0];
+      let firstPress;
+      let secondPress;
+
+      // Press Pause twice quickly (before the first request finishes): 2nd press must queue Play after Pause.
+      await act(async () => {
+        firstPress = findAction(item, "Pause").props.onAction();
+      });
+      await act(async () => {
+        secondPress = findAction(item, "Pause").props.onAction();
+      });
+      await settle();
+      assert.deepEqual(events, ["pause:start"]);
+      assert.equal(releasePlay, undefined);
+
+      await act(async () => releasePause());
+      await settle();
+      assert.deepEqual(events, ["pause:start", "pause:end", "play:start"]);
+
+      await act(async () => releasePlay());
+      await act(async () => Promise.all([firstPress, secondPress]));
+      await settle();
+      assert.deepEqual(events, ["pause:start", "pause:end", "play:start", "play:end"]);
+      assert.ok(findAction(renderer.root.findAllByType("List.Item")[0], "Pause"));
+    } finally {
+      await unmount(renderer);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("FindLyricsCommand keeps retrying when cleaned title lookup fails transiently and raw title fallback returns 404", async (t) => {
+  t.mock.timers.enable({ apis: ["setInterval", "Date"] });
+  resetStats();
+  const originalFetch = globalThis.fetch;
+
+  try {
+    let failCleaned = true;
+    globalThis.fetch = async (url) => {
+      if (!url.includes("Remastered")) {
+        if (failCleaned) {
+          return new Response("Upstream error", { status: 500 });
+        }
+        return new Response(
+          JSON.stringify({
+            instrumental: false,
+            plainLyrics: "Recovered lyric",
+            syncedLyrics: "[00:05.00]Recovered lyric",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      return new Response("", { status: 404 });
+    };
+
+    const client = fixture();
+    const remasteredTrack = { ...track("t-remaster"), name: "Song t1 (Remastered)" };
+    client.getMePlayerCurrentlyPlaying = async () => ({
+      is_playing: true,
+      progress_ms: 6000,
+      item: remasteredTrack,
+      currently_playing_type: "track",
+    });
+
+    const renderer = await mount(React.createElement(FindLyricsCommand));
+    try {
+      assert.match(renderer.root.findByType("Detail").props.markdown, /Failed to fetch lyrics/);
+
+      // Next 5s poll retries cleaned title and recovers once upstream succeeds.
+      failCleaned = false;
+      await act(async () => t.mock.timers.tick(5000));
+      await settle();
+      assert.equal(renderer.root.findAllByType("List.Item")[0].props.title, "Recovered lyric");
     } finally {
       await unmount(renderer);
     }
