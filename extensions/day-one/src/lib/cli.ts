@@ -5,7 +5,15 @@ import { join } from "node:path";
 import { logger } from "@chrismessina/raycast-logger";
 import { environment, getPreferenceValues } from "@raycast/api";
 import { DEMO_LATENCY_MS, demoStdout, isDemo } from "./demo";
-import { classifyCliError, compareVersions, ErrorKind, MIN_CLI_VERSION, parseCliVersion, subcommand } from "./parse";
+import {
+  classifyCliError,
+  compareVersions,
+  ErrorKind,
+  MIN_CLI_VERSION,
+  parseCliVersion,
+  parseNpmLatest,
+  subcommand,
+} from "./parse";
 
 export const IS_WINDOWS = process.platform === "win32";
 export const IS_MAC = process.platform === "darwin";
@@ -190,6 +198,26 @@ async function discoverCli(): Promise<CliInfo> {
     throw new DayOneCliError(`The file set in preferences isn't the Day One CLI: ${cliPath}`, "not-installed");
   }
   throw new DayOneCliError("The Day One CLI isn't installed", "not-installed");
+}
+
+/**
+ * The newest CLI release on npm, or null when it can't be checked (offline, registry down). Doctor uses it to
+ * tell "installed" from "update available"; a failed check only hides that hint, so it never throws.
+ */
+export async function latestCliVersion(): Promise<string | null> {
+  if (isDemo()) return MIN_CLI_VERSION;
+  try {
+    const response = await fetch(`https://registry.npmjs.org/${CLI_PACKAGE}/latest`, {
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!response.ok) throw new Error(`npm registry answered ${response.status}`);
+    const latest = parseNpmLatest(await response.json());
+    log.debug("latest CLI on npm", { latest });
+    return latest;
+  } catch (error) {
+    log.warn("couldn't check npm for a newer CLI", { error: error instanceof Error ? error.message : String(error) });
+    return null;
+  }
 }
 
 /** The CLI, or an `outdated` error when it's older than this extension supports. Everything that runs it goes here. */

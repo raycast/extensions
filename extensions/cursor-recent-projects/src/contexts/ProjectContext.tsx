@@ -1,9 +1,11 @@
 import { createContext, useContext, ReactNode } from "react";
 import { open, showHUD } from "@raycast/api";
+import { fileURLToPath } from "url";
 import { run } from "../integrations/cursor-directory";
 import { runAppleScriptSync } from "run-applescript";
 import { LaunchContext } from "../integrations/types";
 import { callbackLaunchCommand } from "raycast-cross-extension";
+import { closeCursorWindows, isWindows, openInCursor } from "../utils/windows";
 
 interface ProjectContextType {
   openProject: (uri: string, closeOtherWindows: boolean) => Promise<void>;
@@ -15,7 +17,10 @@ export function ProjectProvider({ children, launchContext }: { children: ReactNo
   const openProject = async (uri: string, closeOtherWindows: boolean) => {
     try {
       if (closeOtherWindows) {
-        runAppleScriptSync(`
+        if (isWindows) {
+          await closeCursorWindows();
+        } else {
+          runAppleScriptSync(`
             tell application "System Events"
               tell process "Cursor"
                 repeat while window 1 exists
@@ -24,8 +29,13 @@ export function ProjectProvider({ children, launchContext }: { children: ReactNo
               end tell
             end tell
             `);
+        }
       }
-      await open(uri, "Cursor");
+      if (isWindows) {
+        await openInCursor(fileURLToPath(uri));
+      } else {
+        await open(uri, "Cursor");
+      }
 
       const { cursorDirectory, callbackLaunchOptions } = launchContext || {};
 
@@ -38,7 +48,7 @@ export function ProjectProvider({ children, launchContext }: { children: ReactNo
       if (callbackLaunchOptions) {
         callbackLaunchCommand(callbackLaunchOptions, {
           // TODO should be determined what we want to expose
-          projectPath: uri.split("file://").slice(1).join("/"),
+          projectPath: fileURLToPath(uri),
         });
       }
     } catch (error) {
