@@ -2724,6 +2724,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.monito.dev/api/mcp",
   },
   {
+    name: "moon-dasha",
+    title: "Moon Dasha",
+    description:
+      "Vedic astrology (Jyotish) calculations: birth charts with the ascendant, planets, nakshatras and chara karakas, the 26 divisional charts, seven dasha systems with the periods running on any date, Shadbala, Bhava Bala and Ashtakavarga, yogas and doshas, Sade Sati, transits, the daily Panchang with Rahu Kaal, and Guna Milan compatibility. 11 read-only tools; five return interactive chart cards in apps that show them. Hosted remote Streamable HTTP server with no sign-in and no API key.",
+    icon: "https://moondasha.com/web-app-manifest-512x512.png",
+    homepage: "https://moondasha.com/vedic-astrology-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.moondasha.com/mcp"],
+    },
+    remoteUrl: "https://api.moondasha.com/mcp",
+  },
+  {
     name: "multi-books",
     title: "Multi Books",
     description:
