@@ -6,6 +6,7 @@
   speed at a trigger temperature and hands them back to firmware below a release temperature,
   with the sensor group (hottest die, CPU or GPU) configurable
 - Fan Status and the menu bar show whether a trigger is armed or holding, and can cancel it
+- The Fan Menu Bar keeps its speeds and temperatures up to date while the menu stays open
 
 ## [Initial Version] - 2026-11-17
 

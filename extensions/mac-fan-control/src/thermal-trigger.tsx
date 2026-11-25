@@ -21,18 +21,19 @@ import {
   setAutomatic,
   thermalTrigger,
 } from "macos-fan-control-client";
-import { speedLabel, triggerDetail, triggerLabel } from "./labels";
+import {
+  TRIGGER_SENSORS,
+  sensorLabel,
+  speedLabel,
+  triggerDetail,
+  triggerLabel,
+} from "./labels";
 import { openCommand } from "./launch";
 
 // The trigger must sit under the core's 95 °C safety ceiling, and above the
 // release temperature, so the two dropdowns stay inside those bounds. The low
 // speeds ask for confirmation because the SMC honours the forced target even
 // when its own thermal demand is higher.
-const SENSORS: { value: TriggerSensor; label: string }[] = [
-  { value: "max", label: "Hottest die (CPU or GPU)" },
-  { value: "cpu", label: "CPU" },
-  { value: "gpu", label: "GPU" },
-];
 const TRIGGERS = [90, 85, 80, 75, 70, 65, 60];
 const RELEASES = [70, 65, 60, 55, 50, 45, 40];
 const SPEEDS = [100, 85, 70, 55, 40];
@@ -41,9 +42,6 @@ const CONFIRM_BELOW = 50;
 // Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
 // calmer cadence than the fans themselves change.
 const REFRESH_INTERVAL_MS = 5000;
-
-const sensorLabel = (sensor: TriggerSensor) =>
-  SENSORS.find((option) => option.value === sensor)?.label ?? "Hottest die";
 
 export default function Command() {
   // The failure is shown in the form; without this a missing core would toast on
@@ -79,7 +77,7 @@ export default function Command() {
   const releaseAt = Number(below);
 
   const current = active
-    ? `${triggerLabel(active)} · ${triggerDetail(active)} (${sensorLabel(active.sensor)})`
+    ? `${triggerLabel(active)} · ${triggerDetail(active)} · ${sensorLabel(active.sensor)}`
     : error
       ? "—"
       : data
@@ -206,7 +204,7 @@ export default function Command() {
         value={sensor}
         onChange={(value) => setSensor(value as TriggerSensor)}
       >
-        {SENSORS.map((option) => (
+        {TRIGGER_SENSORS.map((option) => (
           <Form.Dropdown.Item
             key={option.value}
             title={option.label}
