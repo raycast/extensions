@@ -87,3 +87,4 @@ highseat
 tiro
 deapi
 prisma-docs-search
+prisma-postgres
