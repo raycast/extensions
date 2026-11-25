@@ -1,6 +1,6 @@
 # NetBird Changelog
 
-## [Exit Node management] - {PR_MERGE_DATE}
+## [Exit Node management] - 2026-11-25
 
 - Added `Show Exit Nodes` command to select or deselect the active exit node without affecting other network route selections.
 - Fixed `networks select` replacing the entire route selection instead of appending, which could silently clear unrelated selected routes when toggling just one.
