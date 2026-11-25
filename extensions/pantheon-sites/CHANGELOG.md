@@ -1,5 +1,11 @@
 # com.matbrady.pantheon Changelog
 
+## [Organization Filter] - 2026-11-25
+
+### Added
+
+- "Organization Filter" preference to pass `--org` to `site:list`, for faster loads on large accounts
+
 ## [Large Account Support] - 2026-11-14
 
 ### Fixed

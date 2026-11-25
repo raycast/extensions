@@ -333,6 +333,7 @@
 /extensions/bricks-builder                                          @matejmohar
 /extensions/brightness-control                                      @CaliCastle @pavzagor @fisaogullari @0xdhrv @muhammadrizo-y
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
+/extensions/brix-signage                                            @BenLoveitt
 /extensions/browser-ai                                              @aeither
 /extensions/browser-bookmarks                                       @thomaslombart @Chahine-tech @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig @sayuthisobri @0xdhrv @pernielsentikaer @haneul486 @Just-Me-22 @mguellsegarra @teziovsky @noisysocks @demaya
 /extensions/browser-history                                         @crisboarna @TKDKid1000 @MikuGeek @ridemountainpig
@@ -712,6 +713,7 @@
 /extensions/deepwiki                                                @viveknair @tofrankie @alexi-build @Ernest0-Production
 /extensions/default-web-browser-manager                             @clins1994 @pernielsentikaer @ElFitaFlores
 /extensions/defbro                                                  @jfernandogt @wmorland
+/extensions/defi                                                    @qeude
 /extensions/defichain-dobby                                         @adrian-schnell
 /extensions/defichain-lottery                                       @adrian-schnell @pernielsentikaer
 /extensions/defined-fi                                              @chapati23
@@ -802,6 +804,7 @@
 /extensions/dock                                                    @pradeepb28 @xmok
 /extensions/dock-badges                                             @mrpunkin
 /extensions/dock-cleanup                                            @alaramartin
+/extensions/dock-dodger                                             @TimBroddin
 /extensions/dock-tinker                                             @koinzhang @garrucho
 /extensions/docker                                                  @priithaamer @gebeto @BalliAsghar @jfkisafk @noblecloud @SebKranz @xdrakosha @Olivier-OG @Krosnoz @ahetzm @xmok
 /extensions/dockerhub                                               @k8scat @tonka3000 @BalliAsghar @imposibrus
@@ -893,7 +896,7 @@
 /extensions/emissions-calculator                                    @andreaselia @pernielsentikaer
 /extensions/emoji                                                   @FezVrasta @maxdavid @sinasab @pernielsentikaer
 /extensions/emoji-kitchen                                           @coreyone @pernielsentikaer @0xdhrv
-/extensions/emojify                                                 @ViGeng @ViGeng
+/extensions/emojify                                                 @ViGeng @ViGeng @dofy
 /extensions/emojis-com                                              @pondorasti
 /extensions/empty-screenshots                                       @chanceaclark @mrpunkin
 /extensions/encoding-tools                                          @eth-p
@@ -941,6 +944,7 @@
 /extensions/expand-video-canvas                                     @BIAsia
 /extensions/explain-command                                         @maantje
 /extensions/expo                                                    @Patrick-web
+/extensions/expo-orbit                                              @michalzuch
 /extensions/extend-display                                          @pavzagor
 /extensions/external-hdr                                            @kindafun
 /extensions/f1-standings                                            @csigritz @sxn @qeude @ChetanGoti @drillprop
@@ -1039,6 +1043,7 @@
 /extensions/flowspeech-tts                                          @waeckerlinfederowicz66-sketch
 /extensions/fluctuation                                             @zoffyzhang
 /extensions/fluent-outdoors                                         @juhamust
+/extensions/fluidvoice                                              @LagaV
 /extensions/flush-dns                                               @rasmusbe @tombonez @maaaathis
 /extensions/flutter-documentation-search                            @MattisBrizard
 /extensions/flutter-pub-dev-search                                  @prasadsunny1 @K9i-0
@@ -1187,6 +1192,7 @@
 /extensions/glean-search                                            @faizhasim
 /extensions/gles-to-malioc                                          @RomanVPX
 /extensions/glide                                                   @titouv
+/extensions/glimmer                                                 @Se7enbrc
 /extensions/glimpse                                                 @LegendarySpy
 /extensions/glm-models                                              @paulgit
 /extensions/global-media-key                                        @douo
@@ -1309,6 +1315,7 @@
 /extensions/hetrixtools                                             @xmok
 /extensions/hetzner                                                 @alex-w0 @YONN2222
 /extensions/hevy                                                    @clins1994
+/extensions/hex                                                     @artisticmedic
 /extensions/hexlify                                                 @gkpln3
 /extensions/heyclaude                                               @JSONbored
 /extensions/hidden-icons                                            @koinzhang
@@ -1672,6 +1679,7 @@
 /extensions/liveblocks                                              @andreaselia
 /extensions/llm-stats                                               @Ernest0-Production
 /extensions/llms-txt                                                @thedaviddias @pernielsentikaer @xmok
+/extensions/llyfr                                                   @haykh
 /extensions/lm-studio                                               @vineethsai
 /extensions/load-bearing-reply                                      @chrisdeeming
 /extensions/loan-calculator                                         @kylinwowo
@@ -1707,6 +1715,7 @@
 /extensions/lucide-extended                                         @sepidsoroush
 /extensions/lucide-icons                                            @aeither @xilopaint @ridemountainpig @j3lte @muhammadrizo-y
 /extensions/lucky-surf                                              @Popalay
+/extensions/luckynote                                               @durdevic
 /extensions/ludex                                                   @Leocadio94
 /extensions/luma                                                    @ridemountainpig
 /extensions/lume                                                    @sharatvisweswara
@@ -2191,6 +2200,7 @@
 /extensions/oura                                                    @RobErskine @Menchynskyi
 /extensions/outline-document-search                                 @dnlfrst
 /extensions/outline-page                                            @praveenjuge
+/extensions/outseta                                                 @anclist
 /extensions/ovh                                                     @xmok
 /extensions/owl                                                     @gohadar
 /extensions/owledge-raycast                                         @RomainPct

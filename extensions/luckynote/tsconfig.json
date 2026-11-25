@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Raycast",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitThis": false,
+    "noErrorTruncation": true,
+    "allowJs": true,
+    "checkJs": false,
+    "noEmitOnError": false,
+    "types": ["node", "react"],
+    "typeRoots": ["./node_modules/@types", "./node_modules/@raycast/api"]
+  },
+  "include": ["src/**/*", "raycast-env.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

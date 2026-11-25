@@ -1,5 +1,9 @@
 # 2Do Changelog
 
+## [Tags Under List] - 2026-11-25
+
+- Tags and New Tags now appear below List and Project or Checklist (when shown) in Add Task, Edit Task, and Add Link
+
 ## [Add Task Stays Open] - 2026-11-23
 
 - Add Task now stays open and clears the form after saving a task (keeping the selected list), so you can add multiple tasks in a row

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Gumlet MCP Server] - 2026-11-25
+
+- Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Live calls need a Gumlet API key as a GUMLET_API_KEY header. In Raycast, replace YOUR_GUMLET_API_KEY in that header. Listing tools works without a key.
+
 ## [Add StalkChain Data MCP Server] - 2026-11-24
 
 - Add StalkChain Data for read-only Solana wallet and token research and Hyperliquid market data. Connect over HTTP and sign in with StalkChain. Metered queries use account credits.

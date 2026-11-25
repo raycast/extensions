@@ -1944,6 +1944,25 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://easyruncraft.com/mcp",
   },
   {
+    name: "gumlet",
+    title: "Gumlet",
+    description:
+      "Manage a Gumlet account from your AI agent: video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted remote Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Live calls need a Gumlet API key as a GUMLET_API_KEY header (Dashboard → Developer → API keys). In Raycast, replace YOUR_GUMLET_API_KEY in that header. Other clients replace it in the environment. Listing tools works without a key.",
+    icon: "https://assets.gumlet.io/assets/round-logo.png",
+    homepage: "https://docs.gumlet.com/reference/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gumlet.com/mcp/v1", "--header", "GUMLET_API_KEY:${GUMLET_API_KEY}"],
+      env: {
+        GUMLET_API_KEY: "YOUR_GUMLET_API_KEY",
+      },
+    },
+    remoteUrl: "https://mcp.gumlet.com/mcp/v1",
+    headers: {
+      GUMLET_API_KEY: "YOUR_GUMLET_API_KEY",
+    },
+  },
+  {
     name: "edgepedia",
     title: "Edgepedia",
     description:
