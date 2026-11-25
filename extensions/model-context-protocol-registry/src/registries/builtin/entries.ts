@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "flypod",
+    title: "flypod",
+    description:
+      "Publish a folder of static files or Markdown (HTML, CSS, JavaScript, images) at an HTTPS share link, then update it, roll it back, compare versions, add a password or comments, and delete it. Hosted Streamable HTTP server at https://flypod.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. No sign-in needed: sites made without an account are unlisted and expire after 14 days. Sign in with OAuth 2.1 (dynamic client registration and PKCE) at https://flypod.dev/account/mcp to keep sites. Free, with an optional paid Pro plan.",
+    icon: "https://flypod.dev/apple-touch-icon.png",
+    homepage: "https://flypod.dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://flypod.dev/mcp"],
+    },
+    remoteUrl: "https://flypod.dev/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
