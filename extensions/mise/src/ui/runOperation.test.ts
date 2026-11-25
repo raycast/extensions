@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { defaultPreferences, mocks } from "../../test/raycast-api";
 import * as exec from "../mise/exec";
-import { addGlobally, remove, upgrade } from "../mise/operations";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { addGlobally, remove, upgrade, upgradeVulnerable } from "../mise/operations";
 import { runOperation } from "./runOperation";
 
 const location = { path: "/bin/sh", env: { PATH: "/bin", MISE_YES: "1", NO_COLOR: "1" } } as const;
@@ -99,6 +101,39 @@ describe("runOperation", () => {
         ["use", "-g", "--tool-option", "allow_low_downloads=true", "npm:agent-peek@latest"],
         expect.anything(),
       ),
+    );
+  });
+
+  it("says which tools were not upgraded when mise exits 0 with the out-of-range warning, and runs the bump", async () => {
+    const stderr = readFileSync(join(__dirname, "../mise/fixtures/upgrade-vulnerable-out-of-range-stderr.txt"), "utf8");
+    const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr });
+    const onSuccess = vi.fn();
+    await runOperation(location, upgradeVulnerable({ global: true }), onSuccess);
+    const toast = mocks.showToast.mock.lastCall?.[0] as { primaryAction: { onAction: () => Promise<void> } };
+    expect(toast).toMatchObject({
+      style: "success",
+      title: "Still vulnerable: jq@1.8.1, npm:lodash@4.17.15",
+      primaryAction: expect.objectContaining({ title: "Upgrade Past Range" }),
+      secondaryAction: expect.objectContaining({ title: "Copy Logs" }),
+    });
+    expect(onSuccess).toHaveBeenCalledOnce();
+
+    await toast.primaryAction.onAction();
+    await vi.waitFor(() =>
+      expect(runMise).toHaveBeenLastCalledWith(
+        location,
+        ["upgrade", "--vulnerable", "--global", "--bump"],
+        expect.anything(),
+      ),
+    );
+    await vi.waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(2));
+  });
+
+  it("reports plain success for a vulnerable upgrade that printed no warning", async () => {
+    vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
+    await runOperation(location, upgradeVulnerable());
+    expect(mocks.showToast).toHaveBeenLastCalledWith(
+      expect.objectContaining({ style: "success", title: "Vulnerable tools upgraded" }),
     );
   });
 });

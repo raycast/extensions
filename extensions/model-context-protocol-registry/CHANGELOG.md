@@ -4,6 +4,67 @@
 
 - Add RipClip to the official registry: clip long videos into captioned vertical shorts, edit them, plan posts and track views from your AI assistant. Hosted Streamable HTTP server at https://ripclip.org/mcp/ with OAuth 2.1 sign-in (dynamic client registration, client ID metadata documents and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A RipClip account is required (free plan available).
 
+## [Add FunAI Studio MCP Server] - 2026-11-25
+
+- Add FunAI Studio to the official registry: generate images, video, audio, music, voice, 3D and text with hundreds of AI models, run one-click tools and templates, and edit and render video projects in the FunAI editor. 30 tools. Runs FunAI's `funai-mcp` stdio bridge (`npx -y funai-mcp`), which relays to the hosted Streamable HTTP server at https://mcp.funai.art and signs in to FunAI in the browser. Generation uses FunAI credits.
+
+## [Add Glasp MCP Server] - 2026-11-25
+
+- Add Glasp to the official registry: search your own Glasp highlights and notes from the web and Kindle, and see passages that other readers highlighted publicly. Hosted Streamable HTTP server at https://glasp.co/api/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Glasp account (free).
+
+## [Add Formfeed MCP Server] - 2026-11-25
+
+- Add Formfeed to the official registry: PDFs and images from templates or HTML, Word and PowerPoint templates, Markdown and Office files to PDF, ZUGFeRD / Factur-X e-invoices, and PDF tools that fill, redact, split and compress existing PDFs. 18 tools. Hosted Streamable HTTP server at https://mcp.formfeed.dev/mcp with OAuth 2.1 sign-in or a Formfeed API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Who Got Hacked MCP Server] - 2026-11-20
+
+- Add Who Got Hacked to the official registry as a hosted Streamable HTTP server with six read-only tools over data breach records, each linked to a US regulator filing or Have I Been Pwned. No authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Forward Deployed, HyperLake, PulseLake Experience Ops, Trazio and Watchtower MCP Servers] - 2026-11-25
+
+- Add five hosted servers by CerebrixOS to the official registry, each a Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An account for each product is required.
+  - Forward Deployed (https://forwardeployed.work/mcp): research, strategy, financial models and decks, with each paid job priced and approved before it runs.
+  - HyperLake (https://mcp.hyperlake.cloud/hyperlake-mcp): clusters, catalogs, access grants, apps and agents in a HyperLake data lake.
+  - PulseLake Experience Ops (https://mcp.pulselake.co/pulselake-experience-mcp): AI surveys, submissions and Agent Copilots.
+  - Trazio (https://trazio.cerebrixos.com/mcp): read-only questions over logs, metrics, traces, security events, robot runs and video.
+  - Watchtower (https://watchtower.cerebrixos.com/mcp): findings, reports, compliance assessments and scans across reliability, change safety, security and cloud cost; sign-in with GitHub or Microsoft.
+
+## [Add Gadwal MCP Server] - 2026-11-25
+
+- Add Gadwal to the official registry: read and query PostgreSQL, MySQL, MariaDB, SQLite, DuckDB, Cloudflare D1, ClickHouse and BigQuery databases from the Gadwal Mac app, with AI writes staged as pending changes for approval. 24 tools. Local Streamable HTTP server inside the Mac app at http://127.0.0.1:55183/mcp, connected through `mcp-remote` with a Bearer token from Gadwal's settings.
+
+## [Add Converter Studio MCP Server] - 2026-11-25
+
+- Add Converter Studio to the official registry: convert video, audio, images, PDFs, documents, e-books, subtitles, data and archives between 67 formats and get a download link back, kept for 6 hours. 6 tools. Hosted Streamable HTTP server at https://converter.studio/api/mcp through `mcp-remote`, with a Converter Studio API key sent as an `Authorization: Bearer` header.
+
+## [Add Moon Dasha MCP Server] - 2026-11-25
+
+- Add Moon Dasha to the official registry: Vedic astrology calculations for birth charts, the 26 divisional charts, seven dasha systems, Shadbala and Ashtakavarga, yogas and doshas, Sade Sati, transits, the daily Panchang and Guna Milan compatibility. 11 read-only tools. Hosted Streamable HTTP server at https://api.moondasha.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Update Prisma MCP Server] - 2026-11-25
+
+- Update the Prisma entry for the remote Prisma MCP server, which now covers the whole platform: [Prisma Postgres](https://www.prisma.io/postgres) databases, [Prisma Compute](https://www.prisma.io/compute) apps and Object Storage, plus Prisma docs search. Hosted Streamable HTTP server at https://mcp.prisma.io/mcp with Prisma account sign-in (OAuth), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. New icon and docs link.
+
+## [Add CorpusIQ MCP Server] - 2026-11-25
+
+- Add CorpusIQ to the official registry: ask one business question and get an answer that cites its source across 40+ connected business systems: Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion, Jira and more, through a single governed MCP endpoint. Connector tools are retrieval-only and never write back to your connected systems; answers link back to source records. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in and dynamic client registration. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy. A CorpusIQ account is required (30-day free trial).
+
+## [Add PersonaXpand MCP Server] - 2026-11-25
+
+- Add PersonaXpand to the official registry: write, publish and schedule posts to Instagram, Facebook, X, LinkedIn, YouTube, Threads and Bluesky, answer comments, DMs and mentions in your own voice (automatically or after approval), and read analytics and best times to post. Hosted Streamable HTTP server at https://personaxpand.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Brilliant Design MCP Server] - 2026-11-25
+
+- Add Brilliant Design to the official registry: design pages, screens and posts on a live, editable Brilliant canvas, and remove the background from a photo. Hosted Streamable HTTP server at https://brilliant.design/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add AlphAI MCP Server] - 2026-11-25
+
+- Add AlphAI to the official registry: scored financial news by ticker, multi-publisher stories, SEC Form 4 insider trades, 8-K / 6-K earnings reads and your own news alerts. Hosted Streamable HTTP server at https://mcp.alphai.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an AlphAI API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free tier available.
+
+## [Add Gumlet MCP Server] - 2026-11-25
+
+- Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Live calls need a Gumlet API key as a GUMLET_API_KEY header. In Raycast, replace YOUR_GUMLET_API_KEY in that header. Listing tools works without a key.
+
 ## [Add StalkChain Data MCP Server] - 2026-11-24
 
 - Add StalkChain Data for read-only Solana wallet and token research and Hyperliquid market data. Connect over HTTP and sign in with StalkChain. Metered queries use account credits.
