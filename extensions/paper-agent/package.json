@@ -27,7 +27,7 @@
       "name": "paperDir",
       "type": "textfield",
       "title": "Paper Directory",
-      "description": "Root directory for papers (daily digest and notes). Library is stored under paper_dir/library. Maps to delivery.paper_dir.",
+      "description": "Optional override for delivery.paper_dir. Leave empty to use config.yaml, including its custom library directory.",
       "placeholder": "/path/to/your/paper/repo",
       "default": "",
       "required": false
@@ -255,6 +255,13 @@
   ],
   "commands": [
     {
+      "name": "check-setup",
+      "title": "Check Setup",
+      "subtitle": "Paper Agent",
+      "description": "Check the core installation, paper directories, and configuration sources without running the pipeline.",
+      "mode": "view"
+    },
+    {
       "name": "today-papers",
       "title": "Browse Today's Papers",
       "subtitle": "Paper Agent",
@@ -333,15 +340,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.9.0",
-    "js-yaml": "^4.3.2"
+    "@raycast/api": "^2.13.1",
+    "js-yaml": "^4.3.2",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
-    "eslint": "^10.13.0",
+    "eslint": "^10.15.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },

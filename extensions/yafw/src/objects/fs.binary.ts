@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import { Binary } from "../abstractions";
+import { zshCommand } from "../utils";
 
 export class FsBinary implements Binary {
   constructor(
@@ -24,5 +25,5 @@ export class FsBinary implements Binary {
     }
   };
 
-  command: Binary["command"] = (args) => `zsh -l -c 'PATH=${this.path()} ${this.fileName} ${args}'`;
+  command: Binary["command"] = (args) => zshCommand(`PATH=${this.path()} ${this.fileName} ${args}`);
 }

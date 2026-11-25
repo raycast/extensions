@@ -9,7 +9,7 @@ export default async function Command(props: LaunchProps<{ arguments: TaskArgume
   const { taskInput } = props.arguments;
   try {
     await addTask(taskInput);
-    await showHUD("Task added successfully");
+    await showHUD("Task added successfully", { clearRootSearch: true });
   } catch (error) {
     if (error instanceof Error) {
       await showHUD(`Error adding task: ${error.message}`);

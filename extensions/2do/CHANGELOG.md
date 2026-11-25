@@ -1,5 +1,19 @@
 # 2Do Changelog
 
+## [Smart List Performance] - 2026-11-25
+
+- Reuse the smart-list dropdown catalog for ten minutes to reduce 2Do calls when reopening View Tasks
+- Refresh the catalog after task changes; selected smart-list tasks still load fresh
+
+## [Tags Under List] - 2026-11-25
+
+- Tags and New Tags now appear below List and Project or Checklist (when shown) in Add Task, Edit Task, and Add Link
+
+## [Add Task Stays Open] - 2026-11-23
+
+- Add Task now stays open and clears the form after saving a task (keeping the selected list), so you can add multiple tasks in a row
+- Add Link returns to the cleared Link step after saving, ready for the next address
+
 ## [Projects and Checklists] - 2026-11-17
 
 - Creating/Editing:

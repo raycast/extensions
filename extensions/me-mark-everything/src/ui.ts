@@ -56,7 +56,8 @@ export async function manager(s: Session, id?: string, conflicts = false) {
       }
       toast.style = Toast.Style.Failure;
       toast.title = "ME Manager has not connected";
-      toast.message = "Load ME in its registered browser profile, then check again.";
+      toast.message =
+        "Load ME in its registered Chrome or Edge profile. In Dia or Arc, open the library from the ME toolbar button.";
       toast.primaryAction = {
         title: "Check Again",
         onAction: async () => {

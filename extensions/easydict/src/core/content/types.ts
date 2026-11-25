@@ -11,6 +11,7 @@ export interface TranslationContent {
 export interface DictionaryContent {
   readonly kind: "dictionary";
   readonly query: QueryWordInfo;
+  readonly sourceUrl?: string;
   readonly sections: readonly DictionarySection[];
 }
 
@@ -39,6 +40,8 @@ export interface ContentEquivalent {
   readonly frequency: "common" | "often" | "almost-always" | "less-common" | "special-forms";
   readonly inflectionNote?: string;
   readonly firstExampleTranslation?: string;
+  /** Usage examples shown in the row's detail. */
+  readonly examples?: readonly ContentExample[];
 }
 
 export type DictionarySection =
@@ -58,7 +61,11 @@ export type DictionarySection =
       };
       readonly entries: readonly ContentEquivalent[];
     }
-  | { readonly kind: "definitions"; readonly entries: readonly ContentDefinition[] }
+  | {
+      readonly kind: "definitions";
+      readonly textLanguage?: string;
+      readonly entries: readonly ContentDefinition[];
+    }
   | {
       readonly kind: "pairs";
       readonly relation: "form" | "phrase" | "related" | "web-translation";
