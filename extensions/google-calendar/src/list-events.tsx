@@ -1,4 +1,4 @@
-import { Color, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
 import { useEvents, withGoogleAPIs } from "./lib/google";
 import { calendar_v3 } from "@googleapis/calendar";
 import { formatRecurrence } from "./lib/utils";
@@ -130,8 +130,13 @@ function Command(props: LaunchProps) {
     resolvePickerCalendarId(calendarId) ?? null,
   );
   const [isMounted, setIsMounted] = useState(false);
-  const { data, isLoading, pagination, revalidate } = useEvents(selectedCalendarId);
-  const { data: calendars, isLoading: calendarsIsLoading, revalidate: revalidateCalendars } = useCalendars();
+  const { data, isLoading, error: eventsError, pagination, revalidate } = useEvents(selectedCalendarId);
+  const {
+    data: calendars,
+    isLoading: calendarsIsLoading,
+    error: calendarsError,
+    revalidate: revalidateCalendars,
+  } = useCalendars();
 
   // Cached Promise hooks return data and pagination before the native List mounts; populating the List too
   // early can report selection state while the React fiber has no alternate and trigger an invalid state update.
@@ -191,6 +196,7 @@ function Command(props: LaunchProps) {
 
     return getSectionTime(a) - getSectionTime(b);
   });
+  const loadError = eventsError ?? calendarsError;
 
   const formatEventTime = (event: calendar_v3.Schema$Event, section: string) => {
     const startDate = new Date(event.start?.dateTime ?? (event.start?.date ? `${event.start.date}T00:00:00` : ""));
@@ -223,7 +229,26 @@ function Command(props: LaunchProps) {
         ) : undefined
       }
     >
-      {isMounted && !isLoading && !calendarsIsLoading && sectionOrder.length === 0 && (
+      {isMounted && !isLoading && !calendarsIsLoading && sectionOrder.length === 0 && loadError && (
+        <List.EmptyView
+          title="Couldn't Load Events"
+          description={loadError.message || "Check your connection and try again."}
+          icon={Icon.XMarkCircle}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  revalidate();
+                  revalidateCalendars();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {isMounted && !isLoading && !calendarsIsLoading && sectionOrder.length === 0 && !loadError && (
         <List.EmptyView
           title="No Events"
           description="No upcoming events found in this calendar."
