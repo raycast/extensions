@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -19,6 +20,8 @@ import {
   setAutomatic,
   setPercent,
 } from "macos-fan-control-client";
+import { needsSetup } from "./install";
+import { openCommand } from "./launch";
 
 const PRESETS = [100, 85, 70, 55, 40, 25, 0];
 const CONFIRM_BELOW = 50;
@@ -27,7 +30,9 @@ const label = (percent: number) =>
   percent === 100 ? "Maximum" : percent === 0 ? "Minimum" : `${percent}%`;
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(readStatus, [false]);
+  const { data, isLoading, error, revalidate } = useCachedPromise(readStatus, [
+    false,
+  ]);
   const fans = data?.fans ?? [];
   const current = fans.length ? mode(fans) : "";
   const currentPercent = Math.round(average(fans));
@@ -63,6 +68,35 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Fan Control Unavailable"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              {needsSetup(error) ? (
+                <Action
+                  title="Set up Fan Control…"
+                  icon={Icon.Download}
+                  onAction={() =>
+                    openCommand(
+                      "fan-control-setup",
+                      "Could not open Set Up Fan Control",
+                    )
+                  }
+                />
+              ) : null}
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {/* Set Fan Speed is a root command, so the bottom bar shows its own title;
           the current mode and speed live here instead. */}
       <List.Section
