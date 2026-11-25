@@ -60,7 +60,12 @@ export async function runMitm(
     const { stdout } = await execFileAsync(
       "/bin/zsh",
       [resolveScript(), ...arguments_],
-      { timeout: timeoutMilliseconds },
+      {
+        timeout: timeoutMilliseconds,
+        // Starting the proxy must not take over the browser: the commands that
+        // need the UI offer it as an explicit action instead.
+        env: { ...process.env, MITM_NO_OPEN: "1" },
+      },
     );
     return stdout.trim();
   } catch (error) {

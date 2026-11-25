@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { openCommand } from "./lib/launch";
 import { Flow, flowUrl, getFlows } from "./lib/mitm";
 
 function statusIcon(status: number) {
@@ -43,8 +44,21 @@ function refreshAction(revalidate: () => void) {
   );
 }
 
+function openStatusAction() {
+  return (
+    <Action
+      title="Open Proxy Status"
+      icon={Icon.Gauge}
+      onAction={() => openCommand("status", "Could not open Proxy Status")}
+    />
+  );
+}
+
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(() => getFlows(200), []);
+  const { data, isLoading, error, revalidate } = usePromise(
+    () => getFlows(200),
+    [],
+  );
 
   const flows = (data ?? []).slice().reverse();
 
@@ -57,6 +71,32 @@ export default function Command() {
       // arrive after the command opens would stay invisible until it reopened.
       actions={<ActionPanel>{refreshAction(revalidate)}</ActionPanel>}
     >
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Cannot read flows"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              {openStatusAction()}
+              {refreshAction(revalidate)}
+            </ActionPanel>
+          }
+        />
+      ) : null}
+      {!error && !isLoading && flows.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="No traffic captured"
+          description="Start the proxy from Proxy Status, then browse something."
+          actions={
+            <ActionPanel>
+              {openStatusAction()}
+              {refreshAction(revalidate)}
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {flows.map((flow) => {
         const url = flowUrl(flow);
         return (

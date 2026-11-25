@@ -17,25 +17,29 @@
       "name": "setup",
       "title": "Set up MITM Proxy",
       "description": "Install mitmproxy and jq with Homebrew",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "MITM Proxy"
     },
     {
       "name": "toggle",
       "title": "Toggle Proxy",
       "description": "Start or stop mitmproxy and the system proxy",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "MITM Proxy"
     },
     {
       "name": "status",
       "title": "Proxy Status",
       "description": "Process, service, proxy and CA state",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "MITM Proxy"
     },
     {
       "name": "flows",
       "title": "Recent Flows",
       "description": "Browse the requests mitmproxy captured",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "MITM Proxy"
     }
   ],
   "preferences": [

@@ -11,6 +11,7 @@ import { isMissingDependency } from "./lib/dependencies";
 import { openCommand } from "./lib/launch";
 import {
   ProxyStatus,
+  confirmRootCertificate,
   getStatus,
   toggleProxy,
   trustRootCertificate,
@@ -73,6 +74,12 @@ export default function Command() {
     await untrustRootCertificate();
   }
 
+  async function addRootCertificate() {
+    if (!data) return;
+    if (!(await confirmRootCertificate(data))) return;
+    await trustRootCertificate();
+  }
+
   return (
     <Detail
       isLoading={isLoading}
@@ -119,7 +126,7 @@ export default function Command() {
             <Action
               title="Trust Root CA"
               icon={Icon.CheckCircle}
-              onAction={() => run(trustRootCertificate)}
+              onAction={() => run(addRootCertificate)}
             />
           )}
         </ActionPanel>

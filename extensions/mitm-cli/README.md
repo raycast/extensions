@@ -48,13 +48,7 @@ in the process list. Use **Proxy Status → Copy UI Password** to read it.
 
 mitmproxy decrypts HTTPS with its own certificate authority. Starting the proxy
 asks for confirmation before trusting that CA in your login keychain. You can
-remove it at any time with:
-
-```sh
-mitm untrust
-```
-
-or by running **Proxy Status → Untrust Root CA**.
+remove it at any time with **Proxy Status → Untrust Root CA**.
 
 ## Configuration
 
@@ -72,8 +66,8 @@ MITM_INSECURE=1         # skip upstream certificate verification
 
 - **`mitmweb` not found** — run **Set up MITM Proxy → Install Dependencies**.
 - **The proxy is on but pages do not load** — another process may hold port
-  `8080`. Run `mitm status` for the listener, or change `MITM_PORT`.
+  `8080`. **Proxy Status** shows the listener, or change `MITM_PORT`.
 - **A network service still points at a dead proxy** — toggling the proxy off
   clears every service that points at `127.0.0.1:8080`.
-- **HTTPS pages fail after stopping the proxy** — remove the CA with
-  `mitm untrust` if you no longer need it.
+- **HTTPS pages fail after stopping the proxy** — remove the CA from **Proxy
+  Status** if you no longer need it.
