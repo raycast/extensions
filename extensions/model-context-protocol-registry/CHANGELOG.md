@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Tiiny Host MCP Server] - {PR_MERGE_DATE}
+## [Add Tiiny Host MCP Server] - 2026-11-25
 
 - Add Tiiny Host to the official registry: publish an HTML page, a PDF, an image or a ZIP of a static site as a live website on tiiny.site with a share link, and list, update or delete your sites. 4 tools. Hosted Streamable HTTP server at https://mcp.tiiny.host/oauth with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Requires a Tiiny Host account (free plan available).
 
