@@ -126,7 +126,6 @@ export interface DetailStatusChip {
   text: string;
 }
 
-/** The card's type, then only the states that are true for it. */
 export const getDetailStatusChips = (card: RaycastCard): DetailStatusChip[] => [
   {
     kind: "type",
@@ -142,7 +141,6 @@ export const getDetailStatusChips = (card: RaycastCard): DetailStatusChip[] => [
   ...(card.isHidden ? [{ kind: "hidden" as const, text: "Hidden" }] : []),
 ];
 
-/** "USD 29.99" style price, in the page's currency when it has one. */
 export const formatLinkPrice = (price: RaycastLinkPrice): string => {
   if (price.currency) {
     try {
@@ -157,13 +155,11 @@ export const formatLinkPrice = (price: RaycastLinkPrice): string => {
   return String(price.amount);
 };
 
-/** `design_portfolio` as "Design portfolio". */
 export const formatLinkCategory = (category: string): string => {
   const words = category.replace(/_/g, " ").trim();
   return `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
 };
 
-/** The author and publisher of a link, such as "Ada Lovelace · The Atlas". */
 export const getLinkByline = (card: RaycastCard): string | null => {
   const parts = [
     card.linkAuthor,
@@ -172,7 +168,6 @@ export const getLinkByline = (card: RaycastCard): string | null => {
   return parts.length > 0 ? Array.from(new Set(parts)).join(" · ") : null;
 };
 
-/** The page a link was published on, as a date; null when it isn't a date. */
 export const getLinkPublishedDate = (card: RaycastCard): Date | null => {
   if (!card.linkPublishedAt) {
     return null;
@@ -181,7 +176,6 @@ export const getLinkPublishedDate = (card: RaycastCard): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-/** The page a saved text or quote came from: `From example.com`. */
 export const getCardSource = (
   card: RaycastCard,
 ): { label: string; title: string | null; url: string } | null => {
@@ -247,8 +241,6 @@ export const getDetailMarkdown = (card: RaycastCard): string => {
     .map((color) => color.hex)
     .filter((hex) => SAFE_HEX.test(hex));
   const content = renderCardLinks(card.content.trim(), card.links);
-  // A link's content is its address and a file's is its name, which the
-  // sidebar already shows; a short note or palette name is the title itself.
   const repeatsMetadata =
     content === card.fileName ||
     (card.type === "link" && content === card.url) ||

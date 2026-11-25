@@ -17,3 +17,7 @@ A fast Raycast extension for exploring airline branding assets.
 ## Issues
 
 Report bugs or suggest improvements by creating an issue [here](https://github.com/soaring-symbols/raycast/issues).
+
+## License
+
+The extension's code is [MIT](LICENSE). The airline and alliance marks it shows come from the [soaring-symbols](https://github.com/soaring-symbols/soaring-symbols) package and are trademarks of their owners, not covered by this license; read the package's [Disclaimer](https://github.com/soaring-symbols/soaring-symbols/blob/main/DISCLAIMER.md) before using them.

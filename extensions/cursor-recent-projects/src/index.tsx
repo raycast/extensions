@@ -1,4 +1,5 @@
-import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, LaunchProps, Color } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, showToast, Toast, LaunchProps, Color, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
@@ -30,6 +31,8 @@ import {
 import { usePinnedEntries } from "./pinned";
 import { ProjectProvider, useProject } from "./contexts/ProjectContext";
 import { getGitBranch } from "./utils/git";
+import { shortcut } from "./utils/shortcuts";
+import { isWindows, openFolderInTerminal, openRemoteInCursor } from "./utils/windows";
 
 export default function Command(props: LaunchProps<{ launchContext: LaunchContext }>) {
   const { data, isLoading, error, ...removeMethods } = useRecentEntries();
@@ -125,10 +128,11 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
 
 function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & PinMethods & RemoveMethods) {
   const name = decodeURIComponent(basename(props.uri));
-  const path = fileURLToPath(props.uri);
+  // Cursor stores lower-case drive letters on Windows; upper-case them so tildify matches.
+  const path = fileURLToPath(props.uri).replace(/^[a-z]:/, (drive) => drive.toUpperCase());
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
-  const keywords = path.split("/");
+  const keywords = path.split(/[\\/]/);
   const [gitBranch, setGitBranch] = useState<string | null>(null);
 
   useEffect(() => {
@@ -196,16 +200,16 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
               title={getTitle(true)}
               icon="icon.png"
               onAction={() => handleOpenProject(true)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={shortcut(["cmd", "shift"], "enter")}
             />
-            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenWith path={path} shortcut={shortcut(["cmd"], "o")} />
             {isFolderEntry(props.entry) && terminalApp && (
               <Action
                 title={`Open with ${terminalApp.name}`}
                 icon={{ fileIcon: terminalApp.path }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                shortcut={shortcut(["cmd", "shift"], "o")}
                 onAction={() =>
-                  open(path, terminalApp).catch(() =>
+                  openFolderInTerminal(path, terminalApp).catch(() =>
                     showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
                   )
                 }
@@ -213,12 +217,8 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
             )}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
-            <Action.CopyToClipboard
-              title="Copy Path"
-              content={prettyPath}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-            />
+            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={shortcut(["cmd"], ".")} />
+            <Action.CopyToClipboard title="Copy Path" content={prettyPath} shortcut={shortcut(["cmd", "shift"], ".")} />
           </ActionPanel.Section>
           <RemoveActionSection {...props} />
           <PinActionSection {...props} />
@@ -255,6 +255,18 @@ function RemoteItem(
     return url.toString();
   };
 
+  const openRemoteOnWindows = async (revert = false) => {
+    try {
+      await openRemoteInCursor(props.uri, {
+        isWorkspace: isRemoteWorkspaceEntry(props.entry),
+        reuseWindow: closeOtherWindows !== revert,
+        fallbackUrl: getUrl(uri, revert),
+      });
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to open in Cursor" });
+    }
+  };
+
   return (
     <ListOrGridItem
       id={props.pinned ? remotePath : undefined}
@@ -265,13 +277,27 @@ function RemoteItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title={getTitle()} icon="icon.png" url={getUrl(uri)} />
-            <Action.OpenInBrowser
-              title={getTitle(true)}
-              icon="icon.png"
-              url={getUrl(uri, true)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            />
+            {isWindows ? (
+              <>
+                <Action title={getTitle()} icon="icon.png" onAction={() => openRemoteOnWindows()} />
+                <Action
+                  title={getTitle(true)}
+                  icon="icon.png"
+                  onAction={() => openRemoteOnWindows(true)}
+                  shortcut={shortcut(["cmd", "shift"], "enter")}
+                />
+              </>
+            ) : (
+              <>
+                <Action.OpenInBrowser title={getTitle()} icon="icon.png" url={getUrl(uri)} />
+                <Action.OpenInBrowser
+                  title={getTitle(true)}
+                  icon="icon.png"
+                  url={getUrl(uri, true)}
+                  shortcut={shortcut(["cmd", "shift"], "enter")}
+                />
+              </>
+            )}
           </ActionPanel.Section>
           <RemoveActionSection {...props} />
           <PinActionSection {...props} />
@@ -289,7 +315,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       <Action
         title="Pin Entry"
         icon={Icon.Pin}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={shortcut(["cmd", "shift"], "p")}
         onAction={async () => {
           props.pin(props.entry);
           await showToast({ title: "Pinned entry" });
@@ -300,7 +326,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
     <ActionPanel.Section>
       <Action
         title="Unpin Entry"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={shortcut(["cmd", "shift"], "p")}
         icon={Icon.PinDisabled}
         onAction={async () => {
           props.unpin(props.entry);
@@ -310,7 +336,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("left") && (
         <Action
           title="Move Left in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowLeft" }}
+          shortcut={shortcut(["cmd", "opt"], "arrowLeft")}
           icon={Icon.ArrowLeft}
           onAction={async () => {
             props.moveUp(props.entry);
@@ -321,7 +347,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("up") && (
         <Action
           title="Move up in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+          shortcut={shortcut(["cmd", "opt"], "arrowUp")}
           icon={Icon.ArrowUp}
           onAction={async () => {
             props.moveUp(props.entry);
@@ -332,7 +358,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("right") && (
         <Action
           title="Move Right in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowRight" }}
+          shortcut={shortcut(["cmd", "opt"], "arrowRight")}
           icon={Icon.ArrowRight}
           onAction={async () => {
             props.moveDown(props.entry);
@@ -343,7 +369,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("down") && (
         <Action
           title="Move Down in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+          shortcut={shortcut(["cmd", "opt"], "arrowDown")}
           icon={Icon.ArrowDown}
           onAction={async () => {
             props.moveDown(props.entry);
@@ -354,7 +380,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       <Action
         title="Unpin All Entries"
         icon={Icon.PinDisabled}
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+        shortcut={shortcut(["ctrl", "shift"], "x")}
         style={Action.Style.Destructive}
         onAction={async () => {
           props.unpinAll();
@@ -373,7 +399,7 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
         title="Remove from Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeEntry(props.entry)}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
       />
 
       <Action
@@ -381,7 +407,7 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
         title="Remove All Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeAllEntries()}
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.RemoveAll}
       />
     </ActionPanel.Section>
   );

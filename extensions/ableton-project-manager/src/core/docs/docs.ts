@@ -641,7 +641,10 @@ export function restoreArchivedDoc(
 ): "restored" | "conflict" | "unavailable" | "gone" {
   const folder = getDocFolder(doc.kind);
   if (!folder || !fs.existsSync(folder)) return "unavailable";
-  const source = path.join(folder, doc.relativePath);
+  const archiveDir = path.resolve(folder, DELETED_DOCS_FOLDER);
+  const source = path.resolve(folder, doc.relativePath);
+  // 只还原归档文件夹里的文件：记录被改动过时，不碰别处的文件。
+  if (!source.startsWith(archiveDir + path.sep)) return "gone";
   if (!fs.existsSync(source)) return "gone";
 
   try {

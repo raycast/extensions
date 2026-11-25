@@ -1,5 +1,10 @@
 # The Blue Cloud Changelog
 
+## [Show File Size] - 2026-11-24
+
+- Show file sizes
+- Add full date and time to `tooltip`
+
 ## [Download File] - 2025-02-10
 
 - Download a file (need to re-authorize for new scope)

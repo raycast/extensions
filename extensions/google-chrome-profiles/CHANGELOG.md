@@ -1,5 +1,12 @@
 # Google Chrome Profiles Changelog
 
+## [Ask AI Support and Profile Email Masking] - 2026-11-24
+
+- Use Raycast AI to list visible browser profiles, switch profiles, or open a web URL in a specific profile.
+- Ask Raycast AI for the name of the profile in the configured browser's frontmost regular window.
+- Move the current tab to another profile with Raycast AI. The original tab closes after the destination is verified.
+- Add a “Mask profile emails” preference for Switch Profiles and Move Current Tab. You can still search by email.
+
 ## [Brave and Brave Origin] - 2026-11-11
 
 - Add Brave Browser and Brave Origin (standalone, `com.brave.Browser.origin`) to the Browser preference.

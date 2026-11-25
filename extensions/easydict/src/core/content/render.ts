@@ -44,8 +44,11 @@ function estimateTextWidth(text: string, fontSize: number): number {
   return Math.ceil((widthAt32 * fontSize) / 32);
 }
 
-/** KaTeX treats these as control sequences; such pronunciations stay plain text instead. */
-const MATH_UNSUPPORTED = /[\\{}$&#_%^~]/;
+/**
+ * KaTeX treats these as control sequences, and rejects most combining marks such as the IPA tie bar in `d͡ʒ`;
+ * such pronunciations stay plain text instead.
+ */
+const MATH_UNSUPPORTED = /[\\{}$&#_%^~]|\p{M}/u;
 
 /** KaTeX cannot wrap; wider pronunciations fall back to plain text. The estimate over-states the bundled KaTeX font, so this budget still fits one line. */
 const PHONETIC_LINE_BUDGET = 800;

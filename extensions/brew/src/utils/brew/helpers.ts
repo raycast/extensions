@@ -29,7 +29,7 @@ export function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
  * local installed state.
  */
 export function brewInstalledDate(item: Cask | Formula): Date | undefined {
-  const seconds = isCask(item) ? item.installed_time : item.installed?.first()?.time;
+  const seconds = isCask(item) ? item.installed_time : effectiveKeg(item)?.time;
   return seconds == undefined ? undefined : new Date(seconds * 1000);
 }
 
@@ -293,9 +293,43 @@ export function isPinnedPackage(
   pins: { formulae: Set<string>; casks: Set<string> },
   identifier: string,
   isCask: boolean,
+  otherNames: readonly string[] = [],
 ): boolean {
-  const key = pinLookupKey(identifier);
-  return isCask ? pins.casks.has(key) : pins.formulae.has(key);
+  const dir = isCask ? pins.casks : pins.formulae;
+  return [identifier, ...otherNames].some((name) => dir.has(pinLookupKey(name)));
+}
+
+/**
+ * The other names a formula's pin can be stored under: its old names, then its
+ * aliases (`Formula#possible_names`). From Homebrew 7.0.15 `FormulaPin#path`
+ * checks them all, because a keg left in the folder of an alias or old name
+ * (`Cellar/postgresql` after `postgresql` became an alias) is pinned under
+ * that folder's name. Pass to `isPinnedPackage`. Empty for a cask, and for a
+ * record that carries neither field (`oldnames` only comes from `brew info`).
+ */
+export function pinAliases(item: Cask | Nameable): string[] {
+  if (isCask(item)) return [];
+  const formula = item as Partial<Formula>;
+  return [...(formula.oldnames ?? []), ...(formula.aliases ?? [])];
+}
+
+/**
+ * Whether a named upgrade of `item` would hit a pin. The pin directory decides,
+ * under every name `pinAliases` knows. A `brew outdated` record carries no
+ * aliases, so a formula pinned under one is invisible there; brew's own
+ * `pinned` on that record already accounts for it. Only a view that never
+ * unpins (`allowUnpin: false`) trusts that flag: if the pin was lifted since,
+ * the cost is a row reported skipped until refresh, not an unpin of a
+ * package that was never pinned.
+ */
+export function pinnedBeforeUpgrade(
+  pins: { formulae: Set<string>; casks: Set<string> },
+  item: Cask | Nameable,
+  opts: { allowUnpin: boolean },
+): boolean {
+  const cask = isCask(item);
+  if (isPinnedPackage(pins, brewIdentifier(item), cask, pinAliases(item))) return true;
+  return !cask && !opts.allowUnpin && (item as Partial<Formula>).pinned === true;
 }
 
 export async function brewPinnedIdentifiers(): Promise<{ formulae: Set<string>; casks: Set<string> }> {
@@ -389,68 +423,15 @@ function caskInstallPath(cask: Cask): string {
 
 function formulaInstallPath(formula: Formula): string {
   const basePath = brewPath(path_join("Cellar", formula.name));
-  const firstInstalled = formula.installed[0];
-  if (firstInstalled) {
-    return path_join(basePath, firstInstalled.version);
+  const keg = effectiveKeg(formula);
+  if (keg) {
+    return path_join(basePath, keg.version);
   } else {
     return basePath;
   }
 }
 
 /// Version Formatting
-
-/**
- * Format the version string for display.
- */
-export function brewFormatVersion(installable: Cask | Formula): string {
-  if (isCask(installable)) {
-    return caskFormatVersion(installable);
-  } else {
-    return formulaFormatVersion(installable);
-  }
-}
-
-function caskFormatVersion(cask: Cask): string {
-  if (!cask.installed) {
-    return "";
-  }
-
-  let version = cask.installed;
-  let status = "";
-  if (cask.pinned) {
-    status += "P";
-  }
-  if (cask.outdated) {
-    status += "O";
-  }
-  if (status) {
-    version += ` (${status})`;
-  }
-  return version;
-}
-
-function formulaFormatVersion(formula: Formula): string {
-  const installed_version = formula.installed[0];
-  if (!installed_version) {
-    return "";
-  }
-
-  let version = installed_version.version;
-  let status = "";
-  if (!installed_version.installed_on_request) {
-    status += "D";
-  }
-  if (formula.pinned) {
-    status += "P";
-  }
-  if (formula.outdated) {
-    status += "O";
-  }
-  if (status) {
-    version += ` (${status})`;
-  }
-  return version;
-}
 
 /// Sorting
 
