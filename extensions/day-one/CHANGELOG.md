@@ -1,6 +1,6 @@
 # Day One Changelog
 
-## [Update Check for the Day One CLI] - {PR_MERGE_DATE}
+## [Update Check for the Day One CLI] - 2026-11-25
 
 - Run Doctor checks npm for a newer Day One CLI. When there is one, the CLI row shows the new version and offers to update to it; when yours is the latest, it says so and no longer offers an update.
 - Installing or updating the CLI can't run twice at once. Reopening Run Doctor mid-update shows the update in progress instead of offering another, and checks the CLI again when it finishes.
