@@ -1,6 +1,8 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { executeGcloudCommand } from "../../gcloud";
+import { clearCommandCache, executeGcloudCommand } from "../../gcloud";
+import { CacheManager } from "../../utils/CacheManager";
+import { clearTokenCache } from "../../utils/gcpApi";
 import { GCloudConfig } from "./types";
 
 const execFilePromise = promisify(execFile);
@@ -14,18 +16,31 @@ export async function listConfigurations(gcloudPath: string): Promise<GCloudConf
 
 const EXEC_TIMEOUT = 15000;
 
-export async function activateConfiguration(gcloudPath: string, name: string): Promise<void> {
+function invalidateCachesAfterConfigSwitch(projectId?: string): void {
+  clearTokenCache();
+  clearCommandCache();
+  CacheManager.clearAuthCache();
+  CacheManager.clearProjectsListCache();
+  CacheManager.clearProjectCache();
+
+  if (projectId && projectId.trim() !== "") {
+    CacheManager.saveSelectedProject(projectId.trim());
+  }
+}
+
+export async function activateConfiguration(gcloudPath: string, name: string, projectId?: string): Promise<void> {
   try {
     await execFilePromise(gcloudPath, ["config", "configurations", "activate", name], { timeout: EXEC_TIMEOUT });
   } catch (error: unknown) {
     // gcloud exits non-zero on warnings (e.g., project mismatch) even when activation succeeded.
     // Check stderr for the success signal before treating it as a real failure.
     const stderr = (error as { stderr?: string }).stderr || "";
-    if (stderr.includes(`Activated [${name}]`)) {
-      return;
+    if (!stderr.includes(`Activated [${name}]`)) {
+      throw error;
     }
-    throw error;
   }
+
+  invalidateCachesAfterConfigSwitch(projectId);
 }
 
 export async function deleteConfiguration(gcloudPath: string, name: string): Promise<void> {

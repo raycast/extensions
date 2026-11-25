@@ -1,5 +1,11 @@
 # Google Cloud CLI Changelog
 
+## [Fix Navigation, Project Switching & Config Cache Invalidation] - {PR_MERGE_DATE}
+
+- Fixed Hub navigation to push service views onto the navigation stack so pressing Escape returns to the Hub instead of closing Raycast
+- Fixed in-service project switching across all services to stay in the current service and sync the selected project with the Hub
+- Cleared cached OAuth tokens, command results, auth state, and project caches (including `~/.raycast-gcloud-prefs.json`) when activating a named gcloud configuration or switching accounts, and synced the activated configuration's project
+
 ## [Delete Compute Engine Instances] - 2026-11-17
 
 - Added a destructive action to permanently delete Compute Engine VM instances from the instance list or detail view

@@ -207,9 +207,10 @@ function TruncatedNoticeItem({ resource, consoleUrl }: { resource: string; conso
 interface CloudSqlViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProps) {
+export default function CloudSqlView({ projectId, gcloudPath, onProjectChange }: CloudSqlViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [instances, setInstances] = useState<CloudSqlInstance[]>([]);
   const [isTruncated, setIsTruncated] = useState(false);
@@ -220,7 +221,7 @@ export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProp
   useEffect(() => {
     initializeQuickLink(projectId);
     fetchInstances();
-  }, []);
+  }, [projectId, gcloudPath]);
 
   async function fetchInstances() {
     setIsLoading(true);
@@ -374,7 +375,14 @@ ${
       isLoading={isLoading}
       searchBarPlaceholder="Search Cloud SQL instances..."
       navigationTitle={`Cloud SQL - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="cloudsql" />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="cloudsql"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchInstances} />
