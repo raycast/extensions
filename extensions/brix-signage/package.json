@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brix-signage",
+  "title": "Brix Signage",
+  "description": "Search your digital signage screens, files and playlists, change what a screen plays, send screen commands and post a message to screens.",
+  "icon": "extension-icon.png",
+  "author": "brixsignage",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "digital signage",
+    "signage",
+    "screens",
+    "kiosk",
+    "menu board",
+    "brix"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Make an API key in Brix in Settings \u203a AI, API & MCP \u203a API keys. The key starts with ak_.",
+      "placeholder": "ak_us_\u2026"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-screens",
+      "title": "Search Screens",
+      "subtitle": "Brix",
+      "description": "Find a screen, see what it shows, change its content or send a command to it.",
+      "mode": "view",
+      "keywords": [
+        "display",
+        "player",
+        "tv",
+        "restart",
+        "reload"
+      ]
+    },
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "Brix",
+      "description": "Find images, videos and other files in your Brix library.",
+      "mode": "view",
+      "keywords": [
+        "media",
+        "image",
+        "video",
+        "library"
+      ]
+    },
+    {
+      "name": "search-playlists",
+      "title": "Search Playlists",
+      "subtitle": "Brix",
+      "description": "Find a playlist and play it on a screen.",
+      "mode": "view"
+    },
+    {
+      "name": "post-message",
+      "title": "Post Message to Screens",
+      "subtitle": "Brix",
+      "description": "Show a headline on your screens for a set time. Then the screens go back to their usual content.",
+      "mode": "view",
+      "keywords": [
+        "announce",
+        "alert",
+        "broadcast",
+        "cast"
+      ]
+    },
+    {
+      "name": "screen-status",
+      "title": "Screen Status",
+      "subtitle": "Brix",
+      "description": "Show in the menu bar how many screens are offline.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

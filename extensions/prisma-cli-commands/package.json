@@ -2,11 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prisma-cli-commands",
   "title": "Prisma CLI Commands",
-  "description": "Search Prisma CLI commands with details and examples, and copy them.",
+  "description": "Search and copy Prisma ORM 7 CLI commands with details and examples, including prisma init --db to start a project on Prisma Postgres.",
   "icon": "prisma-logo.png",
   "author": "raj_asha",
+  "owner": "prisma",
+  "access": "public",
   "categories": [
-    "Productivity", "Documentation", "Developer Tools"
+    "Productivity",
+    "Documentation",
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
@@ -35,5 +39,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "keywords": [
+    "prisma",
+    "prisma orm",
+    "prisma cli",
+    "prisma postgres",
+    "migrate"
+  ],
+  "platforms": [
+    "macOS"
+  ]
 }

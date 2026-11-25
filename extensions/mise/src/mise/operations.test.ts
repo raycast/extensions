@@ -14,11 +14,13 @@ import {
   runTask,
   uninstall,
   upgrade,
+  upgradeVulnerable,
 } from "./operations";
 
 const useStderr = readFileSync(join(__dirname, "fixtures/use-stderr.txt"), "utf8");
 const uninstallStderr = readFileSync(join(__dirname, "fixtures/uninstall-stderr.txt"), "utf8");
 const lowDownloadsStderr = readFileSync(join(__dirname, "fixtures/use-low-downloads-stderr.txt"), "utf8");
+const outOfRangeStderr = readFileSync(join(__dirname, "fixtures/upgrade-vulnerable-out-of-range-stderr.txt"), "utf8");
 const setMissingStderr = readFileSync(join(__dirname, "fixtures/tasks-set-missing-stderr.txt"), "utf8");
 
 describe("addGlobally", () => {
@@ -318,5 +320,33 @@ describe("parseProgressLine", () => {
       { kind: "summary", message: "removed 1 tool in 0ms" },
       undefined,
     ]);
+  });
+});
+
+describe("upgradeVulnerable", () => {
+  it("upgrades only the affected tools, with the flags upgrade takes", () => {
+    expect(upgradeVulnerable()).toMatchObject({
+      args: ["upgrade", "--vulnerable"],
+      successTitle: "Vulnerable tools upgraded",
+    });
+    expect(upgradeVulnerable({ global: true, bump: true, inactive: true, jobs: 2, prune: true }).args).toEqual(
+      upgrade(undefined, { global: true, bump: true, inactive: true, jobs: 2, prune: true }).args.flatMap((arg, i) =>
+        i === 0 ? [arg, "--vulnerable"] : [arg],
+      ),
+    );
+  });
+
+  it("names the tools left without a newer version and offers the same run past the range", () => {
+    const caveat = upgradeVulnerable({ global: true }).caveat?.(outOfRangeStderr);
+    expect(caveat).toMatchObject({ title: "Still vulnerable: jq@1.8.1, npm:lodash@4.17.15" });
+    expect(caveat?.next).toEqual({
+      title: "Upgrade Past Range",
+      op: expect.objectContaining({ args: ["upgrade", "--vulnerable", "--global", "--bump"] }),
+    });
+  });
+
+  it("offers nothing past the range when it already bumped, and nothing when mise did not warn", () => {
+    expect(upgradeVulnerable({ bump: true }).caveat?.(outOfRangeStderr)?.next).toBeUndefined();
+    expect(upgradeVulnerable().caveat?.("mise upgrade done\n")).toBeUndefined();
   });
 });
