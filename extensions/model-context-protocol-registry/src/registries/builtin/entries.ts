@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "arsen",
+    title: "Arsen MCP",
+    description:
+      "Assess organizational resilience through social-engineering simulations and awareness training. Hosted Streamable HTTP with OAuth sign-in; requires an Arsen account with organization access. Raycast connects directly; other clients use the mcp-remote proxy and require Node.js.",
+    icon: "https://raw.githubusercontent.com/arsen-cybersecurity/arsen-mcp-server/main/assets/arsen-mark.png",
+    homepage: "https://arsen.co/en/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.arsen.co/mcp"],
+    },
+    remoteUrl: "https://api.arsen.co/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
