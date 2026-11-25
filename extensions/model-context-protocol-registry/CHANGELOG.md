@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kite MCP Server] - {PR_MERGE_DATE}
+
+- Add Kite to the official registry: a design tool where agents read and draw editable layers in the same file a team edits live. Hosted Streamable HTTP server at https://kite.new/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
