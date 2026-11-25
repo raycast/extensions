@@ -3,6 +3,7 @@
 ## [JWT Quicklinks] - {PR_MERGE_DATE}
 
 - Create a quicklink that opens the read-only viewer for a test token saved locally on the same device.
+- Fixed tokens with Unicode characters in their claims showing garbled text in **View Decoded JWT**.
 
 ## [JWT Debugger] - 2026-07-28
 
