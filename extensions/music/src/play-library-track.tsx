@@ -48,7 +48,7 @@ export default function PlayLibraryTrack() {
             title={name}
             subtitle={`${artist}`}
             accessories={[{ text: `${album}` }]}
-            icon={{ source: "../assets/icon.png" }}
+            icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
             actions={<Actions name={name} id={id ?? ""} pop={pop} />}
           />
         ))

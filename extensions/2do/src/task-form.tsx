@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Form, Icon, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import {
   ACTIONS,
   actionValueError,
   List,
   listParents,
+  newTaskValues,
   repeatValueError,
-  repeatValues,
   saveTask,
   Tag,
   tagOptions,
@@ -49,18 +49,13 @@ export function TaskForm({
   const lists = useCachedPromise(() => twoDo<{ list: List[] }>("list_lists").then((r) => r.list));
   const tags = useCachedPromise(() => twoDo<{ tags: Tag[] }>("list_tags").then((r) => r.tags));
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<TaskValues>({
+  const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<TaskValues>({
     initialValues: task
       ? { ...taskToValues(task), parent_id: parent?.task_id ?? "", new_tags: "" }
       : {
-          new_tags: "",
-          action_type: link ? "url" : "none",
-          action_value: link?.url ?? "",
-          parent_id: addTo?.task_id ?? "",
-          task_type: "normal",
-          ...(addTo && { list_id: addTo.list_id }),
-          ...repeatValues(),
-          ...(link && { title: link.title, notes: link.description }),
+          ...newTaskValues(addTo?.list_id),
+          ...(link && { title: link.title, notes: link.description, action_type: "url", action_value: link.url }),
+          ...(addTo && { parent_id: addTo.task_id }),
         },
     validation: {
       title: FormValidation.Required,
@@ -80,12 +75,19 @@ export function TaskForm({
         // A checklist's child tasks have no dates, so a task put in a checklist loses its dates and repeat.
         const undated = !dated && { start: null, due: null, is_repeating: false };
         await saveTask({ ...v, ...(addTo && { parent_id: addTo.task_id }), ...undated }, current, parent?.task_id);
-        if (task || addTo) {
-          await showToast({ style: Toast.Style.Success, title: task ? "Task updated" : "Item added" });
+        if (task || addTo || link) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: task ? "Task updated" : addTo ? "Item added" : `Added "${v.title}" to 2Do`,
+          });
           onSaved?.();
           pop();
         } else {
-          await showHUD(`Added "${v.title}" to 2Do`);
+          await showToast({ style: Toast.Style.Success, title: `Added "${v.title}" to 2Do` });
+          reset(newTaskValues(v.list_id));
+          focus("title");
+          if (v.new_tags?.trim()) void tags.revalidate();
+          if (v.task_type && v.task_type !== "normal") void parents.revalidate();
         }
       } catch (error) {
         await showFailureToast(error, { title: task ? "Could not update task" : "Could not add task" });
@@ -182,6 +184,17 @@ export function TaskForm({
           ))}
         </Form.Dropdown>
       )}
+      <Form.TagPicker title="Tags" {...itemProps.tag_ids}>
+        {tagOptions(tags.data, task).map((t) => (
+          <Form.TagPicker.Item key={t.tag_id} value={t.tag_id} title={t.title} />
+        ))}
+      </Form.TagPicker>
+      <Form.TextField
+        title="New Tags"
+        placeholder="Errands, Home"
+        info="Comma-separated. Names matching an existing tag use that tag; the rest are created when you save."
+        {...itemProps.new_tags}
+      />
       {dated && (
         <>
           <Form.Separator />
@@ -266,18 +279,6 @@ export function TaskForm({
         <Form.Dropdown.Item value="high" title="High" />
       </Form.Dropdown>
       <Form.Checkbox label="Starred" {...itemProps.starred} />
-      <Form.Separator />
-      <Form.TagPicker title="Tags" {...itemProps.tag_ids}>
-        {tagOptions(tags.data, task).map((t) => (
-          <Form.TagPicker.Item key={t.tag_id} value={t.tag_id} title={t.title} />
-        ))}
-      </Form.TagPicker>
-      <Form.TextField
-        title="New Tags"
-        placeholder="Errands, Home"
-        info="Comma-separated. Names matching an existing tag use that tag; the rest are created when you save."
-        {...itemProps.new_tags}
-      />
     </Form>
   );
 }

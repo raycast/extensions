@@ -1,0 +1,191 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hex",
+  "title": "Hex",
+  "description": "Control Hex dictation and browse saved dictations, captures, and meetings. Requires Hex 3.4.0 or later",
+  "icon": "icon.png",
+  "author": "tim_gailey",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "dictation",
+    "speech to text",
+    "voice",
+    "transcription",
+    "whisper",
+    "screenshot"
+  ],
+  "commands": [
+    {
+      "name": "toggle-dictation",
+      "title": "Toggle Dictation",
+      "subtitle": "Hex",
+      "description": "Start a dictation, or stop it and paste the transcript. Opens Hex if it isn't running",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-dictation",
+      "title": "Start Dictation",
+      "subtitle": "Hex",
+      "description": "Start a dictation that runs until you stop it. Opens Hex if it isn't running",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-dictation",
+      "title": "Stop Dictation",
+      "subtitle": "Hex",
+      "description": "Stop the Hex dictation in progress and paste the transcript",
+      "mode": "no-view"
+    },
+    {
+      "name": "cancel-dictation",
+      "title": "Cancel Dictation",
+      "subtitle": "Hex",
+      "description": "Discard the Hex dictation in progress without transcribing or pasting it",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-last-dictation",
+      "title": "Paste Last Dictation",
+      "subtitle": "Hex",
+      "description": "Paste your most recent Hex dictation into the active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-last-dictation",
+      "title": "Copy Last Dictation",
+      "subtitle": "Hex",
+      "description": "Copy your most recent Hex dictation to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search Dictation History",
+      "subtitle": "Hex",
+      "description": "Search the dictations Hex has kept, then paste or copy one",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "title": "Primary Action",
+          "description": "What Enter does on a dictation",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "browse-captures",
+      "title": "Browse Captures",
+      "subtitle": "Hex",
+      "description": "Browse the screenshots, screen recordings, and annotations Hex has saved, then paste, copy, or open one",
+      "mode": "view"
+    },
+    {
+      "name": "take-screenshot",
+      "title": "Take Screenshot",
+      "subtitle": "Hex",
+      "description": "Open Hex's screenshot picker to copy and save a screenshot. Requires Labs › Screenshots",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-annotation",
+      "title": "Toggle Annotation",
+      "subtitle": "Hex",
+      "description": "Start a Hex annotation that records your screen with drawing and narration, or stop the one in progress",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-annotation-sending",
+      "title": "Toggle Sending Annotations to OpenCode",
+      "subtitle": "Hex",
+      "description": "Choose whether Hex sends annotations to OpenCode or only saves and copies them. Off also stops Hex's OpenCode warning",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-meetings",
+      "title": "Search Meetings",
+      "subtitle": "Hex",
+      "description": "Browse the meetings Hex has recorded and read or copy their transcripts",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-meeting-recording",
+      "title": "Toggle Meeting Recording",
+      "subtitle": "Hex",
+      "description": "Start recording a meeting in Hex, or stop and transcribe the one in progress",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-vocabulary",
+      "title": "Manage Vocabulary",
+      "subtitle": "Hex",
+      "description": "View, add, edit, and remove vocabulary terms",
+      "mode": "view"
+    },
+    {
+      "name": "add-vocabulary-term",
+      "title": "Add Vocabulary Term",
+      "subtitle": "Hex",
+      "description": "Add a word or name, with the misspellings Hex should correct",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "term",
+          "placeholder": "Term",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "soundsLike",
+          "placeholder": "Sounds Like (Comma-Separated)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "switch-model",
+      "title": "Switch Model",
+      "subtitle": "Hex",
+      "description": "Select or download a transcription model",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

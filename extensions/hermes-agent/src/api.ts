@@ -41,8 +41,9 @@ function authHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  const bearer = token?.trim();
+  if (bearer) {
+    headers.Authorization = `Bearer ${bearer}`;
   }
   return headers;
 }

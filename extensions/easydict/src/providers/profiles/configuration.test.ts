@@ -20,22 +20,18 @@ const { storage, legacy } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@raycast/api", () => ({
-  LocalStorage: {
-    getItem: vi.fn((key: string) => Promise.resolve(storage.get(key))),
-    setItem: vi.fn((key: string, value: string) => {
-      storage.set(key, value);
-      return Promise.resolve();
-    }),
-  },
-}));
+vi.mock("@raycast/api", async () => {
+  const { createLocalStorageMock } = await import("@/test-support/raycastStorage");
+  const localStorage = createLocalStorageMock(storage);
+  return { LocalStorage: { ...localStorage, setItem: vi.fn(localStorage.setItem) } };
+});
 vi.mock("@/consts", () => ({ myPreferences: { servicesOrder: "google,openai" } }));
 vi.mock("./legacyConfiguration", () => ({ getLegacyAIProviderConfiguration: () => legacy }));
 vi.mock("@/shared/logger", () => ({ createTimer: () => ({ done: vi.fn(), fail: vi.fn() }) }));
 
 beforeEach(() => {
   storage.clear();
-  vi.clearAllMocks();
+  vi.mocked(LocalStorage.setItem).mockReset();
   legacy.openai.apiKey = "placeholder";
   legacy.gemini.apiKey = "";
 });

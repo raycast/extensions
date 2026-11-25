@@ -60,6 +60,11 @@ In Raycast, **Show Outdated Tools** lists outdated tools with **Upgrade** and
 **Upgrade past the configured range** preference adds `--bump`, and Upgrade All
 Tools' **Uninstall replaced versions** setting adds `--prune`.
 
+From mise 2026.11.12, `mise audit` checks installed tool versions against known
+vulnerabilities, and `mise upgrade --vulnerable` upgrades only the affected tools,
+within their range. If none is newer in the range it exits 0 with a warning;
+`--bump` upgrades past the range. **Show Outdated Tools** lists vulnerable tools.
+
 ## Cleaning up
 
 - **Prune Unused Versions** runs `mise prune`. It deletes installed versions that

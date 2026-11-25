@@ -1,5 +1,9 @@
 # Changelog
 
+## [Security update] - {PR_MERGE_DATE}
+
+- Fixed a security issue in a component the extension relies on
+
 ## [Security: Address dependabot alert] - {PR_MERGE_DATE}
 
 - Updated `jsdom` to version `28.0.0` to fix https://github.com/raycast/extensions/security/dependabot/74310
