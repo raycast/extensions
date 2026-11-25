@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Agentik MCP Server] - {PR_MERGE_DATE}
+## [Add Agentik MCP Server] - 2026-11-25
 
 - Add Agentik to the official registry: one MCP connection to pay-per-call tools (search, scraping, SEO and social data, media generation) with the price shown before each call. Hosted Streamable HTTP server at https://ai.agentik.cc/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
