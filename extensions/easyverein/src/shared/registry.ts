@@ -1,5 +1,3 @@
-import data from "./registry.json";
-
 export interface RegistryItem {
   id: string;
   kind: "url" | "command";
@@ -33,15 +31,19 @@ export interface MenuItem {
   dynamicUrl?: boolean;
 }
 
-export const GROUPS: { key: string; title: string }[] = [
-  { key: "navigation", title: "Navigation" },
-  { key: "settings", title: "Einstellungen" },
-  { key: "actions", title: "Aktionen" },
-];
+export const GROUP_KEYS = ["navigation", "settings", "actions"];
 
-export const REGISTRY_ITEMS = (data.items as RegistryItem[]).filter((item) => item.kind === "url" && item.url);
+export interface RegistryData {
+  items: unknown[];
+  entityTypes: unknown[];
+}
 
-export const ENTITY_TYPES = data.entityTypes as EntityType[];
+export function createRegistry(data: RegistryData): { items: RegistryItem[]; entityTypes: EntityType[] } {
+  return {
+    items: (data.items as RegistryItem[]).filter((item) => item.kind === "url" && item.url),
+    entityTypes: data.entityTypes as EntityType[],
+  };
+}
 
 /** Restricts the query to one entity type when it starts with an alias prefix like `R:`. */
 export function matchScopePrefix(

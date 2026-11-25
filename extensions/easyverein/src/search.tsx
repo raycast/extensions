@@ -8,16 +8,10 @@ import { MenuRow } from "./parts/MenuRow";
 import { SearchErrorView } from "./parts/SearchErrorView";
 import { addRecentItem, readRecentItems } from "./recentItems";
 import { SearchContext } from "./search.context";
+import { ENTITY_TYPES, REGISTRY_ITEMS } from "./registry";
 import { filterItems } from "./shared/fuzzyMatch";
 import { nestItems } from "./shared/nesting";
-import {
-  ENTITY_TYPES,
-  GROUPS,
-  matchScopePrefix,
-  MenuItem,
-  REGISTRY_ITEMS,
-  registryToMenuItem,
-} from "./shared/registry";
+import { GROUP_KEYS, matchScopePrefix, MenuItem, registryToMenuItem } from "./shared/registry";
 import { useDebouncedValue } from "./useDebouncedValue";
 
 const MAX_STATIC_RESULTS = 8;
@@ -29,6 +23,7 @@ const SECTION_TITLES: Record<string, string> = {
   settings: "Settings",
   actions: "Actions",
 };
+const GROUPS = GROUP_KEYS.map((key) => ({ key, title: SECTION_TITLES[key] }));
 
 function resultToMenuItem(result: SearchResult): MenuItem {
   const entityType = ENTITY_TYPES.find((type) => type.key === result.type);
