@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fastmail",
   "title": "Fastmail",
-  "description": "Search Fastmail email, read messages, open attachments, and copy login codes with a hotkey or from the menu bar.",
+  "description": "Search Fastmail email, manage messages, and copy login codes from a hotkey or the menu bar with your Fastmail account.",
   "icon": "command-icon.png",
   "author": "marckohlbrugge",
   "categories": [
