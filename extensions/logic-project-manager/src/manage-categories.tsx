@@ -184,7 +184,7 @@ function AssignProjectsForm({ kind, option }: { kind: ProjectTagKind; option: Ta
         setSelected(loaded.tagged);
         setInitial(loaded.tagged);
       },
-      onError: (error) => void showFailure(strings.loadProjectsFailed, error),
+      failureToastOptions: { title: strings.loadProjectsFailed },
     },
   );
 

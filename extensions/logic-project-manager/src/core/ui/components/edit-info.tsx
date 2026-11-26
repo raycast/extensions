@@ -106,7 +106,7 @@ export function EditInfo({
         setCollectionIds(loaded.metadata.collectionIds);
         setOriginalCollectionIds(loaded.metadata.collectionIds);
       },
-      onError: (error) => void showFailure(strings.loadInfoFailed, error),
+      failureToastOptions: { title: strings.loadInfoFailed },
     },
   );
 
