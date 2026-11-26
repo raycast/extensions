@@ -1,13 +1,13 @@
 # SlideTab for Raycast
 
-Control **SlideTab** — the tactile macOS trackpad window & app switcher with Force Touch haptics — directly from Raycast.
+Control SlideTab from Raycast. Switch scopes, change Switch Bar layouts, pick trackpad trigger gestures, or pause gestures without leaving the keyboard.
 
-## Installation & Requirements
+## Requirements and install
 
-Requires **SlideTab** (`1.0+`) installed in `/Applications/SlideTab.app`.
+Requires macOS 14 Sonoma or later and SlideTab installed in `/Applications/SlideTab.app`.
 
-- **Direct download:** [https://slidetab.app](https://slidetab.app)
-- **Homebrew:**
+- Direct download: [slidetab.app](https://slidetab.app)
+- Homebrew:
 
 ```bash
 brew install --cask slidetab/tap/slidetab
@@ -15,8 +15,8 @@ brew install --cask slidetab/tap/slidetab
 
 ## Commands
 
-- **Set Switching Scope & Gesture** — Switch between *All Windows*, *Apps Only (`Cmd + Tab`)*, and *Current App (`Cmd + \``)*, toggle *Icons* vs. *List* Switch Bar layout, or change trackpad trigger fingers (`4`, `3`, `3 or 4`, `Top Edge · 2F`).
-- **Toggle SlideTab** — Pause or resume trackpad gestures globally.
-- **Toggle Pause in Current App** — Mute or unmute SlideTab whenever the frontmost app is focused.
-- **Preview Switch Bar** — Show the floating Switch Bar on screen for 2.5 seconds.
-- **Open SlideTab Settings** — Open SlideTab Settings and the live trackpad calibration stage.
+- **Set Switching Scope & Gesture**: switch between All Windows, Apps Only (`Cmd + Tab`), and Current App (`Cmd + \``), toggle Icons or List layout, or pick trigger fingers (`4`, `3`, `3 or 4`, `Top Edge · 2F`).
+- **Toggle SlideTab**: pause or resume trackpad gestures globally.
+- **Toggle Pause in Current App**: mute or unmute SlideTab whenever the frontmost app is focused.
+- **Preview Switch Bar**: show the floating Switch Bar on screen for 2.5 seconds.
+- **Open SlideTab Settings**: open SlideTab Settings and the live trackpad calibration stage.
