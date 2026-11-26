@@ -14,14 +14,16 @@ import {
   ConditionalStopResult,
   getMacCaffeinationState,
   LegacySession,
+  parsePrevention,
   parseReason,
+  SessionPrevention,
   startMacCaffeinate,
   stopMacCaffeinate,
   stopMacCaffeinateIfMatches,
   stopMacLegacyCaffeinate,
 } from "./caffeination";
 
-export type { Schedule, CaffeinationReason, CaffeinationState, LegacySession };
+export type { Schedule, CaffeinationReason, CaffeinationState, LegacySession, SessionPrevention };
 
 type Updates = {
   menubar: boolean;
@@ -30,27 +32,31 @@ type Updates = {
 
 const CAFFEINATION_REASON_KEY = "caffeinationReason";
 
-async function setWindowsCaffeinationReason(sessionId: string, reason?: CaffeinationReason) {
-  await LocalStorage.setItem(CAFFEINATION_REASON_KEY, JSON.stringify({ sessionId, reason }));
+type WindowsSessionInfo = Pick<CaffeinationState, "reason" | "prevention">;
+
+async function setWindowsSessionInfo(sessionId: string, info: WindowsSessionInfo) {
+  await LocalStorage.setItem(CAFFEINATION_REASON_KEY, JSON.stringify({ sessionId, ...info }));
 }
 
-async function getWindowsCaffeinationReason(sessionId: string | null): Promise<CaffeinationReason | undefined> {
+async function getWindowsSessionInfo(sessionId: string | null): Promise<WindowsSessionInfo> {
   const raw = await LocalStorage.getItem<string>(CAFFEINATION_REASON_KEY);
-  if (!raw || !sessionId) return undefined;
+  if (!raw || !sessionId) return {};
   try {
     const value: unknown = JSON.parse(raw);
-    if (!value || typeof value !== "object" || !("sessionId" in value) || value.sessionId !== sessionId)
-      return undefined;
-    return "reason" in value ? parseReason(value.reason) : undefined;
+    if (!value || typeof value !== "object" || !("sessionId" in value) || value.sessionId !== sessionId) return {};
+    return {
+      reason: "reason" in value ? parseReason(value.reason) : undefined,
+      prevention: "prevention" in value ? parsePrevention(value.prevention) : undefined,
+    };
   } catch {
-    return undefined;
+    return {};
   }
 }
 
 export async function getCaffeinationState(): Promise<CaffeinationState> {
   if (process.platform !== "win32") return getMacCaffeinationState();
   const state = await windowsGetCaffeinationState();
-  return { ...state, reason: state.isManaged ? await getWindowsCaffeinationReason(state.sessionId) : undefined };
+  return { ...state, ...(state.isManaged ? await getWindowsSessionInfo(state.sessionId) : {}) };
 }
 
 /**
@@ -103,19 +109,22 @@ export function stoppedCaffeinationMessage(state: CaffeinationState, schedulePau
   return state.externalCount ? `${message}; external caffeination remains active` : message;
 }
 
+/** Returns what the new session prevents, or undefined if it's gone by the time Coffee reads it back. */
 export async function startCaffeinate(
   updates: Updates,
   hudMessage?: string,
   additionalArgs?: string,
   reason?: CaffeinationReason,
-) {
+): Promise<SessionPrevention | undefined> {
   parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
+  let prevention: SessionPrevention | undefined;
   if (process.platform === "win32") {
-    const sessionId = await windowsStartCaffeinate(additionalArgs);
-    await setWindowsCaffeinationReason(sessionId, reason);
+    const session = await windowsStartCaffeinate(additionalArgs);
+    prevention = session.prevention;
+    await setWindowsSessionInfo(session.sessionId, { reason, prevention });
   } else {
     const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
-    await startMacCaffeinate(args, reason);
+    prevention = (await startMacCaffeinate(args, reason)).prevention;
   }
 
   // showHUD closes the window and Raycast 2 unloads view commands, so spawn
@@ -126,6 +135,7 @@ export async function startCaffeinate(
     await showHUD(hudMessage);
   }
   await refresh;
+  return prevention;
 }
 
 export async function stopCaffeinate(
@@ -246,6 +256,28 @@ function generateArgs(additionalArgs?: string) {
 
 export function deviceName(): "PC" | "Mac" {
   return process.platform === "win32" ? "PC" : "Mac";
+}
+
+/** Why Coffee's session isn't keeping the computer awake, or undefined if it is. */
+export function sleepCaveat({ display, system, systemOnAC }: SessionPrevention): string | undefined {
+  const bothOff = "because Prevent display sleep and Prevent system sleep are off for this session";
+  if (process.platform === "win32") {
+    if (system) return undefined;
+    // Per Microsoft's System Sleep Criteria, Windows idle-sleeps unless ES_SYSTEM_REQUIRED is held.
+    return `it isn't keeping your PC awake ${display ? "because Prevent system sleep is off for this session" : bothOff}`;
+  }
+  // While the display can't idle-sleep, neither can the Mac.
+  if (display || system) return undefined;
+  return systemOnAC
+    ? `it keeps your Mac awake only on AC power ${bothOff}`
+    : `it isn't keeping your Mac awake ${bothOff}`;
+}
+
+/** AI tool reply for a session that lasts `period`, such as "for 2h". */
+export function caffeinationReply(period: string, prevention?: SessionPrevention): string {
+  const caveat = prevention && sleepCaveat(prevention);
+  if (caveat) return `Coffee is active ${period}, but ${caveat}`;
+  return prevention ? `${deviceName()} will stay awake ${period}` : `Coffee is active ${period}`;
 }
 
 export async function isCoffeeRunning(): Promise<boolean> {

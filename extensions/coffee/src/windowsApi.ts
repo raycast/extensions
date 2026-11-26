@@ -6,7 +6,7 @@ import {
   stop_caffeinate,
   stop_caffeinate_if_matches,
 } from "rust:../rust";
-import type { CaffeinationState } from "./caffeination";
+import type { CaffeinationState, SessionPrevention } from "./caffeination";
 import { parseCaffeinateTimeout } from "./duration";
 
 interface ParsedCaffeinateArgs {
@@ -31,17 +31,21 @@ function parseArgs(additionalArgs?: string): ParsedCaffeinateArgs {
   return { durationSeconds, pid, windowHandle };
 }
 
-export async function windowsStartCaffeinate(additionalArgs?: string): Promise<string> {
+export async function windowsStartCaffeinate(
+  additionalArgs?: string,
+): Promise<{ sessionId: string; prevention: SessionPrevention }> {
   const { durationSeconds, pid, windowHandle } = parseArgs(additionalArgs);
-  const preferences = getPreferenceValues<Preferences>();
+  const { preventDisplay, preventSystem } = getPreferenceValues<Preferences>();
 
-  return await start_caffeinate({
-    preventDisplay: preferences.preventDisplay,
-    preventSystem: preferences.preventSystem,
+  const sessionId = await start_caffeinate({
+    preventDisplay,
+    preventSystem,
     durationSeconds,
     pid,
     windowHandle,
   });
+  // The worker has no equivalent of macOS's AC-only -s.
+  return { sessionId, prevention: { display: preventDisplay, system: preventSystem, systemOnAC: false } };
 }
 
 export async function windowsStopCaffeinate(): Promise<boolean> {

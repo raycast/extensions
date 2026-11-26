@@ -1,6 +1,6 @@
 import { runAppleScript } from "@raycast/utils";
 import { windowsListProcesses } from "../windowsApi";
-import { startCaffeinate, deviceName } from "../utils";
+import { startCaffeinate, caffeinationReply } from "../utils";
 
 type Input = {
   /**
@@ -31,12 +31,12 @@ export default async function (input: Input) {
   }
 
   const windowArg = target.windowHandle ? ` -wh ${target.windowHandle}` : "";
-  await startCaffeinate({ menubar: true, status: true }, undefined, `-w ${target.id}${windowArg}`, {
+  const prevention = await startCaffeinate({ menubar: true, status: true }, undefined, `-w ${target.id}${windowArg}`, {
     kind: "while",
     appName: application,
   });
 
-  return `${deviceName()} will stay awake while ${application} is running`;
+  return caffeinationReply(`while ${application} is running`, prevention);
 }
 
 async function getRunningProcesses(): Promise<ProcessEntry[]> {

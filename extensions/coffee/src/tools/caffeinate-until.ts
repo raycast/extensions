@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { startCaffeinate, deviceName } from "../utils";
+import { startCaffeinate, deviceName, caffeinationReply } from "../utils";
 
 type Input = {
   /**
@@ -20,7 +20,7 @@ export default async function tool(input: Input) {
   const target = parseFutureDate(input.dateTime);
   const durationSeconds = Math.ceil((target.getTime() - Date.now()) / 1000);
 
-  await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${durationSeconds}`, {
+  const prevention = await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${durationSeconds}`, {
     kind: "until",
     until: target.toISOString(),
   });
@@ -29,7 +29,7 @@ export default async function tool(input: Input) {
     caffeinated: true,
     until: target.toISOString(),
     durationSeconds,
-    message: `${deviceName()} will stay awake until ${formatDateTime(target)}`,
+    message: caffeinationReply(`until ${formatDateTime(target)}`, prevention),
   };
 }
 

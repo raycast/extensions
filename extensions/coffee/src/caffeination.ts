@@ -12,6 +12,14 @@ export type CaffeinationReason =
   | { kind: "until"; until: string }
   | { kind: "schedule"; day: string; from: string; to: string };
 
+/** What a session keeps from sleeping for its whole run. */
+export interface SessionPrevention {
+  display: boolean;
+  system: boolean;
+  /** macOS -s, which keeps the system awake only on AC power. */
+  systemOnAC: boolean;
+}
+
 export interface CaffeinationState {
   sessionId: string | null;
   isRunning: boolean;
@@ -21,6 +29,8 @@ export interface CaffeinationState {
   totalSeconds: number | null;
   startTime: number | null;
   reason?: CaffeinationReason;
+  // Unknown for sessions started before Coffee saved what they prevent.
+  prevention?: SessionPrevention;
   // A session started by Coffee before it tracked ownership. Only offered for
   // an explicit user stop; it is never adopted or stopped implicitly.
   legacySession?: LegacySession;
@@ -49,6 +59,7 @@ interface ManagedSession extends ProcessIdentity {
   startedAt: number;
   durationSeconds: number | null;
   reason?: CaffeinationReason;
+  prevention?: SessionPrevention;
 }
 
 const SESSION_KEY = "caffeinationSession";
@@ -86,6 +97,25 @@ export function parseReason(value: unknown): CaffeinationReason | undefined {
   )
     return { kind: "schedule", day: reason.day, from: reason.from, to: reason.to };
   return undefined;
+}
+
+export function parsePrevention(value: unknown): SessionPrevention | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const { display, system, systemOnAC } = value as Record<string, unknown>;
+  if (typeof display !== "boolean" || typeof system !== "boolean" || typeof systemOnAC !== "boolean") return undefined;
+  return { display, system, systemOnAC };
+}
+
+function preventionFromArgs(args: string[], timed: boolean): SessionPrevention {
+  const flags = new Set(args.filter((arg) => /^-[dimsu]+$/.test(arg)).flatMap((arg) => [...arg.slice(1)]));
+  // caffeinate asserts -i only when it's given no assertion flag at all.
+  if (flags.size === 0) flags.add("i");
+  return {
+    // Without -t, caffeinate releases -u after 5 seconds.
+    display: flags.has("d") || (timed && flags.has("u")),
+    system: flags.has("i"),
+    systemOnAC: flags.has("s"),
+  };
 }
 
 async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
@@ -267,7 +297,7 @@ async function readSession(processes?: ProcessIdentity[]): Promise<ManagedSessio
       Number.isFinite(value.startedAt) &&
       (value.durationSeconds === null || (Number.isSafeInteger(value.durationSeconds) && value.durationSeconds > 0))
     )
-      session = { ...value, reason: parseReason(value.reason) };
+      session = { ...value, reason: parseReason(value.reason), prevention: parsePrevention(value.prevention) };
   } catch {
     /* Older or malformed records cannot establish ownership. */
   }
@@ -326,6 +356,7 @@ async function readState(): Promise<CaffeinationState> {
     totalSeconds: session?.durationSeconds ?? null,
     startTime: session?.startedAt ?? null,
     reason: session?.reason,
+    prevention: session?.prevention,
     ...(legacy && { legacySession: { pid: legacy.pid, createdAt: legacy.createdAt, endsAt: legacy.endsAt } }),
   };
 }
@@ -423,6 +454,7 @@ export async function startMacCaffeinate(args: string[], reason?: CaffeinationRe
         startedAt,
         durationSeconds,
         reason,
+        prevention: preventionFromArgs(args, durationSeconds !== null),
       };
       await LocalStorage.setItem(SESSION_KEY, JSON.stringify(session));
       child.unref();

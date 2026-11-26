@@ -343,6 +343,76 @@ test("AI tools report external activity remaining after stopping Coffee", async 
   assert.ok(h.table.has(900));
 });
 
+const bothOff = "because Prevent display sleep and Prevent system sleep are off for this session";
+
+test("macOS AI replies say when Coffee's session isn't keeping the Mac awake", async () => {
+  const awake = "Mac will stay awake until you manually disable it";
+  const active = "Coffee is active until you manually disable it, but";
+  for (const [preferences, reply] of [
+    [{}, awake],
+    [{ preventSystem: false, preventDisk: false }, awake],
+    [{ preventDisplay: false, preventDisk: false }, awake],
+    [{ preventDisplay: false, preventSystem: false }, `${active} it isn't keeping your Mac awake ${bothOff}`],
+    [
+      { preventDisplay: false, preventSystem: false, preventDisk: false, preventSleepOnAC: true },
+      `${active} it keeps your Mac awake only on AC power ${bothOff}`,
+    ],
+  ]) {
+    const h = createHarness({ preferences });
+    assert.equal(await h.load("tools/caffeinate.ts").default(), reply);
+  }
+});
+
+test("a macOS session records what its caffeinate arguments keep awake for the whole session", async () => {
+  for (const [args, prevention] of [
+    // -u lasts the whole session only with -t, and caffeinate asserts -i when given no assertion flag.
+    [["-u", "-m", "-t", "120"], { display: true, system: false, systemOnAC: false }],
+    [["-u", "-m"], { display: false, system: false, systemOnAC: false }],
+    [["-m", "-t", "120"], { display: false, system: false, systemOnAC: false }],
+    [["-t", "120"], { display: false, system: true, systemOnAC: false }],
+    [["-u", "-s", "-w", "300"], { display: false, system: false, systemOnAC: true }],
+  ]) {
+    const state = await createHarness().load("caffeination.ts").startMacCaffeinate(args);
+    assert.deepEqual({ ...state.prevention }, prevention);
+  }
+});
+
+test("the AI status describes the running session, even after the options change", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  const status = h.load("tools/check-caffeination-status.ts").default;
+  await utils.startCaffeinate(quiet);
+  Object.assign(h.preferences, { preventDisplay: false, preventSystem: false });
+  assert.equal(await status(), "Coffee is currently keeping your Mac awake");
+  await utils.startCaffeinate(quiet);
+  Object.assign(h.preferences, { preventDisplay: true, preventSystem: true });
+  assert.equal(await status(), `Coffee is active, but it isn't keeping your Mac awake ${bothOff}`);
+  // Records from earlier versions, or with unreadable details, can't say what the session prevents.
+  for (const prevention of [undefined, { display: "yes" }]) {
+    h.storage.set(key, JSON.stringify({ ...session(h), prevention }));
+    assert.equal(await status(), "Coffee is active");
+  }
+});
+
+test("Windows AI replies say when Coffee's worker isn't keeping the PC awake", async () => {
+  const h = createHarness({ platform: "win32" });
+  const native = { sessionId: "200:123456789012345678", isRunning: true, isManaged: true, externalCount: null };
+  h.windows.windowsGetCaffeinationState.mock.mockImplementation(async () => native);
+  const start = h.load("tools/caffeinate.ts").default;
+  const status = h.load("tools/check-caffeination-status.ts").default;
+  const active = "Coffee is active until you manually disable it, but";
+  const displayOnly = "it isn't keeping your PC awake because Prevent system sleep is off for this session";
+  assert.equal(await start(), "PC will stay awake until you manually disable it");
+  h.preferences.preventSystem = false;
+  assert.equal(await start(), `${active} ${displayOnly}`);
+  assert.equal(await status(), `Coffee is active, but ${displayOnly}`);
+  h.preferences.preventDisplay = false;
+  assert.equal(await start(), `${active} it isn't keeping your PC awake ${bothOff}`);
+  // Details saved for another worker don't describe this one.
+  native.sessionId = "201:123456789012345679";
+  assert.equal(await status(), "Coffee is active");
+});
+
 test("Windows keeps its existing worker ownership and leaves external detection unsupported", async () => {
   const h = createHarness({ platform: "win32" });
   const utils = h.load("utils.ts");

@@ -118,7 +118,10 @@ function createHarness(options = {}) {
       totalSeconds: null,
       startTime: null,
     })),
-    windowsStartCaffeinate: mock.fn(async () => "200:123456789012345678"),
+    windowsStartCaffeinate: mock.fn(async () => ({
+      sessionId: "200:123456789012345678",
+      prevention: { display: preferences.preventDisplay, system: preferences.preventSystem, systemOnAC: false },
+    })),
     windowsStopCaffeinate: mock.fn(async () => {}),
     windowsStopCaffeinateIfMatches: mock.fn(async () => false),
   };
