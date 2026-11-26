@@ -1,6 +1,6 @@
 # Pick Your Wallpaper Changelog
 
-## [Categories] - {PR_MERGE_DATE}
+## [Categories] - 2026-11-26
 
 - Subfolders of the wallpaper folder are now categories: a dropdown in the search bar filters the grid by category, or shows only the uncategorized images in the folder itself
 - The selected category is remembered between runs
