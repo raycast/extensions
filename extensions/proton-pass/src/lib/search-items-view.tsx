@@ -12,6 +12,7 @@ import {
   setCachedVaults,
 } from "./cache";
 import { renderErrorView } from "./error-views";
+import type { ReloadOptions } from "./session-lock-view";
 import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts } from "./item-counts";
@@ -128,11 +129,13 @@ export function SearchItemsView({
   // A slower, older load must not overwrite a newer one (e.g. Retry during a refresh).
   const loads = useMemo(createRequestTracker, []);
 
-  async function loadItems() {
+  async function loadItems(options?: ReloadOptions) {
     const isLatest = loads.start();
-    // The login and Session Locked screens stay while loading after a login, an unlock or Check Again, until there's
-    // something to show.
-    if (!PassCliError.isSessionBlocked(error?.type)) setError(null);
+    // Raycast can pass its own arguments to an action's callback.
+    const isUnlocked = options?.isUnlocked === true;
+    // The login and Session Locked screens stay while loading after a login or Check Again, until there's something to
+    // show. Once unlocked, the items already here show at once.
+    if (!PassCliError.isSessionBlocked(error?.type) || (isUnlocked && itemsRef.current.length > 0)) setError(null);
     // Loading from the start, so that an empty list doesn't say "No Items Found" meanwhile.
     setIsLoading(true);
     setFailedVaults([]);
@@ -142,7 +145,7 @@ export function SearchItemsView({
     // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
     // screen replaces them once it answers that the session has ended.
     const sessionCheck =
-      hasLoadedFromCache.current || sessionConfirmed ? Promise.resolve(undefined) : endedSessionError();
+      hasLoadedFromCache.current || sessionConfirmed || isUnlocked ? Promise.resolve(undefined) : endedSessionError();
     const [sharedItems, cachedVaults, cachedFolders, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),

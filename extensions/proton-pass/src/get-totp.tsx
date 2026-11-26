@@ -32,6 +32,7 @@ import { countItemsByVault } from "./lib/item-counts";
 import { listedUnder, SHARED_WITH_ME } from "./lib/shared-items";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
+import type { ReloadOptions } from "./lib/session-lock-view";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
 
 interface TotpItem extends Item {
@@ -132,11 +133,13 @@ export default function Command() {
     };
   }, []);
 
-  async function loadTotpItems() {
+  async function loadTotpItems(options?: ReloadOptions) {
     const isLatest = loads.start();
-    // The login and Session Locked screens stay while loading after a login, an unlock or Check Again, until there's
-    // something to show.
-    if (!PassCliError.isSessionBlocked(error)) setError(null);
+    // The login and Session Locked screens stay while loading after a login or Check Again, until there's something to
+    // show. Once unlocked, the items already here show at once, until their codes come with the listing.
+    if (!PassCliError.isSessionBlocked(error) || (options?.isUnlocked === true && itemsRef.current.length > 0)) {
+      setError(null);
+    }
     setIsLoading(true);
 
     try {
@@ -190,7 +193,7 @@ export default function Command() {
           style: Toast.Style.Failure,
           title: failedVaultsTitle(failedVaults.map(({ vault }) => vault.name)),
           message: failedVaults[0].message,
-          primaryAction: { title: "Retry", onAction: loadTotpItems },
+          primaryAction: { title: "Retry", onAction: () => loadTotpItems() },
         });
       }
     } catch (e: unknown) {
@@ -213,7 +216,7 @@ export default function Command() {
           style: Toast.Style.Failure,
           title: "Couldn't Load TOTP Items",
           message: e instanceof Error ? e.message : "Unknown error",
-          primaryAction: { title: "Retry", onAction: loadTotpItems },
+          primaryAction: { title: "Retry", onAction: () => loadTotpItems() },
         });
       }
     } finally {

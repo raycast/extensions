@@ -18,9 +18,15 @@ import { PassCliError } from "./types";
 
 const TOO_MANY_CODES = "Too many wrong codes log you out of pass-cli.";
 
+/** How a view loads again from the Session Locked screen. */
+export interface ReloadOptions {
+  /** The session was just unlocked: what the view already has can show at once, without asking pass-cli first. */
+  isUnlocked?: boolean;
+}
+
 interface SessionLockedViewProps {
   /** Runs once unlocked, logged out, or for Check Again. */
-  reload: () => void | Promise<void>;
+  reload: (options?: ReloadOptions) => void | Promise<void>;
 }
 
 /**
@@ -56,7 +62,7 @@ export function SessionLockedView({ reload }: SessionLockedViewProps) {
         await unlockSession(typed);
         toast.style = Toast.Style.Success;
         toast.title = "Session Unlocked";
-        await reload();
+        await reload({ isUnlocked: true });
       } catch (error) {
         toast.style = Toast.Style.Failure;
         if (error instanceof PassCliError && error.type === "not_authenticated") {

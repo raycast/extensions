@@ -4,7 +4,7 @@ import { CliPathErrorType, PassCliError, PassCliErrorType, PROTON_PASS_CLI_DOCS 
 import { clearCliCache, outdatedCliVersion } from "./cli";
 import { MIN_PASS_CLI_VERSION } from "./core/cli-version";
 import { NotLoggedInView } from "./login-view";
-import { SessionLockedView } from "./session-lock-view";
+import { ReloadOptions, SessionLockedView } from "./session-lock-view";
 
 function ClearCliCacheAction({ onComplete }: { onComplete?: () => void }): JSX.Element {
   const handle = async () => {
@@ -173,7 +173,7 @@ export function ErrorListView({ errorType, onRetry, contextTitle, message }: Err
 
 export function renderErrorView(
   errorType: PassCliErrorType | null,
-  onRetry?: () => void,
+  onRetry?: (options?: ReloadOptions) => void,
   contextTitle?: string,
   message?: string,
 ): JSX.Element | null {

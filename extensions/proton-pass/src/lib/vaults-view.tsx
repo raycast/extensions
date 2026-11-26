@@ -4,7 +4,7 @@ import { endedSessionError, listVaultSharing, listVaultsAndItems, SESSION_CHECK_
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 import { SearchItemsView } from "./search-items-view";
 import { NotLoggedInView } from "./login-view";
-import { SessionLockedView } from "./session-lock-view";
+import { ReloadOptions, SessionLockedView } from "./session-lock-view";
 import {
   getCachedFolders,
   getCachedItems,
@@ -85,15 +85,17 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     );
   }, []);
 
-  async function loadVaults() {
+  async function loadVaults(options?: ReloadOptions) {
     const isLatest = loads.start();
-    // The login and Session Locked screens stay while loading after a login, an unlock or Check Again, until there's
-    // something to show.
-    if (!PassCliError.isSessionBlocked(error?.type)) setError(null);
+    // Raycast can pass its own arguments to an action's callback.
+    const isUnlocked = options?.isUnlocked === true;
+    // The login and Session Locked screens stay while loading after a login or Check Again, until there's something to
+    // show. Once unlocked, the vaults already here show at once.
+    if (!PassCliError.isSessionBlocked(error?.type) || (isUnlocked && vaults.length > 0)) setError(null);
     setIsLoading(true);
 
     // Saved vaults wait for pass-cli to confirm the session, as in the item list: an ended one shows the login screen.
-    const sessionCheck = hasLoadedFromCache.current ? Promise.resolve(undefined) : endedSessionError();
+    const sessionCheck = hasLoadedFromCache.current || isUnlocked ? Promise.resolve(undefined) : endedSessionError();
     const [cachedVaults, cachedItems, cachedSharing, cachedFolders, sessionEnded] = await Promise.all([
       getCachedVaults(),
       getCachedItems(),
