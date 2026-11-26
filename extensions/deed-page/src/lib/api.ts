@@ -298,9 +298,87 @@ export async function deleteSite(slug: string, token: string, fetchImpl: typeof 
   );
 }
 
-/** True when the text contains a real HTML document or fragment marker. */
+/**
+ * Standard HTML element names. Matching only these (rather than any `<word>`)
+ * keeps code like `Array<string>` or `List<int>` from counting as HTML, while
+ * still accepting snippets such as `<a href>`, `<span>` or `<img>`.
+ */
+const HTML_TAGS = [
+  "!doctype\\s+html",
+  "html",
+  "head",
+  "body",
+  "title",
+  "meta",
+  "link",
+  "style",
+  "script",
+  "noscript",
+  "template",
+  "main",
+  "header",
+  "footer",
+  "nav",
+  "section",
+  "article",
+  "aside",
+  "div",
+  "span",
+  "p",
+  "h[1-6]",
+  "hr",
+  "br",
+  "a",
+  "img",
+  "picture",
+  "source",
+  "video",
+  "audio",
+  "iframe",
+  "canvas",
+  "svg",
+  "figure",
+  "figcaption",
+  "ul",
+  "ol",
+  "li",
+  "dl",
+  "dt",
+  "dd",
+  "table",
+  "thead",
+  "tbody",
+  "tfoot",
+  "tr",
+  "th",
+  "td",
+  "caption",
+  "form",
+  "input",
+  "button",
+  "select",
+  "option",
+  "textarea",
+  "label",
+  "fieldset",
+  "legend",
+  "strong",
+  "em",
+  "b",
+  "i",
+  "u",
+  "small",
+  "code",
+  "pre",
+  "blockquote",
+  "details",
+  "summary",
+];
+const HTML_TAG_RE = new RegExp(`<(?:${HTML_TAGS.join("|")})(?:\\s|\\/|>)`, "i");
+
+/** True when the text contains a real HTML document or a standard HTML element tag. */
 export function looksLikeHtml(text: string): boolean {
-  return /<(?:!doctype\s+html|html|head|body|div|p|h[1-6]|section|script)(?:\s|\/|>)/i.test(text.trim());
+  return HTML_TAG_RE.test(text.trim());
 }
 
 export function formatBytes(bytes: number): string {
