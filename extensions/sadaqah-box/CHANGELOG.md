@@ -4,7 +4,7 @@ All notable changes to the Sadaqah Box Raycast Extension will be documented in t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Updates & Improvements] - {PR_MERGE_DATE}
+## [Updates & Improvements] - 2026-11-26
 
 ### Changed
 - **Default API Host Updated** – Changed the default `API Host` preference from `https://sadaqahbox.apps.erklab.com` to `https://live.sadaqahbox.apps.erklab.com`. Existing users who relied on the previous default and have not customized their host should verify or update **API Host** in Extension Preferences if needed.
