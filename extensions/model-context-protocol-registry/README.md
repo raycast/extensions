@@ -10,7 +10,7 @@ Linear connects directly to its [hosted MCP endpoint](https://linear.app/docs/mc
 
 Paper Plane Post connects directly over HTTP in Raycast, with an `mcp-remote` fallback for other clients. It requires no account or API key. Its tools create unpaid postcard drafts; open the returned link to review the card, complete its note and recipient address, and pay on the website. Tool calls never charge money or mail a card.
 
-## Trubleshooting installation
+## Troubleshooting installation
 
 ### `spawn npx ENOENT` or `spawn uvx ENOENT`
 
