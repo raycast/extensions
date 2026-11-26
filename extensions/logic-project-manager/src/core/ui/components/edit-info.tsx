@@ -10,8 +10,8 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import type { TaxonomyOption } from "@/core/metadata/taxonomy";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { usePromise } from "@raycast/utils";
 import fs from "node:fs";
 import path from "node:path";
 import {
@@ -78,48 +78,47 @@ export function EditInfo({
   const { pop } = useNavigation();
   const [name, setName] = useState(project.title);
 
-  const [stageOptions, setStageOptions] = useState<TaxonomyOption[]>([]);
-  const [genreOptions, setGenreOptions] = useState<TaxonomyOption[]>([]);
-  const [collectionOptions, setCollectionOptions] = useState<TaxonomyOption[]>([]);
-
   const [stageId, setStageId] = useState("none");
   const [genreIds, setGenreIds] = useState<string[]>([]);
   const [collectionIds, setCollectionIds] = useState<string[]>([]);
   const [originalCollectionIds, setOriginalCollectionIds] = useState<string[]>([]);
-  const [roleOptions, setRoleOptions] = useState<TaxonomyOption[]>([]);
   const [role, setRole] = useState(currentRole ?? "none");
-  // Role 选项读完前不渲染下拉：选项为空时 Raycast 会退回 None 并触发 onChange，把当前角色覆盖掉。
-  const [rolesLoaded, setRolesLoaded] = useState(false);
-  // 保存的标签、合集读完前不许提交：那时 stageId / genreIds / collectionIds 还是空默认值，
-  // 一提交就会把项目原有的标签清掉，合集成员关系也会被当成「移出」。
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    async function load() {
+
+  // 标签、合集、项目元数据一次读完：用 usePromise 拿到加载状态和失败路径，不再自己拼 useState + useEffect。
+  // Role 只在合集里出现，其他入口不读。
+  const { data, isLoading } = usePromise(
+    async (projectId: string, collection: string | undefined) => {
       const [stages, genres, collections, metadata] = await Promise.all([
         stageTaxonomy.get(),
         genreTaxonomy.get(),
         collectionTaxonomy.get(),
-        getProjectMetadata(project.id),
+        getProjectMetadata(projectId),
       ]);
+      const roles = collection ? await roleTaxonomy.get() : [];
+      return { stages, genres, collections, metadata, roles };
+    },
+    [project.id, collectionId],
+    {
+      // 读到的值填进表单：这几个字段之后由用户自己改，所以只在读到数据时写一次。
+      onData: (loaded) => {
+        setStageId(loaded.metadata.stageId ?? "none");
+        setGenreIds(loaded.metadata.genreIds);
+        setCollectionIds(loaded.metadata.collectionIds);
+        setOriginalCollectionIds(loaded.metadata.collectionIds);
+      },
+      onError: (error) => void showFailure(strings.loadInfoFailed, error),
+    },
+  );
 
-      setStageOptions(stages);
-      setGenreOptions(genres);
-      setCollectionOptions(collections);
-      setStageId(metadata.stageId ?? "none");
-      setGenreIds(metadata.genreIds);
-      setCollectionIds(metadata.collectionIds);
-      setOriginalCollectionIds(metadata.collectionIds);
-
-      if (collectionId) {
-        setRoleOptions(await roleTaxonomy.get());
-        setRole(currentRole ?? "none");
-        setRolesLoaded(true);
-      }
-      setLoaded(true);
-    }
-
-    void load();
-  }, [project.id, collectionId, currentRole]);
+  // 保存的标签、合集读完前不许提交：那时 stageId / genreIds / collectionIds 还是空默认值，
+  // 一提交就会把项目原有的标签清掉，合集成员关系也会被当成「移出」。
+  const loaded = data !== undefined;
+  // Role 选项读完前不渲染下拉：选项为空时 Raycast 会退回 None 并触发 onChange，把当前角色覆盖掉。
+  const rolesLoaded = data !== undefined;
+  const stageOptions = data?.stages ?? [];
+  const genreOptions = data?.genres ?? [];
+  const collectionOptions = data?.collections ?? [];
+  const roleOptions = data?.roles ?? [];
   async function handleSubmit() {
     if (!loaded) return;
 
@@ -285,10 +284,10 @@ export function EditInfo({
   return (
     <Form
       navigationTitle={`${strings.editInfo} — ${project.title}`}
-      isLoading={!loaded}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={strings.save} icon={Icon.Check} onSubmit={handleSubmit} />
+          {loaded && <Action.SubmitForm title={strings.save} icon={Icon.Check} onSubmit={handleSubmit} />}
         </ActionPanel>
       }
     >

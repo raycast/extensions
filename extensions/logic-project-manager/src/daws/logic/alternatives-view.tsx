@@ -377,6 +377,7 @@ export function AlternativesView({ project }: { project: Project }) {
                       icon={logicApp ? { fileIcon: logicApp.path } : Icon.Document}
                       onAction={() => handleOpen(alternative)}
                     />
+                    <ShowInFinderAction path={path.dirname(alternative.metadataFile)} />
                     {!alternative.active && (
                       <Action
                         title={alternativesViewStrings.setActive}
@@ -384,7 +385,6 @@ export function AlternativesView({ project }: { project: Project }) {
                         onAction={() => handleSetActive(alternative)}
                       />
                     )}
-                    <ShowInFinderAction path={path.dirname(alternative.metadataFile)} />
                     <Action.Push
                       title={alternativesViewStrings.renameAlternative}
                       icon={Icon.Pencil}

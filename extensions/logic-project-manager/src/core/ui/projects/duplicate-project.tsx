@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import fs from "node:fs";
 import path from "node:path";
 import { docNameTakenBy } from "@/core/docs/docs";
@@ -44,8 +44,19 @@ export function DuplicateProject({
   const { pop } = useNavigation();
   const parent = path.dirname(project.folderPath);
   const [name, setName] = useState(initialName);
+  // 复制期间挡住重复提交：项目可能有好几 GB，连按 ↵ 会同时复制出两份。
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  // 复制途中按 Esc 会卸载表单，但复制要继续跑完：用 ref 判断组件还在不在，不在就不再 setState。
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   async function handleSubmit() {
+    if (isDuplicating) return;
     const trimmed = name.trim();
     if (trimmed === "" || trimmed.includes("/") || trimmed.includes(":")) {
       await showToast({ style: Toast.Style.Failure, title: strings.invalidName });
@@ -73,8 +84,8 @@ export function DuplicateProject({
       return;
     }
 
-    // 先关掉表单，复制在后台进行（项目可能有好几 GB）。
-    pop();
+    // 等复制完再关表单：失败时表单还开着，用户输入的名字也还在，不用重新填一遍。
+    setIsDuplicating(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: strings.duplicatingProject, message: trimmed });
 
     try {
@@ -88,6 +99,7 @@ export function DuplicateProject({
       toast.style = Toast.Style.Success;
       toast.title = strings.projectDuplicated;
       onDuplicated();
+      if (mounted.current) pop();
     } catch (error) {
       // 复制失败时清理半成品；但 EEXIST 说明目标在复制前就已被别的进程创建（不是本次产物），绝不能删。
       const code = error instanceof Error ? (error as NodeJS.ErrnoException).code : undefined;
@@ -98,11 +110,13 @@ export function DuplicateProject({
       toast.title = code === "ERR_FS_CP_EEXIST" ? strings.nameExists : strings.duplicateFailed;
       toast.message = error instanceof Error ? error.message : String(error);
       toast.primaryAction = copyErrorAction(toast.title, error);
+      if (mounted.current) setIsDuplicating(false);
     }
   }
 
   return (
     <Form
+      isLoading={isDuplicating}
       navigationTitle={`${strings.duplicateProject} — ${project.title}`}
       actions={
         <ActionPanel>

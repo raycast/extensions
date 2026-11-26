@@ -153,13 +153,24 @@ export function Bounces(props: {
       return;
     }
     // 若删掉的正是被登记的外部文件来源，顺手移除记录（用户经扩展主动删除，确知已不存在）。
+    // 先存再改界面：存失败时界面保持原样，这个来源仍显示为不可用。
+    let recordError: unknown = null;
     if (files.includes(bounce.path)) {
       const nextFiles = files.filter((f) => f !== bounce.path);
-      setFiles(nextFiles);
-      await setExternalBounces(props.projectId, folders, nextFiles);
+      try {
+        await setExternalBounces(props.projectId, folders, nextFiles);
+        setFiles(nextFiles);
+      } catch (error) {
+        recordError = error;
+      }
       props.onChanged?.();
     }
     setReloadToken((n) => n + 1);
+    // 文件已经进了废纸篓，登记没改成功时只提示，不让整个操作看起来没成功。
+    if (recordError !== null) {
+      await showFailure(strings.saveFailed, recordError);
+      return;
+    }
     await showToast({ style: Toast.Style.Success, title: strings.movedToTrash, message: bounce.name });
   };
 
@@ -194,9 +205,9 @@ export function Bounces(props: {
     // 文件已经改好了，这里失败只提示，不让表单以为整个操作没成功。
     if (files.includes(bounce.path)) {
       const nextFiles = files.map((f) => (f === bounce.path ? newPath : f));
-      setFiles(nextFiles);
       try {
         await setExternalBounces(props.projectId, folders, nextFiles);
+        setFiles(nextFiles);
       } catch (error) {
         await showFailure(strings.saveFailed, error);
       }
@@ -230,9 +241,15 @@ export function Bounces(props: {
     if (!confirmed) return;
     const nextFolders = folders.filter((f) => f !== sourcePath);
     const nextFiles = files.filter((f) => f !== sourcePath);
+    // 先存再改界面：存失败时界面保持原样，不会和磁盘上的登记对不上。
+    try {
+      await setExternalBounces(props.projectId, nextFolders, nextFiles);
+    } catch (error) {
+      await showFailure(strings.saveFailed, error);
+      return;
+    }
     setFolders(nextFolders);
     setFiles(nextFiles);
-    await setExternalBounces(props.projectId, nextFolders, nextFiles);
     props.onChanged?.();
     await showToast({ style: Toast.Style.Success, title: strings.externalSourceRemoved });
   };

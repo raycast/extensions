@@ -8,11 +8,13 @@ import {
   Icon,
   Keyboard,
   List,
+  openExtensionPreferences,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { slugify, Taxonomy, TaxonomyOption } from "@/core/metadata/taxonomy";
 import { stageTaxonomy, genreTaxonomy, roleTaxonomy } from "@/core/metadata/taxonomies";
 import { countRoleUsage, deleteRoleEverywhere, renameRoleEverywhere } from "@/core/metadata/collection-roles";
@@ -27,7 +29,9 @@ import {
 import { clearTagEverywhere, deleteAllTags } from "@/core/metadata/tag-cleanup";
 import { loadProjects } from "@/core/projects/load-projects";
 import type { Project } from "@/core/projects/types";
-import { showFailure } from "@/core/ui/shared/toast";
+import { showFailure, errorMessage } from "@/core/ui/shared/toast";
+import { listEmptyState } from "@/core/ui/shared/list-empty-state";
+import { LOG_PREFIX } from "@/core/log";
 import { optionKeywords } from "@/core/ui/shared/search-keywords";
 import { getSettings } from "./settings";
 import { strings } from "@/strings";
@@ -160,26 +164,32 @@ function CategoryForm(props: {
 // 从标签出发批量打标：已有这个标签的项目预先勾上；勾上就加，取消就去掉。
 function AssignProjectsForm({ kind, option }: { kind: ProjectTagKind; option: TaxonomyOption }) {
   const { pop } = useNavigation();
-  const [projects, setProjects] = useState<Project[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [initial, setInitial] = useState<string[]>([]);
-  // Stage 是单选：记下每个项目现在的 Stage，勾选后会被改掉的要在表单里写明。
-  const [currentStages, setCurrentStages] = useState<Record<string, string | null>>({});
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function load() {
+  // 项目列表和已打上这个标签的项目一次读完：用 usePromise 拿到加载状态和失败路径。
+  const { data, isLoading } = usePromise(
+    async (tagKind: ProjectTagKind, optionId: string) => {
       const list = loadProjectsSafely();
       const store = await getAllProjectMetadata();
-      const tagged = list.filter((p) => hasTag(store[p.id], kind, option.id)).map((p) => p.id);
-      setProjects(list);
-      setSelected(tagged);
-      setInitial(tagged);
-      setCurrentStages(Object.fromEntries(list.map((p) => [p.id, store[p.id]?.stageId ?? null])));
-      setIsLoading(false);
-    }
-    void load();
-  }, [kind, option.id]);
+      const tagged = list.filter((p) => hasTag(store[p.id], tagKind, optionId)).map((p) => p.id);
+      // Stage 是单选：记下每个项目现在的 Stage，勾选后会被改掉的要在表单里写明。
+      const stages = Object.fromEntries(list.map((p) => [p.id, store[p.id]?.stageId ?? null]));
+      return { list, tagged, stages };
+    },
+    [kind, option.id],
+    {
+      // 勾选状态之后由用户自己改，所以只在读到数据时写一次。
+      onData: (loaded) => {
+        setSelected(loaded.tagged);
+        setInitial(loaded.tagged);
+      },
+      onError: (error) => void showFailure(strings.loadProjectsFailed, error),
+    },
+  );
+
+  const projects = data?.list ?? [];
+  const currentStages = data?.stages ?? {};
 
   const movingStage =
     kind === "stage"
@@ -241,11 +251,21 @@ export default function Command() {
   const [kind, setKind] = useState<CategoryKind>("stage");
   const [options, setOptions] = useState<TaxonomyOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // 读取失败的原因：列表为空时据此显示出错页面，而不是看起来像没有标签。
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   async function reload(currentKind: CategoryKind) {
     setIsLoading(true);
-    setOptions(await TAXONOMIES[currentKind].get());
-    setIsLoading(false);
+    try {
+      setOptions(await TAXONOMIES[currentKind].get());
+      setLoadError(null);
+    } catch (error) {
+      console.error(`${LOG_PREFIX} Failed to load tags:`, error);
+      // 保留已读到的选项：读不到时不该看起来像没有标签。
+      setLoadError(errorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -437,6 +457,8 @@ export default function Command() {
       />
     );
 
+  const emptyState = listEmptyState(isLoading, options.length, loadError);
+
   return (
     <List
       isLoading={isLoading}
@@ -449,16 +471,31 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        title={strings.noCategories}
-        icon={Icon.Tag}
-        actions={
-          <ActionPanel>
-            {createAction}
-            {resetAction}
-          </ActionPanel>
-        }
-      />
+      {emptyState === "error" && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title={strings.loadTagsFailed}
+          description={loadError ?? undefined}
+          actions={
+            <ActionPanel>
+              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={() => void reload(kind)} />
+              <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {emptyState === "empty" && (
+        <List.EmptyView
+          title={strings.noCategories}
+          icon={Icon.Tag}
+          actions={
+            <ActionPanel>
+              {createAction}
+              {resetAction}
+            </ActionPanel>
+          }
+        />
+      )}
 
       {options.map((option, index) => (
         <List.Item
