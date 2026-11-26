@@ -1,6 +1,6 @@
 # Raycast Arcade Changelog
 
-## [Fix Wordle Tiles and Statistics] - {PR_MERGE_DATE}
+## [Fix Wordle Tiles and Statistics] - 2026-11-26
 
 - Center the letters in the Wordle tiles, which sat at the bottom of their boxes ([#33932](https://github.com/raycast/extensions/issues/33932))
 - Show the guess distribution chart in Wordle Statistics, which was blank because its SVG had no `xmlns` namespace
