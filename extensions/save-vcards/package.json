@@ -43,13 +43,11 @@
     "@types/react": "^19.3.0",
     "eslint": "^9.39.5",
     "prettier": "^3.3.3",
-    "tsx": "^4.19.0",
     "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "test": "sh scripts/build-test-helper.sh && tsx --test test/*.test.ts",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"

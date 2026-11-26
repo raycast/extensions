@@ -1,5 +1,4 @@
-// The on-device half of Save vCards. Plain Swift, no Raycast imports, so the same file
-// also compiles into the command-line test helper (test/swift/main.swift).
+// The on-device half of Save vCards. Plain Swift, no Raycast imports.
 // Everything here ships with macOS: Vision, NSDataDetector, NLTagger, Contacts. No network.
 
 import AppKit
