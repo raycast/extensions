@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon, showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import { actionURL, repeatRule, Task, taskLinks, twoDo } from "./2do";
 import { ItemsView } from "./items-view";
 import { TaskForm } from "./task-form";
@@ -64,15 +65,20 @@ const RUN_ACTION: Record<string, { title: string; icon: Icon }> = {
 };
 
 // A task row with its actions. `onChange` reloads the list after an action changes the task.
-// `parent` is set for a project's or checklist's items.
+// `parent` is set for a project's or checklist's items. `onRefresh` / `refreshEpoch` reload every
+// visible parent's child counts together (⌘R), not only this row's ring.
 export function TaskItem({
   task: t,
   parent,
   onChange: reloadList,
+  onRefresh,
+  refreshEpoch = 0,
 }: {
   task: Task;
   parent?: Task;
   onChange: () => void;
+  onRefresh?: () => void;
+  refreshEpoch?: number;
 }) {
   const isParent = t.task_type !== "normal";
   const items = useCachedPromise(
@@ -85,6 +91,13 @@ export function TaskItem({
     reloadList();
     if (isParent) items.revalidate();
   };
+  const seenEpoch = useRef(refreshEpoch);
+  const revalidateItems = items.revalidate;
+  useEffect(() => {
+    if (seenEpoch.current === refreshEpoch) return;
+    seenEpoch.current = refreshEpoch;
+    if (isParent && !t.completed) void revalidateItems();
+  }, [refreshEpoch, isParent, t.completed, revalidateItems]);
   const links = taskLinks(t);
   const actionTarget = actionURL(t.action);
   const primary = actionTarget
@@ -232,7 +245,7 @@ export function TaskItem({
             title="Refresh"
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={onChange}
+            onAction={onRefresh ?? onChange}
           />
         </ActionPanel>
       }

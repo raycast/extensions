@@ -83,6 +83,8 @@ export default function Command() {
     return () => clearTimeout(id);
   }, [nextStart, scope, revalidateCounts, revalidateTasks]);
 
+  const [refreshEpoch, setRefreshEpoch] = useState(0);
+
   function reload() {
     void tasks.revalidate();
     void lists.revalidate();
@@ -90,6 +92,12 @@ export default function Command() {
     void smartLists.revalidate();
     void pausedTags.revalidate();
     void counts.revalidate();
+  }
+
+  // Bump so every visible project/checklist revalidates its child counts, not only the focused row.
+  function refresh() {
+    reload();
+    setRefreshEpoch((n) => n + 1);
   }
 
   const shown = scope && tasks.data ? prepareTasks(scope, tasks.data) : undefined;
@@ -156,7 +164,7 @@ export default function Command() {
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={reload}
+                onAction={refresh}
               />
             </ActionPanel>
           }
@@ -167,7 +175,7 @@ export default function Command() {
           sectionTasks.length > 0 && (
             <List.Section key={title || "tasks"} title={title || undefined}>
               {sectionTasks.map((t) => (
-                <TaskItem key={t.task_id} task={t} onChange={reload} />
+                <TaskItem key={t.task_id} task={t} onChange={reload} onRefresh={refresh} refreshEpoch={refreshEpoch} />
               ))}
             </List.Section>
           ),
