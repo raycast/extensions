@@ -1,5 +1,5 @@
 import { Clipboard, Icon, launchCommand, LaunchType, MenuBarExtra, open, showHUD } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { FRESH_MINUTES, FreshLogin, freshLogins } from "./util/codes";
 import { getToken, InvalidTokenError } from "./util/jmap";
 
@@ -11,12 +11,17 @@ async function load(): Promise<State> {
 }
 
 export default function LoginCodes() {
-  const { data, isLoading, error } = useCachedPromise(load, [], { keepPreviousData: true });
-  // A cached code can be past its 15 minutes by the time the menu bar shows it.
-  const logins =
-    data?.signedIn && !error ? data.logins.filter((l) => Date.now() - l.receivedAt < FRESH_MINUTES * 60 * 1000) : [];
+  // Not useCachedPromise: codes are secrets and its cache is plain files on disk.
+  const { data, isLoading, error } = usePromise(load);
+  const logins = data?.signedIn && !error ? data.logins : [];
   const latestCode = logins.find((l) => l.code)?.code;
-  const openSearch = () => launchCommand({ name: "search", type: LaunchType.UserInitiated });
+  const openSearch = async () => {
+    try {
+      await launchCommand({ name: "search", type: LaunchType.UserInitiated });
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't open Search Email" });
+    }
+  };
 
   return (
     <MenuBarExtra

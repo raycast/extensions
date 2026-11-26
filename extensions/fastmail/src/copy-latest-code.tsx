@@ -3,12 +3,11 @@ import { FRESH_MINUTES, freshLogins } from "./util/codes";
 import { getToken, InvalidTokenError } from "./util/jmap";
 
 export default async function CopyLatestCode() {
-  if (!(await getToken())) {
-    await launchCommand({ name: "search", type: LaunchType.UserInitiated });
-    return;
-  }
-
   try {
+    if (!(await getToken())) {
+      await launchCommand({ name: "search", type: LaunchType.UserInitiated });
+      return;
+    }
     const login = (await freshLogins()).find((l) => l.code);
     if (!login?.code) {
       await showHUD(`No login code in the last ${FRESH_MINUTES} minutes`);

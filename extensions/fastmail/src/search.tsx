@@ -22,6 +22,7 @@ import {
   MutatePromise,
   showFailureToast,
   useCachedPromise,
+  useForm,
   useLocalStorage,
   usePromise,
 } from "@raycast/utils";
@@ -40,6 +41,7 @@ import {
   Mailbox,
   openAttachment,
   ReadOnlyTokenError,
+  removeOldAttachments,
   reportSpam,
   restoreEmail,
   saveToken,
@@ -49,7 +51,7 @@ import {
 } from "./util/jmap";
 import { demoFavicon } from "./util/demo";
 import { registrableDomain } from "./util/domain";
-import { cachedLoginInfo, detectLoginInfo, LoginInfo, looksLikeLogin } from "./util/login";
+import { detectLoginInfo, LoginInfo, looksLikeLogin } from "./util/login";
 
 const DEBOUNCE_MS = 300;
 
@@ -74,7 +76,11 @@ export default function SearchEmail() {
 
   const { data: token, isLoading: isLoadingToken, revalidate: reloadToken } = usePromise(getToken);
   const { value: isShowingDetail, setValue: setShowingDetail } = useLocalStorage("isShowingDetail", false);
-  const { data: mailboxes } = useCachedPromise(getMailboxes, [], { execute: Boolean(token) });
+  // The token is an argument so switching accounts reloads the folders.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { data: mailboxes } = useCachedPromise((_token: string | undefined) => getMailboxes(), [token], {
+    execute: Boolean(token),
+  });
   const { data, isLoading, error, revalidate, mutate, pagination } = useCachedPromise(
     // The token is a dependency so saving a new one refetches.
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -87,9 +93,7 @@ export default function SearchEmail() {
     {
       execute: Boolean(token),
       keepPreviousData: true,
-      onError: (error) => {
-        if (!(error instanceof InvalidTokenError)) showFailureToast(error, { title: "Couldn't load email" });
-      },
+      failureToastOptions: { title: "Couldn't load email" },
     },
   );
 
@@ -104,14 +108,15 @@ export default function SearchEmail() {
     }
   }, [data, isLoading, query, folder]);
 
-  const [loginInfo, setLoginInfo] = useState(new Map<string, LoginInfo>());
+  const { data: loginInfo } = usePromise(
+    (emails: Email[]) => detectLoginInfo(emails.filter(looksLikeLogin)),
+    [data ?? []],
+    { execute: Boolean(token) },
+  );
+
   useEffect(() => {
-    const candidates = (data ?? []).filter((email) => looksLikeLogin(email) && !cachedLoginInfo(email.id));
-    if (candidates.length === 0) return;
-    detectLoginInfo(candidates)
-      .then((found) => setLoginInfo((current) => new Map([...current, ...found])))
-      .catch(() => undefined);
-  }, [data]);
+    removeOldAttachments().catch(() => undefined);
+  }, []);
 
   if (isLoadingToken) return <List isLoading />;
   if (!token || error instanceof InvalidTokenError) {
@@ -119,6 +124,7 @@ export default function SearchEmail() {
   }
 
   const mailActions = buildMailActions(mutate, query !== "" || folder !== INBOX, revalidate);
+  const failedToLoad = error && !data?.length;
   const folderName =
     folder === INBOX
       ? query
@@ -140,16 +146,29 @@ export default function SearchEmail() {
       searchBarPlaceholder="Search mail (from:, subject:, is:unread, has:attachment)"
       searchBarAccessory={<FolderDropdown mailboxes={mailboxes ?? []} onChange={setFolder} />}
     >
-      <List.EmptyView
-        title={query ? "No emails found" : `${folderName ?? "Folder"} is empty`}
-        icon={query ? Icon.MagnifyingGlass : Icon.Tray}
-      />
+      {failedToLoad ? (
+        <List.EmptyView
+          title="Couldn't load email"
+          description={error.message}
+          icon={Icon.Warning}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          title={query ? "No emails found" : `${folderName ?? "Folder"} is empty`}
+          icon={query ? Icon.MagnifyingGlass : Icon.Tray}
+        />
+      )}
       <List.Section title={query ? `Search Results in ${folderName}` : folderName}>
         {(data ?? []).map((email) => (
           <EmailItem
             key={email.id}
             email={email}
-            login={loginInfo.get(email.id) ?? cachedLoginInfo(email.id)}
+            login={loginInfo?.get(email.id)}
             mailActions={mailActions}
             isSelected={email.id === selectedId}
             isShowingDetail={Boolean(isShowingDetail)}
@@ -201,7 +220,8 @@ function mailboxIcon(mailbox: Mailbox): Icon {
 
 function buildMailActions(
   mutate: MutatePromise<Email[]>,
-  keepArchived: boolean,
+  // A search or folder can depend on what changed (is:unread, in:archive), so it reloads afterwards.
+  filtered: boolean,
   // Reloading with a revoked token swaps the list for the token form.
   reload: () => void,
 ): MailActions {
@@ -213,7 +233,7 @@ function buildMailActions(
     { success, silent = false, undo }: { success: string; silent?: boolean; undo?: () => Promise<void> },
   ): Promise<ActionResult> => {
     try {
-      await mutate(request, { optimisticUpdate, shouldRevalidateAfter: false });
+      await mutate(request, { optimisticUpdate, shouldRevalidateAfter: filtered });
       if (!silent) {
         await showToast({
           style: Toast.Style.Success,
@@ -239,15 +259,14 @@ function buildMailActions(
     } catch (error) {
       if (error instanceof InvalidTokenError) {
         reload();
-        await showToast({ style: Toast.Style.Failure, title: "Your API token no longer works" });
+        await showFailureToast(error, { title: "Your API token no longer works" });
         return "signedOut";
       }
       if (silent) return "failed";
       if (error instanceof ReadOnlyTokenError) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(error, {
           title: "Your API token is read-only",
-          message: "Create a token with write access, then use Change API Token.",
+          message: "Create a token with write access, then use Change Fastmail Token.",
           primaryAction: { title: "Create Token in Fastmail", onAction: () => open(TOKEN_SETTINGS_URL) },
         });
       } else {
@@ -260,7 +279,7 @@ function buildMailActions(
   return {
     // Archived mail still matches a search or All Mail, so only drop it when viewing the inbox.
     archive: (email) =>
-      perform(archiveEmail(email.id), keepArchived ? (list) => list : without(email), {
+      perform(archiveEmail(email.id), filtered ? (list) => list : without(email), {
         success: "Archived",
         undo: () => restoreEmail(email),
       }),
@@ -277,36 +296,33 @@ function buildMailActions(
 }
 
 function TokenForm({ invalid, onSaved }: { invalid: boolean; onSaved: () => void }) {
-  const [tokenError, setTokenError] = useState<string | undefined>();
-
-  const handleSubmit = async ({ token }: { token: string }) => {
-    if (!token.trim()) {
-      setTokenError("Paste your API token");
-      return;
-    }
-    if (token.includes("…")) {
-      setTokenError("This token is shortened (it contains …). Copy the full token from Fastmail.");
-      return;
-    }
-    if (!/^[\x21-\x7e]+$/.test(token.trim())) {
-      setTokenError("This doesn't look like a Fastmail token. Copy the full token from Fastmail.");
-      return;
-    }
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Checking token…" });
-    try {
-      await saveToken(token);
-      toast.style = Toast.Style.Success;
-      toast.title = "Connected to Fastmail";
-      onSaved();
-    } catch (error) {
-      await toast.hide();
-      if (error instanceof InvalidTokenError) {
-        setTokenError("Fastmail rejected this token");
-      } else {
-        await showFailureToast(error, { title: "Couldn't reach Fastmail" });
+  const { handleSubmit, itemProps, setValidationError } = useForm<{ token: string }>({
+    validation: {
+      token: (value) => {
+        const token = value?.trim() ?? "";
+        if (!token) return "Paste your API token";
+        if (token.includes("…")) return "This token is shortened (it contains …). Copy the full token from Fastmail.";
+        if (!/^[\x21-\x7e]+$/.test(token))
+          return "This doesn't look like a Fastmail token. Copy the full token from Fastmail.";
+      },
+    },
+    onSubmit: async ({ token }) => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Checking token…" });
+      try {
+        await saveToken(token);
+        toast.style = Toast.Style.Success;
+        toast.title = "Connected to Fastmail";
+        onSaved();
+      } catch (error) {
+        await toast.hide();
+        if (error instanceof InvalidTokenError) {
+          setValidationError("token", "Fastmail rejected this token");
+        } else {
+          await showFailureToast(error, { title: "Couldn't reach Fastmail" });
+        }
       }
-    }
-  };
+    },
+  });
 
   return (
     <Form
@@ -317,7 +333,7 @@ function TokenForm({ invalid, onSaved }: { invalid: boolean; onSaved: () => void
           <Action.OpenInBrowser
             title="Create Token in Fastmail"
             url={TOKEN_SETTINGS_URL}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
         </ActionPanel>
       }
@@ -335,14 +351,7 @@ function TokenForm({ invalid, onSaved }: { invalid: boolean; onSaved: () => void
           "Name it Raycast and tick Email. Leave Read-only unticked if you want to archive, delete and report spam from Raycast. Then copy the token (it starts with fmu1-) and paste it below. It's stored encrypted on this Mac and only sent to Fastmail."
         }
       />
-      <Form.PasswordField
-        id="token"
-        title="API Token"
-        placeholder="fmu1-..."
-        error={tokenError}
-        onChange={() => setTokenError(undefined)}
-        autoFocus
-      />
+      <Form.PasswordField {...itemProps.token} title="API Token" placeholder="fmu1-..." autoFocus />
     </Form>
   );
 }
@@ -474,12 +483,12 @@ function EmailActions(props: EmailActionsProps) {
         key="link"
         title="Open Login Link"
         url={login.link}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
     ),
   ].filter(Boolean);
   const openInFastmail = (
-    <Action.OpenInBrowser title="Open in Fastmail" url={email.webUrl} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+    <Action.OpenInBrowser title="Open in Fastmail" url={email.webUrl} shortcut={Keyboard.Shortcut.Common.Open} />
   );
 
   return (
@@ -509,7 +518,7 @@ function EmailActions(props: EmailActionsProps) {
         <Action
           title="Archive"
           icon={Icon.Box}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          shortcut={Keyboard.Shortcut.Common.Edit}
           onAction={thenPop(mailActions.archive)}
         />
         <Action

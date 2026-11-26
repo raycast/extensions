@@ -179,7 +179,8 @@ export async function listEmails(folder: string, query: string, page: number): P
 
   if (folder === INBOX && !query) {
     conditions.push({ inMailbox: await mailboxIdForRole("inbox") });
-  } else if (folder === INBOX || folder === ALL_MAIL) {
+  } else if ((folder === INBOX || folder === ALL_MAIL) && !conditions.some((c) => "inMailbox" in c)) {
+    // An explicit in:trash or in:spam overrides the default of leaving those folders out.
     const excluded = mailboxes.filter((m) => m.role === "junk" || m.role === "trash").map((m) => m.id);
     if (excluded.length > 0) conditions.push({ inMailboxOtherThan: excluded });
   } else {
@@ -252,7 +253,7 @@ export async function openAttachment(attachment: Attachment): Promise<string> {
 }
 
 // Opened attachments are copies of email content, so they don't linger on disk.
-async function removeOldAttachments(): Promise<void> {
+export async function removeOldAttachments(): Promise<void> {
   const entries = await readdir(ATTACHMENTS_DIR).catch(() => [] as string[]);
   await Promise.all(
     entries.map(async (entry) => {
