@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "redbison",
+  "title": "RedBison",
+  "description": "Search RedBison's free online tools and run its offline developer utilities, like JSON formatting and Base64, on selected text.",
+  "icon": "icon.png",
+  "author": "redbison",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "redbison",
+    "json",
+    "base64",
+    "jwt",
+    "hash",
+    "uuid",
+    "url encode",
+    "calculator",
+    "converter",
+    "developer tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-tools",
+      "title": "Search Tools",
+      "subtitle": "RedBison",
+      "description": "Search every RedBison calculator, converter and developer tool, and open it in the browser.",
+      "mode": "view",
+      "keywords": [
+        "calculator",
+        "converter",
+        "online tools",
+        "redbison.dev"
+      ]
+    },
+    {
+      "name": "run-utility",
+      "title": "Run Utility",
+      "subtitle": "RedBison",
+      "description": "Format, encode, decode, hash or convert the selected text or clipboard with one of the offline RedBison utilities.",
+      "mode": "view",
+      "keywords": [
+        "json",
+        "base64",
+        "url encode",
+        "url decode",
+        "hash",
+        "sha256",
+        "uuid",
+        "jwt",
+        "case",
+        "sort lines",
+        "yaml",
+        "csv"
+      ]
+    },
+    {
+      "name": "format-clipboard-json",
+      "title": "Format Clipboard JSON",
+      "subtitle": "RedBison",
+      "description": "Pretty-print the JSON on the clipboard with two-space indentation and copy the result back.",
+      "mode": "no-view",
+      "keywords": [
+        "json",
+        "pretty print",
+        "beautify",
+        "prettify"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "react": "19.3.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "sync": "node scripts/sync.mjs",
+    "pull": "ray pull-contributions",
+    "publish": "ray publish",
+    "stage": "node scripts/stage.mjs"
+  }
+}
