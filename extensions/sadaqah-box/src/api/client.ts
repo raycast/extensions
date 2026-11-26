@@ -8,11 +8,6 @@ import { ApiError, handleError, isRetryableError } from "../utils/error-handler"
 import { sanitizeUrl } from "../utils/security";
 import type { ApiErrorResponse } from "../types";
 
-interface Preferences {
-  apiHost: string;
-  apiKey: string;
-}
-
 /**
  * Get API key from preferences
  */

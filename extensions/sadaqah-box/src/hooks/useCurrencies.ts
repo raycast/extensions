@@ -7,7 +7,7 @@ import type { Currency } from "../types";
  * Shared hook to load and cache available currencies scoped per API host
  */
 export function useCurrencies() {
-  const { apiHost } = getPreferenceValues<{ apiHost?: string }>();
+  const { apiHost } = getPreferenceValues<Preferences>();
   const hostScope = apiHost?.trim() || "";
 
   return useCachedPromise(

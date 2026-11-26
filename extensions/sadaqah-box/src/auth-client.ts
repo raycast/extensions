@@ -7,7 +7,7 @@ import { sanitizeUrl } from "./utils/security";
 export type { AuthClient } from "better-auth/client";
 
 function getAuthBaseUrl(): string {
-  const { apiHost } = getPreferenceValues<{ apiHost: string }>();
+  const { apiHost } = getPreferenceValues<Preferences>();
   return `${sanitizeUrl(apiHost)}/api/auth`;
 }
 
