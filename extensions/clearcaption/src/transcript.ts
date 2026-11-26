@@ -34,7 +34,9 @@ export async function fetchTranscript(
   const it = items[0];
   if (!it) throw new Error("No result");
   if (it.status !== "OK") throw new Error(`No transcript: ${it.status}`);
-  const raw = translateTo && it.translation?.segments?.length ? it.translation.segments : it.segments || [];
+  if (translateTo && !it.translation?.segments?.length)
+    throw new Error(`Translation to "${translateTo}" is unavailable`);
+  const raw = (translateTo ? it.translation?.segments : it.segments) || [];
   return {
     videoId: it.videoId || it.input || video,
     title: it.title,

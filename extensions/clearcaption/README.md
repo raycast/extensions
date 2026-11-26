@@ -4,7 +4,7 @@ Get the transcript of any YouTube video right from Raycast: paste a URL (or copy
 
 Works where direct YouTube scraping gets blocked: requests run on Apify with rotating proxies.
 
-## Setup
+## Setup (requires a free Apify account)
 
 1. Create a free Apify account: https://console.apify.com/sign-up (the free $5 monthly credit covers about 1,000 videos).
 2. Copy your API token from https://console.apify.com/settings/integrations and paste it into the extension preferences.

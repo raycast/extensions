@@ -12,9 +12,7 @@ import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { clock, fetchTranscript, toSrt, toText } from "./transcript";
 
-type Args = { video?: string; translateTo?: string };
-
-function TranscriptView({ video, translateTo }: { video: string; translateTo?: string }) {
+function TranscriptView({ video, translateTo, title }: { video: string; translateTo?: string; title?: string }) {
   const { apifyToken } = getPreferenceValues<Preferences>();
   const { data, isLoading, error } = usePromise(
     (v: string, lang?: string) => fetchTranscript(v, apifyToken, lang),
@@ -29,7 +27,7 @@ function TranscriptView({ video, translateTo }: { video: string; translateTo?: s
     <Detail
       isLoading={isLoading}
       markdown={md}
-      navigationTitle={translateTo ? `Transcript (${translateTo})` : "Transcript"}
+      navigationTitle={title}
       actions={
         data && (
           <ActionPanel>
@@ -56,13 +54,24 @@ function AskVideo({ initial, translateTo }: { initial: string; translateTo?: str
           <Action.SubmitForm
             title="Get Transcript"
             onSubmit={(v: { video: string; translateTo: string }) =>
-              push(<TranscriptView video={v.video.trim()} translateTo={v.translateTo.trim() || undefined} />)
+              push(
+                <TranscriptView
+                  video={v.video.trim()}
+                  translateTo={v.translateTo.trim() || undefined}
+                  title={v.translateTo.trim() ? `Transcript (${v.translateTo.trim()})` : "Transcript"}
+                />,
+              )
             }
           />
         </ActionPanel>
       }
     >
-      <Form.TextField id="video" title="YouTube URL or ID" defaultValue={initial} />
+      <Form.TextField
+        id="video"
+        title="YouTube URL or ID"
+        placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        defaultValue={initial}
+      />
       <Form.TextField
         id="translateTo"
         title="Translate To"
@@ -73,7 +82,7 @@ function AskVideo({ initial, translateTo }: { initial: string; translateTo?: str
   );
 }
 
-export default function Command(props: LaunchProps<{ arguments: Args }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.GetTranscript }>) {
   const { video, translateTo } = props.arguments;
   const [fromClipboard, setFromClipboard] = useState<string>();
   useEffect(() => {
