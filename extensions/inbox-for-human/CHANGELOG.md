@@ -1,6 +1,6 @@
 # Inbox for Human Changelog
 
-## [New Icon and Detail Pane] - {PR_MERGE_DATE}
+## [New Icon and Detail Pane] - 2026-11-26
 
 - New icon: an inbox tray with a red badge.
 - The detail pane opens with what the file is, then its name and what your agent needs from you. Path shows the file's folder.
