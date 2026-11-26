@@ -67,75 +67,52 @@ function run(argv) {
 }`;
 
 // macOS skips its idle screen saver while any app prevents display sleep, including Coffee's caffeinate -d.
-export const SCREEN_SAVER_WATCHER = `pid=$1 started=$2 uid=$(id -u) armed=1 unknown=0 fresh=60 limit= last=0 last_after= slept=0 overran=0 blocked= blocked_for= decided=
+export const SCREEN_SAVER_WATCHER = `pid=$1 started=$2 uid=$(id -u) armed=1 unknown=0 fresh=60 limit= last=0 slept=0 overran=0 blocked= blocked_for=
 # ps exits 0 without output when it can't read the process table, and 1 both once the PID is gone and when it fails.
 owner() {
   lstart=$(ps -p "$pid" -o lstart= 2>/dev/null) || { kill -0 "$pid" 2>/dev/null && return 1; return 2; }
   [ -n "$lstart" ] || return 1
   [ "$(echo $lstart)" = "$started" ] || return 2
 }
-# kern.monotonicclock_usecs also reports mach_absolute_time, the clock HIDIdleTime counts in, on Macs that have it.
-ticks_per_ms=$(sysctl -n hw.tbfrequency 2>/dev/null)
-case $ticks_per_ms in "" | *[!0-9]*) ticks_per_ms=0 ;; esac
-ticks_per_ms=$((ticks_per_ms / 1000))
-uptime_ms() {
-  [ $ticks_per_ms -gt 0 ] || return
-  set -- $(sysctl -n kern.monotonicclock_usecs 2>/dev/null)
-  [ $# = 2 ] || return
-  case $2 in *[!0-9]*) return 1 ;; esac
-  clock=$(($2 / ticks_per_ms))
-}
-uptime_ms || ticks_per_ms=0
 read_limit() {
   fresh=0
   value=$(osascript -l JavaScript -e "$COFFEE_IDLE_TIME" com.apple.screensaver 2>/dev/null) || return
   case $value in "" | *[!0-9]*) return 1 ;; esac
   limit=$value
 }
-# Reading the uptime on both sides bounds when HIDIdleTime was read.
 sample_idle() {
-  uptime_ms && before=$clock || before=
   value=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { printf "%d", $NF / 1000000; exit }')
-  uptime_ms && after=$clock || after=
   case $value in "" | *[!0-9]*) return 1 ;; esac
   idle=$value
 }
-# HIDIdleTime only falls on input, and otherwise grows at least as much as the uptime between two samples.
-# Without that clock it grows at least as much as each requested sleep, and a sleep that overran by a whole delay could hide input.
+# HIDIdleTime only falls on input, and otherwise grows at least as much as each requested sleep.
+# A sleep that overran by a whole delay could hide input, so that counts too.
 had_input() {
-  if [ -n "$before" ] && [ -n "$last_after" ]; then
-    [ $((idle + 1)) -lt $((last + before - last_after)) ]
-  else
-    [ $((idle + 1)) -lt $((last + slept * 1000)) ] || [ "$overran" -ge $((limit * 1000)) ]
-  fi
+  [ $((idle + 1)) -lt $((last + slept * 1000)) ] || [ "$overran" -ge $((limit * 1000)) ]
 }
 wake_in() {
   [ $((($1 + 999) / 1000)) -lt $delay ] && delay=$((($1 + 999) / 1000))
 }
 decide() {
   set -- $(osascript -l JavaScript -e "$COFFEE_DECISION" com.apple.screensaver "$pid" 2>/dev/null)
-  uptime_ms && decided=$clock || decided=
   [ $# = 2 ] || return
   case $2 in *[!0-9]*) return 1 ;; esac
   verdict=$1 limit=$2 fresh=0
-}
-# The verdict goes stale during slow checks, so decide again after one.
-recent() {
-  [ -z "$decided" ] || [ -z "$before" ] || [ $((before - decided)) -lt 1000 ]
 }
 start_screen_saver() {
   pgrep -q -x -u "$uid" ScreenSaverEngine
   case $? in
     0) armed=0 ;;
-    # A Touch ID unlock resets only this HID clock, so it must reach the delay too. Sampling last catches input during the checks.
-    1) owner && sample_idle && [ "$idle" -ge $((limit * 1000)) ] && recent && open -b com.apple.ScreenSaver.Engine && armed=0 ;;
+    # A Touch ID unlock resets only this HID clock, so sample it last; kill -0 then catches caffeinate exiting meanwhile.
+    1) owner && sample_idle && [ "$idle" -ge $((limit * 1000)) ] && kill -0 "$pid" 2>/dev/null &&
+      open -b com.apple.ScreenSaver.Engine && armed=0 ;;
   esac
 }
-# Without the uptime clock, /usr/bin/time times the sleep on CLOCK_MONOTONIC, which setting the clock doesn't move.
+# /usr/bin/time times the sleep on CLOCK_MONOTONIC, which setting the clock doesn't move.
 # That only matters while input would change something.
 pause() {
   measured=$((delay * 1000))
-  if [ $ticks_per_ms -gt 0 ] || { [ $armed = 1 ] && [ -z "$blocked" ]; }; then
+  if [ $armed = 1 ] && [ -z "$blocked" ]; then
     sleep "$delay"
   else
     timed=$(command time -p sleep "$delay" 2>&1 >/dev/null |
@@ -156,7 +133,7 @@ while :; do
       had_input && armed=1 blocked=
       # A block whose own sample failed waits from this one.
       [ "$blocked" = next ] && blocked=$idle
-      last=$idle last_after=$after slept=0 overran=0
+      last=$idle slept=0 overran=0
       # Wait out the delay in force when the blocker was seen, unless the delay has since shortened.
       held=0
       [ -n "$blocked" ] && held=$((blocked + (blocked_for < limit ? blocked_for : limit) * 1000))
@@ -170,7 +147,7 @@ while :; do
           # The wait starts after the decision, which can be slow.
           blocked)
             blocked_for=$limit blocked=next
-            sample_idle && blocked=$idle last=$idle last_after=$after
+            sample_idle && blocked=$idle last=$idle
             ;;
         esac
       fi

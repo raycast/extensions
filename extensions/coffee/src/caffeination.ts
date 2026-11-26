@@ -293,6 +293,7 @@ async function getLegacyCutoff(): Promise<number> {
 async function findLegacySession(
   processes: ProcessIdentity[],
   session?: ManagedSession,
+  { strict = false } = {},
 ): Promise<(LegacySession & ProcessIdentity) | undefined> {
   const cutoff = await getLegacyCutoff();
   const candidates: (LegacySession & ProcessIdentity)[] = [];
@@ -301,7 +302,10 @@ async function findLegacySession(
     const startedAt = Date.parse(`${entry.createdAt} UTC`);
     if (!Number.isFinite(startedAt) || startedAt >= cutoff) continue;
     // An unreadable candidate could be Coffee's, so no other candidate is unambiguous.
-    const args = await getProcessArgs(entry.pid).catch(() => null);
+    const args = await getProcessArgs(entry.pid).catch((error) => {
+      if (strict) throw error;
+      return null;
+    });
     if (args === null) return undefined;
     const match = LEGACY_ARGS.exec(args ?? "");
     if (!match) continue;
@@ -356,6 +360,13 @@ export async function stateAfter(
   }
 }
 
+export async function conditionalStopResult(
+  stopped: boolean,
+  read: () => Promise<CaffeinationState>,
+): Promise<ConditionalStopResult> {
+  return { stopped, state: stopped ? await stateAfter(read) : await read() };
+}
+
 async function stopSession(expectedSessionId?: string): Promise<boolean> {
   const session = await readSession();
   if (!session) return false;
@@ -401,7 +412,8 @@ export function stopMacLegacyCaffeinate(expected: LegacySession): Promise<Caffei
   return withSessionLock(async () => {
     const processes = await listProcesses();
     const session = await readSession(processes);
-    const legacy = await findLegacySession(processes, session);
+    // A failed inspection must not read as the session having ended.
+    const legacy = await findLegacySession(processes, session, { strict: true });
     if (!legacy || legacy.pid !== expected.pid || legacy.createdAt !== expected.createdAt) {
       throw new Error("The previous Coffee session is no longer running");
     }
@@ -423,10 +435,7 @@ export function stopMacLegacyCaffeinate(expected: LegacySession): Promise<Caffei
 }
 
 export function stopMacCaffeinateIfMatches(expectedSessionId: string): Promise<ConditionalStopResult> {
-  return withSessionLock(async () => {
-    const stopped = await stopSession(expectedSessionId);
-    return { stopped, state: stopped ? await stateAfter(readState) : await readState() };
-  });
+  return withSessionLock(async () => conditionalStopResult(await stopSession(expectedSessionId), readState));
 }
 
 export async function startMacCaffeinate(

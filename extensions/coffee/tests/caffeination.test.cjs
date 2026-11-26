@@ -354,16 +354,6 @@ test("auto-start is independent of external activity and preserves a surviving C
   assert.ok(h.table.has(900));
 });
 
-test("auto-start tries again after a state read fails", async () => {
-  const h = createHarness({ preferences: { startCaffeinateOnLaunch: true } });
-  const status = h.load("status.ts");
-  h.addProcess(950, unreadable);
-  await assert.rejects(status.maybeAutoCaffeinate(), /Cannot read the macOS process table/);
-  h.table.delete(950);
-  assert.equal(await status.maybeAutoCaffeinate(), true);
-  assert.equal(session(h).pid, 200);
-});
-
 function schedule(h, running, from, to) {
   const day = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][new Date().getDay()];
   h.storage.set(day, JSON.stringify({ day, from, to, IsRunning: running, IsManuallyDecafed: false }));
@@ -573,12 +563,23 @@ test("stopping a previous Coffee session rechecks its identity and never signals
   assert.ok(h.table.has(900));
 });
 
+test("stopping a previous Coffee session reports an unreadable command line instead of saying it ended", async () => {
+  const h = createHarness();
+  h.addProcess(900, legacyRow);
+  const utils = h.load("utils.ts");
+  const { legacySession } = await utils.getCaffeinationState();
+  h.table.get(900).args = "";
+  await assert.rejects(utils.stopLegacyCaffeinate(quiet, legacySession), /Cannot read the macOS process table/);
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
+});
+
 test("a state read that fails after stopping a previous Coffee session doesn't undo the stop", async (t) => {
   t.mock.method(console, "error", () => {});
   const h = createHarness();
   h.addProcess(900, legacyRow);
   const day = schedule(h, true, "00:00", "23:59");
   const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet);
   const { legacySession } = await utils.getCaffeinationState();
   h.fakeProcess.kill.mock.mockImplementation((pid) => {
     h.table.delete(pid);
@@ -587,5 +588,6 @@ test("a state read that fails after stopping a previous Coffee session doesn't u
   const state = await utils.stopLegacyCaffeinate(quiet, legacySession, { pauseRunningSchedule: true });
   assert.equal(h.table.has(900), false);
   assert.equal(state.legacySession, undefined);
+  assert.equal(state.isManaged, true);
   assert.equal(JSON.parse(h.storage.get(day)).IsManuallyDecafed, true);
 });

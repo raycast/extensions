@@ -10,6 +10,8 @@ const { createHarness, loadSource, makeTempDir } = require("./helpers.cjs");
 const { ACTIVE_ASSERTIONS, DECISION_SCRIPT, IDLE_TIME_SCRIPT, SCREEN_SAVER_WATCHER } = loadSource("screenSaver.ts", {});
 const quiet = { menubar: false, status: false };
 const OPEN = "-b com.apple.ScreenSaver.Engine";
+// A PID that can't exist, so kill -0 says caffeinate is gone.
+const GONE = "2147483647";
 const COFFEE = { pid: 200, type: "PreventUserIdleDisplaySleep" };
 const DISPLAY_ON = { AssertType: "PreventUserIdleDisplaySleep", AssertLevel: 255 };
 const UNLOCKED = {
@@ -23,17 +25,21 @@ const posixShell = { skip: process.platform === "win32" && "needs /bin/sh" };
 const macOS = { skip: process.platform !== "darwin" && "needs osascript" };
 
 // Every stub answers from the current poll's directory, and the sleep stub ends the poll. Idle files hold milliseconds,
-// "fail" makes that ioreg read fail, and uptime files hold one mach_absolute_time reading per line, read in turn.
+// "fail" makes that ioreg read fail, and a kill file names a process that read kills.
 const STUBS = {
+  // Past the last poll the PID belongs to another process. Like ps, a poll's exit file prints nothing and exits 1.
   ps: String.raw`n=$(cat "$DIR/n"); echo "$n" >> "$DIR/ps.log"; echo "$n ps" >> "$DIR/calls.log"
+[ -d "$DIR/$n" ] || { echo "Thu Jan  1 00:00:00 1970"; exit 0; }
 [ -e "$DIR/$n/unknown" ] && exit 0
 [ -e "$DIR/$n/fails" ] && echo "ps: malloc failed" >&2 && exit 1
-[ -d "$DIR/$n" ] && [ ! -e "$DIR/$n/exit.$(grep -cx "$n" "$DIR/ps.log")" ] || exit 1
+[ -e "$DIR/$n/exit.$(grep -cx "$n" "$DIR/ps.log")" ] && exit 1
 cat "$DIR/lstart"`,
   osascript: String.raw`n=$(cat "$DIR/n"); case "$*" in *IOPMCopyAssertionsByProcess*) file=decision ;; *) file=limit ;; esac
 echo "$n $file" >> "$DIR/osascript.log"; echo "$n $file" >> "$DIR/calls.log"; cat "$DIR/$n/$file"`,
   ioreg: String.raw`n=$(cat "$DIR/n"); echo "$n" >> "$DIR/ioreg.log"; echo "$n ioreg" >> "$DIR/calls.log"
-file="$DIR/$n/idle.$(grep -cx "$n" "$DIR/ioreg.log")"; [ -e "$file" ] || file="$DIR/$n/idle"
+k=$(grep -cx "$n" "$DIR/ioreg.log"); victim=$(cat "$DIR/$n/kill.$k" 2>/dev/null)
+if [ -n "$victim" ]; then kill "$victim"; i=0; while kill -0 "$victim" 2>/dev/null && [ $((i += 1)) -lt 300 ]; do /bin/sleep 0.01; done; fi
+file="$DIR/$n/idle.$k"; [ -e "$file" ] || file="$DIR/$n/idle"
 [ "$(cat "$file" 2>/dev/null)" = fail ] || printf '  | "HIDIdleTime" = %s000000\n' "$(cat "$file")"`,
   pgrep: String.raw`echo "$*" > "$DIR/pgrep.args"; echo "$(cat "$DIR/n") pgrep" >> "$DIR/calls.log"
 exit $(cat "$DIR/$(cat "$DIR/n")/pgrep" 2>/dev/null || echo 1)`,
@@ -44,15 +50,10 @@ report=$(cat "$poll/report" 2>/dev/null); "$@"
 [ -n "$report" ] && echo "$report" >&2 && exit
 awk -v slept="$2" -v drift="$drift" 'BEGIN { printf "real %.2f\nuser 0.00\nsys 0.00\n", slept + drift }' >&2`,
   sleep: String.raw`n=$(cat "$DIR/n"); echo "$n $*" >> "$DIR/sleep.log"; echo $((n + 1)) > "$DIR/n"`,
-  sysctl: String.raw`[ -e "$DIR/tbfrequency" ] || exit 1
-case "$*" in *hw.tbfrequency*) echo 24000000; exit ;; esac
-n=$(cat "$DIR/n"); echo "$n" >> "$DIR/sysctl.log"; [ -e "$DIR/$n/uptime" ] || exit 1
-line=$(sed -n "$(grep -cx "$n" "$DIR/sysctl.log")p" "$DIR/$n/uptime"); [ -n "$line" ] || line=$(tail -n 1 "$DIR/$n/uptime")
-echo "0 $line"`,
 };
 
-// A PID that can't exist, so a failed ps means caffeinate is gone.
-function runWatcher(steps, { started = "Wed Nov 5 09:15:52 2026", pid = "2147483647", tbfrequency = false } = {}) {
+// The watcher checks that caffeinate still exists, so it watches this test process unless told otherwise.
+function runWatcher(steps, { started = "Wed Nov 5 09:15:52 2026", pid = String(process.pid) } = {}) {
   const dir = makeTempDir("coffee-screen-saver-");
   const bin = join(dir, "bin");
   mkdirSync(bin);
@@ -61,36 +62,31 @@ function runWatcher(steps, { started = "Wed Nov 5 09:15:52 2026", pid = "2147483
   }
   writeFileSync(join(dir, "n"), "1");
   writeFileSync(join(dir, "lstart"), "Wed Nov  5 09:15:52 2026\n");
-  if (tbfrequency || steps.some(({ uptime }) => uptime !== undefined)) writeFileSync(join(dir, "tbfrequency"), "");
   const ms = (seconds) => (seconds === undefined || seconds === "fail" ? seconds : Math.round(seconds * 1000));
   let limit;
-  steps.forEach(({ idle, recheck, decision, pgrep, drift, report, exits, unknown, fails, uptime, ...step }, index) => {
-    limit = step.limit ?? limit;
-    const files = {
-      idle: ms(idle),
-      "idle.2": ms(recheck),
-      limit: step.limit,
-      decision: decision === undefined ? `launch ${limit}` : decision,
-      pgrep,
-      drift,
-      report,
-      "exit.2": exits ? "" : undefined,
-      unknown: unknown ? "" : undefined,
-      fails: fails ? "" : undefined,
-      uptime:
-        uptime === undefined
-          ? undefined
-          : [uptime]
-              .flat()
-              .map((seconds) => ms(seconds) * 24000)
-              .join("\n"),
-    };
-    const poll = join(dir, String(index + 1));
-    mkdirSync(poll);
-    for (const [name, value] of Object.entries(files)) {
-      if (value !== undefined && value !== null) writeFileSync(join(poll, name), `${value}\n`);
-    }
-  });
+  steps.forEach(
+    ({ idle, recheck, decision, pgrep, drift, report, exits, unknown, fails, killOnRecheck, ...step }, i) => {
+      limit = step.limit ?? limit;
+      const files = {
+        idle: ms(idle),
+        "idle.2": ms(recheck),
+        limit: step.limit,
+        decision: decision === undefined ? `launch ${limit}` : decision,
+        pgrep,
+        drift,
+        report,
+        "exit.2": exits ? "" : undefined,
+        unknown: unknown ? "" : undefined,
+        fails: fails ? "" : undefined,
+        "kill.2": killOnRecheck,
+      };
+      const poll = join(dir, String(i + 1));
+      mkdirSync(poll);
+      for (const [name, value] of Object.entries(files)) {
+        if (value !== undefined && value !== null) writeFileSync(join(poll, name), `${value}\n`);
+      }
+    },
+  );
   execFileSync("/bin/sh", ["-c", SCREEN_SAVER_WATCHER, "coffee-screen-saver", pid, started], {
     env: {
       PATH: `${bin}:/usr/bin:/bin`,
@@ -114,7 +110,6 @@ function runWatcher(steps, { started = "Wed Nov 5 09:15:52 2026", pid = "2147483
     pgrep: lines("pgrep.args"),
     timed: lines("time.log"),
     calls: lines("calls.log"),
-    clockReads: lines("sysctl.log"),
   };
 }
 
@@ -252,7 +247,7 @@ test("screen saver watcher stops waiting out a skipped screen saver after input"
   assert.deepEqual(opened, [`6 ${OPEN}`]);
 });
 
-for (const [name, steps, opened] of [
+for (const [name, steps, opened, options] of [
   [
     "retries at the next check when the decision fails",
     [
@@ -296,7 +291,7 @@ for (const [name, steps, opened] of [
     ],
     [`2 ${OPEN}`],
   ],
-  ["doesn't start the screen saver once caffeinate exits", [{ idle: 600, limit: 600, exits: true }], []],
+  ["doesn't start the screen saver once caffeinate exits", [{ idle: 600, limit: 600, exits: true }], [], { pid: GONE }],
   [
     "rearms after input while the delay was Never",
     [
@@ -327,6 +322,11 @@ for (const [name, steps, opened] of [
   ],
   ["notices input half a second into a poll", [{ idle: 10, limit: 10 }, { idle: 24.5 }], [`1 ${OPEN}`, `2 ${OPEN}`]],
   ["ignores a millisecond of rounding in idle time", [{ idle: 600, limit: 600 }, { idle: 614.999 }], [`1 ${OPEN}`]],
+  [
+    "notices input two milliseconds short of its sleep",
+    [{ idle: 600, limit: 600 }, { idle: 614.998 }],
+    [`1 ${OPEN}`, `2 ${OPEN}`],
+  ],
   [
     "rearms after input during a sleep that overran by exactly a whole delay",
     [
@@ -433,7 +433,7 @@ for (const [name, steps, opened] of [
   ],
 ]) {
   test(`screen saver watcher ${name}`, posixShell, () => {
-    assert.deepEqual(runWatcher(steps).opened, opened);
+    assert.deepEqual(runWatcher(steps, options).opened, opened);
   });
 }
 
@@ -467,15 +467,13 @@ test("screen saver watcher keeps watching when ps fails while caffeinate still r
     { idle: 700, limit: 600, fails: true },
     { idle: 715, limit: 600 },
   ];
-  assert.deepEqual(runWatcher(steps, { pid: String(process.pid) }).opened, [`2 ${OPEN}`]);
-  assert.deepEqual(runWatcher(steps).opened, []);
+  assert.deepEqual(runWatcher(steps).opened, [`2 ${OPEN}`]);
+  assert.deepEqual(runWatcher(steps, { pid: GONE }).slept, []);
 });
 
 test("screen saver watcher times its sleep only while input would change something", posixShell, () => {
   const steps = [{ idle: 590, limit: 600 }, { idle: 600 }, { idle: 615 }, { idle: 2 }];
   assert.deepEqual(runWatcher(steps).timed, ["2", "3"]);
-  const uptimes = [1000, 1010, 1025, 1040];
-  assert.deepEqual(runWatcher(steps.map((step, index) => ({ ...step, uptime: uptimes[index] }))).timed, []);
 });
 
 test("screen saver watcher samples idle time last before starting the screen saver", posixShell, () => {
@@ -483,55 +481,23 @@ test("screen saver watcher samples idle time last before starting the screen sav
   assert.deepEqual(calls.slice(calls.indexOf("1 decision") + 1), ["1 pgrep", "1 ps", "1 ioreg", "1 open"]);
 });
 
-test("screen saver watcher decides again when its last checks take a second", posixShell, () => {
-  const { opened, decided } = runWatcher([
-    { idle: 600, limit: 600, uptime: [1000, 1000, 1000, 1000, 1001] },
-    { idle: 617, uptime: 1017 },
-  ]);
-  assert.deepEqual({ opened, decided }, { opened: [`2 ${OPEN}`], decided: ["1", "2"] });
-});
-
-test("screen saver watcher notices input hidden by a stall outside its sleep", posixShell, () => {
-  const { opened } = runWatcher([
-    { idle: 60, limit: 60, uptime: 1000 },
-    { idle: 84, uptime: 1085 },
-  ]);
-  assert.deepEqual(opened, [`1 ${OPEN}`, `2 ${OPEN}`]);
-});
-
-test("screen saver watcher doesn't mistake a slow idle read for input", posixShell, () => {
-  const { opened } = runWatcher([
-    { idle: 600, limit: 600, uptime: 1000 },
-    { idle: 620, uptime: [1015, 1020] },
-    { idle: 635, uptime: 1035 },
-  ]);
-  assert.deepEqual(opened, [`1 ${OPEN}`]);
-});
-
-test("screen saver watcher allows a millisecond of rounding against the uptime", posixShell, () => {
-  const run = (idle) =>
-    runWatcher([
-      { idle: 600, limit: 600, uptime: 1000 },
-      { idle, uptime: 1015 },
-    ]).opened;
-  assert.deepEqual(run(614.999), [`1 ${OPEN}`]);
-  assert.deepEqual(run(614.998), [`1 ${OPEN}`, `2 ${OPEN}`]);
-});
-
-test("screen saver watcher compares requested sleeps when the uptime can't be read", posixShell, () => {
-  const { opened } = runWatcher([
-    { idle: 600, limit: 600, uptime: 1000 },
-    { idle: 615 },
-    { idle: 2, uptime: 1032 },
-    { idle: 600, uptime: 1630 },
-  ]);
-  assert.deepEqual(opened, [`1 ${OPEN}`, `4 ${OPEN}`]);
-});
-
-test("screen saver watcher stops reading the uptime on Macs that don't report it", posixShell, () => {
-  const { clockReads, timed } = runWatcher([{ idle: 600, limit: 600 }, { idle: 615 }], { tbfrequency: true });
-  assert.deepEqual({ clockReads, timed }, { clockReads: ["1"], timed: ["1", "2"] });
-});
+test(
+  "screen saver watcher doesn't start the screen saver when caffeinate exits during the last idle sample",
+  posixShell,
+  (t) => {
+    // Orphaned, so launchd reaps it as soon as it's killed; kill -0 still finds an unreaped child.
+    const pid = execFileSync("/bin/sh", ["-c", "sleep 30 >/dev/null 2>&1 & echo $!"], { encoding: "utf8" }).trim();
+    t.after(() => {
+      try {
+        process.kill(Number(pid));
+      } catch {
+        // Already gone.
+      }
+    });
+    assert.deepEqual(runWatcher([{ idle: 600, limit: 600 }], { pid }).opened, [`1 ${OPEN}`]);
+    assert.deepEqual(runWatcher([{ idle: 600, limit: 600, killOnRecheck: pid }], { pid }).opened, []);
+  },
+);
 
 test("screen saver watcher rereads the delay only on checks that don't decide", posixShell, () => {
   const { read, decided } = runWatcher([

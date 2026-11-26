@@ -4,7 +4,7 @@
 
 - Add the **Allow screen saver** preference. On macOS, **Prevent display sleep** also kept the screen saver from starting. With this option, Coffee keeps the display awake and starts the screen saver after the Lock Screen delay, following macOS's default rules, for example waiting while another app keeps the display awake during video playback or a call. Your Mac still locks if it requires a password after the screen saver begins.
 - Coffee no longer loses track of its own session when macOS briefly can't list running processes.
-- If Coffee can't check its state right after you start or stop it, the start or stop now stands, a paused schedule stays paused, and auto-start tries again on its next check.
+- If Coffee can't check its state right after you start or stop it, the start or stop now stands, and a paused schedule stays paused.
 
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 

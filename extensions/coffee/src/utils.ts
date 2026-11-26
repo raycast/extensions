@@ -11,6 +11,7 @@ import { getUserStopDecision } from "./userStopPolicy";
 import {
   CaffeinationReason,
   CaffeinationState,
+  conditionalStopResult,
   ConditionalStopResult,
   getMacCaffeinationState,
   LegacySession,
@@ -201,7 +202,7 @@ export async function stopCaffeinateIfMatches(
     const state = await getCaffeinationState();
     if (state.sessionId !== expectedSessionId || state.reason?.kind !== "schedule") return { stopped: false, state };
     const stopped = await windowsStopCaffeinateIfMatches(expectedSessionId);
-    result = { stopped, state: stopped ? await stateAfter(getCaffeinationState) : await getCaffeinationState() };
+    result = await conditionalStopResult(stopped, getCaffeinationState);
   } else {
     result = await stopMacCaffeinateIfMatches(expectedSessionId);
   }
