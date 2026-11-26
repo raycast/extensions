@@ -18,6 +18,13 @@ import { homedir } from "os";
 import { join } from "path";
 import { FontInfo, FontFormat } from "./types";
 import { extractFonts, checkFontAccessibility } from "./utils/fontExtractor";
+import { FontActions } from "./components/font-actions";
+import { FontPreview } from "./components/font-preview";
+import {
+  filterFontsByPreferences,
+  getFontDisplayName,
+  getFaceLabel,
+} from "./utils/fontActions";
 import { downloadFonts } from "./utils/downloader";
 import { isValidUrl, getDomain } from "./utils/urlHelpers";
 
@@ -80,28 +87,6 @@ function sortFontsByFormat(fonts: FontWithSelection[]): FontWithSelection[] {
     if (familyDiff !== 0) return familyDiff;
     // Then by weight (numeric)
     return getWeightSortOrder(a.weight) - getWeightSortOrder(b.weight);
-  });
-}
-
-function filterFontsByPreferences(
-  fonts: FontInfo[],
-  prefs: Preferences,
-): FontInfo[] {
-  return fonts.filter((font) => {
-    switch (font.format) {
-      case "woff2":
-        return prefs.showWoff2;
-      case "woff":
-        return prefs.showWoff;
-      case "ttf":
-        return prefs.showTtf;
-      case "otf":
-        return prefs.showOtf;
-      case "eot":
-        return prefs.showEot;
-      default:
-        return true;
-    }
   });
 }
 
@@ -317,17 +302,6 @@ export default function ExtractFonts() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  function getFontDisplayName(font: FontInfo): string {
-    const parts = [font.family];
-    if (font.weight && font.weight !== "Regular") {
-      parts.push(font.weight);
-    }
-    if (font.style) {
-      parts.push(font.style.charAt(0).toUpperCase() + font.style.slice(1));
-    }
-    return parts.join(" ");
-  }
-
   function goBack() {
     setViewState("form");
     setFonts([]);
@@ -344,7 +318,7 @@ export default function ExtractFonts() {
         actions={
           <ActionPanel>
             <Action.SubmitForm
-              title="Download Fonts"
+              title="Find Fonts"
               onSubmit={handleSubmit}
               icon={Icon.Download}
             />
@@ -384,7 +358,7 @@ export default function ExtractFonts() {
       >
         {fonts.map((font, index) => (
           <List.Item
-            key={`${font.url}-${index}`}
+            key={getFaceLabel(font)}
             icon={
               font.accessible
                 ? font.selected
@@ -412,6 +386,14 @@ export default function ExtractFonts() {
                     onAction={() => toggleSelection(index)}
                   />
                 )}
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Preview Font"
+                    icon={Icon.Eye}
+                    target={<FontPreview font={font} pageUrl={sourceUrl} />}
+                  />
+                  <FontActions font={font} />
+                </ActionPanel.Section>
                 <Action
                   title="Download Selected Fonts"
                   icon={Icon.Download}

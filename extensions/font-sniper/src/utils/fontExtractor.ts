@@ -1,5 +1,5 @@
 import { FontInfo, FontFormat, ExtractedCSS } from "../types";
-import { resolveUrl } from "./urlHelpers";
+import { isValidUrl, resolveUrl } from "./urlHelpers";
 
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -67,9 +67,9 @@ function parseFormat(url: string, formatHint?: string): FontFormat {
     if (hint.includes("woff2")) return "woff2";
     if (hint.includes("woff")) return "woff";
     if (hint.includes("truetype") || hint.includes("ttf")) return "ttf";
-    if (hint.includes("opentype") || hint.includes("otf")) return "otf";
     if (hint.includes("embedded-opentype") || hint.includes("eot"))
       return "eot";
+    if (hint.includes("opentype") || hint.includes("otf")) return "otf";
   }
 
   // Infer from URL extension
@@ -248,16 +248,14 @@ function extractFontFaceBlocks(css: string): string[] {
     let braceCount = 1;
     let endIndex = startIndex;
 
-    // Limit parsing to prevent infinite loops on malformed CSS
-    const maxLength = Math.min(startIndex + 10000, css.length);
-
-    while (braceCount > 0 && endIndex < maxLength) {
+    while (braceCount > 0 && endIndex < css.length) {
       const char = css[endIndex];
       if (char === "{") braceCount++;
       else if (char === "}") braceCount--;
       endIndex++;
     }
 
+    fontFaceStart.lastIndex = endIndex;
     if (braceCount === 0) {
       blocks.push(css.slice(startIndex, endIndex - 1));
     }
@@ -383,11 +381,12 @@ function parseFontFaceBlocks(css: string, baseUrl: string): FontInfo[] {
   for (const block of blocks) {
     // Extract font-family
     const familyMatch = block.match(
-      /font-family\s*:\s*["']?([^"';}\n]+)["']?/i,
+      /font-family\s*:\s*(?:"([^"]+)"|'([^']+)'|([^;}\n]+))/i,
     );
     if (!familyMatch) continue;
 
-    const family = familyMatch[1].trim();
+    const family = (familyMatch[1] ?? familyMatch[2] ?? familyMatch[3]).trim();
+    if (!family) continue;
 
     // Extract font-weight (e.g., "400", "bold", "normal")
     const weightMatch = block.match(/font-weight\s*:\s*([^;}\n]+)/i);
@@ -399,24 +398,25 @@ function parseFontFaceBlocks(css: string, baseUrl: string): FontInfo[] {
     const styleMatch = block.match(/font-style\s*:\s*([^;}\n]+)/i);
     const style = styleMatch ? styleMatch[1].trim().toLowerCase() : undefined;
 
-    // Extract all src URLs with their format hints
-    // Match: url("path") format("woff2"), url('path') format('woff'), url(path)
-    const srcMatch = block.match(/src\s*:\s*([^;]+)/i);
-    if (!srcMatch) continue;
-
-    const srcValue = srcMatch[1];
+    // A data URL contains a semicolon before its base64 payload.
+    // Match URLs within each src declaration, including fallback declarations.
+    const sources = block.matchAll(
+      /(?:^|;)\s*src\s*:\s*((?:url\([^)]*\)|[^;])+)/gi,
+    );
+    const srcValue = Array.from(sources, (source) => source[1]).join(",");
 
     // Parse individual url() entries
     const urlRegex =
-      /url\(\s*["']?([^"')\s]+)["']?\s*\)(?:\s*format\(\s*["']?([^"')]+)["']?\s*\))?/gi;
+      /url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)(?:\s*format\(\s*["']?([^"')]+)["']?\s*\))?/gi;
     let urlMatch;
 
     while ((urlMatch = urlRegex.exec(srcValue)) !== null) {
-      const rawUrl = urlMatch[1];
-      const formatHint = urlMatch[2];
+      const rawUrl = urlMatch[1] ?? urlMatch[2] ?? urlMatch[3];
+      const formatHint = urlMatch[4];
 
       const isDataUri = rawUrl.startsWith("data:");
       const resolvedUrl = isDataUri ? rawUrl : resolveUrl(baseUrl, rawUrl);
+      if (!isDataUri && !isValidUrl(resolvedUrl)) continue;
       const format = parseFormat(rawUrl, formatHint);
 
       // Extract base64 content for data URIs
@@ -470,6 +470,8 @@ async function fetchCSSWithImports(
 }
 
 export async function extractFonts(pageUrl: string): Promise<FontInfo[]> {
+  if (!isValidUrl(pageUrl))
+    throw new Error("Enter an HTTP or HTTPS website URL.");
   const allFonts: FontInfo[] = [];
   const usedFamilies = new Set<string>();
 
@@ -504,11 +506,11 @@ export async function extractFonts(pageUrl: string): Promise<FontInfo[]> {
   const singleQuotedStyleRegex = /style='([^']*)'/gi;
   let inlineMatch;
   while ((inlineMatch = doubleQuotedStyleRegex.exec(html)) !== null) {
-    const families = extractUsedFontFamilies(inlineMatch[1]);
+    const families = extractUsedFontFamilies(`body {${inlineMatch[1]}}`);
     families.forEach((f) => usedFamilies.add(f));
   }
   while ((inlineMatch = singleQuotedStyleRegex.exec(html)) !== null) {
-    const families = extractUsedFontFamilies(inlineMatch[1]);
+    const families = extractUsedFontFamilies(`body {${inlineMatch[1]}}`);
     families.forEach((f) => usedFamilies.add(f));
   }
 

@@ -5,8 +5,7 @@ import { FontInfo, DownloadResult } from "../types";
 import { sanitizeFilename } from "./urlHelpers";
 import fontverter from "fontverter";
 
-const USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+import { readFontData } from "./fontData";
 
 function getExtension(format: string): string {
   switch (format) {
@@ -82,41 +81,14 @@ export async function downloadFont(
     const isWebFont = font.format === "woff2" || font.format === "woff";
     const shouldConvert = options.convertWoff2ToTtf && isWebFont;
 
-    let data: Uint8Array;
-
-    if (font.isDataUri && font.dataUriContent) {
-      // Decode base64 data URI
-      const buffer = Buffer.from(font.dataUriContent, "base64");
-      data = new Uint8Array(buffer);
-    } else {
-      // Fetch from URL
-      const headers: Record<string, string> = {
-        "User-Agent": USER_AGENT,
-        Accept: "*/*",
-      };
-      if (options.pageUrl) {
-        headers["Referer"] = options.pageUrl;
-      }
-
-      const response = await fetch(font.url, { headers });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      data = new Uint8Array(arrayBuffer);
-    }
+    let data = await readFontData(font, options.pageUrl);
 
     // Convert WOFF/WOFF2 to desktop format if enabled
     let outputFormat = font.format;
     if (shouldConvert) {
       try {
-        const convertedBuffer = await fontverter.convert(
-          Buffer.from(data),
-          "sfnt",
-        );
-        data = new Uint8Array(convertedBuffer);
+        const convertedBuffer = await fontverter.convert(data, "sfnt");
+        data = convertedBuffer;
         // Detect actual format (OTF or TTF) from the converted data
         outputFormat = detectSfntFormat(data);
       } catch (conversionError) {
@@ -137,20 +109,15 @@ export async function downloadFont(
     const ext = getExtension(outputFormat);
     const baseNameWithoutExt = filename.replace(/\.[^.]+$/, "");
     let counter = 1;
-    let fileExists = true;
-    while (fileExists) {
+    while (true) {
       try {
-        await fs.access(filePath);
-        // File exists, try next number
-        filePath = join(destFolder, `${baseNameWithoutExt}_${counter}${ext}`);
-        counter++;
-      } catch {
-        // File doesn't exist, we can use this path
-        fileExists = false;
+        await fs.writeFile(filePath, data, { flag: "wx" });
+        break;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        filePath = join(destFolder, `${baseNameWithoutExt}_${counter++}${ext}`);
       }
     }
-
-    await fs.writeFile(filePath, data);
 
     return {
       font,
