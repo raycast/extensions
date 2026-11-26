@@ -175,7 +175,12 @@ export function CleanView({ navigationTitle }: { navigationTitle?: string }) {
   function CleanActions() {
     return (
       <>
-        <Action title={`Clean Selected (${gb(chosenBytes)})`} icon={Icon.Trash} onAction={() => run(false)} />
+        <Action
+          title={`Clean Selected (${gb(chosenBytes)})`}
+          icon={Icon.Trash}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+          onAction={() => run(false)}
+        />
         {mayDelete && (
           <Action
             title="Delete for Good"
@@ -246,8 +251,10 @@ export function CleanView({ navigationTitle }: { navigationTitle?: string }) {
               icon={on ? Icon.Circle : Icon.CheckCircle}
               onAction={() => toggle(p.path)}
             />
-            <CleanActions />
             <PathActions path={p.path} />
+            <ActionPanel.Section>
+              <CleanActions />
+            </ActionPanel.Section>
             <ActionPanel.Section>
               <CommonActions />
             </ActionPanel.Section>
