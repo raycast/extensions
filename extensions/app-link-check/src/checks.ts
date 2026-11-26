@@ -51,7 +51,7 @@ async function readCapped(
     chunks.push(value);
   }
   return {
-    text: Buffer.concat(chunks).toString("utf8"),
+    text: new TextDecoder().decode(Buffer.concat(chunks)),
     tooLarge: false,
   };
 }
