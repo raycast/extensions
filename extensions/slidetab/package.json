@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slidetab",
+  "title": "SlideTab",
+  "description": "Control SlideTab — the tactile macOS trackpad window & app switcher with Force Touch haptics.",
+  "icon": "extension-icon.png",
+  "author": "slidetab",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Productivity", "System"],
+  "commands": [
+    {
+      "name": "switch-scope",
+      "title": "Set Switching Scope & Gesture",
+      "subtitle": "SlideTab",
+      "description": "Quickly switch between All Windows, Apps Only, Current App, or change trackpad finger gestures.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-slidetab",
+      "title": "Toggle SlideTab",
+      "subtitle": "SlideTab",
+      "description": "Pause or resume SlideTab trackpad gestures globally.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause-current-app",
+      "title": "Toggle Pause in Current App",
+      "subtitle": "SlideTab",
+      "description": "Add or remove the frontmost app from SlideTab's per-app auto-pause list.",
+      "mode": "no-view"
+    },
+    {
+      "name": "preview-switch-bar",
+      "title": "Preview Switch Bar",
+      "subtitle": "SlideTab",
+      "description": "Pop open the SlideTab Switch Bar on screen for 2.5 seconds.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open SlideTab Settings",
+      "subtitle": "SlideTab",
+      "description": "Open the SlideTab preferences and live trackpad calibration window.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
