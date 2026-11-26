@@ -21,6 +21,7 @@ function harness(overrides = {}) {
   const storage = new Map();
   const launched = [];
   const native = {
+    Action: { Style: { Regular: "regular", Destructive: "destructive" } },
     environment: { launchType: "user" },
     LaunchType: { Background: "background", UserInitiated: "user" },
     getPreferenceValues: () => ({ baseUrl: "https://gateway.test/api/v1", webAppUrl: "https://web.test" }),
@@ -348,6 +349,7 @@ test("AI confirmation shows concrete meals; execution only creates a local draft
     ),
   };
   const confirmation = await tool.confirmation(input);
+  assert.equal(confirmation.style, "regular");
   assert.equal(confirmation.info[1].value, "Rice · Beans");
   assert.match(confirmation.message, /No meals will be submitted/);
   assert.equal(h.storage.size, 0);
@@ -358,6 +360,9 @@ test("AI confirmation shows concrete meals; execution only creates a local draft
   assert.equal(h.storage.size, 1);
   assert.equal(h.launched[0].name, "plan-my-meals");
   assert.equal(h.launched[0].context.review, true);
+  const priorDraft = [...h.storage.values()][0];
+  assert.equal((await tool.confirmation(input)).style, "destructive");
+  assert.equal([...h.storage.values()][0], priorDraft);
 });
 
 test("AI refuses stale saved state, repeated weekdays and incompatible choices before confirmation", async () => {
@@ -401,6 +406,28 @@ test("AI lunch lookup reads saved choices without inventing consumption or chang
   assert.equal(h.storage.size, 0);
 });
 
+for (const name of ["my-meals", "plan-my-meals"]) {
+  test(`disabled ${name} navigation shows a failure instead of rejecting`, async () => {
+    const failure = new Error("Command is disabled");
+    const toasts = [];
+    const h = harness({
+      "@raycast/api": {
+        LaunchType: { UserInitiated: "user" },
+        launchCommand: async (input) => {
+          assert.equal(input.name, name);
+          assert.equal(input.type, "user");
+          throw failure;
+        },
+      },
+      "@raycast/utils": { showFailureToast: async (error, options) => toasts.push({ error, ...options }) },
+    });
+    await h.load("src/lib/meals/navigation.ts").openMealsCommand(name);
+    assert.equal(toasts.length, 1);
+    assert.equal(toasts[0].error, failure);
+    assert.match(toasts[0].title, /Could not open/);
+  });
+}
+
 function uiHarness(file, exportName, props, apiOverrides = {}, confirm = true, cached = {}, moduleOverrides = {}) {
   const state = [];
   let cursor = 0;
@@ -408,6 +435,11 @@ function uiHarness(file, exportName, props, apiOverrides = {}, confirm = true, c
   let pops = 0;
   const pushed = [];
   const confirmations = [];
+  const useState = (value) => {
+    const i = cursor++;
+    if (!(i in state)) state[i] = value;
+    return [state[i], (next) => (state[i] = typeof next === "function" ? next(state[i]) : next)];
+  };
   const Form = Object.assign(() => {}, {
     Dropdown: Object.assign(() => {}, { Item: "DropdownItem" }),
     Description: "Description",
@@ -453,13 +485,43 @@ function uiHarness(file, exportName, props, apiOverrides = {}, confirm = true, c
     react: {
       useRef: (current) => ({ current }),
       useEffect: () => {},
-      useState: (value) => {
-        const i = cursor++;
-        if (!(i in state)) state[i] = value;
-        return [state[i], (next) => (state[i] = typeof next === "function" ? next(state[i]) : next)];
-      },
+      useState,
     },
     "@raycast/utils": {
+      showFailureToast: async (error, options) => toasts.push({ ...options, message: error.message }),
+      useForm: ({ initialValues, validation, onSubmit }) => {
+        const [values, setValues] = useState(initialValues);
+        const [errors, setErrors] = useState({});
+        const setValidationError = (id, error) => setErrors((current) => ({ ...current, [id]: error }));
+        return {
+          values,
+          setValue: (id, value) => setValues((current) => ({ ...current, [id]: value })),
+          setValidationError,
+          itemProps: Object.fromEntries(
+            Object.keys(initialValues).map((id) => [
+              id,
+              {
+                id,
+                value: values[id],
+                error: errors[id],
+                onChange: (value) => {
+                  setValues((current) => ({ ...current, [id]: value }));
+                  setValidationError(id, undefined);
+                },
+                onBlur: () => setValidationError(id, validation[id]?.(values[id])),
+              },
+            ]),
+          ),
+          handleSubmit: async (submitted) => {
+            const next = { ...values, ...submitted };
+            const errors = Object.fromEntries(
+              Object.entries(validation).map(([id, validate]) => [id, validate(next[id])]),
+            );
+            setErrors(errors);
+            if (!Object.values(errors).some(Boolean)) await onSubmit(next);
+          },
+        };
+      },
       useCachedPromise: (fn) => ({
         data: undefined,
         isLoading: false,
@@ -584,6 +646,48 @@ test("absence confirmation reports the server's late classification", async () =
   assert.equal(ui.pops(), 1);
 });
 
+test("invalid absence fields prevent writes and retain inputs for correction", async () => {
+  let notices = 0;
+  const ui = uiHarness(
+    "src/views/meals/absence.tsx",
+    "MealAbsenceForm",
+    {
+      account: "employee-1",
+      date: "2026-11-27",
+      onSaved() {},
+    },
+    { notifyAbsence: async () => notices++ },
+  );
+  formControl(ui.render(), "date").onChange("2026-11-25");
+  await formSubmit(ui.render())({ reason: "Meeting" });
+  assert.match(formControl(ui.render(), "date").error, /today or later/);
+  formControl(ui.render(), "date").onChange("2026-11-27");
+  await formSubmit(ui.render())({ reason: "x".repeat(301) });
+  assert.match(formControl(ui.render(), "reason").error, /300 characters/);
+  assert.equal(formControl(ui.render(), "date").value, "2026-11-27");
+  assert.equal(notices, 0);
+  assert.equal(ui.confirmations.length, 0);
+  assert.equal(ui.pops(), 0);
+});
+
+test("the day editor requires an offered main but can explicitly skip without one", async () => {
+  const applied = [];
+  const ui = uiHarness("src/views/meals/day-editor.tsx", "MealDayEditor", {
+    choice: { day: 1, state: "unselected", mainId: null, sideId: null },
+    options,
+    rules: [],
+    onApply: async (choice) => applied.push(choice),
+  });
+  await formSubmit(ui.render())();
+  assert.equal(applied.length, 0);
+  assert.ok(formControl(ui.render(), "main").error);
+  await uiNodes(ui.render())
+    .find((node) => node.props.title === "Skip This Day")
+    .props.onAction();
+  assert.equal(applied[0].state, "skipped");
+  assert.equal(ui.pops(), 1);
+});
+
 test("a gateway 502 after commit is reconciled against the saved selection", async () => {
   let reads = 0,
     writes = 0;
@@ -676,7 +780,14 @@ test("cancelling a submitted plan keeps the separate unsent draft", async () => 
       },
     },
   );
-  const cancel = uiNodes(ui.render()).find((node) => node.props.title === "Cancel Submitted Plan");
+  const tree = ui.render();
+  assert.equal(tree.props.navigationTitle, undefined);
+  const offeredDay = uiNodes(tree).find((node) => node.props.id === "1");
+  assert.ok(offeredDay.props.keywords.includes("Rice"));
+  for (const title of ["Reset Draft", "Use Saved Plan"]) {
+    assert.equal(uiNodes(tree).find((node) => node.props.title === title).props.style, "destructive");
+  }
+  const cancel = uiNodes(tree).find((node) => node.props.title === "Cancel Submitted Plan");
   await cancel.props.onAction();
   assert.equal(cancelled, 1);
   assert.equal(removed, 0);

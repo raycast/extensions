@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  Keyboard,
-  LaunchType,
-  List,
-  launchCommand,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getAbsences, getMealsHistory } from "./lib/api/meals";
@@ -28,6 +17,7 @@ import {
   windowLabel,
 } from "./lib/meals/planning";
 import { loadMealsOverview } from "./lib/meals/service";
+import { openMealsCommand } from "./lib/meals/navigation";
 import { refreshMealsStatus } from "./lib/meals/status";
 import type { AbsenceNotice, HistorySelection, MealsMenu, MealSelection } from "./lib/meals/schemas";
 import { AuthErrorView } from "./views/auth-error";
@@ -42,7 +32,7 @@ async function loadHistory(account: string) {
 async function loadAbsences(_account: string, from: string, to: string) {
   return getAbsences(from, to);
 }
-const openPlanner = () => launchCommand({ name: "plan-my-meals", type: LaunchType.UserInitiated });
+const openPlanner = () => openMealsCommand("plan-my-meals");
 
 export default function MyMealsCommand() {
   const { session, error, revalidate } = useSession();
@@ -118,7 +108,6 @@ function MyMeals({ account }: { account: string }) {
     <List
       isLoading={isLoading || history.isLoading || absences.isLoading}
       isShowingDetail
-      navigationTitle={`My Meals${scope === "history" ? " · History" : ` · ${weekLabel(week)}`}`}
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? "")}
       searchBarPlaceholder="Find a weekday or meal"
@@ -204,7 +193,7 @@ function MyMeals({ account }: { account: string }) {
             <List.Item
               key={entry.id}
               title={weekLabel(entry.week_start)}
-              subtitle={entry.cancelled ? "Cancelled" : "Saved"}
+              subtitle={entry.cancelled ? "Canceled" : "Saved"}
               keywords={entry.items.flatMap((item) => [item.main_name ?? "", item.side_name ?? ""])}
               icon={entry.cancelled ? Icon.MinusCircle : Icon.Clock}
               detail={<List.Item.Detail markdown={historyMarkdown(entry)} />}
@@ -235,7 +224,7 @@ function MyMeals({ account }: { account: string }) {
         </>
       ) : (
         <List.Section
-          title={scope === "current" ? "This Week" : "Next Week"}
+          title={`${scope === "current" ? "This Week" : "Next Week"} · ${weekLabel(week)}`}
           subtitle={weekSelection ? `Saved ${eatTime(weekSelection.submitted_at)}` : "No saved selection"}
         >
           {DAYS.map((day) => {
@@ -403,7 +392,7 @@ function dayMarkdown(
 function historyMarkdown(entry: HistorySelection): string {
   return [
     `# ${weekLabel(entry.week_start)}`,
-    `**${entry.cancelled ? "Cancelled · historical choices only" : "Saved"}** · ${eatTime(entry.submitted_at)}`,
+    `**${entry.cancelled ? "Canceled · historical choices only" : "Saved"}** · ${eatTime(entry.submitted_at)}`,
     ...DAYS.map((day) => {
       const choice = entry.items.find((item) => item.day === day);
       return `- **${WEEKDAYS[day - 1]}:** ${choice?.main_name ? [choice.main_name, choice.side_name].filter(Boolean).join(" · ") : "Skipped"}`;

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { getNextMealSelection, setMealAvailability, setMealReminders } from "../../lib/api/meals";
 import { addDays, currentMonday, weekLabel } from "../../lib/meals/planning";
 import type { MealsProfile } from "../../lib/meals/schemas";
-import { describeError } from "../../lib/api/errors";
+import { showFailureToast } from "@raycast/utils";
 
 export function MealPreferences({ profile, onSaved }: { profile: MealsProfile; onSaved: () => void }) {
   const { pop } = useNavigation();
@@ -48,10 +48,8 @@ export function MealPreferences({ profile, onSaved }: { profile: MealsProfile; o
       await showToast({ style: Toast.Style.Success, title: "Meal preferences saved" });
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: availabilitySaved ? "Availability saved; reminders not confirmed" : "Preferences were not confirmed",
-        message: describeError(error),
       });
     } finally {
       setBusy(false);
@@ -77,7 +75,7 @@ export function MealPreferences({ profile, onSaved }: { profile: MealsProfile; o
       />
       <Form.Description
         title="Availability"
-        text="Turning this off can cancel an existing next-week submission. You will be asked before it is cancelled."
+        text="Turning this off can cancel an existing next-week submission. You will be asked before it is canceled."
       />
       <Form.Separator />
       <Form.Checkbox

@@ -164,7 +164,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "ai": {
-    "instructions": "Help employees read their own meals and prepare weekly meal drafts. Interpret dates in Africa/Dar_es_Salaam. Get saved state with get-my-meals and menu IDs and compatibility with get-meal-menu using week=target before preparing a draft. The planning target can differ from the regular next calendar week under an administrator override. Never invent IDs, meals, dietary facts, holidays or a collection status. Ask about unclear meal preferences and skipped days. prepare-meal-plan requires all five days and the exact expectedSavedAt from a fresh read, requires confirmation, and only prepares a LOCAL DRAFT. Always say that the employee must review and submit in Plan My Meals. Never claim a draft is submitted, ordered or cancelled. Existing quick-fill means recent eligible choices, not a guaranteed previous week. Do not offer absence edits/withdrawals, consumption marking, charge reversals or arbitrary historical-week reuse. For a question about today, call get-my-meals without a date so the tool resolves the current EAT date. Do not guess the date from model knowledge. A closed selection window still permits preparing a local draft; explain that server submission must wait for an eligible window.",
+    "instructions": "Help employees read their own meals and prepare weekly meal drafts. Interpret dates in Africa/Dar_es_Salaam. Get saved state with get-my-meals and menu IDs and compatibility with get-meal-menu using week=target before preparing a draft. The planning target can differ from the regular next calendar week under an administrator override. Never invent IDs, meals, dietary facts, holidays or a collection status. Ask about unclear meal preferences and skipped days. prepare-meal-plan requires all five days and the exact expectedSavedAt from a fresh read, requires confirmation, and only prepares a LOCAL DRAFT. Always say that the employee must review and submit in Plan My Meals. Never claim a draft is submitted, ordered or canceled. Existing quick-fill means recent eligible choices, not a guaranteed previous week. Do not offer absence edits/withdrawals, consumption marking, charge reversals or arbitrary historical-week reuse. For a question about today, call get-my-meals without a date so the tool resolves the current EAT date. Do not guess the date from model knowledge. A closed selection window still permits preparing a local draft; explain that server submission must wait for an eligible window.",
     "evals": [
       {
         "input": "@ipf-os What is my lunch today?",
@@ -241,6 +241,78 @@
             "note": "Only saved selections are returned. A prepared local draft is not a submission."
           }
         }
+      },
+      {
+        "input": "@ipf-os Prepare a local draft for the target week: Rice with Beans on Monday, and explicitly skip Tuesday through Friday. I will review it and submit it myself in Plan My Meals.",
+        "mocks": {
+          "get-my-meals": {
+            "date": "2026-11-27",
+            "targetWeek": {
+              "id": "9",
+              "week_start": "2026-11-30"
+            },
+            "targetSelection": null,
+            "expectedSavedAt": ""
+          },
+          "get-meal-menu": {
+            "menu": {
+              "id": "9",
+              "week_start": "2026-11-30",
+              "items": [
+                {
+                  "day": 1,
+                  "id": "10",
+                  "name": "Rice",
+                  "role": "main",
+                  "special": false,
+                  "description": null,
+                  "note": null
+                },
+                {
+                  "day": 1,
+                  "id": "20",
+                  "name": "Beans",
+                  "role": "side",
+                  "special": false,
+                  "description": null,
+                  "note": null
+                }
+              ]
+            },
+            "compatibilityRules": [],
+            "expectedSavedAt": "",
+            "note": "Preview only. Preparing a local draft does not submit meals."
+          },
+          "prepare-meal-plan": {
+            "submitted": false,
+            "draftPrepared": true,
+            "reviewOpened": true,
+            "week": "30 Nov–4 Dec 2026",
+            "message": "Draft prepared. Review it in Plan My Meals and explicitly submit there. No meals have been submitted."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-my-meals"
+          },
+          {
+            "callsTool": "get-meal-menu"
+          },
+          {
+            "callsTool": "prepare-meal-plan"
+          },
+          {
+            "includes": "review"
+          },
+          {
+            "includes": "submit"
+          },
+          {
+            "not": {
+              "includes": "submitted successfully"
+            }
+          }
+        ]
       }
     ]
   }

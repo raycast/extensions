@@ -1,7 +1,7 @@
-import { LaunchType, launchCommand, type Tool } from "@raycast/api";
+import { Action, LaunchType, launchCommand, type Tool } from "@raycast/api";
 import { z } from "zod";
 import { getAuthProvider } from "../lib/auth";
-import { mealsAccountKey, writeMealDraft } from "../lib/meals/drafts";
+import { mealsAccountKey, readMealDraft, writeMealDraft } from "../lib/meals/drafts";
 import { DAYS, WEEKDAYS, choiceLabel, createDraft, draftIssues, weekLabel } from "../lib/meals/planning";
 import { loadMealPlanner } from "../lib/meals/service";
 import { mealId, weekday, type DayChoice } from "../lib/meals/schemas";
@@ -67,8 +67,10 @@ async function prepare(input: Input) {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const { draft, planner } = await prepare(input);
+  const { account, draft, planner } = await prepare(input);
+  const replacingDraft = await readMealDraft(account, draft.planId);
   return {
+    style: replacingDraft ? Action.Style.Destructive : Action.Style.Regular,
     message:
       "Prepare this local meal draft? This replaces any existing unsent draft for this week and opens the full review. No meals will be submitted automatically.",
     info: [

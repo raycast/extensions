@@ -145,14 +145,7 @@ export function MealPlanner({ account, reviewOnOpen = false }: { account: string
     return <List isLoading searchText={searchText} onSearchTextChange={setSearchText} />;
   if (!draft || !target)
     return (
-      <List
-        isLoading={isLoading}
-        navigationTitle="Meal Planning"
-        isShowingDetail
-        searchText={searchText}
-        onSearchTextChange={setSearchText}
-        filtering
-      >
+      <List isLoading={isLoading} isShowingDetail searchText={searchText} onSearchTextChange={setSearchText} filtering>
         <List.Item
           icon={Icon.Calendar}
           title="Planning menu is not available"
@@ -209,6 +202,7 @@ export function MealPlanner({ account, reviewOnOpen = false }: { account: string
       <ActionPanel.Section title="Draft">
         <Action
           title="Reset Draft"
+          style={Action.Style.Destructive}
           icon={Icon.ArrowCounterClockwise}
           onAction={async () => {
             if (busy) return;
@@ -237,6 +231,7 @@ export function MealPlanner({ account, reviewOnOpen = false }: { account: string
         {stored.data && (
           <Action
             title={data.myNextSelection ? "Use Saved Plan" : "Discard Draft"}
+            style={Action.Style.Destructive}
             icon={Icon.ArrowCounterClockwise}
             onAction={async () => {
               if (
@@ -275,15 +270,15 @@ export function MealPlanner({ account, reviewOnOpen = false }: { account: string
                   title: `Cancel meals for ${weekLabel(draft.weekStart)}?`,
                   message:
                     `Saved days: ${data.myNextSelection?.items.map((day) => WEEKDAYS[day.day - 1]).join(", ") || "none"}. ` +
-                    "The submitted plan will be cancelled. Unsent draft choices will be kept. You can submit again only while the server permits it.",
+                    "The submitted plan will be canceled. Unsent draft choices will be kept. You can submit again only while the server permits it.",
                   primaryAction: { title: "Cancel Submitted Plan", style: Alert.ActionStyle.Destructive },
                 }))
               )
                 return;
               setBusy(true);
               await mealAction(
-                "Cancelling plan…",
-                "Submitted meal plan cancelled",
+                "Canceling plan…",
+                "Submitted meal plan canceled",
                 async () => {
                   await cancelMealSelection(draft.planId);
                 },
@@ -306,7 +301,6 @@ export function MealPlanner({ account, reviewOnOpen = false }: { account: string
   return (
     <List
       isLoading={isLoading || stored.isLoading || busy}
-      navigationTitle={`Plan Meals · ${weekLabel(draft.weekStart)}`}
       isShowingDetail
       searchBarPlaceholder="Find a weekday or meal"
       searchText={searchText}
@@ -335,7 +329,7 @@ export function MealPlanner({ account, reviewOnOpen = false }: { account: string
               ? "Submitted Plan · edit a day to revise"
               : "New Plan"
         }
-        subtitle={`${reviewed} of ${menuDays.length} menu days ready`}
+        subtitle={`${weekLabel(draft.weekStart)} · ${reviewed} of ${menuDays.length} menu days ready`}
       >
         {draft.days.map((choice) => {
           const issue = issues.find((issue) => issue.day === choice.day);
@@ -346,7 +340,11 @@ export function MealPlanner({ account, reviewOnOpen = false }: { account: string
               id={String(choice.day)}
               title={`${WEEKDAYS[choice.day - 1].slice(0, 3)} ${dateLabel(addDays(draft.weekStart, choice.day - 1))}`}
               subtitle={choiceLabel(choice, data.options)}
-              keywords={[WEEKDAYS[choice.day - 1], choiceLabel(choice, data.options)]}
+              keywords={[
+                WEEKDAYS[choice.day - 1],
+                choiceLabel(choice, data.options),
+                ...data.options.filter((option) => option.day === choice.day).map((option) => option.name),
+              ]}
               icon={{
                 source:
                   issue || choice.state === "unselected"

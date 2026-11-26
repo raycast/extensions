@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useState } from "react";
+import { useForm, showFailureToast } from "@raycast/utils";
 import { choiceIssue, compatibleSides, WEEKDAYS } from "../../lib/meals/planning";
 import type { CompatibilityRule, DayChoice, MenuOption } from "../../lib/meals/schemas";
 
@@ -15,27 +16,39 @@ export function MealDayEditor({
   onApply: (choice: DayChoice) => Promise<void>;
 }) {
   const { pop } = useNavigation();
-  const [mainId, setMainId] = useState(choice.mainId ?? "");
-  const [sideId, setSideId] = useState(choice.sideId ?? "");
-  const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [sideCleared, setSideCleared] = useState(false);
+  const { values, itemProps, handleSubmit, setValue, setValidationError } = useForm<{ main: string; side: string }>({
+    initialValues: { main: choice.mainId ?? "", side: choice.sideId ?? "" },
+    validation: {
+      main: (value) => {
+        if (!value) return "Choose a main meal or explicitly skip this day.";
+        return choiceIssue({ day: choice.day, state: "selected", mainId: value, sideId: null }, options, rules);
+      },
+      side: (value): string | null | undefined => {
+        if (!values.main) return;
+        return choiceIssue(
+          { day: choice.day, state: "selected", mainId: values.main, sideId: value || null },
+          options,
+          rules,
+        );
+      },
+    },
+    onSubmit: ({ main, side }) => apply({ day: choice.day, state: "selected", mainId: main, sideId: side || null }),
+  });
+  const mainId = values.main;
+  const sideId = values.side;
   const mains = options.filter((item) => item.day === choice.day && item.role === "main");
   const main = mains.find((item) => item.id === mainId);
   const sides = compatibleSides(choice.day, mainId, options, rules);
   const apply = async (next: DayChoice) => {
     if (busy) return;
-    const issue = choiceIssue(next, options, rules);
-    if (issue) {
-      setError(issue);
-      return;
-    }
     setBusy(true);
     try {
       await onApply(next);
       pop();
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Could not keep this choice");
+      await showFailureToast(error, { title: "Could not keep this meal choice" });
     } finally {
       setBusy(false);
     }
@@ -47,13 +60,7 @@ export function MealDayEditor({
       actions={
         <ActionPanel>
           {mains.length > 0 && (
-            <Action.SubmitForm
-              title="Apply to Draft"
-              icon={Icon.Checkmark}
-              onSubmit={() =>
-                apply({ day: choice.day, state: "selected", mainId, sideId: main?.special ? null : sideId || null })
-              }
-            />
+            <Action.SubmitForm title="Apply to Draft" icon={Icon.Checkmark} onSubmit={handleSubmit} />
           )}
           <Action
             title="Skip This Day"
@@ -65,16 +72,14 @@ export function MealDayEditor({
     >
       {mains.length ? (
         <Form.Dropdown
-          id="main"
+          {...itemProps.main}
           title="Main"
-          value={mainId}
           storeValue={false}
-          error={error}
           onChange={(value) => {
-            setMainId(value);
-            setError(undefined);
+            itemProps.main.onChange?.(value);
             if (sideId && !compatibleSides(choice.day, value, options, rules).some((item) => item.id === sideId)) {
-              setSideId("");
+              setValue("side", "");
+              setValidationError("side", undefined);
               setSideCleared(true);
             }
           }}
@@ -94,13 +99,11 @@ export function MealDayEditor({
       ) : (
         main && (
           <Form.Dropdown
-            id="side"
+            {...itemProps.side}
             title="Side"
-            value={sideId}
             onChange={(value) => {
-              setSideId(value);
+              itemProps.side.onChange?.(value);
               setSideCleared(false);
-              setError(undefined);
             }}
             storeValue={false}
           >

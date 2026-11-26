@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, confirmAlert, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useForm } from "@raycast/utils";
 import { getAbsences, notifyAbsence } from "../../lib/api/meals";
 import { absenceIsLate, eatToday, eatTime, validAbsenceDate } from "../../lib/meals/planning";
 import { mealAction } from "./common";
@@ -11,25 +11,28 @@ async function loadExistingAbsence(_account: string, date: string) {
 
 export function MealAbsenceForm({ account, date, onSaved }: { account: string; date?: string; onSaved: () => void }) {
   const { pop } = useNavigation();
-  const [chosenDate, setChosenDate] = useState(date ?? eatToday());
-  const [error, setError] = useState<string>();
-  const [reasonError, setReasonError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const { values, itemProps, handleSubmit } = useForm<{ date: string; reason: string }>({
+    initialValues: { date: date ?? eatToday(), reason: "" },
+    validation: {
+      date: (value) => {
+        if (!value || !validAbsenceDate(value)) return "Use a valid date today or later, in YYYY-MM-DD format.";
+      },
+      reason: (value) => {
+        if (value && value.trim().length > 300) return "Keep the reason within 300 characters.";
+      },
+    },
+    onSubmit: submit,
+  });
+  const chosenDate = values.date;
   const existing = useCachedPromise(loadExistingAbsence, [account, chosenDate], {
     execute: validAbsenceDate(chosenDate),
     keepPreviousData: false,
   });
   const notice = existing.data?.[0];
-  async function submit(values: { reason: string }) {
+  async function submit(values: { date: string; reason: string }) {
     if (busy) return;
-    if (!validAbsenceDate(chosenDate)) {
-      setError("Use a valid date today or later, in YYYY-MM-DD format.");
-      return;
-    }
-    if (values.reason.trim().length > 300) {
-      setReasonError("Keep the reason within 300 characters.");
-      return;
-    }
+    const chosenDate = values.date;
     const confirmed = await confirmAlert({
       title: `Notify absence for ${chosenDate}?`,
       message: `${absenceIsLate(chosenDate) ? "This is a late notice: the deadline was 08:00 EAT. " : ""}This records a notice for Meals staff. It does not cancel a locked order or reverse a charge. Notices cannot be edited or withdrawn here.`,
@@ -60,24 +63,14 @@ export function MealAbsenceForm({ account, date, onSaved }: { account: string; d
       isLoading={busy || existing.isLoading}
       actions={
         <ActionPanel>
-          {!notice && <Action.SubmitForm title="Notify Absence" icon={Icon.Calendar} onSubmit={submit} />}
+          {!notice && <Action.SubmitForm title="Notify Absence" icon={Icon.Calendar} onSubmit={handleSubmit} />}
           {existing.error && (
             <Action title="Check Existing Notice" icon={Icon.ArrowClockwise} onAction={existing.revalidate} />
           )}
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="date"
-        title="Service Date (EAT)"
-        value={chosenDate}
-        onChange={(value) => {
-          setChosenDate(value);
-          setError(undefined);
-        }}
-        error={error}
-        placeholder="YYYY-MM-DD"
-      />
+      <Form.TextField {...itemProps.date} title="Service Date (EAT)" placeholder="YYYY-MM-DD" />
       {notice && (
         <Form.Description
           title="Existing Notice"
@@ -90,15 +83,7 @@ export function MealAbsenceForm({ account, date, onSaved }: { account: string; d
           text={`${existing.error.message}. Existing notices will be checked again before saving.`}
         />
       )}
-      {!notice && (
-        <Form.TextArea
-          id="reason"
-          title="Reason"
-          error={reasonError}
-          onChange={() => setReasonError(undefined)}
-          placeholder="Optional · up to 300 characters"
-        />
-      )}
+      {!notice && <Form.TextArea {...itemProps.reason} title="Reason" placeholder="Optional · up to 300 characters" />}
       <Form.Description
         title="Notice Deadline"
         text="A notice is on time only when received before 08:00 EAT on the service date."

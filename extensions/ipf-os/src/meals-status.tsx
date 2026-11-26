@@ -1,8 +1,9 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
+import { Icon, MenuBarExtra } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSession } from "./lib/hooks/use-session";
 import { mealsAccountKey } from "./lib/meals/drafts";
 import { currentMonday, eatToday, windowLabel } from "./lib/meals/planning";
+import { openMealsCommand } from "./lib/meals/navigation";
 import { loadMealsOverview } from "./lib/meals/service";
 
 export default function MealsStatusCommand() {
@@ -28,14 +29,8 @@ export default function MealsStatusCommand() {
       />
       {result.data && <MenuBarExtra.Item title={windowLabel(result.data.dashboard.windowStatus)} />}
       {result.error && <MenuBarExtra.Item title="Could not refresh Meals" subtitle={result.error.message} />}
-      <MenuBarExtra.Item
-        title="My Meals"
-        onAction={() => launchCommand({ name: "my-meals", type: LaunchType.UserInitiated })}
-      />
-      <MenuBarExtra.Item
-        title="Plan My Meals"
-        onAction={() => launchCommand({ name: "plan-my-meals", type: LaunchType.UserInitiated })}
-      />
+      <MenuBarExtra.Item title="My Meals" onAction={() => openMealsCommand("my-meals")} />
+      <MenuBarExtra.Item title="Plan My Meals" onAction={() => openMealsCommand("plan-my-meals")} />
     </MenuBarExtra>
   );
 }

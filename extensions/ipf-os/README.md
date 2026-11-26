@@ -58,7 +58,7 @@ menu and any absence notice.
 
 Use the Action Panel to open the planner, manage next-week availability, change
 meal reminders, or notify Meals staff of an absence. Turning availability off
-asks before cancelling an existing submission. Absence notices are separate
+asks before canceling an existing submission. Absence notices are separate
 from cancellation: notices received at or after **08:00 EAT** are late, and do
 not promise an order cancellation or charge reversal. Notices cannot be edited
 or withdrawn here.
@@ -82,7 +82,7 @@ a saved plan changed through another client. Final submission rechecks the menu,
 selection window and saved plan; the API does not provide atomic conflict checks.
 
 Use **Reset Draft** to start again, or **Use Saved Plan** / **Discard Draft** to
-remove unsent changes. Cancelling a submitted plan keeps a separate unsent draft.
+remove unsent changes. Canceling a submitted plan keeps a separate unsent draft.
 Drafts for other weeks remain visible under **Other Unsubmitted Drafts**, with
 their original dates and a read-only view.
 
