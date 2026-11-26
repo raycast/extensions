@@ -57,6 +57,22 @@ for (const [args, duration, label] of [
   });
 }
 
+test("leaves out -u when display sleep is allowed, as caffeinate would keep the display awake for the whole duration", async () => {
+  const { load, processes, preferences } = createHarness({ preferences: { preventDisplay: false } });
+  const command = load("caffeinateFor.ts").default;
+  await command({ arguments: { minutes: "2" } });
+  // With nothing else to assert, caffeinate falls back to -i rather than keeping the display awake.
+  Object.assign(preferences, { preventSystem: false, preventDisk: false });
+  await command({ arguments: { minutes: "2" } });
+  assert.deepEqual(
+    processes.spawn.mock.calls.map(({ arguments: [, flags] }) => Array.from(flags)),
+    [
+      ["-mi", "-t", "120"],
+      ["-t", "120"],
+    ],
+  );
+});
+
 for (const args of [
   {},
   { hours: "", minutes: "", seconds: "" },
