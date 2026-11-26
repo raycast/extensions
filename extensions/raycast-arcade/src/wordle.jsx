@@ -22,6 +22,10 @@ let Color = {
   GREEN: "#6BAA64",
 };
 
+// Half the cap height of Helvetica Neue Bold at font-size 300. Putting the baseline this far below
+// the middle of a tile centers the letter without alignment-baseline, which renderers disagree on.
+const letterBaselineOffset = 108;
+
 function generateRow(rows) {
   let spacing = 25;
   let width = 500;
@@ -38,8 +42,8 @@ function generateRow(rows) {
       svgString += `
             <rect x="${width * i + spacing * i}" width="${width}" height="${width}" fill="${color}"/>
             <text x="${width * i + spacing * i + width / 2}" y="${
-              width - width / 6
-            }" text-anchor="middle" alignment-baseline="middle" class="large" font-size="300" font-weight="bold" fill="white" font-family="Helvetica Neue">${letter}</text>
+              width / 2 + letterBaselineOffset
+            }" text-anchor="middle" class="large" font-size="300" font-weight="bold" fill="white" font-family="Helvetica Neue">${letter}</text>
             `;
     }
   }
@@ -592,54 +596,54 @@ export default function Wordle() {
       let percents = convertToPercentages(distribution);
 
       let svg = `
-      <svg width="500" height="248">
+      <svg width="500" height="248" xmlns="http://www.w3.org/2000/svg">
     <rect width="500" height="248" fill="#00000000" />
-    <text x="15" y="33" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="15" y="30" class="large" font-size="20" font-weight="bold"
         fill="black"
         font-family="Helvetica Neue">1</text>
     <rect x="40" y="8" width="${30 + percents[1] * 400}" height="30" fill="#787C7E" />
-    <text x="49" y="33" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="49" y="30" class="large" font-size="20" font-weight="bold"
         fill="white"
         font-family="Helvetica Neue">${distribution["1"]}</text>
 
-    <text x="15" y="73" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="15" y="70" class="large" font-size="20" font-weight="bold"
         fill="black"
         font-family="Helvetica Neue">2</text>
     <rect x="40" y="48" width="${30 + percents[2] * 400}" height="30" fill="#787C7E" />
-    <text x="49" y="73" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="49" y="70" class="large" font-size="20" font-weight="bold"
         fill="white"
         font-family="Helvetica Neue">${distribution["2"]}</text>
 
-    <text x="15" y="113" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="15" y="110" class="large" font-size="20" font-weight="bold"
         fill="black"
         font-family="Helvetica Neue">3</text>
     <rect x="40" y="88" width="${30 + percents[3] * 400}" height="30" fill="#787C7E" />
-    <text x="49" y="113" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="49" y="110" class="large" font-size="20" font-weight="bold"
         fill="white"
         font-family="Helvetica Neue">${distribution["3"]}</text>
 
-    <text x="15" y="153" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="15" y="150" class="large" font-size="20" font-weight="bold"
         fill="black"
         font-family="Helvetica Neue">4</text>
     <rect x="40" y="128" width="${30 + percents[4] * 400}" height="30" fill="#787C7E" />
-    <text x="49" y="153" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="49" y="150" class="large" font-size="20" font-weight="bold"
         fill="white"
         font-family="Helvetica Neue">${distribution["4"]}</text>
 
 
-    <text x="15" y="193" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="15" y="190" class="large" font-size="20" font-weight="bold"
         fill="black"
         font-family="Helvetica Neue">5</text>
     <rect x="40" y="168" width="${30 + percents[5] * 400}" height="30" fill="#787C7E" />
-    <text x="49" y="193" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="49" y="190" class="large" font-size="20" font-weight="bold"
         fill="white"
         font-family="Helvetica Neue">${distribution["5"]}</text>
 
-    <text x="15" y="233" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="15" y="230" class="large" font-size="20" font-weight="bold"
         fill="black"
         font-family="Helvetica Neue">6</text>
     <rect x="40" y="208" width="${30 + percents[6] * 400}" height="30" fill="#787C7E" />
-    <text x="49" y="233" alignment-baseline="middle" class="large" font-size="20" font-weight="bold"
+    <text x="49" y="230" class="large" font-size="20" font-weight="bold"
         fill="white"
         font-family="Helvetica Neue">${distribution["6"]}</text>
 </svg>

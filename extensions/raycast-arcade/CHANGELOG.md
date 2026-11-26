@@ -1,5 +1,10 @@
 # Raycast Arcade Changelog
 
+## [Fix Wordle Tiles and Statistics] - {PR_MERGE_DATE}
+
+- Center the letters in the Wordle tiles, which sat at the bottom of their boxes ([#33932](https://github.com/raycast/extensions/issues/33932))
+- Show the guess distribution chart in Wordle Statistics, which was blank because its SVG had no `xmlns` namespace
+
 ## [Fix 2048 Board] - 2026-10-13
 
 - Fix the 2048 board not showing: the SVG was missing its `xmlns` namespace and had invalid `##` colours, so only stray text was rendered ([#30885](https://github.com/raycast/extensions/issues/30885))
