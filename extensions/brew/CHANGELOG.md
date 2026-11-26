@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [One action at a time per package] - {PR_MERGE_DATE}
+## [One action at a time per package] - 2026-11-26
 
 - Fixed: pressing Install, Upgrade or Uninstall again while it runs no longer starts a second Homebrew and fails with "Brew is Busy". The package's icon spins, Install and Upgrade read "Installing…" or "Upgrading…", and Uninstall is hidden until the list shows the result
 - Improved: the "Installing…" toast appears as soon as you press Install, instead of after the trust check for a package from a third-party tap
