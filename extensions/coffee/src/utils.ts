@@ -114,10 +114,7 @@ export async function startCaffeinate(
     const sessionId = await windowsStartCaffeinate(additionalArgs);
     await setWindowsCaffeinationReason(sessionId, reason);
   } else {
-    // Without -t, caffeinate times out -u after 5 s and gives -m the same timeout.
-    const userActive = timeout === null && getPreferenceValues<Preferences>().preventDisk ? [] : ["-u"];
-    const args = [...userActive, ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
-    await startMacCaffeinate(args, reason);
+    await startMacCaffeinate(generateArgs(timeout !== null, additionalArgs), reason);
   }
 
   // showHUD closes the window and Raycast 2 unloads view commands, so spawn
@@ -230,7 +227,7 @@ async function tryLaunchCommand(commandName: string, context: { skipScheduleMoni
   }
 }
 
-function generateArgs(additionalArgs?: string) {
+function generateArgs(timed: boolean, additionalArgs?: string) {
   const preferences = getPreferenceValues<Preferences>();
   const flags = [];
 
@@ -239,11 +236,13 @@ function generateArgs(additionalArgs?: string) {
   if (preferences.preventSystem) flags.push("i");
   if (preferences.preventSleepOnAC) flags.push("s");
 
-  const parts = [];
-  if (flags.length > 0) parts.push(`-${flags.join("")}`);
-  if (additionalArgs) parts.push(additionalArgs);
+  const args = [];
+  // Without -t, caffeinate drops -u after 5 s and -m with it, but given no flag at all it asserts -i.
+  if (timed || flags.length === 0) args.push("-u");
+  if (flags.length > 0) args.push(`-${flags.join("")}`);
+  if (additionalArgs) args.push(...additionalArgs.split(/\s+/).filter(Boolean));
 
-  return parts.join(" ");
+  return args;
 }
 
 export function deviceName(): "PC" | "Mac" {

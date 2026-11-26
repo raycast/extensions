@@ -117,15 +117,17 @@ test("natural expiry or watched-app exit clears ownership and never reuses its r
   assert.equal(h.storage.has(key), false);
 });
 
+const nothingSelected = { preventDisplay: false, preventSystem: false, preventDisk: false };
 for (const [label, preferences, args, expected] of [
   ["default options", {}, undefined, ["-dmi"]],
   ["while an app runs", {}, "-w 400", ["-dmi", "-w", "400"]],
   ["disk only", { preventDisplay: false, preventSystem: false }, undefined, ["-m"]],
-  ["display only", { preventDisk: false, preventSystem: false }, undefined, ["-u", "-d"]],
+  ["display only", { preventDisk: false, preventSystem: false }, undefined, ["-d"]],
   // Keeping -u when nothing else is asserted stops caffeinate from defaulting to -i.
-  ["nothing selected", { preventDisplay: false, preventSystem: false, preventDisk: false }, undefined, ["-u"]],
+  ["nothing selected", nothingSelected, undefined, ["-u"]],
+  ["nothing selected while an app runs", nothingSelected, "-w 400", ["-u", "-w", "400"]],
 ]) {
-  test(`untimed sessions drop -u only alongside -m, as caffeinate's 5 s -u timeout would also end -m: ${label}`, async () => {
+  test(`untimed sessions pass -u only when no option is on, as caffeinate ends -u and -m after 5 s: ${label}`, async () => {
     const h = createHarness({ preferences });
     await h.load("utils.ts").startCaffeinate(quiet, undefined, args);
     assert.deepEqual(Array.from(h.processes.spawn.mock.calls[0].arguments[1]), expected);
