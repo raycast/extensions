@@ -31,11 +31,11 @@ export default function Command() {
   });
   const overspent = useCachedPromise(listOverspent, [], {
     execute: launcher && status === "active",
-    onError: () => undefined,
+    failureToastOptions: { title: "Couldn't load overspent allocations" },
   });
   const details = useCachedPromise(getBudget, [selectedId ?? ""], {
     execute: launcher && selectedId !== undefined,
-    onError: () => undefined,
+    failureToastOptions: { title: "Couldn't load budget details" },
   });
 
   useEffect(() => disconnect, []);
