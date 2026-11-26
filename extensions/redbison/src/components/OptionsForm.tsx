@@ -1,6 +1,10 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
+  choiceTitle,
+  optionInfo,
   optionLabel,
+  optionPlaceholder,
   optionsFromForm,
   UtilityError,
   type Options,
@@ -15,7 +19,8 @@ const INPUT_FIELD = "__input";
 /** The option as a form field: a dropdown for a closed set, a checkbox for a switch, text otherwise. */
 function OptionField({ option: o, value }: { option: ToolOption; value: Options[string] | undefined }) {
   const title = optionLabel(o) + (o.required ? " (required)" : "");
-  const info = o.describe.charAt(0).toUpperCase() + o.describe.slice(1);
+  // The CLI's descriptions are British English; optionInfo respells them for the store.
+  const info = optionInfo(o);
 
   if (o.values?.length) {
     // A required choice with no default starts unchosen, so the tool is never
@@ -25,11 +30,7 @@ function OptionField({ option: o, value }: { option: ToolOption; value: Options[
       <Form.Dropdown id={o.key} title={title} info={info} defaultValue={initial}>
         {initial === "" ? <Form.Dropdown.Item value="" title="Choose…" /> : null}
         {o.values.map((v) => (
-          <Form.Dropdown.Item
-            key={v.value}
-            value={v.value}
-            title={v.describe ? `${v.value}: ${v.describe}` : v.value}
-          />
+          <Form.Dropdown.Item key={v.value} value={v.value} title={choiceTitle(v)} />
         ))}
       </Form.Dropdown>
     );
@@ -39,7 +40,7 @@ function OptionField({ option: o, value }: { option: ToolOption; value: Options[
       <Form.Checkbox id={o.key} title={title} label={info} defaultValue={Boolean(value ?? o.defaultValue ?? false)} />
     );
   }
-  const placeholder = o.defaultValue !== undefined ? `Default: ${o.defaultValue}` : info;
+  const placeholder = optionPlaceholder(o);
   if (o.isText) {
     return (
       <Form.TextArea
@@ -79,7 +80,7 @@ export function OptionsForm({
       options = optionsFromForm(u.id, values);
     } catch (e) {
       if (e instanceof UtilityError) {
-        await showToast({ style: Toast.Style.Failure, title: "Check the Options", message: e.message });
+        await showFailureToast(e, { title: "Check the Options" });
         return;
       }
       throw e;

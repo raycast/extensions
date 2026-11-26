@@ -32,7 +32,26 @@ export const EMAIL_DOMAINS = ['example.com', 'example.org', 'test.dev', 'sample.
 
 const LOCAL_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
+export class RandomRangeError extends Error {}
+
+/**
+ * The most each generator makes in one call: the limits the MCP tools have
+ * always published in their schemas (names and emails 100, numbers 1,000),
+ * so a local run accepts exactly what the server would. Without a check a
+ * pasted count of a billion went straight into Array.from on the caller's
+ * thread and ran the editor, the CLI or Raycast out of memory.
+ */
+export const MAX_COUNT = { names: 100, emails: 100, numbers: 1000 } as const;
+
+function checkCount(count: number, max: number): number {
+  if (!Number.isInteger(count) || count < 1 || count > max) {
+    throw new RandomRangeError(`count must be a whole number from 1 to ${max.toLocaleString('en-US')}, not ${count}.`);
+  }
+  return count;
+}
+
 export function randomNames(count: number, rand: RandomInt): string[] {
+  checkCount(count, MAX_COUNT.names);
   return Array.from(
     { length: count },
     () => `${FIRST_NAMES[rand(FIRST_NAMES.length)]} ${LAST_NAMES[rand(LAST_NAMES.length)]}`,
@@ -40,6 +59,7 @@ export function randomNames(count: number, rand: RandomInt): string[] {
 }
 
 export function randomEmails(count: number, rand: RandomInt, domain?: string): string[] {
+  checkCount(count, MAX_COUNT.emails);
   return Array.from({ length: count }, () => {
     const localLen = 6 + rand(6);
     let local = '';
@@ -47,8 +67,6 @@ export function randomEmails(count: number, rand: RandomInt, domain?: string): s
     return `${local}@${domain ?? EMAIL_DOMAINS[rand(EMAIL_DOMAINS.length)]}`;
   });
 }
-
-export class RandomRangeError extends Error {}
 
 /**
  * `count` numbers in the range.
@@ -64,6 +82,7 @@ export function randomNumbers(
   rand: RandomInt,
   randFloat: () => number,
 ): number[] {
+  checkCount(count, MAX_COUNT.numbers);
   const values: number[] = [];
   if (mode === 'integer') {
     const lo = Math.ceil(min);

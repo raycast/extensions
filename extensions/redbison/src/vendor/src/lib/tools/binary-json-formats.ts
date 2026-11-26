@@ -44,6 +44,16 @@ class Reader {
   str(n: number): string { return new TextDecoder().decode(this.bytes(n)); }
 }
 
+/**
+ * A map entry as an own property. Plain assignment of a `__proto__` key calls
+ * the inherited setter: the field vanishes from the JSON and the object's
+ * prototype becomes the decoded value. Both formats allow that key, so it
+ * has to be defined, not assigned.
+ */
+function putEntry(out: Record<string, Out>, key: string, value: Out): void {
+  Object.defineProperty(out, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
 /* ---------------- MessagePack ---------------- */
 
 export function decodeMessagePack(bytes: Uint8Array): { value: Out; trailingBytes: number } {
@@ -123,7 +133,7 @@ function mpMap(r: Reader, n: number, depth: number): Record<string, Out> {
   for (let i = 0; i < n; i++) {
     const k = mp(r, depth + 1);
     const key = typeof k === 'string' ? k : `$key:${JSON.stringify(k)}`;
-    out[key] = mp(r, depth + 1);
+    putEntry(out, key, mp(r, depth + 1));
   }
   return out;
 }
@@ -204,7 +214,7 @@ function cbor(r: Reader, depth: number): Out {
       const put = () => {
         const k = cbor(r, depth + 1);
         const key = typeof k === 'string' ? k : `$key:${JSON.stringify(k)}`;
-        out[key] = cbor(r, depth + 1);
+        putEntry(out, key, cbor(r, depth + 1));
       };
       if (n === null) {
         for (;;) {

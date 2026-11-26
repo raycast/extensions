@@ -74,8 +74,76 @@ const hostOf = (url: string): string => {
   }
 };
 
-/** example.com and www.example.com are one party; cdn.example.co.uk too. */
-const baseDomain = (host: string): string => host.split('.').slice(-2).join('.');
+/**
+ * Public suffixes with more than one label, under which each next label is a
+ * separate owner: shop.example.co.uk and tracker.other.co.uk are two sites,
+ * not one. Taking the last two labels, as this used to, merged every site
+ * under co.uk (or com.au, github.io...) into one party and hid their
+ * cross-site requests from the third-party totals.
+ *
+ * A curated list rather than the full Public Suffix List (publicsuffix.org,
+ * about 10,000 rules): this module is bundled into the CLI and the editor
+ * plugins and vendored into the Raycast extension, which take no third-party
+ * code, and tldts, the usual PSL library, is 130 KB minified. The list holds
+ * the second-level registries of the larger country domains and the hosting
+ * platforms a HAR most often shows; src/test/tools/local-tools-data-fidelity.test.ts
+ * checks every entry against the PSL copy in tldts. A suffix missing from it
+ * errs the old way (two sites read as one party), never the other.
+ */
+const MULTI_LABEL_SUFFIXES = new Set([
+  // United Kingdom, Australia, New Zealand
+  'co.uk', 'org.uk', 'me.uk', 'ltd.uk', 'plc.uk', 'net.uk', 'ac.uk', 'gov.uk', 'nhs.uk', 'police.uk',
+  'com.au', 'net.au', 'org.au', 'edu.au', 'gov.au', 'asn.au', 'id.au',
+  'co.nz', 'net.nz', 'org.nz', 'govt.nz', 'ac.nz', 'school.nz', 'geek.nz', 'gen.nz', 'kiwi.nz',
+  // East and South-East Asia
+  'co.jp', 'ne.jp', 'or.jp', 'ac.jp', 'go.jp', 'ed.jp', 'gr.jp', 'lg.jp', 'ad.jp',
+  'co.kr', 'or.kr', 'ne.kr', 'go.kr', 'ac.kr', 're.kr',
+  'com.cn', 'net.cn', 'org.cn', 'gov.cn', 'edu.cn', 'ac.cn',
+  'com.hk', 'org.hk', 'net.hk', 'edu.hk', 'gov.hk',
+  'com.tw', 'org.tw', 'net.tw', 'edu.tw', 'gov.tw',
+  'com.sg', 'net.sg', 'org.sg', 'edu.sg', 'gov.sg',
+  'com.my', 'net.my', 'org.my', 'edu.my', 'gov.my',
+  'co.id', 'or.id', 'ac.id', 'go.id', 'web.id', 'net.id', 'my.id', 'sch.id',
+  'co.th', 'in.th', 'ac.th', 'go.th', 'or.th', 'net.th',
+  'com.ph', 'net.ph', 'org.ph', 'gov.ph', 'edu.ph',
+  'com.vn', 'net.vn', 'org.vn', 'edu.vn', 'gov.vn',
+  // South Asia, Middle East, Africa
+  'co.in', 'net.in', 'org.in', 'firm.in', 'gen.in', 'ind.in', 'ac.in', 'edu.in', 'gov.in', 'res.in',
+  'com.pk', 'net.pk', 'org.pk', 'edu.pk', 'gov.pk', 'com.bd',
+  'co.il', 'org.il', 'net.il', 'ac.il', 'gov.il',
+  'com.tr', 'net.tr', 'org.tr', 'gov.tr', 'edu.tr', 'gen.tr', 'biz.tr',
+  'com.sa', 'co.ae', 'net.ae', 'org.ae', 'gov.ae', 'ac.ae', 'com.eg',
+  'co.za', 'org.za', 'net.za', 'gov.za', 'ac.za', 'web.za',
+  'com.ng', 'org.ng', 'gov.ng', 'edu.ng', 'co.ke', 'or.ke', 'go.ke', 'ac.ke',
+  // Americas and Europe
+  'com.br', 'net.br', 'org.br', 'gov.br', 'edu.br', 'art.br', 'blog.br', 'app.br',
+  'com.ar', 'net.ar', 'org.ar', 'gob.ar', 'edu.ar',
+  'com.mx', 'net.mx', 'org.mx', 'gob.mx', 'edu.mx',
+  'com.co', 'net.co', 'org.co', 'gov.co', 'edu.co', 'com.pe', 'gob.pe',
+  'com.ua', 'net.ua', 'org.ua', 'gov.ua', 'in.ua',
+  'com.es', 'org.es', 'nom.es', 'gob.es', 'edu.es', 'com.pl', 'net.pl', 'org.pl', 'gov.pl', 'gouv.fr',
+  // Hosting platforms listed in the PSL's private section: each subdomain is a different owner.
+  'github.io', 'gitlab.io', 'vercel.app', 'netlify.app', 'pages.dev', 'workers.dev', 'herokuapp.com',
+  'web.app', 'firebaseapp.com', 'appspot.com', 'azurewebsites.net', 'cloudfront.net', 'blogspot.com',
+  'onrender.com', 'fly.dev', 'myshopify.com', 'ngrok.io', 'ngrok-free.app',
+]);
+
+/** Exported for the test that checks the list against the Public Suffix List. */
+export const HAR_MULTI_LABEL_SUFFIXES: ReadonlySet<string> = MULTI_LABEL_SUFFIXES;
+
+/**
+ * The site a host belongs to, for deciding first or third party:
+ * www.example.com and cdn.example.com are one party, as are www.example.co.uk
+ * and cdn.example.co.uk. The port is not part of the site, and an IP address
+ * is its own party.
+ */
+export const baseDomain = (host: string): string => {
+  const h = host.toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+  if (h.startsWith('[') || /^\d{1,3}(\.\d{1,3}){3}$/.test(h)) return h;
+  const labels = h.split('.');
+  const take = MULTI_LABEL_SUFFIXES.has(labels.slice(-2).join('.')) ? 3 : 2;
+  return labels.slice(-take).join('.');
+};
 
 const typeOf = (mime: string): string => {
   const m = mime.toLowerCase();

@@ -1,5 +1,6 @@
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
-import { runUtility, UtilityError } from "./lib/utilities";
+import { showFailureToast } from "@raycast/utils";
+import { runUtility } from "./lib/utilities";
 
 /**
  * Pretty-print the clipboard's JSON and put it back, without opening a view.
@@ -17,7 +18,6 @@ export default async function FormatClipboardJson() {
     await Clipboard.copy(formatted);
     await showHUD("Formatted JSON copied to clipboard");
   } catch (e) {
-    const message = e instanceof UtilityError ? e.message : String(e);
-    await showToast({ style: Toast.Style.Failure, title: "Not Valid JSON", message });
+    await showFailureToast(e, { title: "Not Valid JSON" });
   }
 }

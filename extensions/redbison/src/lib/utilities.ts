@@ -166,14 +166,52 @@ export function runUtility(id: string, input: string, options: Options = {}): st
   return out;
 }
 
-/** The same run as a terminal command, for people who want it in a script. */
+/**
+ * The same run as a terminal command, for people who want it in a script.
+ *
+ * A switch is written `--flag=true` or `--flag=false`: the CLI never lets a
+ * boolean take the next word (cli/src/args.ts), so `--markCase false` read as
+ * markCase on with "false" as the input. test/review-fixes.test.ts parses
+ * every copied command back with the CLI's own parseArgs.
+ */
 export function cliCommand(id: string, options: Options = {}): string {
   const parts = ["redbison", id];
   for (const [k, v] of Object.entries(options)) {
     if (v === undefined || v === "") continue;
-    parts.push(`--${k}`, shellQuote(String(v)));
+    if (typeof v === "boolean") parts.push(`--${k}=${v}`);
+    else parts.push(`--${k}`, shellQuote(String(v)));
   }
   return parts.join(" ");
+}
+
+/** Results that are secrets, copied without entering Clipboard History. */
+const SECRET_RESULTS = new Set(["password"]);
+
+/** Options whose value is a secret, so a command carrying one is concealed too. */
+const SECRET_OPTIONS: Record<string, string[]> = { hmac: ["key"] };
+
+export function concealResult(id: string): boolean {
+  return SECRET_RESULTS.has(id);
+}
+
+export function concealCommand(id: string, options: Options = {}): boolean {
+  return (SECRET_OPTIONS[id] ?? []).some((k) => options[k] !== undefined && options[k] !== "");
+}
+
+/** An option's description as a form shows it: US English, capitalized. */
+export function optionInfo(o: ToolOption): string {
+  const text = usEnglish(o.describe);
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** The hint inside an empty field: its default (a value, never respelled), or its description. */
+export function optionPlaceholder(o: ToolOption): string {
+  return o.defaultValue !== undefined ? `Default: ${o.defaultValue}` : optionInfo(o);
+}
+
+/** A dropdown choice: "url: - and _, unpadded, safe in a URL", or the bare value. */
+export function choiceTitle(v: { value: string; describe?: string }): string {
+  return v.describe ? `${v.value}: ${usEnglish(v.describe)}` : v.value;
 }
 
 export function shellQuote(value: string): string {

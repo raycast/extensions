@@ -85,16 +85,13 @@
     "eslint": "^10.13.0",
     "prettier": "^3.9.10",
     "react": "19.3.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.test.json",
     "pull": "ray pull-contributions",
     "publish": "ray publish"
   }

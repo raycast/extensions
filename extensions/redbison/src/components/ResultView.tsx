@@ -3,6 +3,8 @@ import { useState } from "react";
 import {
   cliCommand,
   codeBlock,
+  concealCommand,
+  concealResult,
   languageFor,
   optionLabel,
   runUtility,
@@ -73,7 +75,8 @@ export function ResultView({ utility: u, input, options }: { utility: Utility; i
         <ActionPanel>
           {outcome.ok ? (
             <ActionPanel.Section>
-              <Action.CopyToClipboard title="Copy Result" content={outcome.output} />
+              {/* A generated password stays out of Clipboard History. */}
+              <Action.CopyToClipboard title="Copy Result" content={outcome.output} concealed={concealResult(u.id)} />
               <Action.Paste title="Paste Result" content={outcome.output} />
               {u.generates ? (
                 <Action
@@ -97,6 +100,7 @@ export function ResultView({ utility: u, input, options }: { utility: Utility; i
               title="Copy CLI Command"
               icon={Icon.Terminal}
               content={command}
+              concealed={concealCommand(u.id, options)}
               shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>

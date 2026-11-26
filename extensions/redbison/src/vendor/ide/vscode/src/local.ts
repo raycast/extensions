@@ -52,9 +52,12 @@ import {
 import { analyzeGtin } from '../../../src/lib/tools/w500/business2-barcode';
 import {
   amountToCheckWords,
+  binaryToText,
   decimalToWords,
+  isDecodeError,
   numberToWords,
   ordinalToWords,
+  textToBinary,
 } from '../../../src/lib/tools/specialty-converters';
 import { readability, analyzeSentences, fleschBand } from '../../../src/lib/tools/w500/writing';
 import { colorForms, contrastReport, gradientCss } from '../../../src/lib/tools/w500/color-basics';
@@ -477,7 +480,9 @@ export function runLocal(id: string, input: string, options: LocalOptions = {}):
         const str = v === null || v === undefined ? '' : String(v);
         return /[",\n\r]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
       };
-      return [keys.join(','), ...value.map((r) => keys.map((k) => esc((r as Record<string, unknown>)?.[k])).join(','))].join('\n');
+      // The header is escaped like any cell: a key holding a comma, a quote or
+      // a newline otherwise splits into extra columns.
+      return [keys.map(esc).join(','), ...value.map((r) => keys.map((k) => esc((r as Record<string, unknown>)?.[k])).join(','))].join('\n');
     }
     case 'markdown-table': {
       const rows = input.trim().split('\n').map((line) =>
@@ -812,11 +817,16 @@ export function runLocal(id: string, input: string, options: LocalOptions = {}):
     case 'binary-text': {
       const raw = input.trim();
       if (/^[01\s]+$/.test(raw)) {
+        // The bytes are UTF-8, as the encode branch writes them, so they are
+        // decoded together: one character per byte turned é into Ã©. The
+        // site's decoder, which also refuses bytes that are not UTF-8.
         const bits = raw.replace(/\s+/g, '');
         if (bits.length % 8) throw new LocalToolError('Binary needs a multiple of eight bits.');
-        return (bits.match(/.{8}/g) ?? []).map((b) => String.fromCharCode(parseInt(b, 2))).join('');
+        const decoded = binaryToText(bits);
+        if (isDecodeError(decoded)) throw new LocalToolError(decoded.error);
+        return decoded.text;
       }
-      return [...Buffer.from(raw, 'utf8')].map((b) => b.toString(2).padStart(8, '0')).join(' ');
+      return textToBinary(raw);
     }
     case 'date-diff': {
       const to = String(options.to ?? '');
@@ -1013,13 +1023,17 @@ export function runLocal(id: string, input: string, options: LocalOptions = {}):
         Number(options.angle ?? 90),
       );
     }
+    // The generators refuse a count outside 1..100 (1..1000 for numbers),
+    // the limits the MCP schemas publish, before allocating anything.
     case 'random-name':
-      return randomNames(Number(options.count ?? 5), (n) => randomInt(n)).join('\n');
+      return refuse(() => randomNames(Number(options.count ?? 5), (n) => randomInt(n))).join('\n');
     case 'random-email':
-      return randomEmails(
-        Number(options.count ?? 5),
-        (n) => randomInt(n),
-        options.domain === undefined ? undefined : String(options.domain),
+      return refuse(() =>
+        randomEmails(
+          Number(options.count ?? 5),
+          (n) => randomInt(n),
+          options.domain === undefined ? undefined : String(options.domain),
+        ),
       ).join('\n');
     case 'random-number':
       return refuse(() =>
@@ -1064,7 +1078,8 @@ export function runLocal(id: string, input: string, options: LocalOptions = {}):
       return JSON.stringify(refuse(() => convertZone(input, to)), null, 2);
     }
     case 'text-diff':
-      return diffText(input, String(options.b ?? '')).patch;
+      // diffText refuses a comparison too large to hold rather than freezing the caller.
+      return refuse(() => diffText(input, String(options.b ?? ''))).patch;
 
     case 'json-tree':
       return refuse(() => renderJsonTree(input));

@@ -19,6 +19,7 @@ the Search Tools command shows.
 - src/lib/tools/binary-json-formats.ts
 - src/lib/tools/gc-log-analyzer.ts
 - src/lib/tools/har-analyzer.ts
+- src/lib/tools/html-beautify.ts
 - src/lib/tools/json-tree.ts
 - src/lib/tools/jvm-thread-dump.ts
 - src/lib/tools/lorem-generator.ts
