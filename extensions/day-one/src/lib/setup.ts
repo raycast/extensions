@@ -139,6 +139,11 @@ export function installAgentSkills(): Promise<string> {
   return runInLoginShell(SKILLS_COMMAND);
 }
 
+/** `--yes`: without a terminal the skills CLI would wait on a confirmation prompt. */
+export function removeAgentSkills(): Promise<string> {
+  return runInLoginShell("npx --yes skills remove --global --yes dayone-cli");
+}
+
 export type LegacyState = "none" | "present" | "renamed";
 
 /** The legacy CLI is a symlink into Day One.app. A `dayone` here that points anywhere else is the new CLI (Homebrew Node on Intel installs there). */
