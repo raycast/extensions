@@ -332,7 +332,7 @@ function TokenForm({ invalid, onSaved }: { invalid: boolean; onSaved: () => void
       <Form.Description
         title="Token Settings"
         text={
-          "Name: Raycast\nAccess: tick Email. Leave Read-only unticked if you want to archive, delete and report spam from Raycast.\n\nCopy the token Fastmail shows (it starts with fmu1-) and paste it below. It's stored encrypted on this Mac and only sent to Fastmail."
+          "Name it Raycast and tick Email. Leave Read-only unticked if you want to archive, delete and report spam from Raycast. Then copy the token (it starts with fmu1-) and paste it below. It's stored encrypted on this Mac and only sent to Fastmail."
         }
       />
       <Form.PasswordField
@@ -562,7 +562,7 @@ function EmailActions(props: EmailActionsProps) {
           onAction={onReload}
         />
         <Action.Push
-          title="Change Api Token"
+          title="Change Fastmail Token"
           icon={Icon.Key}
           target={
             <TokenForm
