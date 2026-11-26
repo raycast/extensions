@@ -20,6 +20,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://socialtap.dev/mcp",
   },
   {
+    name: "spacery",
+    title: "Spacery",
+    description:
+      "Host Matterport tours, E57 laser scans, Gaussian splats and 360 photos as 3D spaces shared by link. Paste the link to a Matterport space you own and it is hosted in minutes. Each space costs $5 a month, whatever its size, and the first space is a free private preview. Agents can also build guided tours and scavenger hunts in a space. Hosted Streamable HTTP server at https://app.spacery.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. There is no API key to paste: the account links through a short code you approve in the browser, and payment goes through Stripe Checkout in the browser.",
+    icon: "https://raw.githubusercontent.com/lukehollis/spacery/main/assets/icon.png",
+    homepage: "https://spacery.dev/agents?utm_source=raycast&utm_medium=mcp-directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.spacery.dev/mcp"],
+    },
+    remoteUrl: "https://app.spacery.dev/mcp",
+  },
+  {
+    name: "structure",
+    title: "Structure",
+    description:
+      "Catastrophe simulator for reinsurers. It simulates each real catastrophe thousands of times, building by building, so cat modelling, pricing and exposure teams can validate their models against what one history hides. Each observed event, such as the 2025 Eaton fire, the 2016 Ellicott City flood or the 1994 Northridge earthquake, has a catalog of physically solved alternative histories with ground-up and gross losses, return periods, AAL and OEP. Structure also traces cascading effects and cleans and standardizes international exposure data so every region joins before a model runs. Agents can query catalogs, compare sisters, quote and run custom scenarios, and score wildfire runs against satellite radar. Hosted Streamable HTTP server at https://app.structure.ml/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste. A Structure account is required, and GPU runs spend prepaid tokens and are quoted before they start.",
+    icon: "https://www.structure.ml/icon.svg",
+    homepage: "https://app.structure.ml/agents.md",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.structure.ml/mcp"],
+    },
+    remoteUrl: "https://app.structure.ml/mcp",
+  },
+  {
     name: "mobilebox",
     title: "Mobilebox",
     description:

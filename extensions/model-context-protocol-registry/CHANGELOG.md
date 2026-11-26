@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Spacery and Structure MCP Servers] - {PR_MERGE_DATE}
+
+- Add Spacery: host Matterport tours, E57 laser scans, Gaussian splats and 360 photos as 3D spaces shared by link. Paste the link to a Matterport space you own and it is hosted in minutes. Hosted Streamable HTTP server at https://app.spacery.dev/mcp; the account links through a code approved in the browser.
+- Add Structure: catastrophe simulator for reinsurers, with thousands of alternative histories of real floods, wildfires and earthquakes and their losses, AAL, OEP and return periods, cascading effects, and cleaned and standardized international exposure data. Hosted Streamable HTTP server at https://app.structure.ml/mcp with OAuth 2.0 sign-in.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
