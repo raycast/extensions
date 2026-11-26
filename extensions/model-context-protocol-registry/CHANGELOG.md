@@ -2,7 +2,7 @@
 
 ## [Add ElectroAtlas MCP Server] - {PR_MERGE_DATE}
 
-- Add ElectroAtlas to the official registry: Electric cars and plug-in hybrids in Russia: prices in roubles, rated and winter range, sales, dealers, import fees and ownership cost. Answers are in Russian and link to the catalog with sources. 14 read-only tools. Hosted remote Streamable HTTP server at https://electroatlas.ru/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.
+- Add ElectroAtlas to the official registry: Electric cars and plug-in hybrids in Russia: prices in rubles, rated and winter range, sales, dealers, import fees and ownership cost. Answers are in Russian and link to the catalog with sources. 14 read-only tools. Hosted remote Streamable HTTP server at https://electroatlas.ru/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.
 
 ## [Update Levea AI Video Editor description] - 2026-11-25
 

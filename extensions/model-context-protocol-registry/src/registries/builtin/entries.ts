@@ -10,7 +10,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "electroatlas",
     title: "ElectroAtlas",
     description:
-      "Electric cars and plug-in hybrids in Russia: prices in roubles, rated and winter range, sales, dealers, import fees and ownership cost. Answers are in Russian and link to the catalog with sources. 14 read-only tools. Hosted remote Streamable HTTP server at https://electroatlas.ru/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+      "Electric cars and plug-in hybrids in Russia: prices in rubles, rated and winter range, sales, dealers, import fees and ownership cost. Answers are in Russian and link to the catalog with sources. 14 read-only tools. Hosted remote Streamable HTTP server at https://electroatlas.ru/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
     icon: "https://raw.githubusercontent.com/electroatlas/mcp/main/assets/icon.png",
     homepage: "https://github.com/electroatlas/mcp",
     configuration: {
