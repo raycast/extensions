@@ -238,8 +238,10 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | OpenAI_GPT-5.6_Terra | OpenAI's balanced GPT-5.6 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-5.6_Luna | OpenAI's fastest GPT-5.6 model for responsive everyday tasks. |
 | OpenAI_GPT-6_Astra | OpenAI's frontier GPT-6 model for the hardest end-to-end reasoning, coding, and agentic work. |
+| OpenAI_GPT-6.2_Astra | OpenAI's frontier GPT-6.2 model for the hardest end-to-end reasoning, coding, and agentic work. |
 | OpenAI_GPT-6_Sol | OpenAI's GPT-6 model for complex coding and agentic workflows. |
 | OpenAI_GPT-6.1_Sol | OpenAI's GPT-6.1 model for complex coding and agentic workflows. |
+| OpenAI_GPT-6.2_Sol | OpenAI's GPT-6.2 model for complex coding and agentic workflows. |
 | OpenAI_GPT-6.1_Terra | OpenAI's balanced GPT-6.1 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-6_Luna | OpenAI's efficient GPT-6 model for focused, high-volume tasks. |
 | Groq_GPT-OSS_20b | OpenAI's first open-source model, 20b variant. |
@@ -263,6 +265,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Google_Gemini_4_Carbon | Next generation thinking model for complex problem solving. |
 | Google_Gemini_4_Argon | Google's flagship reasoning model for complex software engineering, math and science, and long-running agentic work. |
 | Google_Gemini_4_Hydrogen | Fast Gemini 4 model for everyday coding, analysis and agentic workflows. |
+| Google_Gemini_4_Neon | Fast Gemini 4 reasoning model for coding, analysis and agentic workflows. |
 | Google_Gemini_3.8_Flash | Balances speed with intelligence for agentic and multimodal tasks. |
 | Google_Gemini_3.5_Flash_Lite | Fast, cost-effective model for high-throughput agentic workflows and data processing. |
 | Google_Gemini_3.1_Pro | Next generation thinking model for complex problem solving. |
@@ -276,6 +279,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Vercel_Kimi_K3.1_Pro | Moonshot AI's frontier multimodal model for complex reasoning, coding, and long-horizon agentic work. |
 | Vercel_Gemma_4_31B | Google's open-weight dense model with vision and 140+ language support, tuned for output quality over throughput. |
 | Vercel_Inkling | Thinking Machines' open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
+| Vercel_Inkling_2_Small | Thinking Machines' second-generation open-weights multimodal MoE model with controllable reasoning for coding, tool use, and knowledge work. |
 | Vercel_DeepSeek_V4_Flash | DeepSeek's lightweight V4 MoE model tuned for fast, low-cost coding, reasoning, and agentic tasks. |
 | Vercel_DeepSeek_V4.1_Flash | DeepSeek's lightweight V4.1 MoE model tuned for fast, low-cost coding, reasoning, and agentic tasks. |
 | Vercel_DeepSeek_V4_Pro | DeepSeek's 1.6T parameter MoE model optimized for coding, reasoning, and agentic tasks with a 1M token context window. |

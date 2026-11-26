@@ -10,6 +10,7 @@ import {
   muteCall,
   startCapture,
   stopCapture,
+  stopWebcam,
   unmuteCall,
 } from "./lib/tuple";
 import { callPeople, CallViewParticipant, Contact, TupleErrorKind } from "./lib/types";
@@ -77,6 +78,16 @@ export default function ActiveCallMenuBar() {
           title={activeCall.transcribing ? "Stop Capture" : "Start Capture"}
           icon={activeCall.transcribing ? Icon.Stop : Icon.SpeechBubble}
           onAction={() => runAction(activeCall.transcribing ? stopCapture : startCapture, call.revalidate)}
+        />
+        <MenuBarExtra.Item
+          title="Stop Webcam"
+          icon={Icon.VideoDisabled}
+          onAction={() =>
+            runAction(async () => {
+              await stopWebcam(activeCall.call_id);
+              await showHUD("Asked Tuple to stop your webcam");
+            }, call.revalidate)
+          }
         />
         <AddPersonSubmenu contacts={onlineContacts} onChange={call.revalidate} />
         <MenuBarExtra.Item

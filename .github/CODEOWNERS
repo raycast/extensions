@@ -1238,7 +1238,7 @@
 /extensions/goose-2fa                                               @eachann1024
 /extensions/gopass                                                  @bake @buchanan @andyfase
 /extensions/gotify                                                  @bxb100
-/extensions/govee                                                   @j3lte
+/extensions/govee                                                   @j3lte @Dimik2
 /extensions/gpu-fleet-monitor                                       @kazzart
 /extensions/gradient-generator                                      @smcnab1
 /extensions/gradle-plugins                                          @alex-w0
@@ -1309,7 +1309,7 @@
 /extensions/hephaestus                                              @AkaShark
 /extensions/heptabase                                               @ARui-tw
 /extensions/herdr                                                   @vlste @sxhmilyoyo
-/extensions/hermes-agent                                            @dailin3 @RaviTharuma
+/extensions/hermes-agent                                            @dailin3 @RaviTharuma @GollyJer
 /extensions/heroicons                                               @haackt @mil3na @j3lte @Cybrarist
 /extensions/heroku                                                  @Yukaii
 /extensions/hestiacp-admin                                          @xmok
@@ -1582,7 +1582,7 @@
 /extensions/kurslog                                                 @kurslog-dev
 /extensions/kusto-reference                                         @olafhartong
 /extensions/kutt                                                    @xmok
-/extensions/laby-net                                                @niklaswa
+/extensions/laby-net                                                @niklaswa @muhammadrizo-y
 /extensions/lacinka                                                 @colorage
 /extensions/laliga                                                  @anhthang @pernielsentikaer
 /extensions/lan-file-share                                          @shaomai98
@@ -1995,7 +1995,7 @@
 /extensions/nepali-date-converter                                   @Beedhan
 /extensions/nepali-typing                                           @kshitijsubedi
 /extensions/nerd-font-picker                                        @kud @christippett
-/extensions/netbird                                                 @mi7chal
+/extensions/netbird                                                 @mi7chal @dnwjn
 /extensions/netease-mail                                            @Maxaccurate
 /extensions/netease-music                                           @chyroc @IceGiraffe @Anoninz @ViGeng
 /extensions/netlify                                                 @Destiner @jonohewitt @jasonbarry @peduarte @xmok
@@ -2162,7 +2162,7 @@
 /extensions/openai-gpt                                              @simicvm @DorukAkinci @EvilMouth
 /extensions/openai-speak                                            @jnchman
 /extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig @benwk
-/extensions/openclaw                                                @leveragedrobot @leveragedrobot @RaviTharuma @Olli0103
+/extensions/openclaw                                                @leveragedrobot @leveragedrobot @RaviTharuma @Olli0103 @dofy
 /extensions/opencode                                                @vimtor
 /extensions/opencode-sessions                                       @mike182uk @mormubis @0xdhrv
 /extensions/opencodex-usage                                         @list-jonas @AviralSaxena
@@ -2305,7 +2305,7 @@
 /extensions/pianoman                                                @juhamust @0xdhrv
 /extensions/picgo                                                   @RUBisco0211
 /extensions/pick-random                                             @MatteoGauthier @hongqn
-/extensions/pick-your-wallpaper                                     @hugomarfani @hetommy
+/extensions/pick-your-wallpaper                                     @hugomarfani @hetommy @EdizKeskin
 /extensions/picmal                                                  @albertogalca
 /extensions/pie-for-pihole                                          @GLaDO8
 /extensions/pieces-raycast                                          @caleb-at-pieces
@@ -2716,6 +2716,7 @@
 /extensions/safe-secret                                             @melonamin
 /extensions/sage-hr                                                 @cyxn
 /extensions/salesforce-search                                       @svenwiegand
+/extensions/sandglass-simple-timer                                  @PeterTeit
 /extensions/sanity                                                  @marcusforsberg @xmok
 /extensions/sanity-icons                                            @Spratch @zavbala @bensomething @bendrucker @alexi-build
 /extensions/sap-logon                                               @ginderellas
