@@ -11,7 +11,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Wixel",
     description:
       "Wixel is the AI design studio by Wix. Create images, logos, slide decks, videos, documents and invitations from a request in plain words, and run quick image edits: remove a background, upscale, vectorize, convert. You get back links to the result, files to save and a link to keep editing it in Wixel. Hosted Streamable HTTP server at https://mcp.wix.com/wixel with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with your Wixel account (dynamic client registration and PKCE), no API key to paste. Free to add; creating uses Wixel credits, and a free account is enough to start.",
-    icon: "https://wixmp-e9a92e1fa066d7bc836e4d31.wixmp.com/logos/wixel-icon-180.png",
+    icon: "https://raw.githubusercontent.com/wix/wixel-mcp/master/assets/wixel-icon-400.png",
     homepage: "https://www.wix.com/wixel/explore/mcp",
     configuration: {
       command: "npx",
