@@ -206,6 +206,15 @@ export default function GlobalPackagesCommand() {
   }
 
   async function handleToggleFav(pkg: GlobalPackage) {
+    if (favNames.has(pkg.name)) {
+      const ok = await confirmAlert({
+        title: `Remove "${pkg.name}" from Favorites?`,
+        message: "You can add it back anytime from package search or details.",
+        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+      });
+      if (!ok) return;
+    }
+
     const res = await toggleFavorite({
       name: pkg.name,
       description: `Global ${pkg.packageManager} package`,
@@ -359,6 +368,7 @@ export default function GlobalPackagesCommand() {
                       <Action
                         title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                         icon={isFav ? Icon.StarDisabled : Icon.Star}
+                        style={isFav ? Action.Style.Destructive : Action.Style.Regular}
                         shortcut={{ modifiers: ["cmd"], key: "f" }}
                         onAction={() => handleToggleFav(pkg)}
                       />

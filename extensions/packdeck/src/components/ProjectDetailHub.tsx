@@ -13,7 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { DependencyKind, LocalProject, PackageManagerName, ProjectDependency, TerminalApp } from "../types";
 import { DEPENDENCY_KIND_META, PACKAGE_MANAGER_META } from "../lib/constants";
 import { formatDuration, formatPathForDisplay } from "../lib/format";
@@ -45,6 +45,8 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
   const prefs = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<DepFilter>("all");
   const [refreshTick, setRefreshTick] = useState(0);
+  const [isMovingDep, setIsMovingDep] = useState(false);
+  const moveInFlightRef = useRef(false);
 
   const project = useMemo(() => {
     void refreshTick;
@@ -169,30 +171,46 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
 
   async function handleMoveDepType(dep: ProjectDependency) {
     if (dep.kind !== "dependencies" && dep.kind !== "devDependencies") return;
+    if (moveInFlightRef.current) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Dependency move already in progress",
+        message: "Wait for the current move to complete first.",
+      });
+      return;
+    }
+
     const fromKind = dep.kind;
     const toKind = fromKind === "devDependencies" ? "dependencies" : "devDependencies";
+    moveInFlightRef.current = true;
+    setIsMovingDep(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Moving ${dep.name} to ${toKind}...`,
     });
 
-    const outcome = await executeMoveDependencyType({
-      project,
-      packageName: dep.name,
-      fromKind,
-      toKind,
-      additionalPath: prefs.additionalPath,
-    });
+    try {
+      const outcome = await executeMoveDependencyType({
+        project,
+        packageName: dep.name,
+        fromKind,
+        toKind,
+        additionalPath: prefs.additionalPath,
+      });
 
-    await toast.hide();
-    await notifyOperationResult({
-      title: outcome.success ? `Moved ${dep.name} to ${toKind}` : `Could not move ${dep.name}`,
-      message: outcome.success ? `${dep.declaredRange} preserved · ${outcome.command}` : outcome.errorMessage,
-      success: outcome.success,
-      durationMs: outcome.durationMs,
-    });
+      await toast.hide();
+      await notifyOperationResult({
+        title: outcome.success ? `Moved ${dep.name} to ${toKind}` : `Could not move ${dep.name}`,
+        message: outcome.success ? `${dep.declaredRange} preserved · ${outcome.command}` : outcome.errorMessage,
+        success: outcome.success,
+        durationMs: outcome.durationMs,
+      });
 
-    if (outcome.success) await refreshProject();
+      if (outcome.success) await refreshProject();
+    } finally {
+      moveInFlightRef.current = false;
+      setIsMovingDep(false);
+    }
   }
 
   async function handleUninstallDep(dep: ProjectDependency) {
@@ -228,6 +246,15 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
   }
 
   async function handleToggleFav(dep: ProjectDependency) {
+    if (favNames.has(dep.name)) {
+      const ok = await confirmAlert({
+        title: `Remove "${dep.name}" from Favorites?`,
+        message: "You can add it back anytime from package search or details.",
+        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+      });
+      if (!ok) return;
+    }
+
     const res = await toggleFavorite({
       name: dep.name,
       description: "",
@@ -429,7 +456,7 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
                       icon={Icon.ArrowClockwise}
                       onAction={() => handleReinstallDep(dep)}
                     />
-                    {(dep.kind === "dependencies" || dep.kind === "devDependencies") && (
+                    {!isMovingDep && (dep.kind === "dependencies" || dep.kind === "devDependencies") && (
                       <Action
                         title={
                           dep.kind === "devDependencies" ? "Move to Dependencies (Prod)" : "Move to Dev Dependencies"
@@ -451,6 +478,7 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
                     <Action
                       title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                       icon={isFav ? Icon.StarDisabled : Icon.Star}
+                      style={isFav ? Action.Style.Destructive : Action.Style.Regular}
                       shortcut={{ modifiers: ["cmd"], key: "f" }}
                       onAction={() => handleToggleFav(dep)}
                     />

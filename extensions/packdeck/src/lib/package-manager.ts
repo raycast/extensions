@@ -565,10 +565,35 @@ export async function executeReinstall(params: {
   };
 }
 
+const activePackageJsonMoves = new Set<string>();
+
+/**
+ * Restores `originalContent` to `filePath` ONLY if the file still matches `expectedContent`
+ * written by this operation, preventing rollback from erasing concurrent or external user edits.
+ */
+export function safeRollbackFileIfUnchanged(
+  filePath: string,
+  expectedContent: string,
+  originalContent: string,
+): "rolled-back" | "conflict" {
+  try {
+    const currentContent = fs.readFileSync(filePath, "utf8");
+    if (currentContent !== expectedContent) {
+      return "conflict";
+    }
+  } catch {
+    return "conflict";
+  }
+  const rollbackTmp = `${filePath}.packdeck-rollback-${process.pid}-${Date.now()}`;
+  fs.writeFileSync(rollbackTmp, originalContent, "utf8");
+  fs.renameSync(rollbackTmp, filePath);
+  return "rolled-back";
+}
+
 /**
  * Moves a dependency between `dependencies` and `devDependencies` while preserving its exact
  * declared range/protocol spec (e.g., exact pins, `workspace:*`, `file:...`). Writes package.json
- * atomically and rolls back automatically if the package manager fails to sync the lockfile.
+ * atomically and rolls back only if the file has not changed externally while the install ran.
  */
 export async function executeMoveDependencyType(params: {
   project: LocalProject;
@@ -578,84 +603,107 @@ export async function executeMoveDependencyType(params: {
   additionalPath?: string;
 }): Promise<OperationOutcome> {
   const pkgJsonPath = params.project.packageJsonPath;
-  const originalRaw = fs.readFileSync(pkgJsonPath, "utf8");
-  const pkgJson = JSON.parse(originalRaw) as Record<string, unknown>;
-
-  const fromMap = (pkgJson[params.fromKind] ?? {}) as Record<string, string>;
-  const declaredSpec = fromMap[params.packageName];
-  if (typeof declaredSpec !== "string") {
+  if (activePackageJsonMoves.has(pkgJsonPath)) {
     return {
       success: false,
       command: `${params.project.packageManager} install`,
       durationMs: 0,
       stdout: "",
       stderr: "",
-      errorMessage: `"${params.packageName}" was not found in ${params.fromKind}.`,
+      errorMessage: "Another dependency move is already in progress for this project. Wait for it to finish first.",
     };
   }
 
-  delete fromMap[params.packageName];
-  if (Object.keys(fromMap).length === 0) {
-    delete pkgJson[params.fromKind];
-  } else {
-    pkgJson[params.fromKind] = fromMap;
+  activePackageJsonMoves.add(pkgJsonPath);
+  try {
+    const originalRaw = fs.readFileSync(pkgJsonPath, "utf8");
+    const pkgJson = JSON.parse(originalRaw) as Record<string, unknown>;
+
+    const fromMap = (pkgJson[params.fromKind] ?? {}) as Record<string, string>;
+    const declaredSpec = fromMap[params.packageName];
+    if (typeof declaredSpec !== "string") {
+      return {
+        success: false,
+        command: `${params.project.packageManager} install`,
+        durationMs: 0,
+        stdout: "",
+        stderr: "",
+        errorMessage: `"${params.packageName}" was not found in ${params.fromKind}.`,
+      };
+    }
+
+    delete fromMap[params.packageName];
+    if (Object.keys(fromMap).length === 0) {
+      delete pkgJson[params.fromKind];
+    } else {
+      pkgJson[params.fromKind] = fromMap;
+    }
+
+    const toMap = {
+      ...((pkgJson[params.toKind] ?? {}) as Record<string, string>),
+      [params.packageName]: declaredSpec,
+    };
+    const sortedToMap: Record<string, string> = {};
+    for (const key of Object.keys(toMap).sort((a, b) => a.localeCompare(b))) {
+      sortedToMap[key] = toMap[key];
+    }
+    pkgJson[params.toKind] = sortedToMap;
+
+    const indentMatch = originalRaw.match(/\n([ \t]+)"/);
+    const indent = indentMatch ? indentMatch[1] : 2;
+    const updatedRaw = `${JSON.stringify(pkgJson, null, indent)}\n`;
+
+    const tmpPath = `${pkgJsonPath}.packdeck-tmp-${process.pid}-${Date.now()}`;
+    fs.writeFileSync(tmpPath, updatedRaw, "utf8");
+    fs.renameSync(tmpPath, pkgJsonPath);
+
+    const cmd = buildReinstallCommand(params.project.packageManager);
+    const res = await execCommand(cmd.bin, cmd.args, {
+      cwd: params.project.path,
+      additionalPath: params.additionalPath,
+      timeoutMs: 180_000,
+    });
+
+    let rollbackConflict = false;
+    if (res.exitCode !== 0) {
+      const rollbackStatus = safeRollbackFileIfUnchanged(pkgJsonPath, updatedRaw, originalRaw);
+      if (rollbackStatus === "conflict") {
+        rollbackConflict = true;
+      }
+    }
+
+    const success = res.exitCode === 0;
+    const baseError = success ? undefined : summarizeError(res);
+    const errorMessage = rollbackConflict
+      ? `${baseError} — package.json was modified externally during install; kept newer edits instead of rolling back.`
+      : baseError;
+
+    await recordHistory({
+      action: "update",
+      packageName: params.packageName,
+      version: declaredSpec,
+      projectPath: params.project.path,
+      projectName: params.project.name,
+      isGlobal: false,
+      packageManager: params.project.packageManager,
+      command: cmd.display,
+      args: cmd.args,
+      success,
+      durationMs: res.durationMs,
+      errorMessage,
+    });
+
+    return {
+      success,
+      command: cmd.display,
+      durationMs: res.durationMs,
+      stdout: res.stdout,
+      stderr: res.stderr,
+      errorMessage,
+    };
+  } finally {
+    activePackageJsonMoves.delete(pkgJsonPath);
   }
-
-  const toMap = { ...((pkgJson[params.toKind] ?? {}) as Record<string, string>), [params.packageName]: declaredSpec };
-  const sortedToMap: Record<string, string> = {};
-  for (const key of Object.keys(toMap).sort((a, b) => a.localeCompare(b))) {
-    sortedToMap[key] = toMap[key];
-  }
-  pkgJson[params.toKind] = sortedToMap;
-
-  const indentMatch = originalRaw.match(/\n([ \t]+)"/);
-  const indent = indentMatch ? indentMatch[1] : 2;
-  const updatedRaw = `${JSON.stringify(pkgJson, null, indent)}\n`;
-
-  const tmpPath = `${pkgJsonPath}.packdeck-tmp-${process.pid}-${Date.now()}`;
-  fs.writeFileSync(tmpPath, updatedRaw, "utf8");
-  fs.renameSync(tmpPath, pkgJsonPath);
-
-  const cmd = buildReinstallCommand(params.project.packageManager);
-  const res = await execCommand(cmd.bin, cmd.args, {
-    cwd: params.project.path,
-    additionalPath: params.additionalPath,
-    timeoutMs: 180_000,
-  });
-
-  if (res.exitCode !== 0) {
-    // Roll back package.json atomically so the dependency is never lost
-    const rollbackTmp = `${pkgJsonPath}.packdeck-rollback-${process.pid}-${Date.now()}`;
-    fs.writeFileSync(rollbackTmp, originalRaw, "utf8");
-    fs.renameSync(rollbackTmp, pkgJsonPath);
-  }
-
-  const success = res.exitCode === 0;
-  const errorMessage = success ? undefined : summarizeError(res);
-
-  await recordHistory({
-    action: "update",
-    packageName: params.packageName,
-    version: declaredSpec,
-    projectPath: params.project.path,
-    projectName: params.project.name,
-    isGlobal: false,
-    packageManager: params.project.packageManager,
-    command: cmd.display,
-    args: cmd.args,
-    success,
-    durationMs: res.durationMs,
-    errorMessage,
-  });
-
-  return {
-    success,
-    command: cmd.display,
-    durationMs: res.durationMs,
-    stdout: res.stdout,
-    stderr: res.stderr,
-    errorMessage,
-  };
 }
 
 export async function executeProjectScript(params: {
@@ -1129,27 +1177,33 @@ export function parseYarnAuditNdjson(rawOutput: string): SecurityVulnerability[]
 }
 
 /**
- * Collects all installed package versions (direct and transitive) from `node_modules`
- * so the npm bulk advisory fallback audits the full installed dependency tree.
+ * Collects installed package versions (direct and transitive) from `node_modules`
+ * — including standard nested trees plus pnpm (`.pnpm`) and Bun (`.bun`) virtual stores —
+ * and reports whether the tree scan was truncated or unavailable.
  */
 export function collectInstalledNodeModulesPackages(
   projectPath: string,
   maxPackages = 2500,
-): { payload: Record<string, string[]>; scannedTree: boolean } {
+  maxDepth = 6,
+): { payload: Record<string, string[]>; scannedTree: boolean; truncated: boolean; packageCount: number } {
   const rootNodeModules = path.join(projectPath, "node_modules");
   if (!fs.existsSync(rootNodeModules)) {
-    return { payload: {}, scannedTree: false };
+    return { payload: {}, scannedTree: false, truncated: false, packageCount: 0 };
   }
 
   const versionMap = new Map<string, Set<string>>();
   const visitedRealDirs = new Set<string>();
   let totalCollected = 0;
+  let truncated = false;
 
   function addPackage(name: string, version: string) {
     if (!name || !/^\d+\.\d+\.\d+/.test(version)) return;
     let set = versionMap.get(name);
     if (!set) {
-      if (totalCollected >= maxPackages) return;
+      if (totalCollected >= maxPackages) {
+        truncated = true;
+        return;
+      }
       set = new Set<string>();
       versionMap.set(name, set);
       totalCollected += 1;
@@ -1157,12 +1211,41 @@ export function collectInstalledNodeModulesPackages(
     set.add(version);
   }
 
+  function scanVirtualStore(storeDir: string, depth: number) {
+    let storeEntries: fs.Dirent[];
+    try {
+      storeEntries = fs.readdirSync(storeDir, { withFileTypes: true });
+    } catch {
+      truncated = true;
+      return;
+    }
+    for (const entry of storeEntries) {
+      if (totalCollected >= maxPackages) {
+        truncated = true;
+        break;
+      }
+      if (!entry.isDirectory()) continue;
+      const storeNm = path.join(storeDir, entry.name, "node_modules");
+      if (fs.existsSync(storeNm)) {
+        scanNodeModulesDir(storeNm, depth + 1);
+      }
+    }
+  }
+
   function scanNodeModulesDir(nmDir: string, depth: number) {
-    if (depth > 6 || totalCollected >= maxPackages) return;
+    if (depth > maxDepth) {
+      truncated = true;
+      return;
+    }
+    if (totalCollected >= maxPackages) {
+      truncated = true;
+      return;
+    }
     let realNmDir: string;
     try {
       realNmDir = fs.realpathSync(nmDir);
     } catch {
+      truncated = true;
       return;
     }
     if (visitedRealDirs.has(realNmDir)) return;
@@ -1172,13 +1255,21 @@ export function collectInstalledNodeModulesPackages(
     try {
       entries = fs.readdirSync(nmDir, { withFileTypes: true });
     } catch {
+      truncated = true;
       return;
     }
 
     for (const entry of entries) {
-      if (totalCollected >= maxPackages) break;
-      if (entry.name.startsWith(".")) continue;
+      if (totalCollected >= maxPackages) {
+        truncated = true;
+        break;
+      }
       const fullPath = path.join(nmDir, entry.name);
+      if (entry.name === ".pnpm" || entry.name === ".bun") {
+        scanVirtualStore(fullPath, depth);
+        continue;
+      }
+      if (entry.name.startsWith(".")) continue;
 
       if (entry.name.startsWith("@")) {
         // Scoped packages folder
@@ -1186,10 +1277,14 @@ export function collectInstalledNodeModulesPackages(
         try {
           scopedEntries = fs.readdirSync(fullPath, { withFileTypes: true });
         } catch {
+          truncated = true;
           continue;
         }
         for (const scoped of scopedEntries) {
-          if (totalCollected >= maxPackages) break;
+          if (totalCollected >= maxPackages) {
+            truncated = true;
+            break;
+          }
           if (scoped.name.startsWith(".")) continue;
           inspectPackageDir(path.join(fullPath, scoped.name), depth);
         }
@@ -1221,7 +1316,8 @@ export function collectInstalledNodeModulesPackages(
   for (const [name, versions] of versionMap.entries()) {
     payload[name] = Array.from(versions);
   }
-  return { payload, scannedTree: Object.keys(payload).length > 0 };
+  const packageCount = Object.keys(payload).length;
+  return { payload, scannedTree: packageCount > 0, truncated, packageCount };
 }
 
 export async function runProjectSecurityAudit(
@@ -1231,6 +1327,8 @@ export async function runProjectSecurityAudit(
   let vulnerabilities: SecurityVulnerability[] | null = null;
   let source: "cli" | "registry-advisory" = "cli";
   let isPartial = false;
+  let partialReason: string | undefined;
+  let scannedPackageCount: number | undefined;
 
   if (project.packageManager === "npm" && fs.existsSync(path.join(project.path, "package-lock.json"))) {
     const res = await execCommand("npm", ["audit", "--json"], {
@@ -1258,15 +1356,31 @@ export async function runProjectSecurityAudit(
   // Fallback to npm Bulk Security Advisories API (works for Bun, Yarn Berry, or lockfile-less projects)
   if (vulnerabilities === null) {
     source = "registry-advisory";
-    const { payload, scannedTree } = collectInstalledNodeModulesPackages(project.path);
+    const { payload, scannedTree, truncated, packageCount } = collectInstalledNodeModulesPackages(project.path);
+
+    const declaredRegistryDeps = project.dependencies.filter(
+      (d) => !/^(workspace:|file:|link:|git|https?:)/i.test(d.declaredRange.trim()),
+    );
 
     if (!scannedTree) {
       isPartial = true;
-      for (const dep of project.dependencies) {
+      partialReason = "node_modules is not installed — checked direct package.json dependencies only";
+      for (const dep of declaredRegistryDeps) {
         const version = dep.installedVersion ?? cleanVersion(dep.declaredRange);
         if (/^\d+\.\d+\.\d+/.test(version)) {
           payload[dep.name] = [version];
         }
+      }
+      scannedPackageCount = Object.keys(payload).length;
+    } else {
+      scannedPackageCount = packageCount;
+      const missingDirectCount = declaredRegistryDeps.filter((d) => !payload[d.name]).length;
+      if (truncated) {
+        isPartial = true;
+        partialReason = `node_modules scan reached its safety limit (${packageCount} packages scanned — deeper transitive dependencies may not have been checked)`;
+      } else if (missingDirectCount > 0) {
+        isPartial = true;
+        partialReason = `${missingDirectCount} declared package(s) were missing from node_modules — install dependencies for a complete audit`;
       }
     }
 
@@ -1289,6 +1403,8 @@ export async function runProjectSecurityAudit(
         vulnerabilities: [],
         source,
         isPartial,
+        partialReason,
+        scannedPackageCount,
         rawError: error instanceof Error ? error.message : String(error),
       };
     }
@@ -1304,6 +1420,8 @@ export async function runProjectSecurityAudit(
     vulnerabilities,
     source,
     isPartial,
+    partialReason,
+    scannedPackageCount,
   };
 }
 

@@ -178,12 +178,16 @@ export function ProjectAuditList({ project, searchBarAccessory, isNested = false
             tintColor: report?.isPartial ? Color.Yellow : Color.Green,
           }}
           title={
-            report?.isPartial ? "No Direct Dependency Vulnerabilities (Partial Scan)" : "No Known Vulnerabilities Found"
+            report?.isPartial
+              ? "Partial Audit — No Vulnerabilities in Scanned Packages"
+              : "No Known Vulnerabilities Found"
           }
           description={
             report?.isPartial
-              ? `Only direct package.json dependencies in ${project.name} were checked because node_modules is not installed. Run "${project.packageManager} install" to audit transitive dependencies.`
-              : `${project.name} (${PACKAGE_MANAGER_META[project.packageManager].label}) passed security audit (${report?.source === "registry-advisory" ? "installed node_modules advisory scan" : "local lockfile audit"}).`
+              ? `${report.partialReason ?? `Only direct package.json dependencies in ${project.name} were checked.`} Run "${project.packageManager} install" for a complete dependency tree audit.`
+              : report?.source === "registry-advisory"
+                ? `Checked ${report.scannedPackageCount ?? 0} installed packages (direct and nested) in ${project.name} against the npm advisory database.`
+                : `${project.name} (${PACKAGE_MANAGER_META[project.packageManager].label}) passed security audit (local lockfile audit).`
           }
           actions={
             <ActionPanel>
@@ -193,7 +197,7 @@ export function ProjectAuditList({ project, searchBarAccessory, isNested = false
         />
       ) : (
         <List.Section
-          title={`${project.name} · ${report?.total ?? 0} Vulnerabilities${report?.isPartial ? " (Direct Deps Only)" : ""}`}
+          title={`${project.name} · ${report?.total ?? 0} Vulnerabilities${report?.isPartial ? " (Partial Scan)" : ""}`}
           subtitle={`${counts.critical} critical · ${counts.high} high · ${counts.moderate} moderate · ${counts.low} low`}
         >
           {filtered.map((vuln, index) => {

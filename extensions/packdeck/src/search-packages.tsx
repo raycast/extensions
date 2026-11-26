@@ -116,6 +116,15 @@ export default function SearchPackagesCommand() {
     version: string;
     links?: NpmSearchResult["links"];
   }) {
+    if (favNames.has(pkg.name)) {
+      const ok = await confirmAlert({
+        title: `Remove "${pkg.name}" from Favorites?`,
+        message: "You can add it back anytime from Search npm Packages.",
+        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+      });
+      if (!ok) return;
+    }
+
     const res = await toggleFavorite(pkg);
     await revalidateFavs();
     await showToast({
@@ -249,6 +258,7 @@ export default function SearchPackagesCommand() {
               <Action
                 title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                 icon={isFav ? Icon.StarDisabled : Icon.Star}
+                style={isFav ? Action.Style.Destructive : Action.Style.Regular}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
                 onAction={() =>
                   handleToggleFavorite({
@@ -386,14 +396,7 @@ export default function SearchPackagesCommand() {
                         title="Remove from Favorites"
                         icon={Icon.StarDisabled}
                         style={Action.Style.Destructive}
-                        onAction={async () => {
-                          const ok = await confirmAlert({
-                            title: `Remove "${fav.name}" from Favorites?`,
-                            message: "You can add it back anytime from Search npm Packages.",
-                            primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
-                          });
-                          if (ok) await handleToggleFavorite(fav);
-                        }}
+                        onAction={() => handleToggleFavorite(fav)}
                       />
                     </ActionPanel>
                   }

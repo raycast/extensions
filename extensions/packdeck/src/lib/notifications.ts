@@ -64,15 +64,17 @@ export async function notifyBackgroundHealthChanges(
   const newOutdatedProjects: string[] = [];
 
   for (const snap of current) {
-    if (snap.lastError) continue;
     const prev = previousMap[snap.projectPath];
-    if (snap.criticalOrHighCount > 0 && (!prev || snap.criticalOrHighCount > prev.criticalOrHighCount)) {
-      newVulnProjects.push(`${snap.projectName} (${snap.criticalOrHighCount} high/critical)`);
-    } else if (snap.vulnerabilityCount > 0 && (!prev || snap.vulnerabilityCount > prev.vulnerabilityCount)) {
-      newVulnProjects.push(`${snap.projectName} (${snap.vulnerabilityCount} vulns)`);
+
+    if (!snap.auditError) {
+      if (snap.criticalOrHighCount > 0 && (!prev || snap.criticalOrHighCount > prev.criticalOrHighCount)) {
+        newVulnProjects.push(`${snap.projectName} (${snap.criticalOrHighCount} high/critical)`);
+      } else if (snap.vulnerabilityCount > 0 && (!prev || snap.vulnerabilityCount > prev.vulnerabilityCount)) {
+        newVulnProjects.push(`${snap.projectName} (${snap.vulnerabilityCount} vulns)`);
+      }
     }
 
-    if (snap.outdatedCount > 0 && prev && snap.outdatedCount > prev.outdatedCount) {
+    if (!snap.outdatedError && snap.outdatedCount > 0 && prev && snap.outdatedCount > prev.outdatedCount) {
       newOutdatedProjects.push(`${snap.projectName} (${snap.outdatedCount} outdated)`);
     }
   }
@@ -83,7 +85,8 @@ export async function notifyBackgroundHealthChanges(
       "Vulnerabilities detected",
       newVulnProjects.slice(0, 3).join(", "),
     );
-  } else if (newOutdatedProjects.length > 0) {
+  }
+  if (newOutdatedProjects.length > 0) {
     await sendSystemNotification(
       "Packdeck Updates Available",
       "Outdated dependencies found",
@@ -106,16 +109,19 @@ export function resolveProjectHealthSnapshot(params: {
 
   let outdatedCount = previous?.outdatedCount ?? 0;
   let majorOutdatedCount = previous?.majorOutdatedCount ?? 0;
+  let outdatedError: string | undefined;
   if (outdatedResult.status === "fulfilled") {
     outdatedCount = outdatedResult.value.length;
     majorOutdatedCount = outdatedResult.value.filter((o) => o.bump === "major").length;
   } else {
     const msg = outdatedResult.reason instanceof Error ? outdatedResult.reason.message : String(outdatedResult.reason);
-    errors.push(`Outdated check failed: ${msg}`);
+    outdatedError = `Outdated check failed: ${msg}`;
+    errors.push(outdatedError);
   }
 
   let vulnerabilityCount = previous?.vulnerabilityCount ?? 0;
   let criticalOrHighCount = previous?.criticalOrHighCount ?? 0;
+  let auditError: string | undefined;
   if (auditResult.status === "fulfilled" && !auditResult.value.rawError) {
     vulnerabilityCount = auditResult.value.total;
     criticalOrHighCount = auditResult.value.counts.critical + auditResult.value.counts.high;
@@ -126,7 +132,8 @@ export function resolveProjectHealthSnapshot(params: {
         : auditResult.reason instanceof Error
           ? auditResult.reason.message
           : String(auditResult.reason);
-    errors.push(`Security audit failed: ${msg}`);
+    auditError = `Security audit failed: ${msg}`;
+    errors.push(auditError);
   }
 
   const lastError = errors.length > 0 ? errors.join(" · ") : undefined;
@@ -140,6 +147,8 @@ export function resolveProjectHealthSnapshot(params: {
     vulnerabilityCount,
     criticalOrHighCount,
     checkedAt: lastError && previous ? previous.checkedAt : now,
+    outdatedError,
+    auditError,
     lastError,
   };
 }

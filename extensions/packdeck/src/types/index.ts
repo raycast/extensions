@@ -167,6 +167,8 @@ export interface AuditReport {
   vulnerabilities: SecurityVulnerability[];
   source: "cli" | "registry-advisory";
   isPartial?: boolean;
+  partialReason?: string;
+  scannedPackageCount?: number;
   rawError?: string;
 }
 
@@ -237,5 +239,7 @@ export interface ProjectHealthSnapshot {
   vulnerabilityCount: number;
   criticalOrHighCount: number;
   checkedAt: number;
+  outdatedError?: string;
+  auditError?: string;
   lastError?: string;
 }

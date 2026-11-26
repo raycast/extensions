@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { LocalProject, NpmPackageDetail, PackageManagerName } from "../types";
@@ -128,6 +139,15 @@ export function PackageDetailView({ packageName, activeProject, onMutated }: Pac
   }
 
   async function handleToggleFavorite() {
+    if (isFav) {
+      const ok = await confirmAlert({
+        title: `Remove "${packageName}" from Favorites?`,
+        message: "You can add it back anytime from package search or details.",
+        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+      });
+      if (!ok) return;
+    }
+
     const res = await toggleFavorite({
       name: packageName,
       description: detail?.description ?? "",
@@ -273,6 +293,7 @@ export function PackageDetailView({ packageName, activeProject, onMutated }: Pac
             <Action
               title={isFav ? "Remove from Favorites" : "Add to Favorites"}
               icon={isFav ? Icon.StarDisabled : Icon.Star}
+              style={isFav ? Action.Style.Destructive : Action.Style.Regular}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={handleToggleFavorite}
             />
