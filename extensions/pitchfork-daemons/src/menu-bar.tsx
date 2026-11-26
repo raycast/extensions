@@ -8,7 +8,7 @@ import {
   openExtensionPreferences,
   showHUD,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { Action, Daemon, daemonActions, daemonUrl, isSupervisorDown, nameOf, namespaceOf } from "./model";
 import { listDaemons, MissingBinaryError, OutdatedBinaryError, startSupervisor } from "./pitchfork";
 import { ACTION_ICON, runAction, statusIcon, VERB } from "./ui";
@@ -106,7 +106,8 @@ export default function Command() {
             try {
               await launchCommand({ name: "daemons", type: LaunchType.UserInitiated });
             } catch (error) {
-              await showFailureToast(error, { title: "Could not open Search Daemons" });
+              const message = error instanceof Error ? error.message : String(error);
+              await showHUD(`Could not open Search Daemons: ${message.slice(0, 80)}`);
             }
           }}
         />
