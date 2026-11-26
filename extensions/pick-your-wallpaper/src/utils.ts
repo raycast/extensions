@@ -36,7 +36,11 @@ export async function runAppleScriptSilently(appleScript: string) {
   await runAppleScript(appleScript);
 }
 
-export async function getWallpaperFiles(directoryPath: string): Promise<File[]> {
+/**
+ * Lists the images in `directoryPath` and all of its subfolders.
+ * Each image is tagged with the top-level subfolder it lives in, which is used as its category.
+ */
+export async function getWallpaperFiles(directoryPath: string, category?: string): Promise<File[]> {
   try {
     const entries = await readdir(directoryPath);
     const results = await Promise.all(
@@ -44,9 +48,9 @@ export async function getWallpaperFiles(directoryPath: string): Promise<File[]> 
         const filePath = path.join(directoryPath, entry);
         const fileStats = await stat(filePath);
         if (fileStats.isDirectory()) {
-          return getWallpaperFiles(filePath);
+          return getWallpaperFiles(filePath, category ?? entry);
         }
-        const newFile = { name: entry, path: filePath };
+        const newFile: File = { name: entry, path: filePath, category };
         return isValidFile(newFile) ? [newFile] : [];
       })
     );
