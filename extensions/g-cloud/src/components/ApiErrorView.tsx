@@ -3,7 +3,7 @@
  * Shows a user-friendly error screen with an "Enable API" action for API-not-enabled errors
  */
 
-import { List, ActionPanel, Action, Icon, Color, open } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, open, Keyboard } from "@raycast/api";
 
 // Map of API services to their human-readable names and enable URLs
 const API_INFO: Record<string, { name: string; service: string }> = {
@@ -14,6 +14,7 @@ const API_INFO: Record<string, { name: string; service: string }> = {
   storage: { name: "Cloud Storage", service: "storage.googleapis.com" },
   secretmanager: { name: "Secret Manager", service: "secretmanager.googleapis.com" },
   sqladmin: { name: "Cloud SQL Admin", service: "sqladmin.googleapis.com" },
+  composer: { name: "Cloud Composer", service: "composer.googleapis.com" },
   logging: { name: "Cloud Logging", service: "logging.googleapis.com" },
   iam: { name: "IAM", service: "iam.googleapis.com" },
   container: { name: "Kubernetes Engine", service: "container.googleapis.com" },
@@ -128,7 +129,7 @@ export function ApiErrorView({ error, projectId, apiName, onRetry, title }: ApiE
               title="Retry"
               icon={Icon.ArrowClockwise}
               onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           )}
         </ActionPanel>

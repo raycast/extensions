@@ -9,6 +9,7 @@ import {
   confirmAlert,
   Alert,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { GCloudConfig } from "./types";
@@ -135,7 +136,7 @@ export function ConfigurationsView({ gcloudPath, onSwitchAccount, onClearCache, 
                 <Action
                   title="Create Configuration"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={openCreate}
                 />
                 <Action
@@ -147,7 +148,7 @@ export function ConfigurationsView({ gcloudPath, onSwitchAccount, onClearCache, 
                 <Action
                   title="Refresh"
                   icon={Icon.RotateClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={loadConfigs}
                 />
                 {!config.is_active && (

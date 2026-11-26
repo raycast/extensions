@@ -11,6 +11,7 @@ import {
   Alert,
   useNavigation,
   Detail,
+  Keyboard,
 } from "@raycast/api";
 import { SecretManagerService, Secret, SecretVersion } from "./SecretManagerService";
 import AddVersionForm from "./components/AddVersionForm";
@@ -360,7 +361,7 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
                 title="Add New Version"
                 icon={Icon.Plus}
                 onAction={handleAddVersion}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
               <Action title="View All Versions" icon={Icon.List} onAction={() => setViewMode("versions")} />
             </ActionPanel.Section>
@@ -370,7 +371,7 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
                 onAction={refreshData}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel.Section>
             <ActionPanel.Section title="Privacy">
@@ -458,7 +459,7 @@ export default function SecretDetailView({ secretId, projectId, gcloudPath }: Se
                         title="Add New Version"
                         icon={Icon.Plus}
                         onAction={handleAddVersion}
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        shortcut={Keyboard.Shortcut.Common.New}
                       />
                       <Action title="Back to Overview" icon={Icon.ArrowLeft} onAction={() => setViewMode("overview")} />
                     </ActionPanel.Section>

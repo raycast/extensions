@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { ActionPanel, Action, List, Icon, Color, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Keyboard } from "@raycast/api";
 import { ComputeService, Disk } from "./ComputeService";
 import { friendlyErrorMessage } from "../../utils/errorMessages";
 
@@ -265,7 +265,7 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
                     title="Refresh Disks"
                     icon={Icon.ArrowClockwise}
                     onAction={refreshDisks}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

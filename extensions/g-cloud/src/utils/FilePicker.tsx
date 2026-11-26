@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, useNavigation, Icon, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ReactNode, useState } from "react";
 import { openFilePicker } from "./NativeFilePicker";
@@ -114,12 +114,7 @@ export function FilePicker({
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
             onSubmit={handleSubmit}
           />
-          <Action
-            title="Browse…"
-            icon={Icon.Finder}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onAction={handleBrowse}
-          />
+          <Action title="Browse…" icon={Icon.Finder} shortcut={Keyboard.Shortcut.Common.Open} onAction={handleBrowse} />
           <Action title={cancelTitle} icon={Icon.XmarkCircle} onAction={pop} />
         </ActionPanel>
       }

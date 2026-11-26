@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Keyboard } from "@raycast/api";
 import { NetworkService, Subnet, VPC } from "./NetworkService";
 import { getAllRegions, getRegionByName } from "../../utils/regions";
 
@@ -232,12 +232,12 @@ export default function SubnetsView({ projectId, gcloudPath, vpc }: SubnetsViewP
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   onAction={refreshSubnets}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
                 <Action
                   title="Create Subnet"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() => {
                     push(
                       <CreateSubnetForm

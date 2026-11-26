@@ -10,6 +10,7 @@ import {
   Color,
   confirmAlert,
   Form,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
@@ -696,7 +697,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
             title="Refresh"
             icon={Icon.RotateClockwise}
             onAction={fetchIAMPolicy}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
           {selectedType && (

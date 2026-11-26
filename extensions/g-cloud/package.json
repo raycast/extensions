@@ -3,13 +3,14 @@
   "name": "g-cloud",
   "title": "Google Cloud CLI",
   "subtitle": "Manage your Google Cloud resources without opening a browser",
-  "description": "Manage Google Cloud projects, Compute Engine, Cloud Storage, IAM, Cloud Run, Cloud SQL, secrets and gcloud configurations.",
+  "description": "Manage Google Cloud projects, Compute Engine, Cloud Storage, IAM, Cloud Run, Cloud SQL, Cloud Composer (Airflow), secrets and gcloud configurations.",
   "icon": "icon.png",
   "version": "1.1.0",
   "author": "ojowwalker77",
   "contributors": [
     "ben_selleslagh",
-    "MattAlp"
+    "MattAlp",
+    "gavin-burns-US"
   ],
   "categories": [
     "Developer Tools"
@@ -47,6 +48,103 @@
       "subtitle": "Manage gcloud configs & extension settings",
       "description": "List, switch, create, duplicate, and delete named gcloud configurations. Manage extension settings.",
       "mode": "view"
+    },
+    {
+      "name": "composer",
+      "title": "Composer Environments",
+      "subtitle": "Cloud Composer",
+      "description": "Browse Cloud Composer (managed Airflow) environments in any project you can access: DAGs, runs, task logs, failures, performance history and dataset lineage. Read-only.",
+      "mode": "view",
+      "keywords": [
+        "airflow",
+        "composer",
+        "dag",
+        "gcp"
+      ]
+    },
+    {
+      "name": "composer-dags",
+      "title": "Search Airflow DAGs",
+      "subtitle": "Cloud Composer",
+      "description": "Search Airflow DAGs across the Cloud Composer environments in the current project, filtering by env:, dag:, tag:, owner:, is:failed and more.",
+      "mode": "view",
+      "keywords": [
+        "airflow",
+        "dag",
+        "composer"
+      ]
+    },
+    {
+      "name": "composer-failures",
+      "title": "Recent Airflow Failures",
+      "subtitle": "Cloud Composer",
+      "description": "Failed Airflow DAG runs in a recent window, across the Cloud Composer environments in the current project.",
+      "mode": "view",
+      "keywords": [
+        "airflow",
+        "failed",
+        "composer"
+      ]
+    },
+    {
+      "name": "composer-datasets",
+      "title": "Airflow Datasets & Lineage",
+      "subtitle": "Cloud Composer",
+      "description": "Browse Airflow datasets (data-aware scheduling): producers, consumers, events and end-to-end DAG lineage.",
+      "mode": "view",
+      "keywords": [
+        "airflow",
+        "dataset",
+        "lineage",
+        "composer"
+      ]
+    },
+    {
+      "name": "composer-performance",
+      "title": "Airflow DAG Performance",
+      "subtitle": "Cloud Composer",
+      "description": "Typical DAG and task durations (p50/p90), slow-run regressions and failures per Cloud Composer environment.",
+      "mode": "view",
+      "keywords": [
+        "airflow",
+        "performance",
+        "duration",
+        "composer"
+      ]
+    },
+    {
+      "name": "composer-import-errors",
+      "title": "Airflow Import Errors",
+      "subtitle": "Cloud Composer",
+      "description": "DAG files that fail to parse in the Cloud Composer environments of the current project.",
+      "mode": "view",
+      "keywords": [
+        "airflow",
+        "import",
+        "parse",
+        "composer"
+      ]
+    },
+    {
+      "name": "composer-discover",
+      "title": "Discover Composer Environments",
+      "subtitle": "Cloud Composer",
+      "description": "Scan the projects you can access (filtered by a name pattern) for Cloud Composer environments.",
+      "mode": "view",
+      "keywords": [
+        "airflow",
+        "composer",
+        "projects"
+      ]
+    },
+    {
+      "name": "composer-status",
+      "title": "Airflow Failures Menu Bar",
+      "subtitle": "Cloud Composer",
+      "description": "Menu bar count of failed Airflow DAG runs in the last 24 hours, per Cloud Composer environment.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -76,7 +174,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11",
+    "@raycast/api": "^2.10.0",
     "@raycast/utils": "^2.2.3"
   },
   "overrides": {
@@ -84,8 +182,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "eslint": "^10.9.1",
     "prettier": "^3.0.2",
     "typescript": "^5.9.3"

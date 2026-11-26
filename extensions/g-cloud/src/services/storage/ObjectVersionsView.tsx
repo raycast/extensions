@@ -9,6 +9,7 @@ import {
   Detail,
   Color,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
@@ -442,7 +443,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={fetchVersions}
             />
           </ActionPanel>
@@ -479,7 +480,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={fetchVersions}
           />
           <Action title="Back" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={pop} />
@@ -496,7 +497,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={fetchVersions}
               />
               <Action title="Back" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={pop} />
@@ -531,7 +532,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
                   <Action
                     title="View Details"
                     icon={Icon.Eye}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     onAction={() => viewVersionDetails(version)}
                   />
                   {!version.isCurrent && (
@@ -552,7 +553,7 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={fetchVersions}
                   />
                   <Action

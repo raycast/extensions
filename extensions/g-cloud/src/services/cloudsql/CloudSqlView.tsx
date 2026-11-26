@@ -1,4 +1,16 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Detail, useNavigation, Form } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  Color,
+  Detail,
+  useNavigation,
+  Form,
+  Keyboard,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
   listCloudSqlInstances,
@@ -152,7 +164,7 @@ function InstanceNavigationSection({ instance, projectId, gcloudPath, onViewDeta
       <Action.OpenInBrowser
         title="Open in Console"
         url={`https://console.cloud.google.com/sql/instances/${instance.name}/overview?project=${projectId}`}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
     </ActionPanel.Section>
   );
@@ -172,7 +184,7 @@ function InstanceCopySection({ instance, projectId }: { instance: CloudSqlInstan
         <Action.CopyToClipboard
           title="Copy Connection Name"
           content={instance.connectionName}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
       )}
       {primaryIp && <Action.CopyToClipboard title="Copy Public IP" content={primaryIp} />}
@@ -518,7 +530,7 @@ function InstanceNotRunningView({
           <Action.OpenInBrowser
             title="Open in Console"
             url={`https://console.cloud.google.com/sql/instances/${instance.name}/overview?project=${projectId}`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
           {/* Only a stopped instance can be brought back with an activation-policy change. */}
           {availability === "stopped" && (
@@ -609,7 +621,7 @@ function DatabasesView({ projectId, gcloudPath, instance }: InstanceSubViewProps
                 <Action.OpenInBrowser
                   title="Open in Console"
                   url={`https://console.cloud.google.com/sql/instances/${instanceName}/databases?project=${projectId}`}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.OpenWith}
                 />
                 <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchDatabases} />
               </ActionPanel>
@@ -698,7 +710,7 @@ function UsersView({ projectId, gcloudPath, instance }: InstanceSubViewProps) {
                   <Action.OpenInBrowser
                     title="Open in Console"
                     url={`https://console.cloud.google.com/sql/instances/${instanceName}/users?project=${projectId}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.OpenWith}
                   />
                   <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchUsers} />
                 </ActionPanel>
@@ -795,7 +807,7 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
           <Action
             title="Create Backup"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={handleCreateBackup}
           />
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchBackups} />
@@ -812,7 +824,7 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
               <Action
                 title="Create Backup"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={handleCreateBackup}
               />
               <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchBackups} />
@@ -846,14 +858,14 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
                     <Action
                       title="Create Backup"
                       icon={Icon.Plus}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      shortcut={Keyboard.Shortcut.Common.New}
                       onAction={handleCreateBackup}
                     />
                     <Action.CopyToClipboard title="Copy Backup ID" content={backup.id} />
                     <Action.OpenInBrowser
                       title="Open in Console"
                       url={`https://console.cloud.google.com/sql/instances/${instanceName}/backups?project=${projectId}`}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.OpenWith}
                     />
                     <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchBackups} />
                   </ActionPanel>

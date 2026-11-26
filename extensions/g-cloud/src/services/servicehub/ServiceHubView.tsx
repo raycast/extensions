@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { List, ActionPanel, Action, Icon, Toast, showToast, Color, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Toast, showToast, Color, useNavigation, Keyboard } from "@raycast/api";
 import { ServiceHubService, GCPService } from "./ServiceHubService";
 import ServiceDetails from "./components/ServiceDetails";
 import { GCPServiceCategory } from "../../utils/gcpServices";
@@ -286,7 +286,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
           <Action
             title="Refresh Services"
             icon={Icon.RotateClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={refreshServices}
           />
         </ActionPanel>
@@ -361,7 +361,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
                 <Action
                   title="Refresh Services"
                   icon={Icon.RotateClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refreshServices}
                 />
               </ActionPanel>

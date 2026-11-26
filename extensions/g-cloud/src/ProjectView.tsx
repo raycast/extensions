@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, useNavigation, Cache, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, useNavigation, Cache, showToast, Toast, Color, Keyboard } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { StorageBucketView } from "./services/storage";
 import { IAMView, IAMMembersByPrincipalView } from "./services/iam";
@@ -432,7 +432,7 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                   <Action
                     title="Open Project"
                     icon={Icon.Forward}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     onAction={() => {
                       selectProject(project.id);
                     }}
@@ -440,13 +440,13 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
                   <Action
                     title="Refresh Projects"
                     icon={Icon.RotateClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={fetchProjects}
                   />
                   <Action
                     title="Clear Cache"
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                     onAction={clearCache}
                   />
                 </ActionPanel>

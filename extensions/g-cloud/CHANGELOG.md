@@ -1,5 +1,25 @@
 # Google Cloud CLI Changelog
 
+## [Add Cloud Composer] - {PR_MERGE_DATE}
+
+### New Features
+- Added **Cloud Composer** (managed Airflow) to the service hub, plus these commands:
+  - **Composer Environments**
+  - **Search Airflow DAGs**
+  - **Recent Airflow Failures**
+  - **Airflow Datasets & Lineage**
+  - **Airflow DAG Performance**
+  - **Airflow Import Errors**
+  - **Discover Composer Environments**
+- Browse environments in the selected project and drill into DAGs, runs, task instances (mapped tasks are grouped), task logs (tail, errors only, tries) and XCom links.
+- Switch project from any Composer screen with **Switch Project…** (⌘⇧O) or the project dropdown. Both use the hub's project list and selection.
+- Filter with search-bar tokens such as `env:` `dag:` `task:` `tag:` `owner:` `is:failed` `is:paused`. Prefix a token with `-` to negate it.
+- View DAG and task performance history: duration charts with p50/p90, slow-run flags, a state grid, and the slowest tasks per environment.
+- Explore Airflow dataset (data-aware scheduling) lineage: upstream and downstream lists, a lineage graph drawn inside Raycast, an interactive browser diagram, and a datasets browser with events.
+- Use **Save as Quicklink** (⌘⇧Q) to save any environment, DAG, run, task log or lineage graph.
+- Added an optional **Airflow Failures Menu Bar** command, disabled by default. It only checks regions where environments were found.
+- Composer support is read-only: it never triggers, clears, pauses or edits anything.
+
 ## [Delete Compute Engine Instances] - 2026-11-17
 
 - Added a destructive action to permanently delete Compute Engine VM instances from the instance list or detail view

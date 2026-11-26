@@ -26,7 +26,16 @@ export const CACHE_TTL = {
 };
 
 export type ResourceType =
-  "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "cloudsql" | "logs";
+  | "compute"
+  | "storage"
+  | "iam"
+  | "network"
+  | "secrets"
+  | "cloudrun"
+  | "cloudfunctions"
+  | "cloudsql"
+  | "composer"
+  | "logs";
 
 export interface RecentResource {
   id: string;

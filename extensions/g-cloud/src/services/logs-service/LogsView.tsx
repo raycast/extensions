@@ -10,6 +10,7 @@ import {
   useNavigation,
   open,
   getPreferenceValues,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { listLogEntries, LogEntry, LogSeverity, LOG_RESOURCE_TYPES } from "../../utils/gcpApi";
@@ -464,7 +465,7 @@ ${JSON.stringify(entry.textPayload || entry.jsonPayload || entry.protoPayload ||
                     <Action.CopyToClipboard
                       title="Copy Full Entry"
                       content={JSON.stringify(entry, null, 2)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Filters">

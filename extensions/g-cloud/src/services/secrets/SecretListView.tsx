@@ -11,6 +11,7 @@ import {
   Alert,
   useNavigation,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { SecretManagerService, Secret } from "./SecretManagerService";
 import SecretDetailView from "./SecretDetailView";
@@ -350,13 +351,13 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
                       title="Create New Secret"
                       icon={Icon.Plus}
                       onAction={handleCreateSecret}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      shortcut={Keyboard.Shortcut.Common.New}
                     />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
                       onAction={refreshSecrets}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Danger Zone">

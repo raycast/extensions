@@ -11,6 +11,7 @@ import {
   useNavigation,
   Form,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
@@ -281,7 +282,7 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
             <Action
               title="Cancel"
               icon={Icon.XmarkCircle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               onAction={() => pop()}
             />
           </ActionPanel>
@@ -532,7 +533,7 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={fetchLifecycleRules}
             />
           </ActionPanel>
@@ -611,11 +612,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
       navigationTitle={`Lifecycle Rules - ${bucketName}`}
       actions={
         <ActionPanel>
-          <Action title="Add Rule" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} onAction={addNewRule} />
+          <Action title="Add Rule" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New} onAction={addNewRule} />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={fetchLifecycleRules}
           />
           <Action title="Back" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={pop} />
@@ -629,16 +630,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
           icon={{ source: Icon.Clock, tintColor: Color.Blue }}
           actions={
             <ActionPanel>
-              <Action
-                title="Add Rule"
-                icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-                onAction={addNewRule}
-              />
+              <Action title="Add Rule" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New} onAction={addNewRule} />
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={fetchLifecycleRules}
               />
               <Action title="Back" icon={Icon.ArrowLeft} shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={pop} />
@@ -662,7 +658,7 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
                   <Action
                     title="View Details"
                     icon={Icon.Eye}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     onAction={() => viewRuleDetails(rule)}
                   />
                   <Action
@@ -675,13 +671,13 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
                   <Action
                     title="Add Rule"
                     icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     onAction={addNewRule}
                   />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={fetchLifecycleRules}
                   />
                   <Action
