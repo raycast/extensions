@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shortsync",
+  "title": "ShortSync",
+  "description": "Create, schedule and manage ShortSync social media posts for Instagram, TikTok, YouTube, LinkedIn, X and more, from Raycast and your menu bar.",
+  "icon": "extension-icon.png",
+  "author": "shortsync",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "keywords": [
+    "social media",
+    "scheduler",
+    "schedule post",
+    "instagram",
+    "tiktok",
+    "youtube",
+    "linkedin",
+    "x",
+    "threads",
+    "bluesky"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "A ShortSync workspace API key (starts with ss_live_). Create one in ShortSync under Settings, API, MCP & webhooks.",
+      "type": "password",
+      "required": true,
+      "placeholder": "ss_live_..."
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Leave as is unless you were told to change it.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://www.shortsync.app/api/v1"
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "subtitle": "ShortSync",
+      "description": "Write a post, attach an image or video, pick your accounts and publish now or schedule it.",
+      "mode": "view",
+      "keywords": [
+        "new post",
+        "schedule",
+        "publish"
+      ]
+    },
+    {
+      "name": "scheduled-posts",
+      "title": "Scheduled Posts",
+      "subtitle": "ShortSync",
+      "description": "See upcoming and failed posts, publish them now, retry or cancel them.",
+      "mode": "view",
+      "keywords": [
+        "queue",
+        "upcoming",
+        "failed"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Next Scheduled Post",
+      "subtitle": "ShortSync",
+      "description": "Show your next scheduled post and failed posts in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.0",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
