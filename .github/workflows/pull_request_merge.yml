@@ -122,7 +122,9 @@ jobs:
           changelog_updated=false
           updated_count=0
           # The REST files list is paginated; `gh pr view --json files` stops at 100 files.
-          changelogs=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/${{ github.event.inputs.pr_number }}/files" --jq '.[].filename' | grep -i CHANGELOG.md || true)
+          # Fetch first so an API error fails the step instead of looking like "no changelogs".
+          pr_files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/${{ github.event.inputs.pr_number }}/files" --jq '.[].filename')
+          changelogs=$(grep -i CHANGELOG.md <<< "$pr_files" || true)
           for changelog in $changelogs
           do
             echo "$changelog:"
