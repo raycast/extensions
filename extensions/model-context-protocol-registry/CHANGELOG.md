@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add SceneAgent MCP Server] - {PR_MERGE_DATE}
+
+- Add SceneAgent to the official registry: real2sim for robotics, turning 3D captures (Gaussian splats, photogrammetry, LiDAR or video) into simulation-ready scenes with collision, predicted physics and parts, exported as USD or MJCF for Isaac Sim, Isaac Lab and MuJoCo. Hosted Streamable HTTP server at https://app.sceneagent.dev/mcp with a SceneAgent API token as a Bearer header, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
