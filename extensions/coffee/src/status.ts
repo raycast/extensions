@@ -162,21 +162,20 @@ export async function checkSchedule() {
 export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolean> {
   const currentSessionId = getRaycastSessionId();
   const storedSessionId = await LocalStorage.getItem<string>(AUTO_CAFFEINATE_PID_KEY);
+  const shouldStart =
+    getPreferenceValues<Preferences>().startCaffeinateOnLaunch &&
+    !(await isCoffeeRunning()) &&
+    !(isScheduled ?? (await checkSchedule())) &&
+    // A different (or absent) session ID means Raycast relaunched — treat as new session.
+    // Sleep/wake does not change the session ID, so it cannot trigger a false positive.
+    currentSessionId !== storedSessionId;
 
   // Always refresh the stored session ID so it reflects the running Raycast process.
   // This must happen before the early returns so that after a manual decaf the
   // marker stays current and won't look like a new session on the next tick.
+  // A check that throws skips it, so the next tick retries.
   await LocalStorage.setItem(AUTO_CAFFEINATE_PID_KEY, currentSessionId);
-
-  if (!getPreferenceValues<Preferences>().startCaffeinateOnLaunch) return false;
-  if (await isCoffeeRunning()) return false;
-
-  const scheduled = isScheduled ?? (await checkSchedule());
-  if (scheduled) return false;
-
-  // A different (or absent) session ID means Raycast relaunched — treat as new session.
-  // Sleep/wake does not change the session ID, so it cannot trigger a false positive.
-  if (currentSessionId === storedSessionId) return false;
+  if (!shouldStart) return false;
 
   await startCaffeinate({ menubar: true, status: true }, `Auto-caffeinating your ${deviceName()}`);
   return true;

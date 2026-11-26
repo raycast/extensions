@@ -89,23 +89,18 @@ export function parseReason(value: unknown): CaffeinationReason | undefined {
   return undefined;
 }
 
-async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
-  const args = pid === undefined ? ["-axww"] : ["-ww", "-p", String(pid)];
-  const output = await new Promise<string>((resolve, reject) => {
+/** Resolves "" only when the one selected PID no longer exists. */
+function runPs(args: string[], env: NodeJS.ProcessEnv, pidSelected: boolean): Promise<string> {
+  return new Promise((resolve, reject) => {
     execFile(
       "/bin/ps",
-      [...args, "-o", "pid=,uid=,lstart=,comm="],
-      {
-        encoding: "utf8",
-        env: { ...process.env, LC_ALL: "C", TZ: "UTC" },
-        timeout: PROCESS_QUERY_TIMEOUT_MS,
-        maxBuffer: 8 * 1024 * 1024,
-      },
+      args,
+      { encoding: "utf8", env, timeout: PROCESS_QUERY_TIMEOUT_MS, maxBuffer: 8 * 1024 * 1024 },
       (error, stdout, stderr) => {
         // macOS ps exits 1 without output when the selected PID no longer exists, and 0 without
         // output when it can't read the process table.
         // Permission errors, timeouts and malformed output must not erase ownership.
-        if (error && !(pid !== undefined && error.code === 1 && !stdout.trim() && !stderr.trim())) {
+        if (error && !(pidSelected && error.code === 1 && !stdout.trim() && !stderr.trim())) {
           reject(error);
         } else if (!error && !stdout.trim()) {
           reject(new Error(stderr.trim() || "Cannot read the macOS process table"));
@@ -115,7 +110,16 @@ async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
       },
     );
   });
-  if (!output.trim() && pid !== undefined) return [];
+}
+
+async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
+  const args = pid === undefined ? ["-axww"] : ["-ww", "-p", String(pid)];
+  const output = await runPs(
+    [...args, "-o", "pid=,uid=,lstart=,comm="],
+    { ...process.env, LC_ALL: "C", TZ: "UTC" },
+    pid !== undefined,
+  );
+  if (!output.trim()) return [];
   const processes: ProcessIdentity[] = [];
   for (const line of output.trim().split("\n")) {
     const match = /^\s*(\d+)\s+(-?\d+)\s+(\w+\s+\w+\s+\d+\s+\d+:\d+:\d+\s+\d+)\s+(.+?)\s*$/.exec(line);
@@ -131,18 +135,7 @@ async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
 }
 
 async function getProcessArgs(pid: number): Promise<string | undefined> {
-  const output = await new Promise<string>((resolve, reject) => {
-    execFile(
-      "/bin/ps",
-      ["-ww", "-p", String(pid), "-o", "args="],
-      { encoding: "utf8", env: { ...process.env, LC_ALL: "C" }, timeout: PROCESS_QUERY_TIMEOUT_MS },
-      (error, stdout, stderr) => {
-        if (error && !(error.code === 1 && !stdout.trim() && !stderr.trim())) reject(error);
-        else if (!error && !stdout.trim()) reject(new Error(stderr.trim() || "Cannot read the macOS process table"));
-        else resolve(stdout);
-      },
-    );
-  });
+  const output = await runPs(["-ww", "-p", String(pid), "-o", "args="], { ...process.env, LC_ALL: "C" }, true);
   return output.trim() || undefined;
 }
 
@@ -307,13 +300,33 @@ async function findLegacySession(
     if (entry.executable !== EXECUTABLE || entry.uid !== process.getuid?.() || entry.pid === session?.pid) continue;
     const startedAt = Date.parse(`${entry.createdAt} UTC`);
     if (!Number.isFinite(startedAt) || startedAt >= cutoff) continue;
-    const match = LEGACY_ARGS.exec((await getProcessArgs(entry.pid)) ?? "");
+    // An unreadable candidate could be Coffee's, so no other candidate is unambiguous.
+    const args = await getProcessArgs(entry.pid).catch(() => null);
+    if (args === null) return undefined;
+    const match = LEGACY_ARGS.exec(args ?? "");
     if (!match) continue;
     const endsAt = match[1] === "t" ? startedAt + Number(match[2]) * 1000 : null;
     candidates.push({ ...entry, endsAt });
   }
   // Two matching processes mean at least one is not Coffee's; offer neither.
   return candidates.length === 1 ? candidates[0] : undefined;
+}
+
+function describeState(
+  session: ManagedSession | undefined,
+  externalCount: number | null,
+  legacySession?: LegacySession,
+): CaffeinationState {
+  return {
+    sessionId: session ? sessionId(session) : null,
+    isRunning: Boolean(session) || Boolean(externalCount),
+    isManaged: Boolean(session),
+    externalCount,
+    totalSeconds: session?.durationSeconds ?? null,
+    startTime: session?.startedAt ?? null,
+    reason: session?.reason,
+    ...(legacySession && { legacySession }),
+  };
 }
 
 async function readState(): Promise<CaffeinationState> {
@@ -323,16 +336,24 @@ async function readState(): Promise<CaffeinationState> {
   const externalCount = processes.filter(
     ({ executable, pid }) => (executable === EXECUTABLE || executable === "caffeinate") && pid !== session?.pid,
   ).length;
-  return {
-    sessionId: session ? sessionId(session) : null,
-    isRunning: Boolean(session) || externalCount > 0,
-    isManaged: Boolean(session),
+  return describeState(
+    session,
     externalCount,
-    totalSeconds: session?.durationSeconds ?? null,
-    startTime: session?.startedAt ?? null,
-    reason: session?.reason,
-    ...(legacy && { legacySession: { pid: legacy.pid, createdAt: legacy.createdAt, endsAt: legacy.endsAt } }),
-  };
+    legacy && { pid: legacy.pid, createdAt: legacy.createdAt, endsAt: legacy.endsAt },
+  );
+}
+
+/** Reads the state after an operation that already happened, so a failed read can't make it look failed. */
+export async function stateAfter(
+  read: () => Promise<CaffeinationState>,
+  fallback = describeState(undefined, null),
+): Promise<CaffeinationState> {
+  try {
+    return await read();
+  } catch (error) {
+    console.error("Cannot read Coffee's state:", error);
+    return fallback;
+  }
 }
 
 async function stopSession(expectedSessionId?: string): Promise<boolean> {
@@ -371,7 +392,7 @@ export function getMacCaffeinationState(): Promise<CaffeinationState> {
 export function stopMacCaffeinate(): Promise<CaffeinationState> {
   return withSessionLock(async () => {
     await stopSession();
-    return readState();
+    return stateAfter(readState);
   });
 }
 
@@ -379,7 +400,8 @@ export function stopMacCaffeinate(): Promise<CaffeinationState> {
 export function stopMacLegacyCaffeinate(expected: LegacySession): Promise<CaffeinationState> {
   return withSessionLock(async () => {
     const processes = await listProcesses();
-    const legacy = await findLegacySession(processes, await readSession(processes));
+    const session = await readSession(processes);
+    const legacy = await findLegacySession(processes, session);
     if (!legacy || legacy.pid !== expected.pid || legacy.createdAt !== expected.createdAt) {
       throw new Error("The previous Coffee session is no longer running");
     }
@@ -396,14 +418,14 @@ export function stopMacLegacyCaffeinate(expected: LegacySession): Promise<Caffei
       if (attempt === STOP_POLL_ATTEMPTS - 1) throw new Error("The previous Coffee session did not stop");
       await delay(STOP_POLL_INTERVAL_MS);
     }
-    return readState();
+    return stateAfter(readState, describeState(session, null));
   });
 }
 
 export function stopMacCaffeinateIfMatches(expectedSessionId: string): Promise<ConditionalStopResult> {
   return withSessionLock(async () => {
     const stopped = await stopSession(expectedSessionId);
-    return { stopped, state: await readState() };
+    return { stopped, state: stopped ? await stateAfter(readState) : await readState() };
   });
 }
 
@@ -421,12 +443,13 @@ export async function startMacCaffeinate(
       child.once("error", reject);
       child.once("spawn", resolve);
     });
+    let session: ManagedSession;
     try {
       const identity = child.pid === undefined ? undefined : await getProcessIdentity(child.pid);
       if (!identity || identity.executable !== EXECUTABLE || identity.uid !== process.getuid?.()) {
         throw new Error("Cannot identify Coffee's caffeinate process");
       }
-      const session: ManagedSession = {
+      session = {
         ...identity,
         version: 1,
         startedAt,
@@ -435,8 +458,6 @@ export async function startMacCaffeinate(
       };
       await LocalStorage.setItem(SESSION_KEY, JSON.stringify(session));
       child.unref();
-      if (options?.allowScreenSaver) startScreenSaverWatcher(identity);
-      return await readState();
     } catch (error) {
       // This child is still attached to this command and has not been reaped;
       // roll it back if we cannot persist a verifiable ownership record.
@@ -444,5 +465,7 @@ export async function startMacCaffeinate(
       await LocalStorage.removeItem(SESSION_KEY);
       throw error;
     }
+    if (options?.allowScreenSaver) startScreenSaverWatcher(session);
+    return stateAfter(readState, describeState(session, null));
   });
 }

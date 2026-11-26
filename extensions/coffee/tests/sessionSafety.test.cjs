@@ -155,6 +155,22 @@ test("a targeted inspection that can't read the process table preserves ownershi
   assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
 });
 
+test("a full process scan that exits 1 without output preserves ownership", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet);
+  const saved = h.storage.get(sessionKey);
+  h.processes.execFile.mock.mockImplementation((executable, args, options, callback) => {
+    if (args.includes("-axww")) callback(Object.assign(new Error("ps found nothing"), { code: 1 }), "", "");
+    else {
+      const row = h.table.get(100);
+      callback(null, `${row.pid} ${row.uid} ${row.createdAt} ${row.executable}`, "");
+    }
+  });
+  await assert.rejects(utils.getCaffeinationState(), /ps found nothing/);
+  assert.equal(h.storage.get(sessionKey), saved);
+});
+
 test("Windows reasons are identity-bound and legacy metadata cannot authorize expiry", async () => {
   const h = createHarness({ platform: "win32" });
   const utils = h.load("utils.ts");

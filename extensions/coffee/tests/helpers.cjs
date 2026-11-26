@@ -84,7 +84,10 @@ function createHarness(options = {}) {
     execFile: mock.fn((executable, args, options, callback) => {
       assert.equal(executable, "/bin/ps");
       const pidIndex = args.indexOf("-p");
-      const rows = [...table.values()].filter((p) => pidIndex < 0 || p.pid === Number(args[pidIndex + 1]));
+      // exitedAfterScan rows appear in full scans but are gone when inspected by PID.
+      const rows = [...table.values()].filter(
+        (p) => pidIndex < 0 || (p.pid === Number(args[pidIndex + 1]) && !p.exitedAfterScan),
+      );
       const output = args.includes("args=")
         ? rows.map((p) => p.args ?? p.executable).join("\n")
         : rows.map((p) => `${p.pid} ${p.uid} ${p.createdAt} ${p.executable}`).join("\n");

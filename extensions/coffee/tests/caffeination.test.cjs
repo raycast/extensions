@@ -166,6 +166,65 @@ test("failed termination preserves the session and rolls back a requested schedu
   assert.equal(JSON.parse(h.storage.get(day)).IsManuallyDecafed, false);
 });
 
+// A row that ps would print but Coffee can't parse fails every full process scan.
+const unreadable = { createdAt: "unreadable" };
+
+test("a state read that fails after a start or stop doesn't undo it", async (t) => {
+  const logged = t.mock.method(console, "error", () => {});
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  const day = schedule(h, true, "00:00", "23:59");
+  h.addProcess(950, unreadable);
+  const started = await h.load("caffeination.ts").startMacCaffeinate(["-u", "-d"]);
+  assert.equal(session(h).pid, 200);
+  assert.deepEqual([started.isManaged, started.externalCount], [true, null]);
+  const stopped = await utils.stopCaffeinate(quiet, false, { pauseRunningSchedule: true });
+  assert.equal(h.table.has(200), false);
+  assert.deepEqual([stopped.isManaged, stopped.externalCount], [false, null]);
+  assert.equal(JSON.parse(h.storage.get(day)).IsManuallyDecafed, true);
+  assert.equal(logged.mock.callCount(), 2);
+});
+
+test("a state read that fails after a schedule's session stops still reports the stop", async (t) => {
+  t.mock.method(console, "error", () => {});
+  const h = createHarness();
+  const day = schedule(h, true, "00:00", "00:00");
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet, undefined, "-t 300", { kind: "schedule", day, from: "00:00", to: "00:00" });
+  const { sessionId } = await utils.getCaffeinationState();
+  h.addProcess(950, unreadable);
+  await assert.rejects(utils.stopCaffeinateIfMatches(quiet, "another session"), /Cannot read the macOS process table/);
+  const { stopped, state } = await utils.stopCaffeinateIfMatches(quiet, sessionId);
+  assert.deepEqual([stopped, state.isManaged, h.table.has(200)], [true, false, false]);
+});
+
+test("a Windows state read that fails after a stop doesn't undo it", async (t) => {
+  t.mock.method(console, "error", () => {});
+  const h = createHarness({ platform: "win32" });
+  const day = schedule(h, true, "00:00", "23:59");
+  const utils = h.load("utils.ts");
+  const sessionId = "200:123456789012345678";
+  const reason = { kind: "schedule", day, from: "00:00", to: "00:00" };
+  h.storage.set("caffeinationReason", JSON.stringify({ sessionId, reason }));
+  const running = {
+    isRunning: true,
+    sessionId,
+    isManaged: true,
+    externalCount: null,
+    totalSeconds: null,
+    startTime: null,
+  };
+  h.windows.windowsGetCaffeinationState.mock.mockImplementation(async () => {
+    throw new Error("Native state unavailable");
+  });
+  h.windows.windowsGetCaffeinationState.mock.mockImplementationOnce(async () => running);
+  h.windows.windowsStopCaffeinateIfMatches.mock.mockImplementation(async () => true);
+  const { stopped, state } = await utils.stopCaffeinateIfMatches(quiet, sessionId);
+  assert.deepEqual([stopped, state.isManaged], [true, false]);
+  const paused = await utils.stopCaffeinate(quiet, false, { pauseRunningSchedule: true });
+  assert.deepEqual([paused.isRunning, JSON.parse(h.storage.get(day)).IsManuallyDecafed], [false, true]);
+});
+
 test("an already-exited process makes stop succeed", async () => {
   const h = createHarness();
   const utils = h.load("utils.ts");
@@ -293,6 +352,16 @@ test("auto-start is independent of external activity and preserves a surviving C
   assert.equal(await h.load("status.ts").maybeAutoCaffeinate(), false);
   assert.equal(h.processes.spawn.mock.callCount(), 1);
   assert.ok(h.table.has(900));
+});
+
+test("auto-start tries again after a state read fails", async () => {
+  const h = createHarness({ preferences: { startCaffeinateOnLaunch: true } });
+  const status = h.load("status.ts");
+  h.addProcess(950, unreadable);
+  await assert.rejects(status.maybeAutoCaffeinate(), /Cannot read the macOS process table/);
+  h.table.delete(950);
+  assert.equal(await status.maybeAutoCaffeinate(), true);
+  assert.equal(session(h).pid, 200);
 });
 
 function schedule(h, running, from, to) {
@@ -467,10 +536,20 @@ for (const [name, setup] of [
   });
 }
 
-test("an unreadable command line fails the state read instead of hiding a previous Coffee session", async () => {
+test("an unreadable command line withholds every previous Coffee session without failing the state read", async () => {
   const h = createHarness();
-  h.addProcess(900, { ...legacyRow, args: "" });
-  await assert.rejects(h.load("utils.ts").getCaffeinationState(), /Cannot read the macOS process table/);
+  h.addProcess(900, legacyRow);
+  h.addProcess(901, { ...legacyRow, args: "" });
+  const state = await h.load("utils.ts").getCaffeinationState();
+  assert.deepEqual([state.legacySession, state.externalCount], [undefined, 2]);
+});
+
+test("a previous Coffee session is still offered when another candidate exits before its command line is read", async () => {
+  const h = createHarness();
+  h.addProcess(900, legacyRow);
+  h.addProcess(901, { ...legacyRow, exitedAfterScan: true });
+  const state = await h.load("utils.ts").getCaffeinationState();
+  assert.equal(state.legacySession?.pid, 900);
 });
 
 test("the first run fixes the legacy cutoff so later sessions never qualify", async () => {
@@ -492,4 +571,21 @@ test("stopping a previous Coffee session rechecks its identity and never signals
   await assert.rejects(utils.stopLegacyCaffeinate(quiet, legacySession), /no longer running/);
   assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
   assert.ok(h.table.has(900));
+});
+
+test("a state read that fails after stopping a previous Coffee session doesn't undo the stop", async (t) => {
+  t.mock.method(console, "error", () => {});
+  const h = createHarness();
+  h.addProcess(900, legacyRow);
+  const day = schedule(h, true, "00:00", "23:59");
+  const utils = h.load("utils.ts");
+  const { legacySession } = await utils.getCaffeinationState();
+  h.fakeProcess.kill.mock.mockImplementation((pid) => {
+    h.table.delete(pid);
+    h.addProcess(950, unreadable);
+  });
+  const state = await utils.stopLegacyCaffeinate(quiet, legacySession, { pauseRunningSchedule: true });
+  assert.equal(h.table.has(900), false);
+  assert.equal(state.legacySession, undefined);
+  assert.equal(JSON.parse(h.storage.get(day)).IsManuallyDecafed, true);
 });
