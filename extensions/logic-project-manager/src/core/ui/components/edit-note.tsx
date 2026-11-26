@@ -86,6 +86,7 @@ export function EditNote({
       <Form.TextArea
         id="note"
         title={kind === "notes" ? strings.notes : strings.lyrics}
+        placeholder={kind === "notes" ? strings.notesPlaceholder : strings.lyricsPlaceholder}
         value={note}
         onChange={setNote}
       />

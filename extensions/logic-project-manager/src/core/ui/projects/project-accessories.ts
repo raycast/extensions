@@ -22,7 +22,7 @@ export function projectAccessories({
   const countAccessories = files
     ? [
         { text: String(files.count), tooltip: `${files.count} ${files.labels.projectFiles}` },
-        { icon: "package.png", tooltip: `${files.count} ${files.labels.projectFiles}` },
+        { icon: Icon.Document, tooltip: `${files.count} ${files.labels.projectFiles}` },
       ]
     : [
         { text: String(project.setsCount), tooltip: `${project.setsCount} ${setsLabel}` },

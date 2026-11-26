@@ -174,6 +174,7 @@
 		{
 			"name": "search-projects",
 			"title": "Search Projects",
+			"subtitle": "Logic Pro",
 			"description": "Search, play, and organize your Logic Pro projects and collections",
 			"mode": "view",
 			"keywords": [
@@ -192,12 +193,14 @@
 		{
 			"name": "search-bounces",
 			"title": "Search Bounces",
+			"subtitle": "Logic Pro",
 			"description": "Search the bounces of all your projects",
 			"mode": "view"
 		},
 		{
 			"name": "manage-categories",
 			"title": "Manage Tags",
+			"subtitle": "Logic Pro",
 			"description": "Create and manage Stages, Genres, and Track Roles",
 			"mode": "view",
 			"keywords": [
@@ -213,6 +216,7 @@
 		{
 			"name": "export-data",
 			"title": "Export Data",
+			"subtitle": "Logic Pro",
 			"description": "Save your tags, collections and other extension data to a file",
 			"mode": "view",
 			"keywords": [
@@ -226,6 +230,7 @@
 		{
 			"name": "import-data",
 			"title": "Import Data",
+			"subtitle": "Logic Pro",
 			"description": "Restore extension data from an exported file",
 			"mode": "view",
 			"keywords": [
@@ -249,17 +254,13 @@
 		"eslint": "^10.5.0",
 		"eslint-plugin-react-hooks": "^7.1.1",
 		"prettier": "^3.8.5",
-		"typescript": "^6.0.3",
-		"vitest": "^3.2.4"
+		"typescript": "^6.0.3"
 	},
 	"scripts": {
 		"build": "ray build",
-		"build:player": "bash ./scripts/build-audio-player.sh",
 		"dev": "ray develop",
 		"fix-lint": "ray lint --fix",
 		"lint": "ray lint",
-		"test": "vitest run",
-		"test:watch": "vitest",
 		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
 		"publish": "npx @raycast/api@latest publish",
 		"pull-contributions": "npx @raycast/api@latest pull-contributions"

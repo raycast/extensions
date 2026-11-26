@@ -12,6 +12,7 @@ import {
   List,
   showToast,
   Toast,
+  openExtensionPreferences,
   trash,
   useNavigation,
 } from "@raycast/api";
@@ -35,12 +36,13 @@ import { GroupBySubmenu } from "@/core/ui/actions/group-by-submenu";
 import { useGroupOption } from "@/core/ui/hooks/use-group-option";
 import { groupItems } from "@/core/ui/shared/grouping";
 import { strings } from "@/strings";
+import { listEmptyState } from "@/core/ui/shared/list-empty-state";
 import type { Project } from "@/core/projects/types";
 import { LOG_PREFIX } from "@/core/log";
 import { alternativesViewStrings, projectFilesViewStrings } from "./strings";
 import { openWithDaw } from "@/core/daw-app";
 import { useDawApp } from "@/core/ui/hooks/use-daw-app";
-import { showFailure } from "@/core/ui/shared/toast";
+import { showFailure, errorMessage } from "@/core/ui/shared/toast";
 import { ShowInFinderAction } from "@/core/ui/actions/show-in-finder";
 import { labels } from "@/daws/labels";
 import { AlternativesView, findWindowImage } from "./alternatives-view";
@@ -150,7 +152,7 @@ function RenameProjectFileForm({ file, onRenamed }: { file: ProjectFile; onRenam
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={strings.name} value={name} onChange={setName} />
+      <Form.TextField id="name" title={strings.name} placeholder={file.name} value={name} onChange={setName} />
     </Form>
   );
 }
@@ -160,6 +162,8 @@ function RenameProjectFileForm({ file, onRenamed }: { file: ProjectFile; onRenam
 export function ProjectFilesView({ project }: { project: Project }) {
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // 读取失败的原因：列表为空时据此显示出错页面，而不是看起来像没有工程文件。
+  const [loadError, setLoadError] = useState<string | null>(null);
   const logicApp = useDawApp();
   const [sortBy, setSortBy] = useSortOption(PROJECT_FILES_SORT_STORAGE_KEY, PROJECT_FILES_SORT_OPTIONS, "created-desc");
   const [groupBy, setGroupBy] = useGroupOption(PROJECT_FILES_GROUP_STORAGE_KEY, "created");
@@ -211,10 +215,12 @@ export function ProjectFilesView({ project }: { project: Project }) {
           });
         }
         setFiles(items);
+        setLoadError(null);
       } catch (error) {
         if (!cancelled) {
           console.error(`${LOG_PREFIX} Failed to load project files:`, error);
-          setFiles([]);
+          // 保留已读到的条目：读不到时不该看起来像没有工程文件。
+          setLoadError(errorMessage(error));
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -229,6 +235,12 @@ export function ProjectFilesView({ project }: { project: Project }) {
   }, [project.folderPath, reloadToken]);
 
   const reload = () => setReloadToken((n) => n + 1);
+
+  // 出错页面上的 Try Again：重读期间显示加载，读完再收起。
+  const retryLoad = () => {
+    setIsLoading(true);
+    reload();
+  };
 
   const handleOpen = async (file: ProjectFile) => {
     try {
@@ -295,6 +307,19 @@ export function ProjectFilesView({ project }: { project: Project }) {
       navigationTitle={project.title}
       searchBarPlaceholder={projectFilesViewStrings.searchProjectFiles}
     >
+      {listEmptyState(isLoading, files.length, loadError) === "error" && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title={projectFilesViewStrings.loadFailed}
+          description={loadError ?? undefined}
+          actions={
+            <ActionPanel>
+              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={retryLoad} />
+              <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
       {groupItems(
         sortedFiles,
         groupBy,

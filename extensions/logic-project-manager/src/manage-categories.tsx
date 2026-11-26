@@ -24,6 +24,7 @@ import {
   setStageMembers,
   type ProjectMetadata,
 } from "@/core/metadata/project-metadata";
+import { clearTagEverywhere, deleteAllTags } from "@/core/metadata/tag-cleanup";
 import { loadProjects } from "@/core/projects/load-projects";
 import type { Project } from "@/core/projects/types";
 import { showFailure } from "@/core/ui/shared/toast";
@@ -306,6 +307,26 @@ export default function Command() {
     return count > 0 ? strings.deleteTagInUse.replace("{count}", String(count)) : undefined;
   }
 
+  // Delete All 的确认框：整张列表一起删，所以数的是「有多少项目 / 曲目会失去标签」。
+  async function usageMessageForAll(): Promise<string | undefined> {
+    if (kind === "role") {
+      let count = 0;
+      for (const option of options) {
+        count += await countRoleUsage(option.name);
+      }
+      return count > 0 ? strings.deleteRoleInUse.replace("{count}", String(count)) : undefined;
+    }
+    const store = await getAllProjectMetadata();
+    const ids = new Set(options.map((option) => option.id));
+    const count = loadProjectsSafely().filter((p) => {
+      const meta = store[p.id];
+      return kind === "stage"
+        ? meta?.stageId != null && ids.has(meta.stageId)
+        : (meta?.genreIds ?? []).some((g) => ids.has(g));
+    }).length;
+    return count > 0 ? strings.deleteTagInUse.replace("{count}", String(count)) : undefined;
+  }
+
   async function deleteOption(option: TaxonomyOption) {
     const confirmed = await confirmAlert({
       icon: { source: Icon.Trash, tintColor: Color.Red },
@@ -321,20 +342,35 @@ export default function Command() {
     const next = options.filter((o) => o.id !== option.id);
     await TAXONOMIES[kind].save(next);
     setOptions(next);
-    if (kind === "role") {
-      await deleteRoleEverywhere(option.name);
-    } else if (kind === "stage") {
-      await removeStageEverywhere(option.id);
-    } else if (kind === "genre") {
-      await removeGenreEverywhere(option.id);
+    await clearTagEverywhere(kind, option);
+    await showToast({ style: Toast.Style.Success, title: strings.deleted });
+  }
+
+  // 删光当前这张列表。先确认，写明删几个选项、影响几个项目（Role 是几个曲目）。
+  async function deleteAllOptions() {
+    const confirmed = await confirmAlert({
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: strings.deleteAllConfirmTitle.replace("{count}", String(options.length)),
+      message: await usageMessageForAll(),
+      primaryAction: { title: strings.deleteAll, style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    try {
+      await deleteAllTags(kind, TAXONOMIES[kind], options);
+    } catch (error) {
+      // 失败时列表保持原样：deleteAllTags 全部清完才写空列表。
+      await showFailure(strings.deleteAllFailed, error);
+      return;
     }
+    setOptions([]);
     await showToast({ style: Toast.Style.Success, title: strings.deleted });
   }
 
   // 恢复默认：写回默认种子，并清掉项目上指向已不存在选项的引用（Role 按名字，Stage/Genre 按 id）。
   async function resetOptions() {
     const confirmed = await confirmAlert({
-      icon: { source: Icon.ArrowCounterClockwise, tintColor: Color.Red },
+      icon: { source: Icon.Undo, tintColor: Color.Red },
       title: `${strings.resetToDefaults}?`,
       message: strings.resetToDefaultsHint,
       primaryAction: { title: strings.resetToDefaults, style: Alert.ActionStyle.Destructive },
@@ -379,11 +415,16 @@ export default function Command() {
   );
 
   const resetAction = (
+    <Action title={strings.resetToDefaults} icon={Icon.Undo} style={Action.Style.Destructive} onAction={resetOptions} />
+  );
+
+  const deleteAllAction = (
     <Action
-      title={strings.resetToDefaults}
-      icon={Icon.ArrowCounterClockwise}
+      title={strings.deleteAll}
+      icon={Icon.Trash}
       style={Action.Style.Destructive}
-      onAction={resetOptions}
+      shortcut={Keyboard.Shortcut.Common.RemoveAll}
+      onAction={deleteAllOptions}
     />
   );
 
@@ -391,7 +432,7 @@ export default function Command() {
     kind === "role" ? null : (
       <Action.Push
         title={strings.assignToProjects}
-        icon={Icon.Folder}
+        icon={Icon.PlusTopRightSquare}
         target={<AssignProjectsForm kind={kind} option={option} />}
       />
     );
@@ -480,14 +521,17 @@ export default function Command() {
                   />
                 )}
               </ActionPanel.Section>
-              <Action
-                title={strings.delete}
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                shortcut={Keyboard.Shortcut.Common.Remove}
-                onAction={() => deleteOption(option)}
-              />
-              {resetAction}
+              <ActionPanel.Section title={strings.sectionDangerZone}>
+                {resetAction}
+                <Action
+                  title={strings.delete}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={() => deleteOption(option)}
+                />
+                {deleteAllAction}
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

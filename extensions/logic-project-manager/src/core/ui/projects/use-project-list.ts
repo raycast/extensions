@@ -4,7 +4,7 @@ import type { Project } from "@/core/projects/types";
 import { readProjectListCache, writeProjectListCache } from "@/core/projects/list-cache";
 import { applyProjectMetadata, reloadProjectData } from "@/core/ui/shared/reload-projects";
 import { refreshDocFile } from "@/core/ui/hooks/use-doc-watcher";
-import { showFailure } from "@/core/ui/shared/toast";
+import { showFailure, errorMessage } from "@/core/ui/shared/toast";
 import { strings } from "@/strings";
 import { LOG_PREFIX } from "@/core/log";
 import { shouldCommitProjects, shouldShowLoadingOnScan, shouldWriteListCache } from "./project-list-state";
@@ -22,6 +22,8 @@ export function useProjectList(input: {
 }): {
   projects: Project[];
   isLoading: boolean;
+  /** 最近一次读取失败的原因；读到数据后清空。有缓存时列表照常显示，界面据此提示出错。 */
+  loadError: string | null;
   orphanIds: string[];
   reloadProjects: () => Promise<string[]>;
   applyMetadata: () => Promise<void>;
@@ -40,6 +42,7 @@ export function useProjectList(input: {
   // 上次写进缓存的列表：打开时刚读出来的那份不重复写。
   const lastWrittenRef = useRef(initialCache);
   const [orphanIds, setOrphanIds] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const baseProjectsRef = useRef<Project[]>([]);
   // 每次渲染都更新：runReload 的闭包里拿不到最新的 projects state。
   const projectsRef = useRef<Project[]>(projects);
@@ -95,11 +98,13 @@ export function useProjectList(input: {
       );
       if (isCancelled()) return [];
       setOrphanIds(orphans);
+      setLoadError(null);
       return orphans;
     } catch (error) {
       console.error(`${LOG_PREFIX} Failed to load projects:`, error);
-      setProjects([]);
+      // 保留已有的缓存项目：读不到文件夹时，列表不该看起来像空库。
       setOrphanIds([]);
+      setLoadError(errorMessage(error));
       await showFailure(strings.loadProjectsFailed, error, { message: strings.loadProjectsFailedHint });
     } finally {
       // 静默启动刷新只做一次，成功失败都复位。
@@ -162,5 +167,5 @@ export function useProjectList(input: {
 
   const getProjects = useCallback(() => projectsRef.current, []);
 
-  return { projects, isLoading, orphanIds, reloadProjects, applyMetadata, refreshDoc, getProjects };
+  return { projects, isLoading, loadError, orphanIds, reloadProjects, applyMetadata, refreshDoc, getProjects };
 }

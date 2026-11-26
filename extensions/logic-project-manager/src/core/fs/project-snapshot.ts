@@ -13,7 +13,15 @@ export type SnapshotDiff = {
   removed: SnapshotEntry[];
   ambiguous: SnapshotEntry[];
   guardTripped: boolean;
+  /** 名字没变、但已经是另一个文件夹：旧项目被删掉后又建了同名的新项目。 */
+  replaced: { from: SnapshotEntry; to: SnapshotEntry }[];
+  replaceGuardTripped: boolean;
 };
+
+// 创建时间是否可用：0 和 NaN 表示读不到（旧数据、不支持创建时间的卷）。
+function isValidBirthtime(ms: number): boolean {
+  return Number.isFinite(ms) && ms > 0;
+}
 
 /** 是否同一个文件夹：创建时间一致；双方都有 inode 时 inode 也必须一致。
  *  Finder 复制（⌘D/拷贝）会保留创建时间，但 inode 是新的，所以"复制后删原件"不会被当成改名。 */
@@ -64,11 +72,33 @@ export function diffSnapshots(previous: SnapshotEntry[], current: SnapshotEntry[
     }
   }
 
+  // 名字前后都在、但创建时间不同：旧项目被删掉，又建了同名的新项目，新项目不该继承旧项目的设置。
+  // 不比 inode：⌘S 保存不改创建时间；拷到外接盘再拷回来创建时间不变、inode 会变（2026.11.24 实测）。
+  const previousById = new Map(previous.map((entry) => [entry.id, entry]));
+  const replaced: SnapshotDiff["replaced"] = [];
+  for (const entry of current) {
+    const before = previousById.get(entry.id);
+    if (!before) continue;
+    // 任一边没有有效的创建时间就分不清，当成同一个项目。
+    if (!isValidBirthtime(before.birthtimeMs) || !isValidBirthtime(entry.birthtimeMs)) continue;
+    if (Math.abs(before.birthtimeMs - entry.birthtimeMs) < 1) continue;
+    replaced.push({ from: before, to: entry });
+  }
+
   // 外接盘未挂载、根目录被整体移走等：项目一下子全没了，或一次消失过半（且多于 3 个），多半不是真删除，不处理。
   const guardTripped =
     removed.length > 0 &&
     ((current.length === 0 && previous.length > 0) || (removed.length > 3 && removed.length > previous.length / 2));
-  return { renamed, removed: guardTripped ? [] : removed, ambiguous, guardTripped };
+  // 整个文件夹被搬过（cp、rsync、备份恢复）时创建时间会全变，但都还是原来的项目：不处理。
+  const replaceGuardTripped = replaced.length > 3 && replaced.length > previous.length / 2;
+  return {
+    renamed,
+    removed: guardTripped ? [] : removed,
+    ambiguous,
+    guardTripped,
+    replaced: replaceGuardTripped ? [] : replaced,
+    replaceGuardTripped,
+  };
 }
 
 // 项目所在卷的废纸篓：系统盘为 ~/.Trash；外接盘为 /Volumes/<盘名>/.Trashes/<uid>。第一个永远是 ~/.Trash。

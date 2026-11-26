@@ -233,7 +233,7 @@ export function SearchBouncesView() {
                       {b.unmatched && projects.length > 0 && (
                         <Action.Push
                           title={strings.assignToProject}
-                          icon={Icon.Link}
+                          icon={Icon.PlusTopRightSquare}
                           target={
                             <AssignBounce bounce={b} projects={sortedProjects} onAssigned={() => void reload()} />
                           }

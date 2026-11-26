@@ -16,6 +16,7 @@ type AlternativesViewStrings = {
   changeConfirmTitle: string;
   changeConfirmMessage: string;
   changeFailed: string;
+  loadFailed: string;
 };
 
 export const alternativesViewStrings: AlternativesViewStrings = {
@@ -36,6 +37,7 @@ export const alternativesViewStrings: AlternativesViewStrings = {
   changeConfirmMessage:
     "Make sure this project is closed in Logic Pro. If it's open, Logic will overwrite this change the next time it saves.",
   changeFailed: "Couldn't Change Alternative",
+  loadFailed: "Couldn't Load Alternatives",
 };
 
 // View Project Files 专用的文字：文件夹形态的项目里有多个 .logicx 时用（多是 Save As 存出来的版本）。
@@ -54,6 +56,7 @@ type ProjectFilesViewStrings = {
   trashProjectFileHint: string;
   lastProjectFile: string;
   trashConfirmMessage: string;
+  loadFailed: string;
 };
 
 export const projectFilesViewStrings: ProjectFilesViewStrings = {
@@ -71,4 +74,5 @@ export const projectFilesViewStrings: ProjectFilesViewStrings = {
   trashProjectFileHint: "This moves the project file to the Trash:",
   lastProjectFile: "A project needs at least one project file",
   trashConfirmMessage: "Make sure it's closed in Logic Pro. Audio files in the project folder stay where they are.",
+  loadFailed: "Couldn't Load Project Files",
 };

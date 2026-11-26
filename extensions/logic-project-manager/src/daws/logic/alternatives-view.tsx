@@ -12,6 +12,7 @@ import {
   List,
   showToast,
   Toast,
+  openExtensionPreferences,
   useNavigation,
 } from "@raycast/api";
 import fs from "node:fs";
@@ -27,12 +28,13 @@ import {
   parseSetMetadata,
 } from "@/core/projects/project-file-cache";
 import { strings } from "@/strings";
+import { listEmptyState } from "@/core/ui/shared/list-empty-state";
 import type { Project } from "@/core/projects/types";
 import { LOG_PREFIX } from "@/core/log";
 import { alternativesViewStrings } from "./strings";
 import { openWithDaw } from "@/core/daw-app";
 import { useDawApp } from "@/core/ui/hooks/use-daw-app";
-import { showFailure } from "@/core/ui/shared/toast";
+import { showFailure, errorMessage } from "@/core/ui/shared/toast";
 import { ShowInFinderAction } from "@/core/ui/actions/show-in-finder";
 import { labels } from "@/daws/labels";
 import { SortBySubmenu } from "@/core/ui/actions/sort-by-submenu";
@@ -118,7 +120,7 @@ function RenameAlternativeForm({ alternative, onRenamed }: { alternative: Projec
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={strings.name} value={name} onChange={setName} />
+      <Form.TextField id="name" title={strings.name} placeholder={alternative.name} value={name} onChange={setName} />
     </Form>
   );
 }
@@ -127,6 +129,8 @@ function RenameAlternativeForm({ alternative, onRenamed }: { alternative: Projec
 export function AlternativesView({ project }: { project: Project }) {
   const [alternatives, setAlternatives] = useState<ProjectAlternative[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // 读取失败的原因：列表为空时据此显示出错页面，而不是看起来像没有 Alternative。
+  const [loadError, setLoadError] = useState<string | null>(null);
   const logicApp = useDawApp();
   const [sortBy, setSortBy] = useSortOption(ALTERNATIVES_SORT_STORAGE_KEY, ALTERNATIVES_SORT_OPTIONS, "created-desc");
   const [groupBy, setGroupBy] = useGroupOption(ALTERNATIVES_GROUP_STORAGE_KEY, "created");
@@ -162,10 +166,12 @@ export function AlternativesView({ project }: { project: Project }) {
           items.push({ ...set, ...metadata, windowImage: findWindowImage(set) });
         }
         setAlternatives(items);
+        setLoadError(null);
       } catch (error) {
         if (!cancelled) {
           console.error(`${LOG_PREFIX} Failed to load alternatives:`, error);
-          setAlternatives([]);
+          // 保留已读到的条目：读不到时不该看起来像没有 Alternative。
+          setLoadError(errorMessage(error));
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -180,6 +186,12 @@ export function AlternativesView({ project }: { project: Project }) {
   }, [folderPath, kind, reloadToken]);
 
   const reload = () => setReloadToken((n) => n + 1);
+
+  // 出错页面上的 Try Again：重读期间显示加载，读完再收起。
+  const retryLoad = () => {
+    setIsLoading(true);
+    reload();
+  };
 
   // 所有会改文件的操作都先确认：项目在 Logic 里开着时，Logic 下次保存会盖掉这些改动。
   const confirmChange = (title: string, message: string, actionTitle: string) =>
@@ -291,6 +303,19 @@ export function AlternativesView({ project }: { project: Project }) {
       navigationTitle={project.title}
       searchBarPlaceholder={alternativesViewStrings.searchAlternatives}
     >
+      {listEmptyState(isLoading, alternatives.length, loadError) === "error" && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title={alternativesViewStrings.loadFailed}
+          description={loadError ?? undefined}
+          actions={
+            <ActionPanel>
+              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={retryLoad} />
+              <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
       {groupItems(
         sortedAlternatives,
         groupBy,

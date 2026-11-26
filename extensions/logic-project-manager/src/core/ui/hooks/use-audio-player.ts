@@ -11,10 +11,6 @@ import {
 } from "@/core/audio/audio-player";
 import type { AudioPlayerController, PlaybackStatus } from "@/core/audio/audio-player";
 
-interface UseAudioPlayerOptions {
-  playerPath: string;
-}
-
 interface PlaybackCallbacks {
   onPlaying?: () => void;
   onError?: (message: string) => void;
@@ -95,11 +91,11 @@ function setProgress(position: number, duration: number) {
   }
 }
 
-function play(id: string, audioPath: string, playerPath: string, callbacks?: PlaybackCallbacks) {
+function play(id: string, audioPath: string, callbacks?: PlaybackCallbacks) {
   // 先切换会话编号，使旧播放器的回调失效。
   const sessionId = ++activeSessionId;
 
-  // 本进程接管为 owner，改由 stdout 驱动进度，停掉恢复用的状态轮询。
+  // 本进程接管为 owner，改由播放器控制器轮询状态文件驱动进度，停掉恢复用的状态轮询。
   stopStatusPoller();
 
   const previousController = activeController;
@@ -122,7 +118,6 @@ function play(id: string, audioPath: string, playerPath: string, callbacks?: Pla
   const controller = startAudioPlayer({
     audioPath,
     id,
-    playerPath,
 
     onProgress: (position, duration) => {
       // 只允许当前会话更新播放进度。
@@ -281,7 +276,7 @@ function restart() {
   commandRestart();
 }
 
-export function useAudioPlayer({ playerPath }: UseAudioPlayerOptions) {
+export function useAudioPlayer() {
   const current = useSyncExternalStore(subscribe, getSnapshot);
 
   // 挂载时若后台仍有播放，恢复 Toast(见 restoreFromBackground 的降级说明)。
@@ -289,12 +284,9 @@ export function useAudioPlayer({ playerPath }: UseAudioPlayerOptions) {
     restoreFromBackground();
   }, []);
 
-  const playTrack = useCallback(
-    (id: string, audioPath: string, callbacks?: PlaybackCallbacks) => {
-      play(id, audioPath, playerPath, callbacks);
-    },
-    [playerPath],
-  );
+  const playTrack = useCallback((id: string, audioPath: string, callbacks?: PlaybackCallbacks) => {
+    play(id, audioPath, callbacks);
+  }, []);
 
   const stopTrack = useCallback(() => stop(), []);
   const pauseTrack = useCallback(() => pause(), []);

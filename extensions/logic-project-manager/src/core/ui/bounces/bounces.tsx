@@ -72,23 +72,30 @@ export function BounceGroupSubmenu(props: { value: BounceGroup; onChange: (next:
   );
 }
 
-function RenameBounceForm({ current, onSubmit }: { current: string; onSubmit: (name: string) => void }) {
+function RenameBounceForm({
+  current,
+  onSubmit,
+}: {
+  current: string;
+  /** 返回是否保存成功：失败时表单不关，保留输入。 */
+  onSubmit: (name: string) => Promise<boolean>;
+}) {
   const { pop } = useNavigation();
   const [value, setValue] = useState(current);
-  function handleSubmit() {
-    onSubmit(value);
+  async function handleSubmit() {
+    if (!(await onSubmit(value))) return;
     pop();
   }
   return (
     <Form
-      navigationTitle={strings.renameBounce}
+      navigationTitle={strings.rename}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={strings.save} icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={strings.name} value={value} onChange={setValue} />
+      <Form.TextField id="name" title={strings.name} placeholder={current} value={value} onChange={setValue} />
     </Form>
   );
 }
@@ -161,36 +168,43 @@ export function Bounces(props: {
     await showToast({ style: Toast.Style.Success, title: strings.bounceCopied, message: bounce.name });
   };
 
-  const handleRename = async (bounce: BounceWithSource, rawName: string) => {
+  // 返回是否保存成功：表单据此决定关不关。
+  const handleRename = async (bounce: BounceWithSource, rawName: string): Promise<boolean> => {
     const base = rawName.trim();
     if (base === "" || base.includes("/") || base.includes(":")) {
       await showToast({ style: Toast.Style.Failure, title: strings.invalidName });
-      return;
+      return false;
     }
     const ext = path.extname(bounce.path);
     // 输入框只含文件名主体（不带后缀），统一补回原后缀——即使名字里带点也不会误判成扩展名。
     const finalName = `${base}${ext}`;
     const newPath = path.join(path.dirname(bounce.path), finalName);
-    if (newPath === bounce.path) return;
+    if (newPath === bounce.path) return true;
     if (fs.existsSync(newPath)) {
       await showToast({ style: Toast.Style.Failure, title: strings.bounceNameExists });
-      return;
+      return false;
     }
     try {
       fs.renameSync(bounce.path, newPath);
     } catch (error) {
       await showFailure(strings.renameFailed, error);
-      return;
+      return false;
     }
     // 外部「文件」来源：路径即登记路径，改名后同步更新记录，否则记录会指向旧名而失效。
+    // 文件已经改好了，这里失败只提示，不让表单以为整个操作没成功。
     if (files.includes(bounce.path)) {
       const nextFiles = files.map((f) => (f === bounce.path ? newPath : f));
       setFiles(nextFiles);
-      await setExternalBounces(props.projectId, folders, nextFiles);
+      try {
+        await setExternalBounces(props.projectId, folders, nextFiles);
+      } catch (error) {
+        await showFailure(strings.saveFailed, error);
+      }
       props.onChanged?.();
     }
     setReloadToken((n) => n + 1);
     await showToast({ style: Toast.Style.Success, title: strings.bounceRenamed, message: finalName });
+    return true;
   };
 
   // 共享文件夹里配错的文件：标成不属于这个项目，退回 Unmatched Bounces。
@@ -294,13 +308,13 @@ export function Bounces(props: {
                         {renderManageAction()}
                         <ShowInFinderAction path={b.path} />
                         <Action.Push
-                          title={strings.renameBounce}
+                          title={strings.rename}
                           icon={Icon.Pencil}
                           shortcut={Keyboard.Shortcut.Common.Edit}
                           target={
                             <RenameBounceForm
                               current={splitExt(b.name).stem}
-                              onSubmit={(name) => void handleRename(b, name)}
+                              onSubmit={(name) => handleRename(b, name)}
                             />
                           }
                         />

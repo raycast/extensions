@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Action,
   closeMainWindow,
+  Color,
   Icon,
   Keyboard,
   List,
@@ -20,10 +21,10 @@ import { usePlaybackToast } from "@/core/ui/projects/use-playback-toast";
 import { useCurrentSets } from "@/core/ui/projects/use-current-sets";
 import { useOnboarding } from "@/core/ui/projects/use-onboarding";
 import { useProjectList } from "@/core/ui/projects/use-project-list";
+import { useReplacedProjects } from "@/core/ui/projects/use-replaced-projects";
 import { resetToFirstRun } from "@/core/ui/projects/reset-to-first-run";
 import { useDocWatcher } from "@/core/ui/hooks/use-doc-watcher";
 import { useMissingDocFolders } from "@/core/ui/hooks/use-missing-doc-folders";
-import { ensureAudioPlayerBinary } from "@/core/audio/audio-player-path";
 import { getSettings } from "@/settings";
 import { deleteProjectMetadata, movePinnedProject, setProjectPinned } from "@/core/metadata/project-metadata";
 import { removeProjectFromAllOrders } from "@/core/metadata/collection-order";
@@ -63,6 +64,7 @@ import {
 import { openWithDaw } from "@/core/daw-app";
 import { useDawApp } from "@/core/ui/hooks/use-daw-app";
 import { useTaxonomies } from "@/core/ui/projects/use-taxonomies";
+import { listEmptyState } from "@/core/ui/shared/list-empty-state";
 import { optionKeywords } from "@/core/ui/shared/search-keywords";
 import { findCurrentSet } from "@/core/projects/current-set";
 import { itemLimit, limitGroups } from "@/core/ui/shared/progressive-list";
@@ -84,7 +86,6 @@ const SORT_STORAGE_KEY = "project-sort-option";
 const GROUP_STORAGE_KEY = "project-group-option";
 const VIEW_MODE_STORAGE_KEY = "view-mode:projects";
 const DETAIL_DOC_STORAGE_KEY = "detail-doc:projects";
-const PLAYER_PATH = ensureAudioPlayerBinary();
 
 // 正在由扩展执行 Move to Trash 的项目：已归档，目录监听触发的重载不要再当成 Finder 删除处理。
 const trashingIds = new Set<string>();
@@ -120,13 +121,29 @@ export function ProjectsView() {
   const reloadProjectsRef = useRef<() => Promise<string[]>>(async () => []);
   const onStartupLoadedRef = useRef<(orphans: string[]) => Promise<void>>(async () => {});
 
-  const { projects, isLoading, orphanIds, reloadProjects, applyMetadata, refreshDoc, getProjects } = useProjectList({
-    root: PROJECTS_ROOT,
-    trashingIds,
-    onAppliedRef: refreshCurrentSetsRef,
-    onStartupLoadedRef,
-  });
+  const { projects, isLoading, loadError, orphanIds, reloadProjects, applyMetadata, refreshDoc, getProjects } =
+    useProjectList({
+      root: PROJECTS_ROOT,
+      trashingIds,
+      onAppliedRef: refreshCurrentSetsRef,
+      onStartupLoadedRef,
+    });
   reloadProjectsRef.current = reloadProjects;
+  // 同名旧项目的设置已归档的项目：这些行多出 Restore Previous Settings。
+  const { ids: replacedIds, revalidate: revalidateReplaced } = useReplacedProjects(projects);
+
+  // 出错页面上的 Try Again：重读期间显示加载，读完再收起。
+  const [retrying, setRetrying] = useState(false);
+  const retryLoad = useCallback(async () => {
+    setRetrying(true);
+    try {
+      await reloadProjects();
+    } finally {
+      setRetrying(false);
+    }
+  }, [reloadProjects]);
+
+  const emptyState = listEmptyState(isLoading || retrying, projects.length, loadError);
 
   // 首次加载完：残留数据提示只弹一次，然后跑引导。时机和原来一样（加载状态关掉之后）。
   onStartupLoadedRef.current = async (orphans) => {
@@ -149,9 +166,7 @@ export function ProjectsView() {
   const { showAll, showAllNow } = useProgressiveList(projects.length);
 
   const { playbackStatus, playingId, positionSeconds, durationSeconds, play, pause, resume, stop, seek, restart } =
-    useAudioPlayer({
-      playerPath: PLAYER_PATH,
-    });
+    useAudioPlayer();
 
   const { isPlaybackToastActive } = usePlaybackToast(projects, {
     playbackStatus,
@@ -344,7 +359,14 @@ export function ProjectsView() {
               onRestart={restart}
               onResume={resume}
             />
-            <ProjectDetailsSection project={item} onSaved={reloadProjects} />
+            <ProjectDetailsSection
+              project={item}
+              onSaved={() => {
+                void reloadProjects();
+                revalidateReplaced();
+              }}
+              hasPreviousSettings={replacedIds.has(item.id)}
+            />
             <ProjectFileSection
               project={item}
               dawApp={dawApp}
@@ -373,10 +395,10 @@ export function ProjectsView() {
               onTrash={() => handleTrashProject(item)}
             />
             {environment.isDevelopment && (
-              <ActionPanel.Section>
+              <ActionPanel.Section title={strings.dev}>
                 <Action
-                  title={strings.resetToFirstRunDev}
-                  icon={Icon.ArrowCounterClockwise}
+                  title={strings.resetToFirstRun}
+                  icon={{ source: Icon.Power, tintColor: Color.Orange }}
                   onAction={async () => {
                     await resetToFirstRun();
                     // 缓存已清空，当前窗口里的列表还是旧的：关掉窗口，重开才是第一次打开的样子。
@@ -408,7 +430,7 @@ export function ProjectsView() {
 
   return (
     <List
-      isLoading={isLoading || readingSets}
+      isLoading={isLoading || retrying || readingSets}
       isShowingDetail={showDetail}
       filtering={!isTagSearch}
       onSearchTextChange={(text) => {
@@ -458,7 +480,20 @@ export function ProjectsView() {
         </List.Dropdown>
       }
     >
-      {!isLoading && projects.length === 0 && (
+      {emptyState === "error" && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title={strings.loadProjectsFailed}
+          description={loadError ?? undefined}
+          actions={
+            <ActionPanel>
+              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={retryLoad} />
+              <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {emptyState === "empty" && (
         <List.EmptyView
           icon="icon.png"
           title={labels.noProjectsFound}
@@ -478,7 +513,7 @@ export function ProjectsView() {
           description={strings.advancedSearchHint}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title={strings.openReadme} icon={Icon.Book} url={daw.readmeUrl} />
+              <Action.OpenInBrowser title={strings.openReadme} icon={Icon.QuestionMark} url={daw.readmeUrl} />
             </ActionPanel>
           }
         />

@@ -129,7 +129,7 @@ export async function reloadProjectData(
   // 预先算好哪些项目会共用同一个笔记/歌词文件，读写时据此拦截。
   setKnownProjectTitles(base.map((p) => p.title));
   // 先补做在 Finder 里做的改名/删除，再处理放回、套用元数据。
-  const { guardTripped, ambiguous, trashUnavailable, docRenameIssues } = await syncFinderChanges(
+  const { guardTripped, ambiguous, trashUnavailable, docRenameIssues, replaced } = await syncFinderChanges(
     base,
     root,
     trashingIds,
@@ -167,6 +167,16 @@ export async function reloadProjectData(
       style: Toast.Style.Failure,
       title: strings.docRenameSkipped,
       message: docRenameIssues.join(", "),
+    });
+  } else if (replaced.length > 0) {
+    // 同名但创建时间不同：旧设置已归档，告诉用户还能找回来。
+    await showToast({
+      style: Toast.Style.Success,
+      title:
+        replaced.length === 1
+          ? strings.newProjectLooksNew.replace("{name}", replaced[0])
+          : strings.newProjectsLookNew.replace("{count}", String(replaced.length)),
+      message: strings.newProjectLooksNewHint,
     });
   }
   // 先还原从废纸篓放回的项目（标签/轨号/角色/文档），再套用元数据。

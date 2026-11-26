@@ -5,14 +5,26 @@ import path from "node:path";
 import { docNameTakenBy } from "@/core/docs/docs";
 import { strings } from "@/strings";
 import type { Project } from "@/core/projects/types";
-import { daw, type ProjectKind } from "@/daws";
+import { daw } from "@/daws";
 import { copyErrorAction } from "@/core/ui/shared/toast";
+import { entryNameConflict } from "@/core/ui/shared/project-entry-name";
 
 // 与 Finder 一致的副本命名：Song copy、Song copy 2、Song copy 3…
+// 两种入口名都查：包和文件夹换算出同一个 id 时，两个项目会共用元数据，列表里只剩一个。
 // 要读磁盘，所以由打开表单的操作先算好，表单里不读。
-export function uniqueCopyName(dir: string, title: string, kind: ProjectKind): string {
+export function uniqueCopyName(dir: string, title: string): string {
   let name = `${title} copy`;
-  for (let n = 2; fs.existsSync(path.join(dir, daw.entryNameFor(name, kind))); n++) {
+  for (
+    let n = 2;
+    entryNameConflict(
+      dir,
+      name,
+      daw.entryNameFor,
+      (target) => fs.existsSync(target),
+      () => false,
+    ) !== null;
+    n++
+  ) {
     name = `${title} copy ${n}`;
   }
   return name;
@@ -41,7 +53,15 @@ export function DuplicateProject({
     }
 
     const target = path.join(parent, daw.entryNameFor(trimmed, project.kind));
-    if (fs.existsSync(target)) {
+    // 两种入口名都查：包和文件夹换算出同一个 id 时，两个项目会共用元数据，列表里只剩一个。
+    const conflict = entryNameConflict(
+      parent,
+      trimmed,
+      daw.entryNameFor,
+      (candidate) => fs.existsSync(candidate),
+      () => false,
+    );
+    if (conflict !== null) {
       await showToast({ style: Toast.Style.Failure, title: strings.nameExists });
       return;
     }
@@ -90,7 +110,7 @@ export function DuplicateProject({
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={strings.name} value={name} onChange={setName} />
+      <Form.TextField id="name" title={strings.name} placeholder={initialName} value={name} onChange={setName} />
     </Form>
   );
 }

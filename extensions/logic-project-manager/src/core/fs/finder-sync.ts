@@ -55,6 +55,8 @@ export type FinderSyncResult = {
   trashUnavailable: boolean;
   /** Finder 改名后，笔记 / 歌词没能跟着改名的项目（新名字）。 */
   docRenameIssues: string[];
+  /** 同名但创建时间不同、旧设置已归档的项目（项目名）。 */
+  replaced: string[];
 };
 
 /** 对比上次看到的项目清单，把在 Finder 里做的改名/删除补做一遍。
@@ -83,6 +85,7 @@ export async function syncFinderChanges(
     guardTripped: false,
     trashUnavailable: false,
     docRenameIssues: [],
+    replaced: [],
   };
 
   const renames: FinderRename[] = [];
@@ -121,6 +124,22 @@ export async function syncFinderChanges(
       await removeProjectFromAllOrders(entry.id);
       await removeProjectFromAllRoles(entry.id);
       result.archived++;
+    }
+
+    // 同名但创建时间不同：旧项目已不在，新项目不该继承它的设置。
+    // 不检查废纸篓：Save As 同名覆盖、Finder「替换」都不会让旧项目进废纸篓。
+    for (const { from } of diff.replaced) {
+      if (skipIds.has(from.id)) continue;
+      await archiveDeletedProject({
+        id: from.id,
+        title: from.id,
+        createdAt: from.birthtimeMs,
+        inode: from.inode,
+      });
+      await deleteProjectMetadata(from.id);
+      await removeProjectFromAllOrders(from.id);
+      await removeProjectFromAllRoles(from.id);
+      result.replaced.push(from.id);
     }
   }
 

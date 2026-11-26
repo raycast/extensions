@@ -56,6 +56,25 @@ function recordKey(record: DeletedRecord): string {
   return `${record.id}\n${record.deletedAt}`;
 }
 
+/** 同名、但不是同一个文件夹的最新一条记录：旧项目被删掉后又建了同名新项目时，用它找回旧设置。 */
+export async function findReplacedRecord(project: FolderRef): Promise<DeletedRecord | null> {
+  const records = await getRecords();
+  const matches = records.filter((record) => record.id === project.id && !isSameFolder(record, project));
+  if (matches.length === 0) return null;
+  return matches.reduce((latest, record) => (record.deletedAt > latest.deletedAt ? record : latest));
+}
+
+/** 有同名旧项目设置可找回的项目 id。一次读完所有记录，不在每个项目行里各读一遍。 */
+export async function replacedProjectIds(projects: Project[]): Promise<string[]> {
+  const records = await getRecords();
+  const ids = new Set<string>();
+  for (const record of records) {
+    const project = projects.find((p) => p.id === record.id);
+    if (project && !isSameFolder(record, project)) ids.add(record.id);
+  }
+  return [...ids];
+}
+
 /** 该文件夹是否已有删除记录，用于避免重复归档。 */
 export async function hasDeletedRecord(entry: { id: string; birthtimeMs: number; inode?: number }): Promise<boolean> {
   const records = await getRecords();
@@ -168,5 +187,35 @@ export async function restorePutBackProjects(projects: Project[]): Promise<Resto
     // 只替换本次处理过的记录；期间新增的记录（如另一处刚归档的）原样保留。
     await updateRecords((current) => [...current.filter((r) => !handled.has(recordKey(r))), ...pending]);
   }
+  return result;
+}
+
+/** 把同名旧项目归档的设置还原到当前项目。只往空位里写，和从废纸篓放回一样。
+ *  文档暂时还原不了时，记录里只留下待还原的文档，下次再点 Restore Previous Settings 时重试。 */
+export async function restoreReplacedProject(project: Project): Promise<RestoreResult> {
+  const result: RestoreResult = { restored: [], docConflicts: [] };
+  const record = await findReplacedRecord(project);
+  if (!record) return result;
+
+  const existingCollections = new Set((await collectionTaxonomy.get()).map((c) => c.id));
+  await restoreData(record, existingCollections);
+  result.restored.push(project.title);
+
+  const pendingDocs: ArchivedDoc[] = [];
+  for (const doc of record.docs) {
+    const status = restoreArchivedDoc(project, doc);
+    if (status === "unavailable") pendingDocs.push(doc);
+    if (status === "conflict" && !result.docConflicts.includes(project.title)) {
+      result.docConflicts.push(project.title);
+    }
+  }
+
+  await updateRecords((current) => {
+    const rest = current.filter((r) => recordKey(r) !== recordKey(record));
+    // 数据已还原、清空，下次重试只处理文档，不会把用户之后的改动改回去。
+    return pendingDocs.length > 0
+      ? [...rest, { ...record, dataRestored: true, metadata: null, orders: {}, roles: {}, docs: pendingDocs }]
+      : rest;
+  });
   return result;
 }

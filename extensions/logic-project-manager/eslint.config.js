@@ -123,9 +123,9 @@ const coreLayering = {
   },
 };
 
-// 其余文件（命令入口、src/daws、测试等）只拦跨文件夹的相对路径。
+// 其余文件（命令入口、src/daws 等）只拦跨文件夹的相对路径。
 const crossFolderOnly = {
-  files: ["src/**", "test/**"],
+  files: ["src/**"],
   rules: {
     "no-restricted-imports": ["error", { patterns: [CROSS_FOLDER] }],
   },

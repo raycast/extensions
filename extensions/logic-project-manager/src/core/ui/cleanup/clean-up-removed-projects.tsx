@@ -81,14 +81,14 @@ export function CleanUpRemovedProjects() {
             <ActionPanel>
               <Action
                 title={strings.cleanUp}
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
                 shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={() => confirmAndClean([id], id)}
               />
               <Action
                 title={strings.cleanUpAll}
-                icon={Icon.Trash}
+                icon={Icon.Eraser}
                 style={Action.Style.Destructive}
                 shortcut={Keyboard.Shortcut.Common.RemoveAll}
                 onAction={() => confirmAndClean(removedIds, strings.cleanUpAll)}

@@ -66,7 +66,7 @@ export function UnmatchedBounces({ projects, onChanged }: { projects: Project[];
               <ActionPanel.Section>
                 <Action.Push
                   title={strings.assignToProject}
-                  icon={Icon.Link}
+                  icon={Icon.PlusTopRightSquare}
                   target={<AssignBounce bounce={bounce} projects={sortedProjects} onAssigned={handleAssigned} />}
                 />
                 <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
@@ -160,7 +160,7 @@ export function AssignBounce({
       navigationTitle={`${strings.assignToProject} — ${bounce.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={strings.assignToProject} icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={strings.assignToProject} icon={Icon.PlusTopRightSquare} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
