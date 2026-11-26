@@ -96,9 +96,7 @@
     "lint": "ray lint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.test.json",
-    "sync": "node scripts/sync.mjs",
     "pull": "ray pull-contributions",
-    "publish": "ray publish",
-    "stage": "node scripts/stage.mjs"
+    "publish": "ray publish"
   }
 }

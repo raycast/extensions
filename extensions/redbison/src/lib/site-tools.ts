@@ -2,8 +2,8 @@
  * The redbison.dev catalogue: every tool on the site, as the Search Tools
  * command lists it.
  *
- * A copy ships inside the extension (src/vendor/site-tools.json, written by
- * scripts/sync.mjs from the site's public/ai-tools.json), so the list works
+ * A copy ships inside the extension (src/vendor/site-tools.json, built from
+ * https://redbison.dev/ai-tools.json), so the list works
  * offline and on first launch. The command then fetches the live
  * https://redbison.dev/ai-tools.json, which gains tools every week, and keeps
  * the newer list in Raycast's cache. The request is a plain GET of a public
