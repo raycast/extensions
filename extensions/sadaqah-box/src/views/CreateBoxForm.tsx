@@ -1,53 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { createBoxCached, listCurrenciesCached } from "./api/cached";
-import { Currency } from "./types";
-import { createBoxSchema, validateInput } from "./validation/schemas";
-import { getErrorMessage } from "./utils/error-handler";
-import { SUCCESS_MESSAGES } from "./constants";
+import { createBoxCached } from "../api/cached";
+import { useCurrencies } from "../hooks/useCurrencies";
+import { createBoxSchema, validateInput } from "../validation/schemas";
+import { getErrorMessage } from "../utils/error-handler";
+import { SUCCESS_MESSAGES } from "../constants";
 
 interface CreateBoxProps {
   onCreate?: () => void;
 }
 
-export default function CreateBoxCommand({ onCreate }: CreateBoxProps) {
+export default function CreateBoxForm({ onCreate }: CreateBoxProps) {
   const { pop } = useNavigation();
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: currencies, isLoading: isLoadingCurrencies } = useCurrencies();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameError, setNameError] = useState<string | undefined>();
-
-  useEffect(() => {
-    async function fetchCurrencies() {
-      try {
-        const response = await listCurrenciesCached();
-        setCurrencies(response.currencies);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load currencies",
-          message: getErrorMessage(error),
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchCurrencies();
-  }, []);
+  const [descriptionError, setDescriptionError] = useState<string | undefined>();
 
   async function handleSubmit(values: { name: string; description: string; baseCurrencyId: string }) {
-    // Clear previous errors
     setNameError(undefined);
+    setDescriptionError(undefined);
 
-    // Validate input using Zod schema
     const validation = validateInput(createBoxSchema, values);
 
     if (!validation.success) {
-      // Set field-specific errors
-      const nameValidationError = validation.errors.find((e) => e.startsWith("name:"));
-      if (nameValidationError) {
-        setNameError(nameValidationError.replace("name: ", ""));
-      }
+      setNameError(validation.fieldErrors.name);
+      setDescriptionError(validation.fieldErrors.description);
 
       showToast({
         style: Toast.Style.Failure,
@@ -58,7 +36,7 @@ export default function CreateBoxCommand({ onCreate }: CreateBoxProps) {
     }
 
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
       await createBoxCached(validation.data);
 
       showToast({
@@ -74,13 +52,13 @@ export default function CreateBoxCommand({ onCreate }: CreateBoxProps) {
         title: "Failed to create box",
         message: getErrorMessage(error),
       });
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoadingCurrencies || isSubmitting}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Box" onSubmit={handleSubmit} />
@@ -94,13 +72,19 @@ export default function CreateBoxCommand({ onCreate }: CreateBoxProps) {
         error={nameError}
         onChange={() => setNameError(undefined)}
       />
-      <Form.TextArea id="description" title="Description" placeholder="Optional description" />
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Optional description"
+        error={descriptionError}
+        onChange={() => setDescriptionError(undefined)}
+      />
       <Form.Dropdown
         id="baseCurrencyId"
         title="Base Currency"
-        info="Defaults to USD if not selected. Cannot be changed after sadaqahs are added."
+        info="Defaults to Gold (XAU) if not selected. Cannot be changed after sadaqahs are added."
       >
-        <Form.Dropdown.Item value="" title="Default (USD)" />
+        <Form.Dropdown.Item value="" title="Default (XAU)" />
         {currencies.map((currency) => (
           <Form.Dropdown.Item key={currency.id} value={currency.id} title={`${currency.name} (${currency.code})`} />
         ))}
