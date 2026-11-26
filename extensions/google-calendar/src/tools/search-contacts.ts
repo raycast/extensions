@@ -33,9 +33,9 @@ const cachedSearchContacts = withCache(
     }));
   },
   {
-    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    maxAge: 1000 * 60 * 60 * 24,
     validate(data) {
-      return data.length > 0; // Retry empty results rather than treating them as valid cached data
+      return data.length > 0;
     },
   },
 );
