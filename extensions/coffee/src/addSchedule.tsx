@@ -20,6 +20,7 @@ import {
   isTodaysSchedule,
   isNotTodaysSchedule,
   numberToDayString,
+  parseSchedule,
 } from "./utils";
 import { extractSchedule } from "./extractSchedule";
 import { activateScheduleMonitor, checkSchedule, isScheduleMonitorActivated } from "./status";
@@ -124,7 +125,9 @@ export default function Command() {
 
     if (deleteConfirmation) {
       try {
-        if (schedule.IsRunning === true) await stopCaffeinate({ menubar: true, status: true });
+        // The list refreshes every 15 s, so it can miss that the schedule just started.
+        const stored = parseSchedule(await LocalStorage.getItem(schedule.day));
+        if (stored?.IsRunning === true) await stopCaffeinate({ menubar: true, status: true });
         await LocalStorage.removeItem(schedule.day);
         await showToast(Toast.Style.Success, "Schedule deleted.");
 

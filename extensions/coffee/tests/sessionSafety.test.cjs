@@ -206,3 +206,105 @@ test("ordinary Windows stop cannot clear metadata saved by a concurrent replacem
   assert.equal((await utils.getCaffeinationState()).reason.appName, "Editor");
   assert.equal(h.storage.get("caffeinationReason"), JSON.stringify(replacement));
 });
+
+// "24:00" keeps the schedule active whenever the test runs.
+function activeSchedule(h) {
+  const day = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][new Date().getDay()];
+  h.storage.set(day, JSON.stringify({ day, from: "00:00", to: "24:00", IsRunning: false, IsManuallyDecafed: false }));
+  return day;
+}
+
+function statusChangingScheduleDuringStart(h, change) {
+  const utils = h.load("utils.ts");
+  return h.load("status.ts", {
+    "./utils": {
+      ...utils,
+      startCaffeinate: async (...args) => {
+        const sessionId = await utils.startCaffeinate(...args);
+        change();
+        return sessionId;
+      },
+    },
+  });
+}
+
+for (const [change, edit] of [
+  ["deleted", () => undefined],
+  ["edited", (schedule) => ({ ...schedule, to: "23:00" })],
+  ["paused", (schedule) => ({ ...schedule, IsManuallyDecafed: true })],
+]) {
+  test(`a schedule ${change} while it starts keeps the change and stops its session`, async () => {
+    const h = createHarness();
+    const day = activeSchedule(h);
+    const changed = edit(JSON.parse(h.storage.get(day)));
+    const status = statusChangingScheduleDuringStart(h, () => {
+      if (changed) h.storage.set(day, JSON.stringify(changed));
+      else h.storage.delete(day);
+    });
+    assert.equal(await status.checkSchedule(), false);
+    assert.equal(h.storage.get(day), changed && JSON.stringify(changed));
+    assert.equal(h.table.has(200), false);
+  });
+}
+
+test("a schedule another check marks running while it starts keeps its session", async () => {
+  const h = createHarness();
+  const day = activeSchedule(h);
+  const status = statusChangingScheduleDuringStart(h, () =>
+    h.storage.set(day, JSON.stringify({ ...JSON.parse(h.storage.get(day)), IsRunning: true })),
+  );
+  assert.equal(await status.checkSchedule(), true);
+  assert.ok(h.table.has(200));
+});
+
+test("a schedule deleted before it starts leaves the user's own session running", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  const day = activeSchedule(h);
+  const status = h.load("status.ts", {
+    "./utils": {
+      ...utils,
+      getCaffeinationState: async () => {
+        const state = await utils.getCaffeinationState();
+        h.storage.delete(day);
+        await utils.startCaffeinate(quiet);
+        return state;
+      },
+    },
+  });
+  assert.equal(await status.checkSchedule(), false);
+  assert.equal(h.storage.has(day), false);
+  assert.ok(h.table.has(200));
+  assert.equal(h.processes.spawn.mock.callCount(), 1);
+});
+
+function findElement(node, type) {
+  if (!node || typeof node !== "object") return undefined;
+  if (node.type === type) return node;
+  for (const child of Object.values(node)) {
+    const found = findElement(child, type);
+    if (found) return found;
+  }
+}
+
+test("deleting a schedule from a list loaded before it started stops its session", async () => {
+  const h = createHarness();
+  const day = activeSchedule(h);
+  const listed = JSON.parse(h.storage.get(day));
+  assert.equal(await h.load("status.ts").checkSchedule(), true);
+  const react = {
+    Fragment: "Fragment",
+    createElement: (type, props, ...children) => ({ type, props: props ?? {}, children }),
+    useState: (initial) => [Array.isArray(initial) ? [listed] : initial, () => {}],
+  };
+  const List = Object.assign(() => null, { Section: "Section", Item: "Item", EmptyView: "EmptyView" });
+  const { default: Command } = h.load("addSchedule.tsx", {
+    react,
+    "@raycast/api": { ...h.api, List, ActionPanel: "ActionPanel", Action: "Action", Icon: {}, Color: {} },
+    "./hooks/useLoadStoredSchedules": { useLoadStoredSchedules: () => {} },
+    "./components/ListActionPanel": { ListActionPanel: "ListActionPanel" },
+  });
+  await findElement(Command(), "ListActionPanel").props.onDeleteScheduleAction(listed);
+  assert.equal(h.storage.has(day), false);
+  assert.equal(h.table.has(200), false);
+});
