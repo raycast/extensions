@@ -1,5 +1,12 @@
 # 2Do Changelog
 
+## [New View Tasks Scopes] - 2026-11-26
+
+- New scopes in View Tasks: Now, Later Today, Tomorrow, and Deadlines (Overdue and Upcoming)
+- Paused tags appear as their own scopes, labeled Paused: {tag}
+- Scope options show how many tasks they contain, such as Today (2)
+- Task rows show start and due dates when set; overdue dues stay red
+
 ## [Smart List Performance] - 2026-11-25
 
 - Reuse the smart-list dropdown catalog for ten minutes to reduce 2Do calls when reopening View Tasks
