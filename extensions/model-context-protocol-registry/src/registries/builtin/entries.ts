@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "chatacademia",
+    title: "ChatAcademia",
+    description:
+      "ChatAcademia, the AI research assistant for academics. Search papers and grants across scholarly databases, verify citations, find research gaps, extract study data and get mock peer review, with 8 guided research workflows. Hosted Streamable HTTP server at https://api.chatacademia.com/mcp/raycast with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. A ChatAcademia account is required (7-day free trial).",
+    icon: "https://raw.githubusercontent.com/khanhduyvt0101/chatacademia-claude-plugin/main/assets/chatacademia-icon-512.png",
+    homepage: "https://www.chatacademia.com/claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.chatacademia.com/mcp/raycast"],
+    },
+    remoteUrl: "https://api.chatacademia.com/mcp/raycast",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
