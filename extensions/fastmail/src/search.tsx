@@ -399,7 +399,7 @@ function EmailPreview({ email }: { email: Email }) {
   return (
     <List.Item.Detail
       isLoading={isLoading}
-      markdown={emailMarkdown(email, content?.body)}
+      markdown={emailMarkdown(email, content?.markdown)}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="From" text={formatAddress(email.from)} />
@@ -442,7 +442,7 @@ function EmailView(props: EmailActionsProps) {
     <Detail
       isLoading={isLoading}
       navigationTitle={email.subject}
-      markdown={emailMarkdown(email, content?.body)}
+      markdown={emailMarkdown(email, content?.markdown)}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="From" text={formatAddress(email.from)} />

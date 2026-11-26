@@ -52,6 +52,8 @@ export type Email = {
 };
 
 export type EmailContent = {
+  // markdown is for showing, body for copying: plain text is escaped only in markdown.
+  markdown: string;
   body: string;
   text: string;
   links: Link[];
@@ -401,11 +403,13 @@ function toEmail(raw: RawEmail, accountId: string, mailboxes: Mailbox[]): Email 
 function toContent(raw: RawContent): EmailContent {
   const text = bodyText(raw.textBody, raw.bodyValues);
   const html = bodyText(raw.htmlBody, raw.bodyValues);
+  const body = html ? htmlToMarkdown(html) : text;
   const hasRealText = text.trim().length > 0 && raw.textBody.some((part) => part.type === "text/plain");
 
   return {
     // Plain text is escaped so a sender can't sneak in Markdown, like an image that tracks reads.
-    body: html ? htmlToMarkdown(html) : escapeMarkdown(text),
+    markdown: html ? body : escapeMarkdown(text),
+    body,
     text: hasRealText ? text : htmlToText(html),
     links: html ? htmlLinks(html) : textLinks(text),
   };
