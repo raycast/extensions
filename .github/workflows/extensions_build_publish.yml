@@ -71,6 +71,10 @@ jobs:
 
           # Required: an empty list would let anyone change owners-only extensions.
           read_file .github/public_raycast_extensions.txt "$RUNNER_TEMP/public_raycast_extensions.txt"
+          if ! LC_ALL=C grep -q '[^[:space:]]' "$RUNNER_TEMP/public_raycast_extensions.txt"; then
+            echo "::error::.github/public_raycast_extensions.txt at $CONFIG_REF is empty or contains only whitespace."
+            exit 1
+          fi
           {
             echo "value<<EOF"
             printf '%s\n' "$(cat "$RUNNER_TEMP/public_raycast_extensions.txt")"

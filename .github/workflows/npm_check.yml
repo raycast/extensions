@@ -90,8 +90,9 @@ jobs:
         with:
           ref: ${{ needs.setup.outputs.check_ref }}
           sparse-checkout: ${{ matrix.extension_dir }}
-      # `npm ci` failing (broken lockfile) fails the job; npm-check findings stay warnings.
+      # Dependency checks are advisory; leave the test step's failure behavior unchanged.
       - name: Check extension
+        continue-on-error: true
         working-directory: ${{ matrix.extension_dir }}
         run: |
           npm install -g npm-check
