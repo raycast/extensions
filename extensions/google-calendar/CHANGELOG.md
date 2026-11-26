@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Event Creation and Reliability] - {PR_MERGE_DATE}
+## [Event Creation and Reliability] - 2026-11-26
 
 - **Conferencing**: Added an empty state when no custom providers are saved
 - **Create Event**: Added shortcut guidance that matches the current platform
@@ -13,11 +13,11 @@
 - **Icons**: Updated Google Calendar and Google Meet icons to the new gradient refresh icons
 - **Actions**: Change Response Status now uses `⌘`/`Ctrl` `⇧` `R` and the new Refresh action uses `⌘`/`Ctrl` `R`
 
-## [Improve README] - {PR_MERGE_DATE}
+## [Improve README] - 2026-11-26
 
 - Rewrite the README to explain what each command does.
 
-## [Fix Google API Requests] - {PR_MERGE_DATE}
+## [Fix Google API Requests] - 2026-11-26
 
 - Fix a crash when searching contacts or making Google Calendar requests in Raycast.
 
