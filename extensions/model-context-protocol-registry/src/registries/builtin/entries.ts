@@ -10,9 +10,10 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "chime-scheduler",
     title: "Chime Scheduler",
     description:
-      "LinkedIn post scheduler for your AI assistant: write a LinkedIn post in chat, say when it should go out in your own words (\"Tuesday at 9am\"), and it is published on your personal LinkedIn profile at that time. Schedule posts or save drafts, publish now and get the live post link, add a first comment, attach up to 9 images or one MP4 video through a private upload link, and list, reschedule, edit or cancel posts. Posts go out through LinkedIn's official API, only when you ask; it never reads your feed, messages or connections. Hosted Streamable HTTP server at https://schedule.getchime.co/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth sign-in with LinkedIn, no API key to paste. Free.",
+      'LinkedIn post scheduler for your AI assistant: write a LinkedIn post in chat, say when it should go out in your own words ("Tuesday at 9am"), and it is published on your personal LinkedIn profile at that time. Schedule posts or save drafts, publish now and get the live post link, add a first comment, attach up to 9 images or one MP4 video through a private upload link, and list, reschedule, edit or cancel posts. Posts go out through LinkedIn\'s official API, only when you ask; it never reads your feed, messages or connections. Hosted Streamable HTTP server at https://schedule.getchime.co/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth sign-in with LinkedIn, no API key to paste. Free.',
     icon: "https://raw.githubusercontent.com/wednesday-solutions/chime-scheduler/9ec3d18adc67a156a1c2d9f852eceed8514619f5/store-logo.png",
-    homepage: "https://schedule.getchime.co/?utm_source=raycast_mcp&utm_medium=directory&utm_campaign=scheduler_listings",
+    homepage:
+      "https://schedule.getchime.co/?utm_source=raycast_mcp&utm_medium=directory&utm_campaign=scheduler_listings",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://schedule.getchime.co/mcp"],
