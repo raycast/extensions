@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -85,6 +85,7 @@ export default function Command() {
 
   function reload() {
     void tasks.revalidate();
+    void lists.revalidate();
     invalidateSmartLists();
     void smartLists.revalidate();
     void pausedTags.revalidate();
@@ -145,7 +146,22 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {!tasks.isLoading && <List.EmptyView icon={Icon.CheckCircle} title="No Tasks" />}
+      {!tasks.isLoading && (
+        <List.EmptyView
+          icon={Icon.CheckCircle}
+          title="No Tasks"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={reload}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {sections.map(
         ([title, sectionTasks]) =>
           sectionTasks.length > 0 && (

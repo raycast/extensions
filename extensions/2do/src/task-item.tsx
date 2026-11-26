@@ -228,6 +228,12 @@ export function TaskItem({
             shortcut={Keyboard.Shortcut.Common.Open}
             onAction={() => twoDo("open_task", { task_id: t.task_id }).catch((e) => showFailureToast(e))}
           />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={onChange}
+          />
         </ActionPanel>
       }
     />
