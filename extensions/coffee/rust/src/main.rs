@@ -158,18 +158,6 @@ fn process_alive(pid: u32) -> bool {
     }
 }
 
-fn terminate_process(pid: u32) -> bool {
-    let handle = unsafe { OpenProcess(PROCESS_TERMINATE, false, pid) };
-    match handle {
-        Ok(handle) => {
-            let ok = unsafe { TerminateProcess(handle, 1) }.is_ok();
-            unsafe { let _ = CloseHandle(handle); }
-            ok
-        }
-        Err(_) => false,
-    }
-}
-
 /// The creation time of `pid` as raw FILETIME 100ns ticks, or `None` if the
 /// process no longer exists or cannot be queried.
 fn process_creation_ticks(pid: u32) -> Option<u64> {
@@ -370,8 +358,9 @@ fn stop_caffeinate() -> Result<bool, String> {
         _ => false,
     };
     if had_worker {
-        let pid = state.as_ref().unwrap().pid;
-        if !terminate_process(pid) {
+        let worker = state.as_ref().unwrap();
+        // Verify again on the handle that terminates, in case the PID was reused.
+        if stop_matching_process(worker.pid, worker.start_ticks).is_err() {
             // The terminate call failed; give the worker a brief moment to exit
             // on its own via the stop flag, then confirm it is gone.
             for _ in 0..50 {
