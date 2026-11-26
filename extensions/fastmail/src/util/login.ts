@@ -109,7 +109,8 @@ async function extractWithAI(items: Readable[]): Promise<Map<string, LoginInfo> 
       code?: string | null;
       link?: number | null;
     }[];
-    const results = new Map<string, LoginInfo>(items.map(({ email }) => [email.id, { code: null, link: null }]));
+    // Only emails AI actually answered for count as checked; the rest get another try later.
+    const results = new Map<string, LoginInfo>();
     for (const answer of json) {
       const item = typeof answer.email === "number" ? items[answer.email - 1] : undefined;
       if (!item) continue;
