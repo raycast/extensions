@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { ExtensionPreferences, LocalProject, ProjectScript } from "../types";
+import { LocalProject, ProjectScript, TerminalApp } from "../types";
 import { PACKAGE_MANAGER_META, SCRIPT_CATEGORY_META } from "../lib/constants";
 import { buildRunScriptCommand } from "../lib/package-manager";
 import { getRecentScripts, recordRecentScript } from "../lib/storage";
@@ -16,8 +16,8 @@ interface ProjectScriptsListProps {
 }
 
 export function ProjectScriptsList({ project, searchBarAccessory, isNested = false }: ProjectScriptsListProps) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
-  const terminal = prefs.preferredTerminal ?? "Terminal";
+  const prefs = getPreferenceValues<Preferences>();
+  const terminal = (prefs.preferredTerminal ?? "Terminal") as TerminalApp;
 
   const { data: recentRecords, revalidate: revalidateRecents } = usePromise(getRecentScripts);
 
@@ -66,7 +66,6 @@ export function ProjectScriptsList({ project, searchBarAccessory, isNested = fal
         key="terminal"
         title={`Run in ${terminal}`}
         icon={Icon.Terminal}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
         onAction={() => launchInTerminal(script)}
       />
     );
@@ -110,7 +109,7 @@ export function ProjectScriptsList({ project, searchBarAccessory, isNested = fal
               <Action.CopyToClipboard
                 title={`Copy "${cmd.display}"`}
                 content={cmd.display}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.CopyToClipboard title="Copy Raw Script Command" content={script.command} />
               <Action.Open title="Open Package.json" target={project.packageJsonPath} />

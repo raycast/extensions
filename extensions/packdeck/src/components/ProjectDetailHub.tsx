@@ -6,6 +6,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   open,
   showToast,
@@ -13,13 +14,13 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { DependencyKind, ExtensionPreferences, LocalProject, ProjectDependency } from "../types";
+import { DependencyKind, LocalProject, PackageManagerName, ProjectDependency, TerminalApp } from "../types";
 import { DEPENDENCY_KIND_META, PACKAGE_MANAGER_META } from "../lib/constants";
 import { formatDuration, formatPathForDisplay } from "../lib/format";
 import { notifyOperationResult } from "../lib/notifications";
 import {
   buildInstallCommand,
-  executeInstall,
+  executeMoveDependencyType,
   executeReinstall,
   executeUninstall,
   executeUpdate,
@@ -41,7 +42,7 @@ interface ProjectDetailHubProps {
 type DepFilter = "all" | DependencyKind;
 
 export function ProjectDetailHub({ project: initialProject, onProjectChanged }: ProjectDetailHubProps) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<DepFilter>("all");
   const [refreshTick, setRefreshTick] = useState(0);
 
@@ -49,7 +50,7 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
     void refreshTick;
     return (
       readProjectAt(initialProject.path, {
-        defaultPackageManager: prefs.defaultPackageManager,
+        defaultPackageManager: (prefs.defaultPackageManager ?? "auto") as "auto" | PackageManagerName,
       }) ?? initialProject
     );
   }, [initialProject, prefs.defaultPackageManager, refreshTick]);
@@ -136,18 +137,28 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
       title: `Reinstalling ${dep.name}...`,
     });
 
-    const outcome = await executeReinstall({
-      pm: project.packageManager,
-      packageName: dep.name,
-      depType,
-      projectPath: project.path,
-      projectName: project.name,
-      additionalPath: prefs.additionalPath,
-    });
+    const isProtocolSpec = /^(workspace:|file:|link:|git|https?:)/i.test(dep.declaredRange);
+    const outcome = isProtocolSpec
+      ? await executeReinstall({
+          pm: project.packageManager,
+          projectPath: project.path,
+          projectName: project.name,
+          additionalPath: prefs.additionalPath,
+        })
+      : await executeReinstall({
+          pm: project.packageManager,
+          packageName: dep.name,
+          versionSpec: dep.declaredRange || dep.installedVersion,
+          depType,
+          exact: !/^[\^~]/.test(dep.declaredRange.trim()),
+          projectPath: project.path,
+          projectName: project.name,
+          additionalPath: prefs.additionalPath,
+        });
 
     await toast.hide();
     await notifyOperationResult({
-      title: outcome.success ? `Reinstalled ${dep.name}` : `Reinstall failed`,
+      title: outcome.success ? `Reinstalled ${dep.name}` : "Reinstall failed",
       message: outcome.success ? formatDuration(outcome.durationMs) : outcome.errorMessage,
       success: outcome.success,
       durationMs: outcome.durationMs,
@@ -157,49 +168,31 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
   }
 
   async function handleMoveDepType(dep: ProjectDependency) {
-    const targetType = dep.kind === "devDependencies" ? "prod" : "dev";
+    if (dep.kind !== "dependencies" && dep.kind !== "devDependencies") return;
+    const fromKind = dep.kind;
+    const toKind = fromKind === "devDependencies" ? "dependencies" : "devDependencies";
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: `Moving ${dep.name} to ${targetType === "dev" ? "devDependencies" : "dependencies"}...`,
+      title: `Moving ${dep.name} to ${toKind}...`,
     });
 
-    const rm = await executeUninstall({
-      pm: project.packageManager,
+    const outcome = await executeMoveDependencyType({
+      project,
       packageName: dep.name,
-      projectPath: project.path,
-      projectName: project.name,
-      additionalPath: prefs.additionalPath,
-    });
-
-    if (!rm.success) {
-      await toast.hide();
-      await notifyOperationResult({
-        title: `Could not move ${dep.name}`,
-        message: rm.errorMessage,
-        success: false,
-      });
-      return;
-    }
-
-    const add = await executeInstall({
-      pm: project.packageManager,
-      packageName: dep.name,
-      version: dep.installedVersion,
-      projectPath: project.path,
-      projectName: project.name,
-      depType: targetType,
+      fromKind,
+      toKind,
       additionalPath: prefs.additionalPath,
     });
 
     await toast.hide();
     await notifyOperationResult({
-      title: add.success ? `Moved ${dep.name} to ${targetType}` : `Failed to reinstall ${dep.name}`,
-      message: add.success ? add.command : add.errorMessage,
-      success: add.success,
-      durationMs: rm.durationMs + add.durationMs,
+      title: outcome.success ? `Moved ${dep.name} to ${toKind}` : `Could not move ${dep.name}`,
+      message: outcome.success ? `${dep.declaredRange} preserved · ${outcome.command}` : outcome.errorMessage,
+      success: outcome.success,
+      durationMs: outcome.durationMs,
     });
 
-    if (add.success) await refreshProject();
+    if (outcome.success) await refreshProject();
   }
 
   async function handleUninstallDep(dep: ProjectDependency) {
@@ -339,7 +332,11 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
                 title={`Open Project in ${prefs.preferredTerminal ?? "Terminal"}`}
                 icon={Icon.Window}
                 onAction={() =>
-                  runCommandInTerminal(project.path, { bin: "pwd", args: [] }, prefs.preferredTerminal ?? "Terminal")
+                  runCommandInTerminal(
+                    project.path,
+                    { bin: "pwd", args: [] },
+                    (prefs.preferredTerminal ?? "Terminal") as TerminalApp,
+                  )
                 }
               />
             </ActionPanel>
@@ -416,7 +413,7 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
                     <Action.Push
                       title="Install Specific Version…"
                       icon={Icon.Tag}
-                      shortcut={{ modifiers: ["cmd"], key: "v" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                       target={
                         <InstallPackageForm
                           packageName={dep.name}
@@ -445,7 +442,7 @@ export function ProjectDetailHub({ project: initialProject, onProjectChanged }: 
                       title="Uninstall Package"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => handleUninstallDep(dep)}
                     />
                   </ActionPanel.Section>

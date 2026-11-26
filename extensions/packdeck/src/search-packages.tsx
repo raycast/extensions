@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { InstallPackageForm } from "./components/InstallPackageForm";
@@ -16,12 +28,12 @@ import {
   toggleFavorite,
 } from "./lib/storage";
 import { useProjects } from "./lib/useProjects";
-import { ExtensionPreferences, NpmSearchResult } from "./types";
+import { NpmSearchResult, PackageManagerName } from "./types";
 
 const GLOBAL_OPTION = "__global__";
 
 export default function SearchPackagesCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [showDetail, setShowDetail] = useState(true);
   const [targetOverride, setTargetOverride] = useState<string>("");
@@ -33,9 +45,11 @@ export default function SearchPackagesCommand() {
     [effectiveTargetValue, projects],
   );
 
-  const defaultPm =
+  const defaultPm: PackageManagerName =
     selectedProject?.packageManager ??
-    (prefs.defaultPackageManager && prefs.defaultPackageManager !== "auto" ? prefs.defaultPackageManager : "npm");
+    (prefs.defaultPackageManager && prefs.defaultPackageManager !== "auto"
+      ? (prefs.defaultPackageManager as PackageManagerName)
+      : "npm");
 
   const {
     data: results,
@@ -198,7 +212,6 @@ export default function SearchPackagesCommand() {
               <Action.Push
                 title="Install Package (Options)…"
                 icon={Icon.Download}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
                 target={
                   <InstallPackageForm
                     packageName={pkg.name}
@@ -249,7 +262,7 @@ export default function SearchPackagesCommand() {
               <Action.CopyToClipboard
                 title={`Copy "${installCmd}"`}
                 content={installCmd}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.CopyToClipboard title="Copy Package Name" content={pkg.name} />
               <Action
@@ -372,7 +385,15 @@ export default function SearchPackagesCommand() {
                       <Action
                         title="Remove from Favorites"
                         icon={Icon.StarDisabled}
-                        onAction={() => handleToggleFavorite(fav)}
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          const ok = await confirmAlert({
+                            title: `Remove "${fav.name}" from Favorites?`,
+                            message: "You can add it back anytime from Search npm Packages.",
+                            primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                          });
+                          if (ok) await handleToggleFavorite(fav);
+                        }}
                       />
                     </ActionPanel>
                   }
@@ -400,8 +421,15 @@ export default function SearchPackagesCommand() {
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         onAction={async () => {
+                          const ok = await confirmAlert({
+                            title: "Clear all recent searches?",
+                            message: "This permanently removes your saved search history.",
+                            primaryAction: { title: "Clear Searches", style: Alert.ActionStyle.Destructive },
+                          });
+                          if (!ok) return;
                           await clearRecentSearches();
                           await revalidateRecents();
+                          await showToast({ style: Toast.Style.Success, title: "Recent searches cleared" });
                         }}
                       />
                     </ActionPanel>

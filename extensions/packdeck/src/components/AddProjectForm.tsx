@@ -1,46 +1,52 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useForm } from "@raycast/utils";
 import { addCustomProjectPath, setActiveProjectPath } from "../lib/storage";
 
 interface AddProjectFormProps {
   onAdded?: () => unknown;
 }
 
+interface AddProjectFormValues {
+  folder: string[];
+  setActive: boolean;
+}
+
 export function AddProjectForm({ onAdded }: AddProjectFormProps) {
   const { pop } = useNavigation();
-  const [folders, setFolders] = useState<string[]>([]);
-  const [setActive, setSetActive] = useState(true);
-  const [folderError, setFolderError] = useState<string | undefined>();
 
-  async function handleSubmit() {
-    const selected = folders[0];
-    if (!selected) {
-      setFolderError("Please select a project folder.");
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<AddProjectFormValues>({
+    initialValues: {
+      folder: [],
+      setActive: true,
+    },
+    validation: {
+      folder: (value) => {
+        const selected = value?.[0];
+        if (!selected) return "Please select a project folder.";
+        if (!fs.existsSync(path.join(selected, "package.json"))) {
+          return "Selected directory does not contain a package.json file.";
+        }
+      },
+    },
+    async onSubmit(values) {
+      const selected = values.folder[0];
+      await addCustomProjectPath(selected);
+      if (values.setActive) {
+        await setActiveProjectPath(selected);
+      }
 
-    const pkgJson = path.join(selected, "package.json");
-    if (!fs.existsSync(pkgJson)) {
-      setFolderError("Selected directory does not contain a package.json file.");
-      return;
-    }
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Project added",
+        message: path.basename(selected),
+      });
 
-    await addCustomProjectPath(selected);
-    if (setActive) {
-      await setActiveProjectPath(selected);
-    }
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Project added",
-      message: path.basename(selected),
-    });
-
-    await onAdded?.();
-    pop();
-  }
+      await onAdded?.();
+      pop();
+    },
+  });
 
   return (
     <Form
@@ -52,24 +58,13 @@ export function AddProjectForm({ onAdded }: AddProjectFormProps) {
       }
     >
       <Form.FilePicker
-        id="folder"
         title="Project Directory"
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
-        value={folders}
-        error={folderError}
-        onChange={(next) => {
-          setFolderError(undefined);
-          setFolders(next);
-        }}
+        {...itemProps.folder}
       />
-      <Form.Checkbox
-        id="setActive"
-        label="Set as active project immediately"
-        value={setActive}
-        onChange={setSetActive}
-      />
+      <Form.Checkbox label="Set as active project immediately" {...itemProps.setActive} />
       <Form.Description
         title="Tip"
         text="You can also configure automatic discovery folders under Packdeck extension preferences (Project Directories)."

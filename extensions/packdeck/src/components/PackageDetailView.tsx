@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { ExtensionPreferences, LocalProject, NpmPackageDetail } from "../types";
+import { LocalProject, NpmPackageDetail, PackageManagerName } from "../types";
 import { formatBytes, formatDuration, formatNumber, formatRelativeTime } from "../lib/format";
 import { notifyOperationResult } from "../lib/notifications";
 import { buildInstallCommand, executeInstall } from "../lib/package-manager";
@@ -59,7 +59,7 @@ function buildReadmeMarkdown(detail: NpmPackageDetail): string {
 }
 
 export function PackageDetailView({ packageName, activeProject, onMutated }: PackageDetailViewProps) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const [viewMode, setViewMode] = useState<"readme" | "versions">("readme");
 
   const {
@@ -81,9 +81,11 @@ export function PackageDetailView({ packageName, activeProject, onMutated }: Pac
     return viewMode === "readme" ? buildReadmeMarkdown(detail) : buildVersionsMarkdown(detail);
   }, [detail, error, packageName, viewMode]);
 
-  const defaultPm =
+  const defaultPm: PackageManagerName =
     activeProject?.packageManager ??
-    (prefs.defaultPackageManager !== "auto" && prefs.defaultPackageManager ? prefs.defaultPackageManager : "npm");
+    (prefs.defaultPackageManager && prefs.defaultPackageManager !== "auto"
+      ? (prefs.defaultPackageManager as PackageManagerName)
+      : "npm");
 
   async function quickInstall(depType: "prod" | "dev", isGlobal = false) {
     if (!isGlobal && !activeProject) {

@@ -11,8 +11,8 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { PACKAGE_MANAGER_META } from "./lib/constants";
-import { formatRelativeTime } from "./lib/format";
-import { notifyBackgroundHealthChanges } from "./lib/notifications";
+import { formatRelativeTime, truncateText } from "./lib/format";
+import { notifyBackgroundHealthChanges, resolveProjectHealthSnapshot } from "./lib/notifications";
 import { checkProjectOutdated, runProjectSecurityAudit } from "./lib/package-manager";
 import { discoverLocalProjects } from "./lib/projects";
 import {
@@ -23,9 +23,9 @@ import {
   saveHealthSnapshots,
   setActiveProjectPath,
 } from "./lib/storage";
-import { ExtensionPreferences, ProjectHealthSnapshot } from "./types";
+import { PackageManagerName, ProjectHealthSnapshot } from "./types";
 
-async function collectHealthSnapshots(prefs: ExtensionPreferences): Promise<ProjectHealthSnapshot[]> {
+async function collectHealthSnapshots(prefs: Preferences): Promise<ProjectHealthSnapshot[]> {
   const [activePath, customPaths, pinnedPaths, previousSnapshots] = await Promise.all([
     getActiveProjectPath(),
     getCustomProjectPaths(),
@@ -40,7 +40,7 @@ async function collectHealthSnapshots(prefs: ExtensionPreferences): Promise<Proj
     customPaths,
     pinnedPaths,
     activeProjectPath: activePath,
-    defaultPackageManager: prefs.defaultPackageManager,
+    defaultPackageManager: (prefs.defaultPackageManager as PackageManagerName | "auto" | undefined) ?? "auto",
   });
 
   // Monitor up to 3 highest-priority projects (pinned & active first) to keep background refresh lightweight
@@ -49,30 +49,25 @@ async function collectHealthSnapshots(prefs: ExtensionPreferences): Promise<Proj
 
   const snapshots = await Promise.all(
     watched.map(async (project): Promise<ProjectHealthSnapshot> => {
-      const [outdated, audit] = await Promise.all([
+      const [outdatedResult, auditResult] = await Promise.allSettled([
         checkProjectOutdated(project, {
           registryUrl: prefs.registryUrl,
           additionalPath: prefs.additionalPath,
-        }).catch(() => []),
+        }),
         runProjectSecurityAudit(project, {
           registryUrl: prefs.registryUrl,
           additionalPath: prefs.additionalPath,
-        }).catch(() => ({
-          total: 0,
-          counts: { critical: 0, high: 0, moderate: 0, low: 0, info: 0 },
-        })),
+        }),
       ]);
 
-      return {
+      return resolveProjectHealthSnapshot({
         projectPath: project.path,
         projectName: project.name,
         packageManager: project.packageManager,
-        outdatedCount: outdated.length,
-        majorOutdatedCount: outdated.filter((o) => o.bump === "major").length,
-        vulnerabilityCount: audit.total,
-        criticalOrHighCount: audit.counts.critical + audit.counts.high,
-        checkedAt: Date.now(),
-      };
+        previous: previousSnapshots[project.path],
+        outdatedResult,
+        auditResult,
+      });
     }),
   );
 
@@ -88,11 +83,12 @@ async function collectHealthSnapshots(prefs: ExtensionPreferences): Promise<Proj
 }
 
 export default function MenuBarStatusCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const {
     data: snapshots,
     isLoading,
+    error,
     revalidate,
   } = useCachedPromise(async () => collectHealthSnapshots(prefs), [], {
     keepPreviousData: true,
@@ -101,19 +97,26 @@ export default function MenuBarStatusCommand() {
   const list = snapshots ?? [];
   const totalOutdated = list.reduce((sum, s) => sum + s.outdatedCount, 0);
   const totalVulns = list.reduce((sum, s) => sum + s.vulnerabilityCount, 0);
+  const failedCount = list.filter((s) => Boolean(s.lastError)).length;
   const lastChecked = list[0]?.checkedAt;
 
   let badgeTitle: string | undefined;
   if (totalVulns > 0) {
     badgeTitle = `!${totalVulns}`;
+  } else if (failedCount > 0 || error) {
+    badgeTitle = "!";
   } else if (totalOutdated > 0) {
     badgeTitle = `↑${totalOutdated}`;
   }
 
+  const failureSuffix = error ? " — refresh failed" : failedCount > 0 ? ` — ${failedCount} refresh failed` : "";
+
   const tooltip =
     list.length === 0
-      ? "Packdeck — No watched projects"
-      : `Packdeck — ${totalOutdated} outdated, ${totalVulns} vulnerabilities across ${list.length} project(s)`;
+      ? error
+        ? "Packdeck — Background refresh failed"
+        : "Packdeck — No watched projects"
+      : `Packdeck — ${totalOutdated} outdated, ${totalVulns} vulnerabilities across ${list.length} project(s)${failureSuffix}`;
 
   async function safeLaunch(commandName: string) {
     try {
@@ -141,6 +144,13 @@ export default function MenuBarStatusCommand() {
       isLoading={isLoading}
     >
       <MenuBarExtra.Section title="Watched Projects">
+        {error && (
+          <MenuBarExtra.Item
+            title={`Refresh failed: ${truncateText(error.message, 55)}`}
+            icon={Icon.Warning}
+            onAction={() => revalidate()}
+          />
+        )}
         {list.length === 0 ? (
           <MenuBarExtra.Item
             title="No Projects Discovered Yet"
@@ -152,6 +162,7 @@ export default function MenuBarStatusCommand() {
             const statusParts: string[] = [];
             if (snap.vulnerabilityCount > 0) statusParts.push(`${snap.vulnerabilityCount} vulns`);
             if (snap.outdatedCount > 0) statusParts.push(`${snap.outdatedCount} outdated`);
+            if (snap.lastError) statusParts.push("Refresh failed");
             const subtitle =
               statusParts.length > 0
                 ? statusParts.join(" · ")
@@ -164,11 +175,20 @@ export default function MenuBarStatusCommand() {
                 icon={
                   snap.vulnerabilityCount > 0
                     ? Icon.Shield
-                    : snap.outdatedCount > 0
-                      ? Icon.ArrowUpCircle
-                      : Icon.CheckCircle
+                    : snap.lastError
+                      ? Icon.Warning
+                      : snap.outdatedCount > 0
+                        ? Icon.ArrowUpCircle
+                        : Icon.CheckCircle
                 }
               >
+                {snap.lastError && (
+                  <MenuBarExtra.Item
+                    title={`Refresh failed (${truncateText(snap.lastError, 52)})`}
+                    icon={Icon.Warning}
+                    onAction={() => revalidate()}
+                  />
+                )}
                 <MenuBarExtra.Item
                   title={`Outdated Packages (${snap.outdatedCount})`}
                   icon={Icon.ArrowUpCircle}
@@ -199,7 +219,7 @@ export default function MenuBarStatusCommand() {
         <MenuBarExtra.Item
           title="Search npm Packages"
           icon={Icon.MagnifyingGlass}
-          shortcut={Keyboard.Shortcut.Common.Save}
+          shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={() => safeLaunch("search-packages")}
         />
         <MenuBarExtra.Item

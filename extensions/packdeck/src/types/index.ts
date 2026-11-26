@@ -12,21 +12,6 @@ export type ScriptCategory = "dev" | "build" | "test" | "lint" | "format" | "typ
 
 export type TerminalApp = "Terminal" | "iTerm" | "Warp" | "Ghostty" | "Alacritty" | "Kitty";
 
-export interface ExtensionPreferences {
-  projectDirectories?: string;
-  scanDepth?: string;
-  defaultPackageManager?: "auto" | PackageManagerName;
-  registryUrl?: string;
-  preferredTerminal?: TerminalApp;
-  preferredEditor?: {
-    name: string;
-    path: string;
-    bundleId?: string;
-  };
-  enableNotifications?: boolean;
-  additionalPath?: string;
-}
-
 export interface PackageLinks {
   npm?: string;
   homepage?: string;
@@ -181,6 +166,7 @@ export interface AuditReport {
   counts: Record<AuditSeverity, number>;
   vulnerabilities: SecurityVulnerability[];
   source: "cli" | "registry-advisory";
+  isPartial?: boolean;
   rawError?: string;
 }
 
@@ -251,4 +237,5 @@ export interface ProjectHealthSnapshot {
   vulnerabilityCount: number;
   criticalOrHighCount: number;
   checkedAt: number;
+  lastError?: string;
 }

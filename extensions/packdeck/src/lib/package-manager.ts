@@ -147,18 +147,49 @@ export function buildUninstallCommand(
   return { bin: pm, args, display: formatCommandDisplay(pm, args) };
 }
 
+export function hasExplicitVersion(spec: string): boolean {
+  if (spec.startsWith("@")) {
+    const slashIdx = spec.indexOf("/");
+    if (slashIdx === -1) return false;
+    return spec.indexOf("@", slashIdx + 1) !== -1;
+  }
+  return spec.includes("@");
+}
+
+export async function detectYarnMajorVersion(projectPath?: string, additionalPath?: string): Promise<number> {
+  if (projectPath) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectPath, "package.json"), "utf8")) as {
+        packageManager?: string;
+      };
+      const match = pkg.packageManager?.match(/^yarn@(\d+)/i);
+      if (match) return Number.parseInt(match[1], 10);
+    } catch {
+      // ignore read errors
+    }
+    if (fs.existsSync(path.join(projectPath, ".yarnrc.yml"))) {
+      return 4;
+    }
+  }
+  const res = await execCommand("yarn", ["--version"], {
+    cwd: projectPath,
+    additionalPath,
+    timeoutMs: 5000,
+  });
+  const verMatch = res.stdout.trim().match(/^(\d+)\./);
+  return verMatch ? Number.parseInt(verMatch[1], 10) : 1;
+}
+
 export function buildUpdateCommand(
   pm: PackageManagerName,
   packageSpecs: string[],
-  options: { isGlobal?: boolean; latest?: boolean } = {},
+  options: { isGlobal?: boolean; latest?: boolean; yarnMajor?: number } = {},
 ): BuiltCommand {
-  const { isGlobal = false, latest = false } = options;
+  const { isGlobal = false, latest = false, yarnMajor = 1 } = options;
 
   // When upgrading to latest (potentially crossing major semver), explicit install <pkg>@latest works consistently across all 4 PMs
   if (latest && packageSpecs.length > 0) {
-    const specs = packageSpecs.map((p) =>
-      p.includes("@") && !p.startsWith("@") ? p : p.endsWith("@latest") ? p : `${p}@latest`,
-    );
+    const specs = packageSpecs.map((p) => (hasExplicitVersion(p) ? p : `${p}@latest`));
     if (isGlobal) {
       switch (pm) {
         case "npm":
@@ -209,7 +240,15 @@ export function buildUpdateCommand(
         args = ["update", ...packageSpecs];
         break;
       case "yarn":
-        args = ["upgrade", ...packageSpecs];
+        // Yarn Berry (v2+) uses `yarn up -R <patterns>` to re-resolve within declared package.json ranges
+        // without modifying manifests or crossing semver ranges. `micromatch` requires both `*` and `@*/*`
+        // to match unscoped and scoped packages on bulk wanted updates.
+        if (yarnMajor >= 2) {
+          const patterns = packageSpecs.length > 0 ? packageSpecs : ["*", "@*/*"];
+          args = ["up", "-R", ...patterns];
+        } else {
+          args = ["upgrade", ...packageSpecs];
+        }
         break;
       case "bun":
         args = ["update", ...packageSpecs];
@@ -220,7 +259,41 @@ export function buildUpdateCommand(
   return { bin: pm, args, display: formatCommandDisplay(pm, args) };
 }
 
-export function buildReinstallCommand(pm: PackageManagerName): BuiltCommand {
+export function buildReinstallCommand(
+  pm: PackageManagerName,
+  packageName?: string,
+  options: {
+    versionSpec?: string;
+    isGlobal?: boolean;
+    depType?: InstallDependencyType;
+    exact?: boolean;
+  } = {},
+): BuiltCommand {
+  if (packageName) {
+    const trimmedSpec = options.versionSpec?.trim();
+    if (trimmedSpec) {
+      if (isValidVersionSpec(trimmedSpec)) {
+        const pkgTarget = hasExplicitVersion(packageName) ? packageName : `${packageName}@${trimmedSpec}`;
+        return buildInstallCommand(pm, pkgTarget, {
+          isGlobal: options.isGlobal,
+          depType: options.depType,
+          exact: options.exact,
+        });
+      }
+      // Complex ranges with spaces or non-registry protocols (e.g. `>=1.0.0 <2.0.0`, `workspace:*`):
+      // run a full local install rather than stripping the spec and silently upgrading.
+      if (!options.isGlobal) {
+        const args = ["install"];
+        return { bin: pm, args, display: formatCommandDisplay(pm, args) };
+      }
+    }
+    return buildInstallCommand(pm, packageName, {
+      isGlobal: options.isGlobal,
+      depType: options.depType,
+      exact: options.exact,
+    });
+  }
+
   const args = ["install"];
   return { bin: pm, args, display: formatCommandDisplay(pm, args) };
 }
@@ -396,9 +469,15 @@ export async function executeUpdate(params: {
   latest?: boolean;
   additionalPath?: string;
 }): Promise<OperationOutcome> {
+  const yarnMajor =
+    params.pm === "yarn" && !params.isGlobal
+      ? await detectYarnMajorVersion(params.projectPath, params.additionalPath)
+      : 1;
+
   const cmd = buildUpdateCommand(params.pm, params.packages, {
     isGlobal: params.isGlobal,
     latest: params.latest,
+    yarnMajor,
   });
 
   const res = await execCommand(cmd.bin, cmd.args, {
@@ -437,15 +516,20 @@ export async function executeUpdate(params: {
 export async function executeReinstall(params: {
   pm: PackageManagerName;
   packageName?: string;
+  versionSpec?: string;
   depType?: InstallDependencyType;
+  exact?: boolean;
   projectPath?: string;
   projectName?: string;
   isGlobal?: boolean;
   additionalPath?: string;
 }): Promise<OperationOutcome> {
-  const cmd = params.packageName
-    ? buildInstallCommand(params.pm, params.packageName, { isGlobal: params.isGlobal, depType: params.depType })
-    : buildReinstallCommand(params.pm);
+  const cmd = buildReinstallCommand(params.pm, params.packageName, {
+    versionSpec: params.versionSpec,
+    isGlobal: params.isGlobal,
+    depType: params.depType,
+    exact: params.exact,
+  });
 
   const res = await execCommand(cmd.bin, cmd.args, {
     cwd: params.isGlobal ? undefined : params.projectPath,
@@ -459,10 +543,104 @@ export async function executeReinstall(params: {
   await recordHistory({
     action: "reinstall",
     packageName: params.packageName,
+    version: params.versionSpec,
     projectPath: params.projectPath,
     projectName: params.projectName,
     isGlobal: Boolean(params.isGlobal),
     packageManager: params.pm,
+    command: cmd.display,
+    args: cmd.args,
+    success,
+    durationMs: res.durationMs,
+    errorMessage,
+  });
+
+  return {
+    success,
+    command: cmd.display,
+    durationMs: res.durationMs,
+    stdout: res.stdout,
+    stderr: res.stderr,
+    errorMessage,
+  };
+}
+
+/**
+ * Moves a dependency between `dependencies` and `devDependencies` while preserving its exact
+ * declared range/protocol spec (e.g., exact pins, `workspace:*`, `file:...`). Writes package.json
+ * atomically and rolls back automatically if the package manager fails to sync the lockfile.
+ */
+export async function executeMoveDependencyType(params: {
+  project: LocalProject;
+  packageName: string;
+  fromKind: "dependencies" | "devDependencies";
+  toKind: "dependencies" | "devDependencies";
+  additionalPath?: string;
+}): Promise<OperationOutcome> {
+  const pkgJsonPath = params.project.packageJsonPath;
+  const originalRaw = fs.readFileSync(pkgJsonPath, "utf8");
+  const pkgJson = JSON.parse(originalRaw) as Record<string, unknown>;
+
+  const fromMap = (pkgJson[params.fromKind] ?? {}) as Record<string, string>;
+  const declaredSpec = fromMap[params.packageName];
+  if (typeof declaredSpec !== "string") {
+    return {
+      success: false,
+      command: `${params.project.packageManager} install`,
+      durationMs: 0,
+      stdout: "",
+      stderr: "",
+      errorMessage: `"${params.packageName}" was not found in ${params.fromKind}.`,
+    };
+  }
+
+  delete fromMap[params.packageName];
+  if (Object.keys(fromMap).length === 0) {
+    delete pkgJson[params.fromKind];
+  } else {
+    pkgJson[params.fromKind] = fromMap;
+  }
+
+  const toMap = { ...((pkgJson[params.toKind] ?? {}) as Record<string, string>), [params.packageName]: declaredSpec };
+  const sortedToMap: Record<string, string> = {};
+  for (const key of Object.keys(toMap).sort((a, b) => a.localeCompare(b))) {
+    sortedToMap[key] = toMap[key];
+  }
+  pkgJson[params.toKind] = sortedToMap;
+
+  const indentMatch = originalRaw.match(/\n([ \t]+)"/);
+  const indent = indentMatch ? indentMatch[1] : 2;
+  const updatedRaw = `${JSON.stringify(pkgJson, null, indent)}\n`;
+
+  const tmpPath = `${pkgJsonPath}.packdeck-tmp-${process.pid}-${Date.now()}`;
+  fs.writeFileSync(tmpPath, updatedRaw, "utf8");
+  fs.renameSync(tmpPath, pkgJsonPath);
+
+  const cmd = buildReinstallCommand(params.project.packageManager);
+  const res = await execCommand(cmd.bin, cmd.args, {
+    cwd: params.project.path,
+    additionalPath: params.additionalPath,
+    timeoutMs: 180_000,
+  });
+
+  if (res.exitCode !== 0) {
+    // Roll back package.json atomically so the dependency is never lost
+    const rollbackTmp = `${pkgJsonPath}.packdeck-rollback-${process.pid}-${Date.now()}`;
+    fs.writeFileSync(rollbackTmp, originalRaw, "utf8");
+    fs.renameSync(rollbackTmp, pkgJsonPath);
+  }
+
+  const success = res.exitCode === 0;
+  const errorMessage = success ? undefined : summarizeError(res);
+
+  await recordHistory({
+    action: "update",
+    packageName: params.packageName,
+    version: declaredSpec,
+    projectPath: params.project.path,
+    projectName: params.project.name,
+    isGlobal: false,
+    packageManager: params.project.packageManager,
     command: cmd.display,
     args: cmd.args,
     success,
@@ -584,9 +762,12 @@ export async function executeAuditFix(params: {
 export function parseNpmOutdatedJson(
   rawJson: string,
   depKindLookup: Map<string, DependencyKind>,
+  exitCode = 0,
 ): OutdatedPackage[] | null {
   const trimmed = rawJson.trim();
-  if (!trimmed) return [];
+  // Empty stdout is only a valid "up to date" response when the CLI exited cleanly (code 0).
+  // Non-zero exit with empty stdout indicates a missing binary or CLI failure.
+  if (!trimmed) return exitCode === 0 ? [] : null;
   try {
     const parsed = JSON.parse(trimmed) as Record<
       string,
@@ -691,7 +872,7 @@ export async function checkProjectOutdated(
         additionalPath: options.additionalPath,
         timeoutMs: 30_000,
       });
-      const parsed = parseNpmOutdatedJson(res.stdout, depKindLookup);
+      const parsed = parseNpmOutdatedJson(res.stdout, depKindLookup, res.exitCode);
       if (parsed !== null) return parsed;
     } else if (project.packageManager === "pnpm") {
       const res = await execCommand("pnpm", ["outdated", "--format", "json"], {
@@ -699,7 +880,7 @@ export async function checkProjectOutdated(
         additionalPath: options.additionalPath,
         timeoutMs: 30_000,
       });
-      const parsed = parseNpmOutdatedJson(res.stdout, depKindLookup);
+      const parsed = parseNpmOutdatedJson(res.stdout, depKindLookup, res.exitCode);
       if (parsed !== null) return parsed;
     } else if (project.packageManager === "yarn") {
       const res = await execCommand("yarn", ["outdated", "--json"], {
@@ -722,13 +903,22 @@ export async function checkProjectOutdated(
       !d.declaredRange.startsWith("http"),
   );
 
+  if (checkableDeps.length === 0) {
+    return [];
+  }
+
   const outdated: OutdatedPackage[] = [];
+  let failedLookups = 0;
+
   await runWithConcurrency(checkableDeps, 8, async (dep) => {
     const meta = await fetchAbbreviatedMeta(dep.name, options.registryUrl);
-    if (!meta || !meta.latest) return;
+    if (!meta || !meta.latest) {
+      failedLookups += 1;
+      return;
+    }
 
     const current = dep.installedVersion ?? cleanVersion(dep.declaredRange);
-    const wanted = findWantedVersion(dep.declaredRange, meta.versions, meta.latest);
+    const wanted = findWantedVersion(dep.declaredRange, meta.versions, meta.latest, current);
 
     if (isOutdated(current, meta.latest) || isOutdated(current, wanted)) {
       outdated.push({
@@ -741,6 +931,13 @@ export async function checkProjectOutdated(
       });
     }
   });
+
+  if (failedLookups > 0 && failedLookups === checkableDeps.length) {
+    throw new Error("Could not reach the npm registry to check for outdated packages. Check your network connection.");
+  }
+  if (failedLookups > 0 && outdated.length === 0) {
+    throw new Error(`Could not verify ${failedLookups} of ${checkableDeps.length} packages against the npm registry.`);
+  }
 
   return sortOutdated(outdated);
 }
@@ -880,7 +1077,8 @@ export function parseNpmAuditJson(rawJson: string): SecurityVulnerability[] | nu
 export function parseYarnAuditNdjson(rawOutput: string): SecurityVulnerability[] | null {
   const lines = rawOutput.split(/\r?\n/).filter(Boolean);
   const vulns: SecurityVulnerability[] = [];
-  let sawValidJson = false;
+  let sawSummary = false;
+  let sawError = false;
 
   for (const line of lines) {
     try {
@@ -899,8 +1097,11 @@ export function parseYarnAuditNdjson(rawOutput: string): SecurityVulnerability[]
           };
         };
       };
-      sawValidJson = true;
-      if (obj.type === "auditAdvisory" && obj.data?.advisory) {
+      if (obj.type === "error") {
+        sawError = true;
+      } else if (obj.type === "auditSummary") {
+        sawSummary = true;
+      } else if (obj.type === "auditAdvisory" && obj.data?.advisory) {
         const adv = obj.data.advisory;
         vulns.push({
           id: String(adv.id),
@@ -921,7 +1122,106 @@ export function parseYarnAuditNdjson(rawOutput: string): SecurityVulnerability[]
     }
   }
 
-  return sawValidJson ? sortVulnerabilities(vulns) : null;
+  if (sawError || !sawSummary) {
+    return null;
+  }
+  return sortVulnerabilities(vulns);
+}
+
+/**
+ * Collects all installed package versions (direct and transitive) from `node_modules`
+ * so the npm bulk advisory fallback audits the full installed dependency tree.
+ */
+export function collectInstalledNodeModulesPackages(
+  projectPath: string,
+  maxPackages = 2500,
+): { payload: Record<string, string[]>; scannedTree: boolean } {
+  const rootNodeModules = path.join(projectPath, "node_modules");
+  if (!fs.existsSync(rootNodeModules)) {
+    return { payload: {}, scannedTree: false };
+  }
+
+  const versionMap = new Map<string, Set<string>>();
+  const visitedRealDirs = new Set<string>();
+  let totalCollected = 0;
+
+  function addPackage(name: string, version: string) {
+    if (!name || !/^\d+\.\d+\.\d+/.test(version)) return;
+    let set = versionMap.get(name);
+    if (!set) {
+      if (totalCollected >= maxPackages) return;
+      set = new Set<string>();
+      versionMap.set(name, set);
+      totalCollected += 1;
+    }
+    set.add(version);
+  }
+
+  function scanNodeModulesDir(nmDir: string, depth: number) {
+    if (depth > 6 || totalCollected >= maxPackages) return;
+    let realNmDir: string;
+    try {
+      realNmDir = fs.realpathSync(nmDir);
+    } catch {
+      return;
+    }
+    if (visitedRealDirs.has(realNmDir)) return;
+    visitedRealDirs.add(realNmDir);
+
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(nmDir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      if (totalCollected >= maxPackages) break;
+      if (entry.name.startsWith(".")) continue;
+      const fullPath = path.join(nmDir, entry.name);
+
+      if (entry.name.startsWith("@")) {
+        // Scoped packages folder
+        let scopedEntries: fs.Dirent[];
+        try {
+          scopedEntries = fs.readdirSync(fullPath, { withFileTypes: true });
+        } catch {
+          continue;
+        }
+        for (const scoped of scopedEntries) {
+          if (totalCollected >= maxPackages) break;
+          if (scoped.name.startsWith(".")) continue;
+          inspectPackageDir(path.join(fullPath, scoped.name), depth);
+        }
+      } else {
+        inspectPackageDir(fullPath, depth);
+      }
+    }
+  }
+
+  function inspectPackageDir(pkgDir: string, depth: number) {
+    const pkgJsonPath = path.join(pkgDir, "package.json");
+    try {
+      const raw = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8")) as { name?: string; version?: string };
+      if (raw.name && raw.version) {
+        addPackage(raw.name, raw.version);
+      }
+    } catch {
+      return;
+    }
+    const nestedNm = path.join(pkgDir, "node_modules");
+    if (fs.existsSync(nestedNm)) {
+      scanNodeModulesDir(nestedNm, depth + 1);
+    }
+  }
+
+  scanNodeModulesDir(rootNodeModules, 0);
+
+  const payload: Record<string, string[]> = {};
+  for (const [name, versions] of versionMap.entries()) {
+    payload[name] = Array.from(versions);
+  }
+  return { payload, scannedTree: Object.keys(payload).length > 0 };
 }
 
 export async function runProjectSecurityAudit(
@@ -930,6 +1230,7 @@ export async function runProjectSecurityAudit(
 ): Promise<AuditReport> {
   let vulnerabilities: SecurityVulnerability[] | null = null;
   let source: "cli" | "registry-advisory" = "cli";
+  let isPartial = false;
 
   if (project.packageManager === "npm" && fs.existsSync(path.join(project.path, "package-lock.json"))) {
     const res = await execCommand("npm", ["audit", "--json"], {
@@ -954,18 +1255,30 @@ export async function runProjectSecurityAudit(
     vulnerabilities = parseYarnAuditNdjson(res.stdout);
   }
 
-  // Fallback to npm Bulk Security Advisories API (works for Bun, Yarn Berry, or lockfile-less projects!)
+  // Fallback to npm Bulk Security Advisories API (works for Bun, Yarn Berry, or lockfile-less projects)
   if (vulnerabilities === null) {
     source = "registry-advisory";
-    const payload: Record<string, string[]> = {};
-    for (const dep of project.dependencies) {
-      const version = dep.installedVersion ?? cleanVersion(dep.declaredRange);
-      if (/^\d+\.\d+\.\d+/.test(version)) {
-        payload[dep.name] = [version];
+    const { payload, scannedTree } = collectInstalledNodeModulesPackages(project.path);
+
+    if (!scannedTree) {
+      isPartial = true;
+      for (const dep of project.dependencies) {
+        const version = dep.installedVersion ?? cleanVersion(dep.declaredRange);
+        if (/^\d+\.\d+\.\d+/.test(version)) {
+          payload[dep.name] = [version];
+        }
       }
     }
+
     try {
-      vulnerabilities = sortVulnerabilities(await fetchBulkSecurityAdvisories(payload, options.registryUrl));
+      const directNames = new Set(project.dependencies.map((d) => d.name));
+      const fetched = await fetchBulkSecurityAdvisories(payload, options.registryUrl);
+      vulnerabilities = sortVulnerabilities(
+        fetched.map((v) => ({
+          ...v,
+          isDirect: directNames.has(v.packageName),
+        })),
+      );
     } catch (error) {
       return {
         projectPath: project.path,
@@ -975,6 +1288,7 @@ export async function runProjectSecurityAudit(
         counts: { critical: 0, high: 0, moderate: 0, low: 0, info: 0 },
         vulnerabilities: [],
         source,
+        isPartial,
         rawError: error instanceof Error ? error.message : String(error),
       };
     }
@@ -989,6 +1303,7 @@ export async function runProjectSecurityAudit(
     counts,
     vulnerabilities,
     source,
+    isPartial,
   };
 }
 
@@ -1007,6 +1322,9 @@ export async function listGlobalPackages(
       additionalPath: options.additionalPath,
       timeoutMs: 20_000,
     });
+    if (res.exitCode !== 0 && !res.stdout.trim()) {
+      throw new Error(`Failed to list global npm packages: ${summarizeError(res)}`);
+    }
     try {
       const parsed = JSON.parse(res.stdout || "{}") as {
         dependencies?: Record<string, { version?: string }>;
@@ -1019,13 +1337,18 @@ export async function listGlobalPackages(
         });
       }
     } catch {
-      // ignore parse failure
+      if (res.exitCode !== 0) {
+        throw new Error(`Failed to parse global npm package list: ${summarizeError(res)}`);
+      }
     }
   } else if (pm === "pnpm") {
     const res = await execCommand("pnpm", ["list", "-g", "--depth=0", "--json"], {
       additionalPath: options.additionalPath,
       timeoutMs: 20_000,
     });
+    if (res.exitCode !== 0 && !res.stdout.trim()) {
+      throw new Error(`Failed to list global pnpm packages: ${summarizeError(res)}`);
+    }
     try {
       const parsed = JSON.parse(res.stdout || "[]") as Array<{
         dependencies?: Record<string, { version?: string }>;
@@ -1039,7 +1362,9 @@ export async function listGlobalPackages(
         });
       }
     } catch {
-      // ignore
+      if (res.exitCode !== 0) {
+        throw new Error(`Failed to parse global pnpm package list: ${summarizeError(res)}`);
+      }
     }
   } else if (pm === "yarn") {
     const dirRes = await execCommand("yarn", ["global", "dir"], {

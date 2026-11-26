@@ -27,12 +27,12 @@ import {
   listGlobalPackages,
 } from "./lib/package-manager";
 import { getFavorites, toggleFavorite } from "./lib/storage";
-import { ExtensionPreferences, GlobalPackage, PackageManagerName } from "./types";
+import { GlobalPackage, PackageManagerName } from "./types";
 
 type ManagerFilter = "all" | PackageManagerName;
 
 export default function GlobalPackagesCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const [managerFilter, setManagerFilter] = useState<ManagerFilter>("all");
 
   const { data: managersInfo, isLoading: loadingManagers } = usePromise(
@@ -48,6 +48,7 @@ export default function GlobalPackagesCommand() {
   const {
     data: globals,
     isLoading: loadingGlobals,
+    error: globalsError,
     revalidate,
   } = usePromise(
     async (managers: PackageManagerName[], filter: ManagerFilter) => {
@@ -157,6 +158,7 @@ export default function GlobalPackagesCommand() {
     const outcome = await executeReinstall({
       pm: pkg.packageManager,
       packageName: pkg.name,
+      versionSpec: pkg.version && pkg.version !== "unknown" ? pkg.version : undefined,
       isGlobal: true,
       additionalPath: prefs.additionalPath,
     });
@@ -259,6 +261,17 @@ export default function GlobalPackagesCommand() {
             </ActionPanel>
           }
         />
+      ) : !loadingGlobals && globalsError ? (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Could Not Load Global Packages"
+          description={globalsError.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       ) : !loadingGlobals && packages.length === 0 ? (
         <List.EmptyView
           icon={Icon.Globe}
@@ -331,7 +344,7 @@ export default function GlobalPackagesCommand() {
                         title="Uninstall Global Package"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={() => handleUninstallGlobal(pkg)}
                       />
                     </ActionPanel.Section>

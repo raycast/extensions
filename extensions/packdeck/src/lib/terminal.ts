@@ -2,18 +2,37 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { runAppleScript } from "@raycast/utils";
 import { TerminalApp } from "../types";
 import { execCommand } from "./env";
 
+const TERMINAL_SCRIPT = `
+on run argv
+  set cmd to item 1 of argv
+  tell application "Terminal"
+    activate
+    do script cmd
+  end tell
+end run
+`;
+
+const ITERM_SCRIPT = `
+on run argv
+  set cmd to item 1 of argv
+  tell application "iTerm"
+    activate
+    if (count of windows) = 0 then
+      create window with default profile
+    else
+      tell current window to create tab with default profile
+    end if
+    tell current session of current window to write text cmd
+  end tell
+end run
+`;
+
 export function shellQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
-}
-
-function appleScriptQuote(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/[\r\n]+/g, " ");
 }
 
 export function buildShellCommandLine(bin: string, args: string[]): string {
@@ -30,30 +49,21 @@ export async function runCommandInTerminal(
   const fullCmd = `cd ${shellQuote(projectPath)} && ${safeExecLine}`;
 
   if (terminal === "Terminal") {
-    const script = [
-      'tell application "Terminal"',
-      "activate",
-      `do script "${appleScriptQuote(fullCmd)}"`,
-      "end tell",
-    ].join("\n");
-    const res = await execCommand("/usr/bin/osascript", ["-e", script], { timeoutMs: 10_000 });
-    return res.exitCode === 0 ? { launched: true } : { launched: false, error: res.stderr };
+    try {
+      await runAppleScript(TERMINAL_SCRIPT, [fullCmd], { timeout: 10_000 });
+      return { launched: true };
+    } catch (error) {
+      return { launched: false, error: error instanceof Error ? error.message : String(error) };
+    }
   }
 
   if (terminal === "iTerm") {
-    const script = [
-      'tell application "iTerm"',
-      "activate",
-      "if (count of windows) = 0 then",
-      "create window with default profile",
-      "else",
-      "tell current window to create tab with default profile",
-      "end if",
-      `tell current session of current window to write text "${appleScriptQuote(fullCmd)}"`,
-      "end tell",
-    ].join("\n");
-    const res = await execCommand("/usr/bin/osascript", ["-e", script], { timeoutMs: 10_000 });
-    return res.exitCode === 0 ? { launched: true } : { launched: false, error: res.stderr };
+    try {
+      await runAppleScript(ITERM_SCRIPT, [fullCmd], { timeout: 10_000 });
+      return { launched: true };
+    } catch (error) {
+      return { launched: false, error: error instanceof Error ? error.message : String(error) };
+    }
   }
 
   // For Warp, Ghostty, Alacritty, Kitty: create a self-cleaning .command launcher script

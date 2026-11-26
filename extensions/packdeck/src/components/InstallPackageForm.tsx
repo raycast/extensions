@@ -1,7 +1,17 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useForm, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { ExtensionPreferences, InstallDependencyType, LocalProject, PackageManagerName } from "../types";
+import { InstallDependencyType, LocalProject, PackageManagerName } from "../types";
 import { PACKAGE_MANAGER_META } from "../lib/constants";
 import { formatDuration, formatPathForDisplay } from "../lib/format";
 import { notifyOperationResult } from "../lib/notifications";
@@ -18,7 +28,18 @@ interface InstallPackageFormProps {
   onSuccess?: () => unknown;
 }
 
+interface InstallFormValues {
+  packageName: string;
+  target: string;
+  depType: string;
+  version: string;
+  customVersion: string;
+  packageManager: string;
+  exact: boolean;
+}
+
 const GLOBAL_TARGET = "__global__";
+const UNRESOLVED_TARGET = "";
 
 export function InstallPackageForm({
   packageName: initialPkgName = "",
@@ -29,115 +50,143 @@ export function InstallPackageForm({
   onSuccess,
 }: InstallPackageFormProps) {
   const { pop } = useNavigation();
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const { projects, activeProject, isLoading: loadingProjects } = useProjects();
-
-  const [pkgName, setPkgName] = useState(initialPkgName);
-  const [target, setTarget] = useState<string>(
-    defaultGlobal ? GLOBAL_TARGET : (defaultProject?.path ?? activeProject?.path ?? GLOBAL_TARGET),
-  );
-  const [pmOverride, setPmOverride] = useState<"auto" | PackageManagerName>("auto");
-  const [depType, setDepType] = useState<InstallDependencyType>(defaultDepType);
-  const [selectedVersion, setSelectedVersion] = useState<string>(initialVersion);
-  const [customVersion, setCustomVersion] = useState<string>("");
-  const [exact, setExact] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [pkgNameError, setPkgNameError] = useState<string | undefined>();
-  const [customVersionError, setCustomVersionError] = useState<string | undefined>();
 
-  const effectiveTarget = useMemo(() => {
-    if (target === GLOBAL_TARGET) return GLOBAL_TARGET;
-    if (projects.some((p) => p.path === target)) return target;
-    return defaultProject?.path ?? activeProject?.path ?? GLOBAL_TARGET;
-  }, [target, projects, defaultProject, activeProject]);
+  const { handleSubmit, itemProps, values } = useForm<InstallFormValues>({
+    initialValues: {
+      packageName: initialPkgName,
+      target: defaultGlobal ? GLOBAL_TARGET : (defaultProject?.path ?? UNRESOLVED_TARGET),
+      depType: defaultDepType,
+      version: initialVersion,
+      customVersion: "",
+      packageManager: "auto",
+      exact: false,
+    },
+    validation: {
+      packageName: (value) => {
+        const trimmed = value?.trim() ?? "";
+        if (!trimmed) return "Package name is required";
+        if (!isValidPackageName(trimmed)) return "Enter a valid npm package name (e.g. zod or @scope/pkg)";
+      },
+      customVersion: (value) => {
+        const trimmed = value?.trim() ?? "";
+        if (trimmed && !isValidVersionSpec(trimmed)) return "Enter a valid version or semver range";
+      },
+    },
+    async onSubmit(formValues) {
+      const cleanName = formValues.packageName.trim();
+      const targetVal = resolveEffectiveTarget(formValues.target);
+      const installGlobal = targetVal === GLOBAL_TARGET;
+      const targetProject = installGlobal ? undefined : availableProjects.find((p) => p.path === targetVal);
 
-  const selectedProject = useMemo(
-    () => (effectiveTarget === GLOBAL_TARGET ? undefined : projects.find((p) => p.path === effectiveTarget)),
-    [effectiveTarget, projects],
-  );
+      if (!installGlobal && !targetProject) {
+        await showToast({ style: Toast.Style.Failure, title: "Select a project or choose Global install" });
+        return;
+      }
 
-  const isGlobal = effectiveTarget === GLOBAL_TARGET;
+      const pm = resolveEffectivePm(formValues.packageManager as "auto" | PackageManagerName, targetProject);
+      const version = formValues.customVersion.trim() || formValues.version;
+      const depType = formValues.depType as InstallDependencyType;
+      const spec = version && version !== "latest" ? `${cleanName}@${version}` : cleanName;
+      const cmdPreview = buildInstallCommand(pm, spec, {
+        isGlobal: installGlobal,
+        depType,
+        exact: formValues.exact,
+      }).display;
 
-  const effectivePm: PackageManagerName = useMemo(() => {
-    if (pmOverride !== "auto") return pmOverride;
-    if (selectedProject) return selectedProject.packageManager;
+      setIsSubmitting(true);
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Installing ${cleanName}...`,
+        message: cmdPreview,
+      });
+
+      const outcome = await executeInstall({
+        pm,
+        packageName: cleanName,
+        version,
+        projectPath: targetProject?.path,
+        projectName: targetProject?.name,
+        isGlobal: installGlobal,
+        depType,
+        exact: formValues.exact,
+        additionalPath: prefs.additionalPath,
+      });
+
+      setIsSubmitting(false);
+      await toast.hide();
+
+      await notifyOperationResult({
+        title: outcome.success ? `Installed ${cleanName}` : `Failed to install ${cleanName}`,
+        message: outcome.success
+          ? `${installGlobal ? "Global" : targetProject?.name} (${pm}) · ${formatDuration(outcome.durationMs)}`
+          : outcome.errorMessage,
+        success: outcome.success,
+        durationMs: outcome.durationMs,
+      });
+
+      if (outcome.success) {
+        await onSuccess?.();
+        pop();
+      }
+    },
+  });
+
+  const availableProjects = useMemo(() => {
+    if (!defaultProject) return projects;
+    if (projects.some((p) => p.path === defaultProject.path)) return projects;
+    return [defaultProject, ...projects];
+  }, [projects, defaultProject]);
+
+  function resolveEffectiveTarget(currentTarget: string): string {
+    if (currentTarget === GLOBAL_TARGET) return GLOBAL_TARGET;
+    if (currentTarget && availableProjects.some((p) => p.path === currentTarget)) return currentTarget;
+    if (defaultProject && availableProjects.some((p) => p.path === defaultProject.path)) return defaultProject.path;
+    if (activeProject) return activeProject.path;
+    return loadingProjects ? UNRESOLVED_TARGET : GLOBAL_TARGET;
+  }
+
+  function resolveEffectivePm(override: "auto" | PackageManagerName, proj?: LocalProject): PackageManagerName {
+    if (override !== "auto") return override;
+    if (proj) return proj.packageManager;
     if (prefs.defaultPackageManager && prefs.defaultPackageManager !== "auto") {
-      return prefs.defaultPackageManager;
+      return prefs.defaultPackageManager as PackageManagerName;
     }
     return "npm";
-  }, [pmOverride, selectedProject, prefs.defaultPackageManager]);
+  }
+
+  const effectiveTarget = resolveEffectiveTarget(values.target);
+  const selectedProject = useMemo(
+    () =>
+      !effectiveTarget || effectiveTarget === GLOBAL_TARGET
+        ? undefined
+        : availableProjects.find((p) => p.path === effectiveTarget),
+    [effectiveTarget, availableProjects],
+  );
+  const isGlobal = effectiveTarget === GLOBAL_TARGET;
+  const effectivePm = resolveEffectivePm(values.packageManager as "auto" | PackageManagerName, selectedProject);
 
   const { data: meta, isLoading: loadingVersions } = usePromise(
     async (name: string) => {
       const cleaned = name.trim();
-      if (!cleaned || cleaned.includes(" ")) return null;
+      if (!cleaned || !isValidPackageName(cleaned)) return null;
       return fetchAbbreviatedMeta(cleaned, prefs.registryUrl);
     },
-    [pkgName],
+    [values.packageName],
   );
 
-  const effectiveVersion = customVersion.trim() || selectedVersion;
+  const effectiveVersion = values.customVersion.trim() || values.version;
   const specPreview = useMemo(() => {
-    const cleanName = pkgName.trim() || "<package>";
+    const cleanName = values.packageName.trim() || "<package>";
     const spec = effectiveVersion && effectiveVersion !== "latest" ? `${cleanName}@${effectiveVersion}` : cleanName;
-    return buildInstallCommand(effectivePm, spec, { isGlobal, depType, exact }).display;
-  }, [pkgName, effectiveVersion, effectivePm, isGlobal, depType, exact]);
-
-  async function handleSubmit() {
-    const cleanName = pkgName.trim();
-    if (!cleanName) {
-      setPkgNameError("Package name is required");
-      return;
-    }
-    if (!isValidPackageName(cleanName)) {
-      setPkgNameError("Enter a valid npm package name (e.g. zod or @scope/pkg)");
-      return;
-    }
-    if (customVersion.trim() && !isValidVersionSpec(customVersion.trim())) {
-      setCustomVersionError("Enter a valid version or semver range");
-      return;
-    }
-    if (!isGlobal && !selectedProject) {
-      await showToast({ style: Toast.Style.Failure, title: "Select a project or choose Global install" });
-      return;
-    }
-
-    setIsSubmitting(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Installing ${cleanName}...`,
-      message: specPreview,
-    });
-
-    const outcome = await executeInstall({
-      pm: effectivePm,
-      packageName: cleanName,
-      version: effectiveVersion,
-      projectPath: selectedProject?.path,
-      projectName: selectedProject?.name,
+    return buildInstallCommand(effectivePm, spec, {
       isGlobal,
-      depType,
-      exact,
-      additionalPath: prefs.additionalPath,
-    });
-
-    setIsSubmitting(false);
-    await toast.hide();
-
-    await notifyOperationResult({
-      title: outcome.success ? `Installed ${cleanName}` : `Failed to install ${cleanName}`,
-      message: outcome.success
-        ? `${isGlobal ? "Global" : selectedProject?.name} (${effectivePm}) · ${formatDuration(outcome.durationMs)}`
-        : outcome.errorMessage,
-      success: outcome.success,
-      durationMs: outcome.durationMs,
-    });
-
-    if (outcome.success) {
-      await onSuccess?.();
-      pop();
-    }
-  }
+      depType: values.depType as InstallDependencyType,
+      exact: values.exact,
+    }).display;
+  }, [values.packageName, effectiveVersion, effectivePm, isGlobal, values.depType, values.exact]);
 
   const versionOptions = useMemo(() => {
     const opts: Array<{ value: string; title: string }> = [
@@ -160,42 +209,43 @@ export function InstallPackageForm({
   return (
     <Form
       isLoading={loadingProjects || loadingVersions || isSubmitting}
-      navigationTitle={pkgName ? `Install ${pkgName}` : "Install Package"}
+      navigationTitle={values.packageName ? `Install ${values.packageName}` : "Install Package"}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Install Package" icon={Icon.Download} onSubmit={handleSubmit} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={specPreview}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="packageName"
         title="Package Name"
         placeholder="e.g. zod, @tanstack/react-query, typescript"
-        value={pkgName}
-        error={pkgNameError}
-        onChange={(value) => {
-          setPkgNameError(undefined);
-          setPkgName(value);
-        }}
-        onBlur={(event) => {
-          const v = event.target.value?.trim() ?? "";
-          if (!v) setPkgNameError("Package name is required");
-          else if (!isValidPackageName(v)) setPkgNameError("Enter a valid npm package name");
-        }}
+        {...itemProps.packageName}
       />
 
-      <Form.Dropdown id="target" title="Install Target" value={effectiveTarget} onChange={setTarget}>
+      <Form.Dropdown
+        id={itemProps.target.id}
+        title="Install Target"
+        value={effectiveTarget}
+        onChange={(nextVal) => {
+          if (nextVal !== UNRESOLVED_TARGET) {
+            itemProps.target.onChange?.(nextVal);
+          }
+        }}
+      >
+        {effectiveTarget === UNRESOLVED_TARGET && (
+          <Form.Dropdown.Item value={UNRESOLVED_TARGET} title="Loading local projects…" icon={Icon.Clock} />
+        )}
         <Form.Dropdown.Section title="Global">
           <Form.Dropdown.Item value={GLOBAL_TARGET} title="Global (-g)" icon={Icon.Globe} />
         </Form.Dropdown.Section>
-        {projects.length > 0 && (
+        {availableProjects.length > 0 && (
           <Form.Dropdown.Section title="Local Projects">
-            {projects.map((proj) => (
+            {availableProjects.map((proj) => (
               <Form.Dropdown.Item
                 key={proj.path}
                 value={proj.path}
@@ -210,12 +260,7 @@ export function InstallPackageForm({
       {selectedProject && <Form.Description title="Project Path" text={formatPathForDisplay(selectedProject.path)} />}
 
       {!isGlobal && (
-        <Form.Dropdown
-          id="depType"
-          title="Dependency Type"
-          value={depType}
-          onChange={(v) => setDepType(v as InstallDependencyType)}
-        >
+        <Form.Dropdown title="Dependency Type" {...itemProps.depType}>
           <Form.Dropdown.Item value="prod" title="Production (dependencies)" icon={Icon.Box} />
           <Form.Dropdown.Item value="dev" title="Development (devDependencies)" icon={Icon.Hammer} />
           <Form.Dropdown.Item value="optional" title="Optional (optionalDependencies)" icon={Icon.PlusCircle} />
@@ -223,34 +268,19 @@ export function InstallPackageForm({
         </Form.Dropdown>
       )}
 
-      <Form.Dropdown id="version" title="Version / Tag" value={selectedVersion} onChange={setSelectedVersion}>
+      <Form.Dropdown title="Version / Tag" {...itemProps.version}>
         {versionOptions.map((opt) => (
           <Form.Dropdown.Item key={opt.value} value={opt.value} title={opt.title} />
         ))}
       </Form.Dropdown>
 
       <Form.TextField
-        id="customVersion"
         title="Custom Version / Range"
         placeholder="Optional override (e.g. 2.1.0, ^3.0.0, beta)"
-        value={customVersion}
-        error={customVersionError}
-        onChange={(value) => {
-          setCustomVersionError(undefined);
-          setCustomVersion(value);
-        }}
-        onBlur={(event) => {
-          const v = event.target.value?.trim() ?? "";
-          if (v && !isValidVersionSpec(v)) setCustomVersionError("Enter a valid version or semver range");
-        }}
+        {...itemProps.customVersion}
       />
 
-      <Form.Dropdown
-        id="packageManager"
-        title="Package Manager"
-        value={pmOverride}
-        onChange={(v) => setPmOverride(v as "auto" | PackageManagerName)}
-      >
+      <Form.Dropdown title="Package Manager" {...itemProps.packageManager}>
         <Form.Dropdown.Item
           value="auto"
           title={`Auto (${PACKAGE_MANAGER_META[effectivePm].label}${selectedProject?.lockfileName ? ` via ${selectedProject.lockfileName}` : ""})`}
@@ -262,9 +292,7 @@ export function InstallPackageForm({
         <Form.Dropdown.Item value="bun" title="Bun" />
       </Form.Dropdown>
 
-      {!isGlobal && (
-        <Form.Checkbox id="exact" label="Pin exact version (--save-exact / -E)" value={exact} onChange={setExact} />
-      )}
+      {!isGlobal && <Form.Checkbox label="Pin exact version (--save-exact / -E)" {...itemProps.exact} />}
 
       <Form.Separator />
       <Form.Description title="Command Preview" text={specPreview} />

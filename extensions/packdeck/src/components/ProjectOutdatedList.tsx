@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { ExtensionPreferences, LocalProject, OutdatedPackage, SemverBump } from "../types";
+import { LocalProject, OutdatedPackage, SemverBump } from "../types";
 import { BUMP_META, DEPENDENCY_KIND_META, PACKAGE_MANAGER_META } from "../lib/constants";
 import { formatDuration } from "../lib/format";
 import { notifyOperationResult } from "../lib/notifications";
@@ -33,12 +33,13 @@ export function ProjectOutdatedList({
   isNested = false,
   onUpdated,
 }: ProjectOutdatedListProps) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const [bumpFilter, setBumpFilter] = useState<"all" | SemverBump>("all");
 
   const {
     data: outdated,
     isLoading,
+    error,
     revalidate,
   } = usePromise(
     async (proj: LocalProject) =>
@@ -172,7 +173,18 @@ export function ProjectOutdatedList({
       searchBarPlaceholder={`Filter outdated packages in ${project.name}...`}
       searchBarAccessory={searchBarAccessory ?? defaultDropdown}
     >
-      {!isLoading && items.length === 0 ? (
+      {!isLoading && error ? (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Could Not Check Outdated Packages"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry Outdated Check" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : !isLoading && items.length === 0 ? (
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title="All Dependencies Up to Date"

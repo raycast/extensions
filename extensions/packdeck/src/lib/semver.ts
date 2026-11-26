@@ -12,13 +12,11 @@ const SEMVER_REGEX = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.
 
 export function cleanVersion(input: string): string {
   const trimmed = input.trim();
-  // Strip common semver range prefixes and leading 'v'
   const stripped = trimmed
     .replace(/^(workspace:|npm:|catalog:)/i, "")
     .replace(/^[\^~>=<=\s]+/, "")
     .replace(/^v/i, "");
 
-  // If it's a compound range like ">=1.2.3 <2.0.0", take the first semver-like token
   const firstToken = stripped.split(/\s+/)[0] ?? stripped;
   const match = firstToken.match(/(\d+)\.(\d+)(?:\.(\d+))?(?:-([0-9A-Za-z.-]+))?/);
   if (!match) {
@@ -65,11 +63,18 @@ function comparePrerelease(a: string[], b: string[]): number {
     if (numA !== null && numB !== null) {
       return numA > numB ? 1 : -1;
     }
-    if (numA !== null) return -1; // numeric < non-numeric per semver spec
+    if (numA !== null) return -1;
     if (numB !== null) return 1;
     return partA > partB ? 1 : -1;
   }
   return 0;
+}
+
+export function compareParsed(a: ParsedSemver, b: ParsedSemver): number {
+  if (a.major !== b.major) return a.major > b.major ? 1 : -1;
+  if (a.minor !== b.minor) return a.minor > b.minor ? 1 : -1;
+  if (a.patch !== b.patch) return a.patch > b.patch ? 1 : -1;
+  return comparePrerelease(a.prerelease, b.prerelease);
 }
 
 export function compareSemver(a: string, b: string): number {
@@ -78,10 +83,7 @@ export function compareSemver(a: string, b: string): number {
   if (!parsedA || !parsedB) {
     return a.localeCompare(b);
   }
-  if (parsedA.major !== parsedB.major) return parsedA.major > parsedB.major ? 1 : -1;
-  if (parsedA.minor !== parsedB.minor) return parsedA.minor > parsedB.minor ? 1 : -1;
-  if (parsedA.patch !== parsedB.patch) return parsedA.patch > parsedB.patch ? 1 : -1;
-  return comparePrerelease(parsedA.prerelease, parsedB.prerelease);
+  return compareParsed(parsedA, parsedB);
 }
 
 export function isOutdated(current: string, target: string): boolean {
@@ -90,7 +92,7 @@ export function isOutdated(current: string, target: string): boolean {
   if (!parsedCurrent || !parsedTarget) {
     return current.trim() !== target.trim();
   }
-  return compareSemver(parsedTarget.raw, parsedCurrent.raw) > 0;
+  return compareParsed(parsedTarget, parsedCurrent) > 0;
 }
 
 export function classifyBump(current: string, target: string): SemverBump {
@@ -117,11 +119,168 @@ export function classifyBump(current: string, target: string): SemverBump {
   return "unknown";
 }
 
+interface PartialVersion {
+  major?: number;
+  minor?: number;
+  patch?: number;
+  prerelease: string[];
+}
+
+function parsePartialVersion(raw: string): PartialVersion | null {
+  const cleaned = raw.trim().replace(/^v/i, "");
+  if (!cleaned || cleaned === "*" || cleaned.toLowerCase() === "x") {
+    return { prerelease: [] };
+  }
+  const match = cleaned.match(/^(\d+|x|X|\*)(?:\.(\d+|x|X|\*))?(?:\.(\d+|x|X|\*))?(?:-([0-9A-Za-z.-]+))?(?:\+.*)?$/);
+  if (!match) return null;
+
+  const isWild = (tok: string | undefined) => !tok || tok === "*" || tok.toLowerCase() === "x";
+  return {
+    major: isWild(match[1]) ? undefined : Number.parseInt(match[1], 10),
+    minor: isWild(match[2]) ? undefined : Number.parseInt(match[2], 10),
+    patch: isWild(match[3]) ? undefined : Number.parseInt(match[3], 10),
+    prerelease: match[4] ? match[4].split(".") : [],
+  };
+}
+
+function makeSemver(major: number, minor = 0, patch = 0, prerelease: string[] = []): ParsedSemver {
+  const pre = prerelease.length > 0 ? `-${prerelease.join(".")}` : "";
+  return { major, minor, patch, prerelease, raw: `${major}.${minor}.${patch}${pre}` };
+}
+
+function matchesSingleComparator(candidate: ParsedSemver, token: string): boolean | null {
+  const t = token.trim();
+  if (!t || t === "*" || t.toLowerCase() === "x" || t === "latest") return true;
+
+  // Caret range: ^1.2.3, ^0.2.3, ^0.0.3, ^1.2, ^1
+  if (t.startsWith("^")) {
+    const p = parsePartialVersion(t.slice(1));
+    if (!p || p.major === undefined) return null;
+    const lower = makeSemver(p.major, p.minor ?? 0, p.patch ?? 0, p.prerelease);
+    if (compareParsed(candidate, lower) < 0) return false;
+    let upper: ParsedSemver;
+    if (p.major > 0) {
+      upper = makeSemver(p.major + 1, 0, 0);
+    } else if (p.minor !== undefined && p.minor > 0) {
+      upper = makeSemver(0, p.minor + 1, 0);
+    } else if (p.minor === undefined) {
+      upper = makeSemver(1, 0, 0);
+    } else if (p.patch !== undefined) {
+      upper = makeSemver(0, 0, p.patch + 1);
+    } else {
+      upper = makeSemver(0, 1, 0);
+    }
+    return compareParsed(candidate, upper) < 0;
+  }
+
+  // Tilde range: ~1.2.3, ~1.2, ~1
+  if (t.startsWith("~")) {
+    const p = parsePartialVersion(t.slice(1));
+    if (!p || p.major === undefined) return null;
+    const lower = makeSemver(p.major, p.minor ?? 0, p.patch ?? 0, p.prerelease);
+    if (compareParsed(candidate, lower) < 0) return false;
+    const upper = p.minor !== undefined ? makeSemver(p.major, p.minor + 1, 0) : makeSemver(p.major + 1, 0, 0);
+    return compareParsed(candidate, upper) < 0;
+  }
+
+  // Relational operators: >=, <=, >, <, =
+  const relMatch = t.match(/^(>=|<=|>|<|=)(.+)$/);
+  if (relMatch) {
+    const op = relMatch[1];
+    const p = parsePartialVersion(relMatch[2]);
+    if (!p) return null;
+    if (p.major === undefined) return true;
+    const lower = makeSemver(p.major, p.minor ?? 0, p.patch ?? 0, p.prerelease);
+    if (op === ">=") return compareParsed(candidate, lower) >= 0;
+    if (op === ">") {
+      if (p.minor === undefined) return compareParsed(candidate, makeSemver(p.major + 1, 0, 0)) >= 0;
+      if (p.patch === undefined) return compareParsed(candidate, makeSemver(p.major, p.minor + 1, 0)) >= 0;
+      return compareParsed(candidate, lower) > 0;
+    }
+    if (op === "<") return compareParsed(candidate, lower) < 0;
+    if (op === "<=") {
+      if (p.minor === undefined) return compareParsed(candidate, makeSemver(p.major + 1, 0, 0)) < 0;
+      if (p.patch === undefined) return compareParsed(candidate, makeSemver(p.major, p.minor + 1, 0)) < 0;
+      return compareParsed(candidate, lower) <= 0;
+    }
+    if (op === "=") {
+      if (p.minor === undefined) return candidate.major === p.major;
+      if (p.patch === undefined) return candidate.major === p.major && candidate.minor === p.minor;
+      return compareParsed(candidate, lower) === 0;
+    }
+  }
+
+  // Bare version or x-range (e.g. "1.2.3", "1.2.x", "1.x", "1")
+  const p = parsePartialVersion(t);
+  if (!p) return null;
+  if (p.major === undefined) return true;
+  if (p.minor === undefined) return candidate.major === p.major;
+  if (p.patch === undefined) return candidate.major === p.major && candidate.minor === p.minor;
+  return compareParsed(candidate, makeSemver(p.major, p.minor, p.patch, p.prerelease)) === 0;
+}
+
+function matchesBranch(candidate: ParsedSemver, branch: string): boolean | null {
+  const trimmed = branch.trim();
+  if (!trimmed) return true;
+
+  // Hyphen range: "1.2.3 - 2.3.4"
+  const hyphenMatch = trimmed.match(/^([^\s]+)\s+-\s+([^\s]+)$/);
+  if (hyphenMatch) {
+    const lowOk = matchesSingleComparator(candidate, `>=${hyphenMatch[1]}`);
+    const highOk = matchesSingleComparator(candidate, `<=${hyphenMatch[2]}`);
+    if (lowOk === null || highOk === null) return null;
+    return lowOk && highOk;
+  }
+
+  // Normalize spaces after operators like ">= 1.0.0 < 2.0.0" -> ">=1.0.0 <2.0.0"
+  const normalized = trimmed.replace(/(>=|<=|>|<|=|\^|~)\s+/g, "$1");
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+
+  for (const token of tokens) {
+    const result = matchesSingleComparator(candidate, token);
+    if (result === null) return null;
+    if (!result) return false;
+  }
+  return true;
+}
+
 /**
- * Given a package.json range (e.g. "^1.2.3", "~1.2.3", "1.2.3", ">=1.0.0", "*")
- * and a list of published versions, finds the highest stable version satisfying the range.
+ * Evaluates whether a semver version satisfies a standard npm semver range expression,
+ * supporting `||` unions, space-separated intersections, hyphen ranges, `^`, `~`, `x`-ranges, and comparators.
+ * Returns `null` if the range syntax cannot be recognized.
  */
-export function findWantedVersion(declaredRange: string, availableVersions: string[], latestVersion: string): string {
+export function satisfiesSemverRange(version: string, range: string): boolean | null {
+  const candidate = parseSemver(version);
+  if (!candidate) return null;
+
+  const trimmed = range.trim();
+  if (!trimmed || trimmed === "*" || trimmed === "latest" || trimmed === "workspace:*") {
+    return true;
+  }
+
+  const branches = trimmed.split("||");
+  let sawValidBranch = false;
+  for (const branch of branches) {
+    const res = matchesBranch(candidate, branch);
+    if (res === true) return true;
+    if (res === false) sawValidBranch = true;
+  }
+  return sawValidBranch ? false : null;
+}
+
+/**
+ * Given a package.json range (e.g. "^1.2.3", ">=1.0.0 <2.0.0", "^1.0.0 || ^2.0.0")
+ * and a list of published versions, finds the highest stable version satisfying the range.
+ * Falls back to `fallbackVersion` (typically the currently installed version) when a range is unrecognized
+ * or no published stable version satisfies it, never falsely claiming an out-of-range `latest` is wanted.
+ */
+export function findWantedVersion(
+  declaredRange: string,
+  availableVersions: string[],
+  latestVersion: string,
+  fallbackVersion?: string,
+): string {
   const trimmed = declaredRange.trim();
   if (!trimmed || trimmed === "*" || trimmed === "latest" || trimmed === "workspace:*") {
     return latestVersion;
@@ -130,45 +289,22 @@ export function findWantedVersion(declaredRange: string, availableVersions: stri
   const stableVersions = availableVersions
     .map((v) => parseSemver(v))
     .filter((v): v is ParsedSemver => v !== null && v.prerelease.length === 0)
-    .sort((a, b) => compareSemver(b.raw, a.raw));
+    .sort((a, b) => compareParsed(b, a));
 
   if (stableVersions.length === 0) {
-    return latestVersion;
+    return fallbackVersion ?? cleanVersion(trimmed);
   }
 
-  // Caret range: ^major.minor.patch
-  if (trimmed.startsWith("^")) {
-    const base = parseSemver(trimmed.slice(1));
-    if (!base) return latestVersion;
-    const match = stableVersions.find((v) => {
-      if (compareSemver(v.raw, base.raw) < 0) return false;
-      if (base.major > 0) return v.major === base.major;
-      if (base.minor > 0) return v.major === 0 && v.minor === base.minor;
-      return v.major === 0 && v.minor === 0 && v.patch === base.patch;
-    });
-    return match?.raw ?? base.raw;
+  for (const candidate of stableVersions) {
+    const satisfied = satisfiesSemverRange(candidate.raw, trimmed);
+    if (satisfied === true) {
+      return candidate.raw;
+    }
+    if (satisfied === null) {
+      // Unrecognized range syntax — do not falsely advertise latestVersion as wanted
+      return fallbackVersion ?? cleanVersion(trimmed);
+    }
   }
 
-  // Tilde range: ~major.minor.patch
-  if (trimmed.startsWith("~")) {
-    const base = parseSemver(trimmed.slice(1));
-    if (!base) return latestVersion;
-    const match = stableVersions.find(
-      (v) => compareSemver(v.raw, base.raw) >= 0 && v.major === base.major && v.minor === base.minor,
-    );
-    return match?.raw ?? base.raw;
-  }
-
-  // Exact pin
-  const exact = parseSemver(trimmed);
-  if (exact && !/[<>x*|\s]/.test(trimmed)) {
-    return exact.raw;
-  }
-
-  // >= range without upper bound
-  if (trimmed.startsWith(">=") && !trimmed.includes("<")) {
-    return latestVersion;
-  }
-
-  return latestVersion;
+  return fallbackVersion ?? cleanVersion(trimmed);
 }

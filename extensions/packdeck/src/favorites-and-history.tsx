@@ -30,7 +30,7 @@ import {
 } from "./lib/storage";
 import { runCommandInTerminal } from "./lib/terminal";
 import { useProjects } from "./lib/useProjects";
-import { ExtensionPreferences, FavoritePackage, HistoryEntry, PackageManagerName } from "./types";
+import { FavoritePackage, HistoryEntry, PackageManagerName, TerminalApp } from "./types";
 
 type SectionFilter = "all" | "favorites" | "history";
 
@@ -47,7 +47,7 @@ function resolveHistoryInvocation(entry: HistoryEntry): { bin: PackageManagerNam
 }
 
 export default function FavoritesAndHistoryCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<SectionFilter>("all");
   const { activeProject } = useProjects();
 
@@ -66,9 +66,9 @@ export default function FavoritesAndHistoryCommand() {
       return;
     }
 
-    const pm = isGlobal
+    const pm: PackageManagerName = isGlobal
       ? prefs.defaultPackageManager && prefs.defaultPackageManager !== "auto"
-        ? prefs.defaultPackageManager
+        ? (prefs.defaultPackageManager as PackageManagerName)
         : "npm"
       : activeProject!.packageManager;
 
@@ -100,9 +100,29 @@ export default function FavoritesAndHistoryCommand() {
   }
 
   async function handleRemoveFavorite(name: string) {
+    const ok = await confirmAlert({
+      title: `Remove "${name}" from Favorites?`,
+      message: "You can re-bookmark this package later from package search or details.",
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+
     await removeFavorite(name);
     await revalidateFavs();
     await showToast({ style: Toast.Style.Success, title: `Removed ${name} from Favorites` });
+  }
+
+  async function handleRemoveHistoryEntry(entry: HistoryEntry) {
+    const ok = await confirmAlert({
+      title: "Remove command history entry?",
+      message: `Permanently delete "${entry.command}" from Packdeck history.`,
+      primaryAction: { title: "Remove Entry", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+
+    await removeHistoryEntry(entry.id);
+    await revalidateHist();
+    await showToast({ style: Toast.Style.Success, title: "Removed history entry" });
   }
 
   async function handleReplayHistory(entry: HistoryEntry) {
@@ -211,7 +231,6 @@ export default function FavoritesAndHistoryCommand() {
                         <Action.Push
                           title="Install Package (Options)…"
                           icon={Icon.Download}
-                          shortcut={{ modifiers: ["cmd"], key: "return" }}
                           target={<InstallPackageForm packageName={fav.name} defaultProject={activeProject} />}
                         />
                         {activeProject && (
@@ -298,7 +317,7 @@ export default function FavoritesAndHistoryCommand() {
                                 runCommandInTerminal(
                                   entry.projectPath!,
                                   { bin: invocation.bin, args: invocation.args, display: entry.command },
-                                  prefs.preferredTerminal ?? "Terminal",
+                                  (prefs.preferredTerminal as TerminalApp) ?? "Terminal",
                                 )
                               }
                             />
@@ -320,10 +339,7 @@ export default function FavoritesAndHistoryCommand() {
                             icon={Icon.Trash}
                             style={Action.Style.Destructive}
                             shortcut={Keyboard.Shortcut.Common.Remove}
-                            onAction={async () => {
-                              await removeHistoryEntry(entry.id);
-                              await revalidateHist();
-                            }}
+                            onAction={() => handleRemoveHistoryEntry(entry)}
                           />
                           <Action
                             title="Clear All History"

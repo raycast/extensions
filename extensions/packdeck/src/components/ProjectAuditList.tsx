@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { AuditSeverity, ExtensionPreferences, LocalProject, SecurityVulnerability } from "../types";
+import { AuditSeverity, LocalProject, SecurityVulnerability } from "../types";
 import { PACKAGE_MANAGER_META, SEVERITY_META } from "../lib/constants";
 import { formatDuration } from "../lib/format";
 import { notifyOperationResult } from "../lib/notifications";
@@ -43,13 +43,14 @@ function getRemediationText(vuln: SecurityVulnerability, pm: LocalProject["packa
 }
 
 export function ProjectAuditList({ project, searchBarAccessory, isNested = false }: ProjectAuditListProps) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const [severityFilter, setSeverityFilter] = useState<"all" | AuditSeverity>("all");
   const [showDetails, setShowDetails] = useState(true);
 
   const {
     data: report,
     isLoading,
+    error,
     revalidate,
   } = usePromise(
     async (proj: LocalProject) =>
@@ -159,11 +160,11 @@ export function ProjectAuditList({ project, searchBarAccessory, isNested = false
       searchBarPlaceholder={`Filter vulnerabilities in ${project.name}...`}
       searchBarAccessory={searchBarAccessory ?? defaultDropdown}
     >
-      {!isLoading && report?.rawError ? (
+      {!isLoading && (error || report?.rawError) ? (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Orange }}
           title="Could Not Complete Security Audit"
-          description={report.rawError}
+          description={report?.rawError ?? error?.message ?? "Unknown audit failure"}
           actions={
             <ActionPanel>
               <Action title="Retry Audit" icon={Icon.ArrowClockwise} onAction={revalidate} />
@@ -172,9 +173,18 @@ export function ProjectAuditList({ project, searchBarAccessory, isNested = false
         />
       ) : !isLoading && filtered.length === 0 ? (
         <List.EmptyView
-          icon={{ source: Icon.Shield, tintColor: Color.Green }}
-          title="No Known Vulnerabilities Found"
-          description={`${project.name} (${PACKAGE_MANAGER_META[project.packageManager].label}) passed security audit (${report?.source === "registry-advisory" ? "npm advisory API" : "local lockfile audit"}).`}
+          icon={{
+            source: report?.isPartial ? Icon.Warning : Icon.Shield,
+            tintColor: report?.isPartial ? Color.Yellow : Color.Green,
+          }}
+          title={
+            report?.isPartial ? "No Direct Dependency Vulnerabilities (Partial Scan)" : "No Known Vulnerabilities Found"
+          }
+          description={
+            report?.isPartial
+              ? `Only direct package.json dependencies in ${project.name} were checked because node_modules is not installed. Run "${project.packageManager} install" to audit transitive dependencies.`
+              : `${project.name} (${PACKAGE_MANAGER_META[project.packageManager].label}) passed security audit (${report?.source === "registry-advisory" ? "installed node_modules advisory scan" : "local lockfile audit"}).`
+          }
           actions={
             <ActionPanel>
               <Action title="Re-Run Security Audit" icon={Icon.ArrowClockwise} onAction={revalidate} />
@@ -183,7 +193,7 @@ export function ProjectAuditList({ project, searchBarAccessory, isNested = false
         />
       ) : (
         <List.Section
-          title={`${project.name} · ${report?.total ?? 0} Vulnerabilities`}
+          title={`${project.name} · ${report?.total ?? 0} Vulnerabilities${report?.isPartial ? " (Direct Deps Only)" : ""}`}
           subtitle={`${counts.critical} critical · ${counts.high} high · ${counts.moderate} moderate · ${counts.low} low`}
         >
           {filtered.map((vuln, index) => {

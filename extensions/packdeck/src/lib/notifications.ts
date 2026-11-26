@@ -1,26 +1,27 @@
 import { environment, getPreferenceValues, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
-import { ExtensionPreferences, ProjectHealthSnapshot } from "../types";
-import { execCommand } from "./env";
+import { runAppleScript } from "@raycast/utils";
+import { AuditReport, OutdatedPackage, PackageManagerName, ProjectHealthSnapshot } from "../types";
 
-function escapeAppleScriptString(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/[\r\n]+/g, " ");
-}
+const DISPLAY_NOTIFICATION_SCRIPT = `
+on run argv
+  set notifMessage to item 1 of argv
+  set notifTitle to item 2 of argv
+  set notifSubtitle to item 3 of argv
+  display notification notifMessage with title notifTitle subtitle notifSubtitle
+end run
+`;
 
 export async function sendSystemNotification(title: string, subtitle: string, message: string): Promise<void> {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   if (prefs.enableNotifications === false) {
     return;
   }
 
-  const safeTitle = escapeAppleScriptString(title);
-  const safeSubtitle = escapeAppleScriptString(subtitle);
-  const safeMessage = escapeAppleScriptString(message);
-
-  const script = `display notification "${safeMessage}" with title "${safeTitle}" subtitle "${safeSubtitle}"`;
-  await execCommand("/usr/bin/osascript", ["-e", script], { timeoutMs: 5000 });
+  try {
+    await runAppleScript(DISPLAY_NOTIFICATION_SCRIPT, [message, title, subtitle], { timeout: 5000 });
+  } catch {
+    // Notification delivery is best-effort
+  }
 }
 
 export async function notifyOperationResult(options: {
@@ -30,7 +31,7 @@ export async function notifyOperationResult(options: {
   durationMs?: number;
 }): Promise<void> {
   // Menu bar commands run in the background where Toast API is unavailable; fall back to HUD
-  if (environment.commandMode === "menu-bar") {
+  if (environment.entryPointMode === "menu-bar") {
     await showHUD(options.message ? `${options.title} — ${options.message}` : options.title);
     return;
   }
@@ -55,7 +56,7 @@ export async function notifyBackgroundHealthChanges(
   current: ProjectHealthSnapshot[],
   previousMap: Record<string, ProjectHealthSnapshot>,
 ): Promise<void> {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   if (prefs.enableNotifications === false) return;
   if (environment.launchType !== LaunchType.Background) return;
 
@@ -63,6 +64,7 @@ export async function notifyBackgroundHealthChanges(
   const newOutdatedProjects: string[] = [];
 
   for (const snap of current) {
+    if (snap.lastError) continue;
     const prev = previousMap[snap.projectPath];
     if (snap.criticalOrHighCount > 0 && (!prev || snap.criticalOrHighCount > prev.criticalOrHighCount)) {
       newVulnProjects.push(`${snap.projectName} (${snap.criticalOrHighCount} high/critical)`);
@@ -88,4 +90,56 @@ export async function notifyBackgroundHealthChanges(
       newOutdatedProjects.slice(0, 3).join(", "),
     );
   }
+}
+
+export function resolveProjectHealthSnapshot(params: {
+  projectPath: string;
+  projectName: string;
+  packageManager: PackageManagerName;
+  previous?: ProjectHealthSnapshot;
+  outdatedResult: PromiseSettledResult<OutdatedPackage[]>;
+  auditResult: PromiseSettledResult<AuditReport>;
+  now?: number;
+}): ProjectHealthSnapshot {
+  const { projectPath, projectName, packageManager, previous, outdatedResult, auditResult, now = Date.now() } = params;
+  const errors: string[] = [];
+
+  let outdatedCount = previous?.outdatedCount ?? 0;
+  let majorOutdatedCount = previous?.majorOutdatedCount ?? 0;
+  if (outdatedResult.status === "fulfilled") {
+    outdatedCount = outdatedResult.value.length;
+    majorOutdatedCount = outdatedResult.value.filter((o) => o.bump === "major").length;
+  } else {
+    const msg = outdatedResult.reason instanceof Error ? outdatedResult.reason.message : String(outdatedResult.reason);
+    errors.push(`Outdated check failed: ${msg}`);
+  }
+
+  let vulnerabilityCount = previous?.vulnerabilityCount ?? 0;
+  let criticalOrHighCount = previous?.criticalOrHighCount ?? 0;
+  if (auditResult.status === "fulfilled" && !auditResult.value.rawError) {
+    vulnerabilityCount = auditResult.value.total;
+    criticalOrHighCount = auditResult.value.counts.critical + auditResult.value.counts.high;
+  } else {
+    const msg =
+      auditResult.status === "fulfilled"
+        ? (auditResult.value.rawError ?? "Audit failed")
+        : auditResult.reason instanceof Error
+          ? auditResult.reason.message
+          : String(auditResult.reason);
+    errors.push(`Security audit failed: ${msg}`);
+  }
+
+  const lastError = errors.length > 0 ? errors.join(" · ") : undefined;
+
+  return {
+    projectPath,
+    projectName,
+    packageManager,
+    outdatedCount,
+    majorOutdatedCount,
+    vulnerabilityCount,
+    criticalOrHighCount,
+    checkedAt: lastError && previous ? previous.checkedAt : now,
+    lastError,
+  };
 }

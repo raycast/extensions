@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
+  confirmAlert,
   getPreferenceValues,
   Icon,
   List,
@@ -25,12 +27,12 @@ import { executeReinstall } from "./lib/package-manager";
 import { removeCustomProjectPath, togglePinnedProject } from "./lib/storage";
 import { runCommandInTerminal } from "./lib/terminal";
 import { useProjects } from "./lib/useProjects";
-import { ExtensionPreferences, LocalProject, PackageManagerName } from "./types";
+import { LocalProject, PackageManagerName, TerminalApp } from "./types";
 
 type ProjectFilter = "all" | "pinned" | PackageManagerName;
 
 export default function ManageProjectsCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const { projects, activeProjectPath, selectActiveProject, isLoading, revalidate } = useProjects();
   const [filter, setFilter] = useState<ProjectFilter>("all");
 
@@ -84,6 +86,13 @@ export default function ManageProjectsCommand() {
   }
 
   async function handleRemoveCustom(project: LocalProject) {
+    const ok = await confirmAlert({
+      title: `Remove "${project.name}" from custom projects?`,
+      message: "This only removes the project bookmark from Packdeck; no files on disk are deleted.",
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+
     await removeCustomProjectPath(project.path);
     await revalidate();
     await showToast({ style: Toast.Style.Success, title: `Removed ${project.name} from custom projects` });
@@ -174,7 +183,7 @@ export default function ManageProjectsCommand() {
                         <Action
                           title="Set as Active Project"
                           icon={Icon.Star}
-                          shortcut={Keyboard.Shortcut.Common.Save}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                           onAction={() => handleSetActive(project)}
                         />
                       )}
@@ -202,7 +211,7 @@ export default function ManageProjectsCommand() {
                       <Action.Push
                         title="Run Project Scripts"
                         icon={Icon.Terminal}
-                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
                         target={<ProjectScriptsList project={project} isNested />}
                       />
                       <Action
@@ -227,7 +236,7 @@ export default function ManageProjectsCommand() {
                           runCommandInTerminal(
                             project.path,
                             { bin: "ls", args: ["-la"], display: "ls -la" },
-                            prefs.preferredTerminal ?? "Terminal",
+                            (prefs.preferredTerminal as TerminalApp) ?? "Terminal",
                           )
                         }
                       />
@@ -237,7 +246,7 @@ export default function ManageProjectsCommand() {
                       <Action
                         title={project.isPinned ? "Unpin Project" : "Pin Project"}
                         icon={project.isPinned ? Icon.PinDisabled : Icon.Pin}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                        shortcut={Keyboard.Shortcut.Common.Pin}
                         onAction={() => handleTogglePin(project)}
                       />
                     </ActionPanel.Section>
@@ -257,7 +266,12 @@ export default function ManageProjectsCommand() {
                           onAction={() => handleRemoveCustom(project)}
                         />
                       )}
-                      <Action title="Rescan Project Directories" icon={Icon.ArrowClockwise} onAction={revalidate} />
+                      <Action
+                        title="Rescan Project Directories"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={revalidate}
+                      />
                       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                     </ActionPanel.Section>
                   </ActionPanel>
