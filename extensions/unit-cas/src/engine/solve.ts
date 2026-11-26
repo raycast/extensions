@@ -1143,13 +1143,15 @@ function conditionsIn(symbolic: Map<string, Node>, assign: Map<string, Value>, e
   };
   const locals = new Map(env.locals ?? []);
   assign.forEach((v, k) => locals.set(k, v));
+  // The solved values shadow any stored variable of the same name.
+  const solvedEnv: Env = { ...env, locals, constraints: [] };
   const out: Node[] = [];
   for (const c of env.constraints ?? []) {
     for (const r of conjuncts(c)) {
       if (r.type !== "rel" || !containsVar(r, solved)) continue;
       let rel: Extract<Node, { type: "rel" }> = { ...r, l: subst(r.l), r: subst(r.r) };
       try {
-        const alg = new Algebra(env, new Set(freeVars(rel, env)));
+        const alg = new Algebra(solvedEnv, new Set(freeVars(rel, solvedEnv)));
         rel = { ...rel, l: alg.simplifyNode(rel.l), r: alg.simplifyNode(rel.r) };
       } catch {
         // Keep the unsimplified condition.
@@ -1163,7 +1165,7 @@ function conditionsIn(symbolic: Map<string, Node>, assign: Map<string, Value>, e
         if (rel.op === "≥") continue;
       }
       try {
-        const v = evaluate(rel, { ...env, locals, constraints: [] });
+        const v = evaluate(rel, solvedEnv);
         if (v.k === "bool") {
           if (!v.v) return null;
           continue;
