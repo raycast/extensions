@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard, useNavigation } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { endedSessionError, listVaultSharing, listVaultsAndItems, SESSION_CHECK_WAIT_MS } from "./pass-cli";
+import { endedSessionError, listVaultSharing, listVaultsAndItems, waitForSessionCheck } from "./pass-cli";
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 import { SearchItemsView } from "./search-items-view";
 import { NotLoggedInView } from "./login-view";
@@ -16,7 +16,7 @@ import {
   setCachedVaults,
 } from "./cache";
 import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
-import { createListingSaves, createRequestTracker, listingSaves, withTimeout } from "./refresh";
+import { createListingSaves, createRequestTracker, listingSaves } from "./refresh";
 import { platformShortcut } from "./shortcuts";
 import {
   SortVaultsByDropdown,
@@ -101,7 +101,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       getCachedItems(),
       getCachedSharing(),
       getCachedFolders(),
-      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
+      waitForSessionCheck(sessionCheck),
     ]);
     if (!isLatest()) return;
     let isFresh = false;

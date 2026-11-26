@@ -1,9 +1,9 @@
 import { environment, getPreferenceValues, open } from "@raycast/api";
 import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
-import { clearCache } from "./cache";
+import { clearCache, getSessionHasLock, setSessionHasLock } from "./cache";
 import { checkCliVersion, ensureCli, preferInstalledCli } from "./cli";
-import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
+import { createPassCliAdapter, PassCliAdapter, SessionCheck } from "./core/adapter";
 import { unlockCommandLine, UnlockOutcome } from "./core/unlock";
 import {
   BrowserLoginStatus,
@@ -162,7 +162,10 @@ export async function logout(force = false): Promise<void> {
 /** Unlocks a locked session with its lock code, which goes to pass-cli's own prompt and nowhere else. */
 export async function unlockSession(code: string): Promise<UnlockOutcome> {
   if (USE_MOCK_DATA) return "unlocked";
-  return (await getAdapter()).unlock(code);
+  const outcome = await (await getAdapter()).unlock(code);
+  // E.g. for Get TOTP Code, which checks the session only when it has a lock code: see lockedSessionError.
+  if (outcome === "unlocked") await setSessionHasLock(true);
+  return outcome;
 }
 
 /** The command that unlocks the session in a terminal, with the pass-cli the extension runs. */
@@ -185,6 +188,60 @@ export async function checkAuth(): Promise<boolean> {
 export const SESSION_CHECK_WAIT_MS = 1_000;
 
 /**
+ * How long saved items wait for it at most when the session has a lock code: nothing of a locked session shows, unless
+ * pass-cli can't tell for this long, e.g. offline.
+ */
+const LOCK_CHECK_WAIT_MS = 10_000;
+
+/** Set once pass-cli says the session has a lock code, before it says whether it's locked: see waitForSessionCheck. */
+let hasLockCode = false;
+
+/** The check's answer, or nothing once `ms` have passed. */
+function answerWithin<T>(check: Promise<T>, ms: number): Promise<{ answer: T } | undefined> {
+  return Promise.race([
+    check.then((answer) => ({ answer })),
+    new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms)),
+  ]);
+}
+
+/**
+ * endedSessionError's answer, for saved items to show or not: nothing after SESSION_CHECK_WAIT_MS, for them to show
+ * anyway. A session with a lock code, as pass-cli said now or at an earlier opening, is waited for longer: until pass-cli
+ * says whether it's locked, which takes a second command.
+ */
+export async function waitForSessionCheck(check: Promise<PassCliError | undefined>): Promise<PassCliError | undefined> {
+  const early = await answerWithin(check, SESSION_CHECK_WAIT_MS);
+  if (early) return early.answer;
+  if (!hasLockCode && !(await getSessionHasLock())) return undefined;
+  return (await answerWithin(check, LOCK_CHECK_WAIT_MS - SESSION_CHECK_WAIT_MS))?.answer;
+}
+
+/**
+ * For Get TOTP Code, which shows its saved items without asking pass-cli first: endedSessionError, through
+ * waitForSessionCheck, when the session has a lock code. Nothing otherwise, at once.
+ */
+export async function lockedSessionError(): Promise<PassCliError | undefined> {
+  if (USE_MOCK_DATA || !(await getSessionHasLock())) return undefined;
+  return waitForSessionCheck(endedSessionError());
+}
+
+async function checkSession(): Promise<SessionCheck> {
+  if (USE_MOCK_DATA) {
+    await ensureMockCacheCleared();
+    return { state: "open", hasLock: false };
+  }
+  const adapter = await getAdapter();
+  const found = await adapter.checkSession(() => {
+    hasLockCode = true;
+    // For the next opening, which then waits for the answer from the start.
+    setSessionHasLock(true).catch(() => undefined);
+  });
+  hasLockCode = found.hasLock;
+  if (!found.hasLock) await setSessionHasLock(false).catch(() => undefined);
+  return found;
+}
+
+/**
  * The error to show when pass-cli says the session has ended or is locked, so that saved items don't show meanwhile, or
  * when the pass-cli at CLI Path can't run: with saved items still fresh, no other command would say so. Nothing when
  * the session is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
@@ -194,10 +251,13 @@ export const SESSION_CHECK_WAIT_MS = 1_000;
  * again. Once this check is done, pass-cli is up to date for them.
  */
 export async function endedSessionError(): Promise<PassCliError | undefined> {
-  const check = checkAuth();
+  const check = checkSession();
   sessionCheck = check;
   try {
-    if (await check) return undefined;
+    const { state } = await check;
+    if (state === "open") return undefined;
+    // pass-cli's info answers for a locked session too: see SessionCheck.
+    if (state === "locked") return new PassCliError("Your pass-cli session is locked.", "session_locked");
   } catch (error) {
     // Saved items belong to a locked session too, and show again once it's unlocked.
     if (error instanceof PassCliError && (PassCliError.isCliPath(error.type) || error.type === "session_locked")) {

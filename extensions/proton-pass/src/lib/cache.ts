@@ -10,6 +10,8 @@ const SHARING_CACHE_KEY = "proton_pass_sharing_cache";
 const FOLDERS_CACHE_KEY = "proton_pass_folders_cache";
 // Per-vault item caches were written by earlier versions; keep them available for offline vault views.
 const VAULT_ITEMS_CACHE_PREFIX = `${ITEMS_CACHE_KEY}_`;
+// Whether the session had a lock code when pass-cli last said, for the next opening: see waitForSessionCheck.
+const SESSION_LOCK_KEY = "proton_pass_session_has_lock";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface CachedData<T> {
@@ -70,6 +72,10 @@ export const setCachedVaults = (vaults: Vault[]) => setCache(VAULTS_CACHE_KEY, v
 export const getCachedFolders = () => getCache<VaultFolder[]>(FOLDERS_CACHE_KEY);
 export const setCachedFolders = (folders: VaultFolder[]) => setCache(FOLDERS_CACHE_KEY, folders);
 
+export const getSessionHasLock = async () => (await LocalStorage.getItem<boolean>(SESSION_LOCK_KEY)) === true;
+export const setSessionHasLock = (hasLock: boolean) =>
+  hasLock ? LocalStorage.setItem(SESSION_LOCK_KEY, true) : LocalStorage.removeItem(SESSION_LOCK_KEY);
+
 export const getCachedSharing = () => getCache<SavedSharing>(SHARING_CACHE_KEY);
 export const setCachedSharing = (sharing: SavedSharing) => setCache(SHARING_CACHE_KEY, sharing);
 
@@ -81,6 +87,7 @@ export async function clearCache(): Promise<void> {
       key === VAULTS_CACHE_KEY ||
       key === SHARING_CACHE_KEY ||
       key === FOLDERS_CACHE_KEY ||
+      key === SESSION_LOCK_KEY ||
       key.startsWith(VAULT_ITEMS_CACHE_PREFIX),
   );
 

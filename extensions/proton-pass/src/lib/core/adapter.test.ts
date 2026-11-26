@@ -113,6 +113,58 @@ test("a session ended by Proton, e.g. after too many wrong lock codes, counts as
   assert.equal(await createPassCliAdapter(fakeCommand("session-invalidated")).checkAuth(), false);
 });
 
+test("a session with a lock code is asked whether it's locked: info says only that it has one, and answers either way", async () => {
+  const checkWith = async (mode: string) => {
+    const dir = mkdtempSync(join(tmpdir(), "pass-session-"));
+    const log = join(dir, "calls.log");
+    try {
+      const lockCodes: number[] = [];
+      const adapter = createPassCliAdapter(fakeCommand(mode), { env: { ...process.env, FAKE_PASS_CLI_LOG: log } });
+      const answer = await adapter.checkSession(() => lockCodes.push(1));
+      const calls = readFileSync(log, "utf8")
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line).args.join(" "));
+      return { answer, calls, toldLockCode: lockCodes.length > 0 };
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  assert.deepEqual(await checkWith("session:locked"), {
+    answer: { state: "locked", hasLock: true },
+    calls: ["info --output json", "session unlock"],
+    toldLockCode: true,
+  });
+  assert.deepEqual(await checkWith("session:unlocked"), {
+    answer: { state: "open", hasLock: true },
+    calls: ["info --output json", "session unlock"],
+    toldLockCode: true,
+  });
+  assert.deepEqual(await checkWith("session:lock-removed"), {
+    answer: { state: "open", hasLock: false },
+    calls: ["info --output json", "session unlock"],
+    toldLockCode: true,
+  });
+  // Without a lock code, nothing more than before.
+  assert.deepEqual(await checkWith("session:no-lock"), {
+    answer: { state: "open", hasLock: false },
+    calls: ["info --output json"],
+    toldLockCode: false,
+  });
+});
+
+test("the session check reports a logged-out session as ended, and a locked one refused by info as locked", async () => {
+  assert.deepEqual(await createPassCliAdapter(fakeCommand("session:logged-out")).checkSession(), {
+    state: "ended",
+    hasLock: false,
+  });
+  await assert.rejects(
+    createPassCliAdapter(fakeCommand("locked")).checkSession(),
+    (error: unknown) => error instanceof PassCliError && error.type === "session_locked",
+  );
+});
+
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
   assert.deepEqual(vaultShareListArgs(), ["share", "list", "--only-vaults", "true", "--output", "json"]);

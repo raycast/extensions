@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { PassCliError } from "../types";
-import { CommandDescriptor, classifyCliError } from "./exec";
+import { CommandDescriptor, classifyCliError, normalizeCliExecutionError } from "./exec";
 import { shellQuote } from "./terminal-login";
 
 /** What an unlock found: the session unlocked with the code, or not locked anymore, e.g. unlocked in a terminal. */
@@ -50,15 +50,13 @@ function inTerminal(command: CommandDescriptor): CommandDescriptor {
 }
 
 /** What pass-cli printed, without the prompt, the code if the terminal showed it, or "Session is locked…" again. */
-function failureMessage(output: string, code: string): string {
-  const lines = output
-    .split(code)
-    .join("")
+function failureMessage(output: string, code: string, fallback = "pass-cli couldn't unlock the session."): string {
+  const lines = (code ? output.split(code).join("") : output)
     .split(/\r?\n|\r/)
     .map((line) => line.replace(PROMPT, "").trim())
     .filter((line) => line && line !== "Caused by:" && !line.startsWith("Session is locked."))
     .map((line) => line.replace(/^Error:\s*/, "").replace(/^\d+:\s*/, ""));
-  return lines.join(": ") || "pass-cli couldn't unlock the session.";
+  return lines.join(": ") || fallback;
 }
 
 /**
@@ -128,6 +126,63 @@ export function unlockSession(
       const type = classifyCliError(message);
       // E.g. after too many wrong codes.
       if (type === "not_authenticated") return settle(new PassCliError("Your pass-cli session has ended.", type));
+      settle(new PassCliError(message, type === "network_error" ? type : "unknown"));
+    });
+  });
+}
+
+/** Whether a session with a lock code is locked now: "none" once it has no lock code anymore. */
+export type LockState = "locked" | "unlocked" | "none";
+
+const LOCK_CHECK_TIMEOUT_MS = 30_000;
+
+/** Whether checkLockState can run: on Windows, pass-cli could ask for the code in a console window of its own. */
+export const canCheckLockState = (platform: NodeJS.Platform = process.platform) => platform !== "win32";
+
+/**
+ * Asks pass-cli whether the session is locked now. Its `info` only says whether the session has a lock code, and
+ * answers either way. `session unlock` first asks Proton whether it's locked, and only then asks for the code, which
+ * fails without a terminal, before any code is checked: no attempt counts. It runs in a session of its own, without a
+ * terminal even if Raycast had one, and nothing is ever written to it.
+ */
+export function checkLockState(command: CommandDescriptor, options: UnlockOptions = {}): Promise<LockState> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command.file, [...command.args, ...UNLOCK_ARGS], { env: options.env, detached: true });
+    let output = "";
+    let isDone = false;
+    const timer = setTimeout(() => {
+      try {
+        if (child.pid) process.kill(-child.pid, "SIGTERM");
+      } catch {
+        // Already ended.
+      }
+      settle(new PassCliError("pass-cli didn't say whether the session is locked.", "timeout"));
+    }, options.timeout ?? LOCK_CHECK_TIMEOUT_MS);
+
+    function settle(outcome: LockState | PassCliError) {
+      if (isDone) return;
+      isDone = true;
+      clearTimeout(timer);
+      child.stdin.destroy();
+      if (outcome instanceof PassCliError) reject(outcome);
+      else resolve(outcome);
+    }
+
+    const read = (chunk: Buffer) => {
+      output += chunk.toString("utf8");
+    };
+    child.stdout.on("data", read);
+    child.stderr.on("data", read);
+    child.stdin.on("error", () => undefined);
+    child.on("error", (error) => settle(normalizeCliExecutionError(error, command.file)));
+    child.on("close", () => {
+      if (output.includes("Session is not locked")) return settle("unlocked");
+      if (output.includes("Session has no lock")) return settle("none");
+      // pass-cli's prompt for the code, which can't show.
+      if (output.includes("Error reading lock code")) return settle("locked");
+      const type = classifyCliError(output);
+      if (type === "not_authenticated") return settle(new PassCliError("Your pass-cli session has ended.", type));
+      const message = failureMessage(output, "", "pass-cli didn't say whether the session is locked.");
       settle(new PassCliError(message, type === "network_error" ? type : "unknown"));
     });
   });

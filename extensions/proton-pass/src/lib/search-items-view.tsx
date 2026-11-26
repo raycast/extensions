@@ -1,7 +1,7 @@
 import { Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
+import { endedSessionError, listItems, listVaultsAndItems, VaultFailure, waitForSessionCheck } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import {
   getCachedFolders,
@@ -143,7 +143,8 @@ export function SearchItemsView({
 
     // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
     // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
-    // screen replaces them once it answers that the session has ended.
+    // screen replaces them once it answers that the session has ended. Not those of a session with a lock code, which
+    // wait until pass-cli says whether it's locked.
     const sessionCheck =
       hasLoadedFromCache.current || sessionConfirmed || isUnlocked ? Promise.resolve(undefined) : endedSessionError();
     const [sharedItems, cachedVaults, cachedFolders, legacyItems, sessionEnded] = await Promise.all([
@@ -151,7 +152,7 @@ export function SearchItemsView({
       getCachedVaults(),
       getCachedFolders(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
-      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
+      waitForSessionCheck(sessionCheck),
     ]);
     const sharedHasVault = sharedItems?.data.some((item) => listedUnder(item) === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.

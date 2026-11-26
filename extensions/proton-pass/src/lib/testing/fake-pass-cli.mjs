@@ -54,7 +54,9 @@ const PROMPT_DELAY_MS = 100;
  */
 function promptForCode({ echo = false } = {}) {
   if (!process.stdin.isTTY) {
-    console.error("Error: Error reading lock code\n\nCaused by:\n    Device not configured (os error 6)");
+    console.error(
+      "Error: Error reading lock code\n\nCaused by:\n    0: Error prompting for password\n    1: Device not configured (os error 6)",
+    );
     process.exit(1);
   }
   if (!echo) process.stdin.setRawMode(true);
@@ -227,11 +229,46 @@ const fixtures = {
   "totps-flat": { primary: "111222", secondary: "333444" },
 };
 
-if (mode?.startsWith("unlock") && process.env.FAKE_PASS_CLI_LOG) {
+if ((mode?.startsWith("unlock") || mode?.startsWith("session:")) && process.env.FAKE_PASS_CLI_LOG) {
   appendFileSync(process.env.FAKE_PASS_CLI_LOG, `${JSON.stringify({ args, env: process.env })}\n`);
 }
 
+/**
+ * `info --output json`, then `session unlock` run without a terminal, for a session that has a lock code or not:
+ * locked, unlocked, without one (`no-lock`), or whose lock code was removed between the two (`lock-removed`). Or
+ * logged out (`logged-out`).
+ */
+async function sessionState(state) {
+  const command = args.join(" ");
+  if (state === "logged-out") {
+    console.error("Error: This operation requires an authenticated client");
+    process.exitCode = 1;
+  } else if (command === "info --output json") {
+    // pass-cli 2.7.1's InfoOutput, commands/info.rs.
+    const info = { release_track: "stable", id: "user-1", username: "alice", email: "alice@example.com" };
+    console.log(JSON.stringify({ ...info, session_has_lock: state !== "no-lock", session_lock_after_seconds: 300 }));
+  } else if (command !== "session unlock") {
+    console.error(`Unexpected arguments for ${mode}`);
+    process.exit(3);
+  } else if (state === "unlocked") {
+    console.log("Session is not locked");
+  } else if (state === "locked") {
+    // Without a terminal, the prompt fails, before any code is checked.
+    if (await promptForCode()) wrongCode();
+  } else {
+    console.error("Error: Session has no lock");
+    process.exitCode = 1;
+  }
+}
+
 switch (mode) {
+  case "session:locked":
+  case "session:unlocked":
+  case "session:no-lock":
+  case "session:lock-removed":
+  case "session:logged-out":
+    await sessionState(mode.slice("session:".length));
+    break;
   // Any command, once the session has locked itself after a while unused.
   case "locked":
     console.error(LOCKED);

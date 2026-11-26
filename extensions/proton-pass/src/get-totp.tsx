@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useFrecencySorting } from "@raycast/utils";
-import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
+import { listVaultsAndItems, getTotp, localTotpCode, lockedSessionError } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./lib/types";
 import {
   getTotpRemainingSeconds,
@@ -143,6 +143,12 @@ export default function Command() {
     setIsLoading(true);
 
     try {
+      // The saved items of a session with a lock code show once pass-cli says it isn't locked.
+      if (!hasLoadedFromCache.current && options?.isUnlocked !== true) {
+        const blocked = await lockedSessionError();
+        if (!isLatest()) return;
+        if (blocked) throw blocked;
+      }
       const cachedItems = !hasLoadedFromCache.current ? (await getCachedItems())?.data : undefined;
       if (!isLatest()) return;
       hasLoadedFromCache.current = true;

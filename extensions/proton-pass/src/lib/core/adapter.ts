@@ -8,7 +8,7 @@ import {
 } from "../pass-cli-normalize";
 import { Folder, Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
 import { CommandDescriptor, ExecCliOptions, execCli, normalizeCliExecutionError } from "./exec";
-import { unlockSession, UnlockOutcome } from "./unlock";
+import { canCheckLockState, checkLockState, unlockSession, UnlockOutcome } from "./unlock";
 
 export function passwordArgs(options: PasswordOptions): string[] {
   if (options.type === "random") {
@@ -35,6 +35,27 @@ export function logoutArgs(force: boolean): string[] {
 
 export function authCheckArgs(): string[] {
   return ["info"];
+}
+
+/** `info`, which says whether the session has a lock code: see checkSession. */
+export function sessionInfoArgs(): string[] {
+  return ["info", "--output", "json"];
+}
+
+/** What the session check found: whether pass-cli has a session, whether it's locked, and whether it has a lock code. */
+export interface SessionCheck {
+  state: "open" | "locked" | "ended";
+  hasLock: boolean;
+}
+
+/** `session_has_lock`, in pass-cli's info since 2.2.2. */
+function hasLockCode(info: string): boolean {
+  try {
+    const data: unknown = JSON.parse(info);
+    return isRecord(data) && data.session_has_lock === true;
+  } catch {
+    return false;
+  }
 }
 
 export function vaultListArgs(): string[] {
@@ -121,6 +142,11 @@ function parseShares(text: string): unknown[] {
 export interface PassCliAdapter {
   generatePassword(options: PasswordOptions): Promise<string>;
   checkAuth(): Promise<boolean>;
+  /**
+   * Whether the session is open, locked or ended. For a session with a lock code, `onLockCode` is called as soon as
+   * that's known, before pass-cli is asked whether it's locked.
+   */
+  checkSession(onLockCode?: () => void): Promise<SessionCheck>;
   logout(force: boolean): Promise<void>;
   /** Unlocks a locked session with its lock code: see unlockSession. */
   unlock(code: string): Promise<UnlockOutcome>;
@@ -182,6 +208,27 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
         return true;
       } catch (error) {
         if (error instanceof PassCliError && error.type === "not_authenticated") return false;
+        throw error;
+      }
+    },
+    checkSession: async (onLockCode) => {
+      const ended: SessionCheck = { state: "ended", hasLock: false };
+      let info: string;
+      try {
+        info = await run(sessionInfoArgs());
+      } catch (error) {
+        if (error instanceof PassCliError && error.type === "not_authenticated") return ended;
+        throw error;
+      }
+      if (!hasLockCode(info)) return { state: "open", hasLock: false };
+      onLockCode?.();
+      // Where it can't be asked, a locked session shows once a listing is refused.
+      if (!canCheckLockState()) return { state: "open", hasLock: true };
+      try {
+        const lock = await checkLockState(command, { env: execOptions.env });
+        return { state: lock === "locked" ? "locked" : "open", hasLock: lock !== "none" };
+      } catch (error) {
+        if (error instanceof PassCliError && error.type === "not_authenticated") return ended;
         throw error;
       }
     },

@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { CommandDescriptor } from "./exec";
-import { unlockCommandLine, unlockSession } from "./unlock";
+import { checkLockState, unlockCommandLine, unlockSession } from "./unlock";
 import { PassCliError } from "../types";
 
 const fakeCli = resolve("src/lib/testing/fake-pass-cli.mjs");
@@ -95,4 +95,25 @@ test("the unlock command to run in a terminal keeps a path with spaces whole", (
     unlockCommandLine("C:\\Users\\someone\\O'Brien\\pass-cli.exe", "win32"),
     "& 'C:\\Users\\someone\\O''Brien\\pass-cli.exe' session unlock",
   );
+});
+
+test("tells whether a session with a lock code is locked now, without a code: pass-cli's prompt fails then", async () => {
+  await withLog(async (log) => {
+    const env = { ...process.env, FAKE_PASS_CLI_LOG: log };
+    assert.equal(await checkLockState(fakeCommand("session:locked"), { env }), "locked");
+    assert.equal(await checkLockState(fakeCommand("session:unlocked"), { env }), "unlocked");
+    // Its lock code removed meanwhile, e.g. in a terminal.
+    assert.equal(await checkLockState(fakeCommand("session:lock-removed"), { env }), "none");
+
+    const calls = readFileSync(log, "utf8").trim().split("\n");
+    assert.equal(calls.length, 3);
+    for (const call of calls) assert.deepEqual(JSON.parse(call).args, ["session", "unlock"]);
+  });
+});
+
+test("the lock check stops a pass-cli that waits, and reports a session ended by Proton", async () => {
+  const started = Date.now();
+  await assert.rejects(checkLockState(fakeCommand("unlock-hang"), { timeout: 300 }), failsWith("timeout"));
+  assert.ok(Date.now() - started < 5_000);
+  await assert.rejects(checkLockState(fakeCommand("unlock-logged-out")), failsWith("not_authenticated"));
 });
