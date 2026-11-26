@@ -145,6 +145,35 @@ fn stop_requested() -> bool {
     stop_flag_path().map(|p| p.exists()).unwrap_or(false)
 }
 
+/// Starts and stops run as separate processes, so they take turns holding this file exclusively.
+fn lock_state() -> Result<std::fs::File, String> {
+    use std::os::windows::fs::OpenOptionsExt;
+    use windows::Win32::Foundation::ERROR_SHARING_VIOLATION;
+
+    let path = state_dir()?.join("state.lock");
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let opened = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .share_mode(0)
+            .open(&path);
+        match opened {
+            Ok(lock) => return Ok(lock),
+            Err(error) if error.raw_os_error() != Some(ERROR_SHARING_VIOLATION.0 as i32) => {
+                return Err(format!("cannot lock caffeination state: {error}"));
+            }
+            Err(_) if Instant::now() >= deadline => {
+                return Err(
+                    "Another Coffee command is still updating caffeination; try again".to_string(),
+                );
+            }
+            Err(_) => std::thread::sleep(Duration::from_millis(50)),
+        }
+    }
+}
+
 fn process_alive(pid: u32) -> bool {
     let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) };
     match handle {
@@ -250,7 +279,9 @@ fn window_alive(window_handle: usize, pid: Option<u32>) -> bool {
 /// Bridge: spawn a detached worker process that holds the keep-awake state.
 #[raycast]
 fn start_caffeinate(config: KeepAwakeConfig) -> Result<String, String> {
-    let _ = stop_caffeinate();
+    // Holding the lock until the new worker publishes lets the next start find and stop it.
+    let _lock = lock_state()?;
+    stop_worker()?;
 
     let exe = std::env::current_exe().map_err(|e| format!("cannot locate own executable: {e}"))?;
     let worker_pid: u32;
@@ -288,6 +319,15 @@ fn start_caffeinate(config: KeepAwakeConfig) -> Result<String, String> {
         return Err("native caffeination requires Windows".to_string());
     }
 
+    let started = wait_for_worker(worker_pid, worker_ticks);
+    if started.is_err() {
+        // A worker that publishes once the lock is released would run untracked.
+        let _ = stop_matching_process(worker_pid, worker_ticks);
+    }
+    started
+}
+
+fn wait_for_worker(worker_pid: u32, worker_ticks: u64) -> Result<String, String> {
     // Wait for the worker to confirm it is holding the execution state before
     // reporting success. The worker only persists its state after acquiring
     // ES_SYSTEM/DISPLAY_REQUIRED, so its absence within the timeout means the
@@ -363,6 +403,12 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
 /// running worker could not be terminated.
 #[raycast]
 fn stop_caffeinate() -> Result<bool, String> {
+    let _lock = lock_state()?;
+    stop_worker()
+}
+
+/// Callers hold `lock_state()`, so no worker publishes between reading the state and clearing it.
+fn stop_worker() -> Result<bool, String> {
     let _ = write_stop_flag();
     let state = read_stored_state()?;
     let had_worker = match &state {

@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Start one session at a time on Windows] - {PR_MERGE_DATE}
+
+- On Windows, when two sessions started at the same moment, for example a schedule and "Start caffeination when Raycast starts", both could keep the PC awake. Once either ended, Coffee showed nothing running, so the menu bar couldn't stop the other. Coffee now starts one session at a time, and the later one replaces the earlier one ([#34019](https://github.com/raycast/extensions/issues/34019)).
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
