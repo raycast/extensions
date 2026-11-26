@@ -35,6 +35,8 @@ export const CREDENTIALS_BODY =
   "This extension doesn't send a URL that carries sign-in details. Copy the address without them.";
 
 export const COPIED_TOAST = "Short link copied";
+/** When the copy fails the clipboard still holds the long URL, so the user must not paste it believing it short. */
+export const COPY_FAILED_TOAST = "Couldn't copy the short link";
 export const LABEL_SHORT_LINK = "Short link";
 export const LABEL_DESTINATION = "Destination";
 export const LABEL_EXPIRY = "Expiry";

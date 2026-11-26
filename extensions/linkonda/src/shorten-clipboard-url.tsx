@@ -3,7 +3,8 @@
  * the short link and show its QR code. A thin shell: the rules are in `lib/` and are tested there (spec 0143).
  *
  * Stores nothing: no local storage, cache or file. The only thing put on the clipboard is the short link, and only
- * after a 201. Every step ends in a view; nothing is thrown or logged.
+ * after a 201. Every step ends in a view; nothing is thrown or logged. A failed copy says so in a toast: the clipboard
+ * then still holds the long URL.
  */
 import {
   Action,
@@ -16,7 +17,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { createShortLink, type ShortLink, type ShortenResult } from "./lib/api";
 import { clipboardUrl } from "./lib/clipboard";
 import {
@@ -27,6 +28,7 @@ import {
   ACTION_PREFERENCES,
   ACTION_RETRY,
   COPIED_TOAST,
+  COPY_FAILED_TOAST,
   failureMarkdown,
   formatExpiry,
   LABEL_ACCOUNT,
@@ -43,7 +45,6 @@ import {
 type Failure = Extract<ShortenResult, { ok: false }>;
 
 type State =
-  | { view: "loading" }
   | { view: "no-url"; reason: "none" | "credentials" }
   | { view: "failed"; failure: Failure }
   | { view: "done"; link: ShortLink; destination: string; qr: string | null; copied: boolean };
@@ -60,7 +61,7 @@ export async function run(): Promise<State> {
 
   let apiKey: string | undefined;
   try {
-    apiKey = getPreferenceValues<{ apiKey?: string }>().apiKey;
+    apiKey = getPreferenceValues<Preferences.ShortenClipboardUrl>().apiKey;
   } catch {
     apiKey = undefined;
   }
@@ -76,27 +77,26 @@ export async function run(): Promise<State> {
     () => true,
     () => false,
   );
-  if (copied) {
-    await showToast({ style: Toast.Style.Success, title: COPIED_TOAST, message: shortUrl }).catch(() => undefined);
-  }
+  await showToast(
+    copied
+      ? { style: Toast.Style.Success, title: COPIED_TOAST, message: shortUrl }
+      : { style: Toast.Style.Failure, title: COPY_FAILED_TOAST, message: shortUrl },
+  ).catch(() => undefined);
   return { view: "done", link: result.link, destination: found.url, qr: await renderQrDataUrl(shortUrl), copied };
 }
 
+const UNEXPECTED: State = { view: "failed", failure: { ok: false, kind: "unexpected", title: TITLES.unexpected } };
+
 export default function Command() {
-  const [state, setState] = useState<State>({ view: "loading" });
+  // run() ends every expected step in a State; a rejection is the unexpected case, shown as its own view rather than
+  // usePromise's default toast.
+  const { data, error, isLoading, revalidate } = usePromise(run, [], { onError: () => undefined });
 
-  const start = useCallback(() => {
-    setState({ view: "loading" });
-    run().then(setState, () =>
-      setState({ view: "failed", failure: { ok: false, kind: "unexpected", title: TITLES.unexpected } }),
-    );
-  }, []);
-  useEffect(start, [start]);
-
-  const retry = <Action title={ACTION_RETRY} onAction={start} />;
+  const retry = <Action title={ACTION_RETRY} onAction={revalidate} />;
   const preferences = <Action title={ACTION_PREFERENCES} onAction={openExtensionPreferences} />;
 
-  if (state.view === "loading") return <Detail isLoading markdown={LOADING} />;
+  if (isLoading || (!data && !error)) return <Detail isLoading markdown={LOADING} />;
+  const state: State = error || !data ? UNEXPECTED : data;
 
   if (state.view === "no-url") {
     return (
