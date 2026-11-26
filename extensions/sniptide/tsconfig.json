@@ -1,13 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*", "test/**/*", "raycast-env.d.ts"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2023",
     "strict": true,
-    "types": ["bun", "node"],
+    "types": ["node"],
     "noUncheckedIndexedAccess": true,
     "isolatedModules": true,
     "esModuleInterop": true,

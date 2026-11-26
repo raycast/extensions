@@ -13,11 +13,7 @@ export function FailureView({ error }: { error: unknown }) {
       actions={
         failure.preferences ? (
           <ActionPanel>
-            <Action
-              icon={Icon.Gear}
-              title={messages.openPreferences}
-              onAction={openExtensionPreferences}
-            />
+            <Action icon={Icon.Gear} title={messages.openPreferences} onAction={openExtensionPreferences} />
           </ActionPanel>
         ) : undefined
       }

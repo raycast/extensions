@@ -17,8 +17,7 @@ export function describe(error: unknown): Failure {
     if (error.status === 401) return { message: messages.tokenRejected, preferences: true }
     if (error.status === 403) return { message: messages.readOnly, preferences: true }
     if (error.status === 429) return { message: messages.rateLimited, preferences: false }
-    if (error.code === "invalid_response")
-      return { message: messages.unreachable, preferences: true }
+    if (error.code === "invalid_response") return { message: messages.unreachable, preferences: true }
     if (error.status) return { message: error.message, preferences: false }
   }
   // The SDK's constructor throws a TypeError for a token or address it can't use.

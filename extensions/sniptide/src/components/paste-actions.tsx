@@ -14,8 +14,7 @@ export function CodeActions({ paste, first }: { paste: PasteSummary | Paste; fir
   async function run(action: CodeAction) {
     const toast = await showToast({ style: Toast.Style.Animated, title: messages.loadingPaste })
     try {
-      const files: CodeFile[] =
-        "files" in paste ? paste.files : (await client().readPaste(paste.id)).paste.files
+      const files: CodeFile[] = "files" in paste ? paste.files : (await client().readPaste(paste.id)).paste.files
       const [file] = files
       if (!file) {
         toast.style = Toast.Style.Failure
@@ -48,16 +47,8 @@ export function CodeActions({ paste, first }: { paste: PasteSummary | Paste; fir
 export function LinkActions({ paste }: { paste: Pick<PasteSummary, "url"> }) {
   return (
     <>
-      <Action.CopyToClipboard
-        title={messages.copyLink}
-        content={paste.url}
-        shortcut={Keyboard.Shortcut.Common.Copy}
-      />
-      <Action.OpenInBrowser
-        title={messages.open}
-        url={paste.url}
-        shortcut={Keyboard.Shortcut.Common.Open}
-      />
+      <Action.CopyToClipboard title={messages.copyLink} content={paste.url} shortcut={Keyboard.Shortcut.Common.Copy} />
+      <Action.OpenInBrowser title={messages.open} url={paste.url} shortcut={Keyboard.Shortcut.Common.Open} />
     </>
   )
 }

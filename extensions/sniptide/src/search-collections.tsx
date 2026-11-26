@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api"
 import { useCachedPromise } from "@raycast/utils"
-import { client } from "./api"
+import { accountKey, client } from "./api"
 import { FailureView } from "./components/failure-view"
 import { PasteList } from "./components/paste-list"
 import { messages } from "./lib/messages"
@@ -8,8 +8,10 @@ import { report } from "./report"
 
 export default function SearchCollections() {
   const { data, isLoading, error } = useCachedPromise(
-    async () => (await client().listCollections()).collections,
-    [],
+    // The account is part of the cache key, so another token or instance starts from a fresh list.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (_account: string) => (await client().listCollections()).collections,
+    [accountKey()],
     { onError: (failure) => report(failure, messages.failed) },
   )
 

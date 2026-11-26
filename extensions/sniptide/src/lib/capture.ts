@@ -26,13 +26,7 @@ export function fileNameFor(text: string) {
 
 export function validFileName(name: string) {
   const value = name.trim()
-  return (
-    value.length > 0 &&
-    value.length <= MAX_FILE_NAME &&
-    !/[/\\]/.test(value) &&
-    value !== "." &&
-    value !== ".."
-  )
+  return value.length > 0 && value.length <= MAX_FILE_NAME && !/[/\\]/.test(value) && value !== "." && value !== ".."
 }
 
 function clip(value: string, max: number) {

@@ -22,8 +22,7 @@ export function instanceUrl(value: string | undefined) {
     throw new ConfigError(messages.invalidInstance)
   }
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
-  if (url.protocol !== "https:" && !(url.protocol === "http:" && local))
-    throw new ConfigError(messages.invalidInstance)
+  if (url.protocol !== "https:" && !(url.protocol === "http:" && local)) throw new ConfigError(messages.invalidInstance)
   if (url.username || url.password) throw new ConfigError(messages.invalidInstance)
   // An address copied from the browser often carries a page path. The API lives at the root.
   return url.origin

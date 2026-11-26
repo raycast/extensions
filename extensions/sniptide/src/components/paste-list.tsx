@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api"
 import { useCachedPromise } from "@raycast/utils"
 import type { Collection, PasteSummary } from "@sniptide/sdk"
 import { useState } from "react"
-import { client } from "../api"
+import { accountKey, client } from "../api"
 import { primaryAction } from "../deliver"
 import { languageLabel, visibilityLabel } from "../lib/format"
 import { messages } from "../lib/messages"
@@ -23,16 +23,20 @@ export function PasteList({ collection }: { collection?: Collection }) {
   const first = primaryAction()
   const slug = collection?.slug ?? filter
   const query = searchText.trim()
+  const account = accountKey()
 
   const { data: collections } = useCachedPromise(
-    async () => (await client().listCollections()).collections,
-    [],
+    // The account is part of the cache key, so another token or instance starts from a fresh list.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (_account: string) => (await client().listCollections()).collections,
+    [account],
     // The paste search reports a failure. The dropdown stays out of the way without its list.
     { execute: !collection, onError: () => {} },
   )
 
   const { data, isLoading, pagination, error } = useCachedPromise(
-    (q: string, inCollection: string) =>
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (q: string, inCollection: string, _account: string) =>
       async ({ cursor }: { cursor?: string }) => {
         const page = await client().listPastes({
           limit: PAGE_SIZE,
@@ -46,7 +50,7 @@ export function PasteList({ collection }: { collection?: Collection }) {
           cursor: page.nextCursor ?? undefined,
         }
       },
-    [query, slug],
+    [query, slug, account],
     { keepPreviousData: true, onError: (failure) => report(failure, messages.failed) },
   )
 
@@ -57,9 +61,7 @@ export function PasteList({ collection }: { collection?: Collection }) {
       throttle
       onSearchTextChange={setSearchText}
       navigationTitle={collection?.name}
-      searchBarPlaceholder={
-        collection ? messages.searchPastesIn(collection.name) : messages.searchPastes
-      }
+      searchBarPlaceholder={collection ? messages.searchPastesIn(collection.name) : messages.searchPastes}
       searchBarAccessory={
         collection || !collections?.length ? undefined : (
           <List.Dropdown tooltip={messages.collectionFilter} value={filter} onChange={setFilter}>
@@ -78,11 +80,7 @@ export function PasteList({ collection }: { collection?: Collection }) {
       ) : query ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title={messages.noMatchesTitle} />
       ) : (
-        <List.EmptyView
-          icon={Icon.Document}
-          title={messages.noPastesTitle}
-          description={messages.noPastesBody}
-        />
+        <List.EmptyView icon={Icon.Document} title={messages.noPastesTitle} description={messages.noPastesBody} />
       )}
       {data?.map((paste) => (
         <PasteItem key={paste.id} paste={paste} first={first} />

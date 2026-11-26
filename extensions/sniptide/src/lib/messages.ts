@@ -46,6 +46,7 @@ export const messages = {
   titleLabel: "Title",
   titlePlaceholder: "The content's first line",
   fileNameLabel: "File Name",
+  fileNamePlaceholder: "snippet.ts",
   fileNameInfo: "The extension sets the language, such as snippet.ts for TypeScript.",
   fileNameInvalid: "Enter a file name without slashes, up to 120 characters.",
   visibilityLabel: "Visibility",
@@ -62,8 +63,7 @@ export const messages = {
   failed: "Couldn't reach your pastes",
   createFailed: "Couldn't create the paste",
   tokenRejected: "Sniptide rejected the API token. Check it in the extension preferences.",
-  readOnly:
-    "This API token is read-only. Create a token with write access and set it in the extension preferences.",
+  readOnly: "This API token is read-only. Create a token with write access and set it in the extension preferences.",
   unreachable: "Can't reach Sniptide. Check your connection and the instance address.",
   rateLimited: "Sniptide is limiting requests from this token. Wait a few minutes and try again.",
   invalidInstance:

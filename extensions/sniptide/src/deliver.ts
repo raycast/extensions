@@ -5,7 +5,7 @@ export type CodeAction = "paste" | "copy"
 
 // The Search Pastes preference declared in package.json.
 export function primaryAction(): CodeAction {
-  const { primaryAction } = getPreferenceValues<{ primaryAction?: CodeAction }>()
+  const { primaryAction } = getPreferenceValues<Preferences.SearchPastes>()
   return primaryAction === "copy" ? "copy" : "paste"
 }
 

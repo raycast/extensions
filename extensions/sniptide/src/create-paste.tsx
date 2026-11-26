@@ -13,7 +13,7 @@ import {
 } from "@raycast/api"
 import { useCachedPromise, useForm, usePromise } from "@raycast/utils"
 import type { Visibility } from "@sniptide/sdk"
-import { client, defaultVisibility } from "./api"
+import { accountKey, client, defaultVisibility } from "./api"
 import { captureFromText, fileNameFor, validFileName } from "./lib/capture"
 import { messages } from "./lib/messages"
 import { report } from "./report"
@@ -47,8 +47,10 @@ export default function CreatePaste() {
 
 function CreateForm({ content }: { content: string }) {
   const { data: collections } = useCachedPromise(
-    async () => (await client().listCollections()).collections,
-    [],
+    // The account is part of the cache key, so another token or instance starts from a fresh list.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (_account: string) => (await client().listCollections()).collections,
+    [accountKey()],
     // Without the list the paste can still be created outside a collection.
     { onError: () => {} },
   )
@@ -91,27 +93,16 @@ function CreateForm({ content }: { content: string }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Link}
-            title={messages.createAndCopy}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm icon={Icon.Link} title={messages.createAndCopy} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        {...itemProps.content}
-        title={messages.contentLabel}
-        placeholder={messages.contentPlaceholder}
-      />
-      <Form.TextField
-        {...itemProps.title}
-        title={messages.titleLabel}
-        placeholder={messages.titlePlaceholder}
-      />
+      <Form.TextArea {...itemProps.content} title={messages.contentLabel} placeholder={messages.contentPlaceholder} />
+      <Form.TextField {...itemProps.title} title={messages.titleLabel} placeholder={messages.titlePlaceholder} />
       <Form.TextField
         {...itemProps.fileName}
         title={messages.fileNameLabel}
+        placeholder={messages.fileNamePlaceholder}
         info={messages.fileNameInfo}
       />
       <Form.Dropdown {...itemProps.visibility} title={messages.visibilityLabel}>

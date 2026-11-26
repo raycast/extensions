@@ -29,10 +29,7 @@ export interface ShareSteps {
 export async function share(steps: ShareSteps) {
   const text = await steps.read()
   if (!text?.trim()) throw new NothingToShareError(steps.empty)
-  const { paste } = await steps.client.createPaste(
-    captureFromText(text, steps.options),
-    steps.key(),
-  )
+  const { paste } = await steps.client.createPaste(captureFromText(text, steps.options), steps.key())
   await steps.copy(paste.url)
   return paste
 }

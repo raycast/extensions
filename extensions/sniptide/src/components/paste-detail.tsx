@@ -25,13 +25,8 @@ export function PasteDetail({ summary, first }: { summary: PasteSummary; first: 
       markdown={data ? pasteMarkdown(data) : error ? describe(error).message : ""}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title={messages.visibilityLabel}
-            text={visibilityLabel(paste.visibility)}
-          />
-          {paste.collection ? (
-            <Detail.Metadata.Label title={messages.collectionLabel} text={paste.collection} />
-          ) : null}
+          <Detail.Metadata.Label title={messages.visibilityLabel} text={visibilityLabel(paste.visibility)} />
+          {paste.collection ? <Detail.Metadata.Label title={messages.collectionLabel} text={paste.collection} /> : null}
           {paste.tags.length > 0 ? (
             <Detail.Metadata.TagList title={messages.tagsLabel}>
               {paste.tags.map((tag) => (
@@ -39,10 +34,7 @@ export function PasteDetail({ summary, first }: { summary: PasteSummary; first: 
               ))}
             </Detail.Metadata.TagList>
           ) : null}
-          <Detail.Metadata.Label
-            title={messages.updatedLabel}
-            text={new Date(paste.updatedAt).toLocaleString()}
-          />
+          <Detail.Metadata.Label title={messages.updatedLabel} text={new Date(paste.updatedAt).toLocaleString()} />
           <Detail.Metadata.Link title={messages.linkLabel} target={paste.url} text={paste.slug} />
         </Detail.Metadata>
       }
