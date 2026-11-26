@@ -22,7 +22,7 @@ export function statusIcon(daemon: Daemon, pending?: Action): Image.ImageLike {
 
 export async function runAction(action: Action, ids: string[], label: string): Promise<boolean> {
   // Menu bar commands run in the background, where the Toast API is not available.
-  if (environment.commandMode === "menu-bar") {
+  if (environment.entryPointMode === "menu-bar") {
     try {
       await control(action, ids);
       await showHUD(`${VERB[action]} finished: ${label}`);
