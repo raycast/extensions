@@ -93,7 +93,7 @@
     {
       "name": "versionPath",
       "title": "Canary Version Path",
-      "description": "Optional. Path on the canary that returns the commit it runs. Empty = /build-info.json. It can return JSON with a commit, sha, revision or version field, or plain text holding only the commit.",
+      "description": "Optional. File on the canary that returns the commit it runs, looked up in each folder of the canary URL down to the host root. Empty = /build-info.json. It can return JSON with a commit, sha, revision or version field, or plain text holding only the commit.",
       "type": "textfield",
       "required": false,
       "default": "/build-info.json",
