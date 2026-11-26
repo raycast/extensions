@@ -7,10 +7,11 @@ const { join } = require("node:path");
 const { after, mock, test } = require("node:test");
 const { createHarness, loadSource } = require("./helpers.cjs");
 
-const { ASSERTIONS_SCRIPT, IDLE_TIME_SCRIPT, SCREEN_SAVER_WATCHER } = loadSource("screenSaver.ts", {});
+const { IDLE_TIME_SCRIPT, LAUNCH_STATE_SCRIPT, SCREEN_SAVER_WATCHER } = loadSource("screenSaver.ts", {});
 const quiet = { menubar: false, status: false };
 const OPEN = "-b com.apple.ScreenSaver.Engine";
 const OWN = "200 PreventUserIdleDisplaySleep";
+const ON_SCREEN = "session 1 0 1";
 const posixShell = { skip: process.platform === "win32" && "needs /bin/sh" };
 const macOS = { skip: process.platform !== "darwin" && "needs osascript" };
 
@@ -23,9 +24,11 @@ function tempDir() {
 // The watcher calls ps once per poll, so every stub answers from that poll's directory.
 const STUBS = {
   ps: String.raw`n=$(($(cat "$DIR/n") + 1)); echo $n > "$DIR/n"; [ -d "$DIR/$n" ] && cat "$DIR/lstart"; exit 0`,
-  osascript: String.raw`case "$*" in *idleTime*) file=limit ;; *) file=assertions ;; esac
+  osascript: String.raw`case "$*" in *idleTime*) file=limit ;; *) file=state ;; esac
 cat "$DIR/$(cat "$DIR/n")/$file"`,
-  ioreg: String.raw`echo "$(cat "$DIR/n")" >> "$DIR/ioreg.log"; printf '  | "HIDIdleTime" = %s000000000\n' "$(cat "$DIR/$(cat "$DIR/n")/idle")"`,
+  ioreg: String.raw`n=$(cat "$DIR/n"); echo "$n" >> "$DIR/ioreg.log"
+file="$DIR/$n/idle.$(grep -cx "$n" "$DIR/ioreg.log")"; [ -e "$file" ] || file="$DIR/$n/idle"
+printf '  | "HIDIdleTime" = %s000000000\n' "$(cat "$file")"`,
   pgrep: String.raw`echo "$*" > "$DIR/pgrep.args"; [ -e "$DIR/$(cat "$DIR/n")/running" ]`,
   open: String.raw`echo "$(cat "$DIR/n") $*" >> "$DIR/open.log"`,
   sleep: String.raw`echo "$(cat "$DIR/n") $*" >> "$DIR/sleep.log"`,
@@ -40,12 +43,13 @@ function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
   }
   writeFileSync(join(dir, "n"), "0");
   writeFileSync(join(dir, "lstart"), "Wed Nov  5 09:15:52 2026\n");
-  steps.forEach(({ idle, limit, assertions = OWN, running }, index) => {
+  steps.forEach(({ idle, recheck, limit, session = ON_SCREEN, assertions = OWN, running }, index) => {
     const step = join(dir, String(index + 1));
     mkdirSync(step);
-    writeFileSync(join(step, "idle"), String(idle));
+    if (idle !== undefined) writeFileSync(join(step, "idle"), String(idle));
+    if (recheck !== undefined) writeFileSync(join(step, "idle.2"), String(recheck));
     if (limit !== undefined) writeFileSync(join(step, "limit"), `${limit}\n`);
-    if (assertions !== null) writeFileSync(join(step, "assertions"), `${assertions}\n`);
+    if (assertions !== null) writeFileSync(join(step, "state"), `${session}\n${assertions}\n`);
     if (running) writeFileSync(join(step, "running"), "");
   });
   execFileSync("/bin/sh", ["-c", SCREEN_SAVER_WATCHER, "coffee-screen-saver", "200", started], {
@@ -53,7 +57,7 @@ function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
       PATH: `${bin}:/usr/bin:/bin`,
       DIR: dir,
       COFFEE_IDLE_TIME: IDLE_TIME_SCRIPT,
-      COFFEE_ASSERTIONS: ASSERTIONS_SCRIPT,
+      COFFEE_LAUNCH_STATE: LAUNCH_STATE_SCRIPT,
     },
     timeout: 10_000,
   });
@@ -66,21 +70,24 @@ function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
   };
 }
 
-for (const [preferences, watched] of [
-  [{ allowScreenSaver: true }, true],
-  [{ allowScreenSaver: true, preventDisplay: false }, false],
-  [{ allowScreenSaver: false }, false],
+for (const [platform, preferences, spawned] of [
+  ["darwin", { allowScreenSaver: true }, ["/usr/bin/caffeinate", "/bin/sh"]],
+  ["darwin", { allowScreenSaver: true, preventDisplay: false }, ["/usr/bin/caffeinate"]],
+  ["darwin", { allowScreenSaver: false }, ["/usr/bin/caffeinate"]],
+  ["win32", { allowScreenSaver: true }, []],
 ]) {
-  test(`screen saver watcher follows Coffee's caffeinate process: ${JSON.stringify(preferences)}`, async () => {
-    const h = createHarness({ preferences });
+  test(`screen saver watcher follows Coffee's session on ${platform}: ${JSON.stringify(preferences)}`, async () => {
+    const h = createHarness({ platform, preferences });
     const watcher = Object.assign(new EventEmitter(), { unref: mock.fn() });
     h.processes.spawn.mock.mockImplementation((executable) => (executable === "/bin/sh" ? watcher : h.makeChild()));
     await h.load("utils.ts").startCaffeinate(quiet, undefined, "-t 300");
     const calls = h.processes.spawn.mock.calls.map(({ arguments: args }) => args);
-    assert.equal(calls.length, watched ? 2 : 1);
-    if (!watched) return;
-    const [executable, args, options] = calls[1];
-    assert.equal(executable, "/bin/sh");
+    assert.deepEqual(
+      calls.map(([executable]) => executable),
+      spawned,
+    );
+    if (!spawned.includes("/bin/sh")) return;
+    const [, args, options] = calls[1];
     assert.deepEqual(Array.from(args), [
       "-c",
       SCREEN_SAVER_WATCHER,
@@ -92,7 +99,7 @@ for (const [preferences, watched] of [
     assert.equal(options.env.TZ, "UTC");
     assert.equal(options.env.LC_ALL, "C");
     assert.equal(options.env.COFFEE_IDLE_TIME, IDLE_TIME_SCRIPT);
-    assert.equal(options.env.COFFEE_ASSERTIONS, ASSERTIONS_SCRIPT);
+    assert.equal(options.env.COFFEE_LAUNCH_STATE, LAUNCH_STATE_SCRIPT);
     assert.equal(watcher.unref.mock.callCount(), 1);
   });
 }
@@ -157,6 +164,10 @@ for (const [name, steps, opened] of [
     [{ idle: 700, limit: 600, assertions: "300 PreventUserIdleSystemSleep" }],
     [],
   ],
+  ["waits while the screen is locked", [{ idle: 700, limit: 600, session: "session 1 1 1" }], []],
+  ["waits while no display is awake", [{ idle: 700, limit: 600, session: "session 1 0 0" }], []],
+  ["waits while another user is on the console", [{ idle: 700, limit: 600, session: "session 0 0 1" }], []],
+  ["rechecks idle time right before starting", [{ idle: 700, recheck: 3, limit: 600 }], []],
   ["fails closed until the Lock Screen delay can be read", [{ idle: 5000 }], []],
   [
     "leaves an already running screen saver alone",
@@ -165,6 +176,21 @@ for (const [name, steps, opened] of [
       { idle: 615, limit: 600 },
     ],
     [],
+  ],
+  [
+    "rearms after input while the delay was Never",
+    [
+      { idle: 700, limit: 600 },
+      { idle: 715 },
+      { idle: 730 },
+      { idle: 745 },
+      { limit: 0 },
+      {},
+      {},
+      {},
+      { idle: 780, limit: 600 },
+    ],
+    [`1 ${OPEN}`, `9 ${OPEN}`],
   ],
   [
     "rearms after input between polls when the delay is shorter than a poll",
@@ -204,7 +230,12 @@ test("reads the Lock Screen delay the way loginwindow does", macOS, () => {
   assert.equal(read(), "1200");
 });
 
-test("lists active power assertions as pid and type", macOS, () => {
-  const rows = execFileSync("osascript", ["-l", "JavaScript", "-e", ASSERTIONS_SCRIPT], { encoding: "utf8" }).trim();
-  for (const row of rows ? rows.split("\n") : []) assert.match(row, /^\d+ [A-Za-z]+$/);
+test("reports the session and active power assertions", macOS, () => {
+  const [session, ...rows] = execFileSync("osascript", ["-l", "JavaScript", "-e", LAUNCH_STATE_SCRIPT], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n");
+  assert.match(session, /^session [01] [01] \d+$/);
+  for (const row of rows) assert.match(row, /^\d+ [A-Za-z]+$/);
 });

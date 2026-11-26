@@ -8,14 +8,20 @@ function run(argv) {
   return valid[0] ? String(Math.max(seconds, 0)) : "1200";
 }`;
 
-// Structured, because pmset prints caller-chosen assertion names unescaped and a name can forge a row.
-export const ASSERTIONS_SCRIPT = `ObjC.import("IOKit");
+// loginwindow also skips its idle screen saver while switched out, after a screen lock, or with no display awake.
+// Assertions are read structurally because pmset prints caller-chosen names unescaped, so a name can forge a row.
+export const LAUNCH_STATE_SCRIPT = `ObjC.import("CoreGraphics");
+ObjC.import("IOKit");
 function run() {
+  const session = ObjC.castRefToObject($.CGSessionCopyCurrentDictionary());
+  const flag = (key) => (session.isNil() || !ObjC.unwrap(session.objectForKey(key)) ? 0 : 1);
+  const displays = Ref();
+  const awake = $.CGGetActiveDisplayList(0, null, displays) === 0 ? displays[0] : 0;
+  const rows = ["session " + flag("kCGSSessionOnConsoleKey") + " " + flag("CGSSessionScreenIsLocked") + " " + awake];
   const ref = Ref();
   if ($.IOPMCopyAssertionsByProcess(ref) !== 0) throw new Error("Cannot read power assertions");
   const byPid = ObjC.castRefToObject(ref[0]);
   const pids = byPid.allKeys;
-  const rows = [];
   for (let i = 0; i < pids.count; i++) {
     const assertions = byPid.objectForKey(pids.objectAtIndex(i));
     for (let j = 0; j < assertions.count; j++) {
@@ -35,31 +41,30 @@ read_limit() {
   case $value in "" | *[!0-9]*) return 1 ;; esac
   limit=$value
 }
-display_clear() {
-  rows=$(osascript -l JavaScript -e "$COFFEE_ASSERTIONS" 2>/dev/null) || return
-  printf '%s\\n' "$rows" | grep -Eqx "$pid (PreventUserIdleDisplaySleep|NoDisplaySleepAssertion)" &&
-    ! printf '%s\\n' "$rows" | grep -Ex "[0-9]+ (PreventUserIdleDisplaySleep|NoDisplaySleepAssertion|DisplayWake)" | grep -qv "^$pid "
+sample_idle() {
+  idle=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { print int($NF / 1000000000); exit }')
+  case $idle in "" | *[!0-9]*) return 1 ;; esac
+}
+can_launch() {
+  state=$(osascript -l JavaScript -e "$COFFEE_LAUNCH_STATE" 2>/dev/null) || return
+  printf '%s\\n' "$state" | grep -Eqx "session 1 0 [1-9][0-9]*" &&
+    printf '%s\\n' "$state" | grep -Eqx "$pid (PreventUserIdleDisplaySleep|NoDisplaySleepAssertion)" &&
+    ! printf '%s\\n' "$state" | grep -Ex "[0-9]+ (PreventUserIdleDisplaySleep|NoDisplaySleepAssertion|DisplayWake)" | grep -qv "^$pid "
 }
 while [ "$(echo $(ps -p "$pid" -o lstart= 2>/dev/null))" = "$started" ]; do
   delay=15
   [ $((polls % 4)) = 0 ] && read_limit
   polls=$((polls + 1))
-  if [ -n "$limit" ] && [ "$limit" -gt 0 ]; then
-    idle=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { print int($NF / 1000000000); exit }')
-    case $idle in
-      "" | *[!0-9]*) ;;
-      *)
-        if [ "$idle" -lt "$limit" ] || [ "$idle" -lt $((last + slept)) ]; then armed=1; fi
-        last=$idle
-        if [ "$idle" -lt "$limit" ]; then
-          [ $((limit - idle)) -lt $delay ] && delay=$((limit - idle))
-        elif [ $armed = 1 ] && read_limit && [ "$limit" -gt 0 ] && [ "$idle" -ge "$limit" ] && display_clear; then
-          pgrep -q -x -u "$uid" ScreenSaverEngine || open -b com.apple.ScreenSaver.Engine && armed=0
-        fi
-        ;;
-    esac
+  if [ -n "$limit" ] && [ "$limit" -gt 0 ] && sample_idle; then
+    if [ "$idle" -lt "$limit" ] || [ "$idle" -lt $((last + slept)) ]; then armed=1; fi
+    last=$idle slept=0
+    if [ "$idle" -lt "$limit" ]; then
+      [ $((limit - idle)) -lt $delay ] && delay=$((limit - idle))
+    elif [ $armed = 1 ] && read_limit && [ "$limit" -gt 0 ] && can_launch && sample_idle && [ "$idle" -ge "$limit" ]; then
+      pgrep -q -x -u "$uid" ScreenSaverEngine || open -b com.apple.ScreenSaver.Engine && armed=0
+    fi
   fi
-  slept=$delay
+  slept=$((slept + delay))
   sleep $delay
 done`;
 
@@ -75,7 +80,7 @@ export function startScreenSaverWatcher({ pid, createdAt }: { pid: number; creat
       LC_ALL: "C",
       TZ: "UTC",
       COFFEE_IDLE_TIME: IDLE_TIME_SCRIPT,
-      COFFEE_ASSERTIONS: ASSERTIONS_SCRIPT,
+      COFFEE_LAUNCH_STATE: LAUNCH_STATE_SCRIPT,
     },
   });
   watcher.once("error", (error) => console.error("Cannot watch for the screen saver:", error));
