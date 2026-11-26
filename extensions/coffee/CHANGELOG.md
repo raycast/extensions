@@ -1,8 +1,8 @@
 # Coffee Changelog
 
-## [Enhancement] Allow the screen saver while the display stays awake - {PR_MERGE_DATE}
+## [Allow the screen saver while the display stays awake] - {PR_MERGE_DATE}
 
-- Add the **Allow screen saver** preference. On macOS, **Prevent display sleep** also kept the screen saver from starting; with this option, Coffee keeps the display awake and starts the screen saver after the delay set in System Settings > Lock Screen, unless another app is keeping the display awake.
+- Add the **Allow screen saver** preference. On macOS, **Prevent display sleep** also kept the screen saver from starting. With this option, Coffee keeps the display awake and starts the screen saver after the Lock Screen delay, unless another app is keeping the display awake, for example during video playback or a call.
 
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
