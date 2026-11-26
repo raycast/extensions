@@ -201,6 +201,14 @@
       "label": "Prevent display sleep"
     },
     {
+      "name": "allowScreenSaver",
+      "description": "Start the screen saver after the delay set in System Settings > Lock Screen, even though the display is kept awake. Only applies with Prevent display sleep. This option is not supported on Windows and will have no effect",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Allow screen saver"
+    },
+    {
       "name": "preventSystem",
       "description": "Prevent the system from sleeping",
       "type": "checkbox",

@@ -114,8 +114,9 @@ export async function startCaffeinate(
     const sessionId = await windowsStartCaffeinate(additionalArgs);
     await setWindowsCaffeinationReason(sessionId, reason);
   } else {
+    const { preventDisplay, allowScreenSaver } = getPreferenceValues<Preferences>();
     const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
-    await startMacCaffeinate(args, reason);
+    await startMacCaffeinate(args, reason, { allowScreenSaver: preventDisplay && allowScreenSaver });
   }
 
   // showHUD closes the window and Raycast 2 unloads view commands, so spawn

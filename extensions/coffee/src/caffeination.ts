@@ -5,6 +5,7 @@ import { mkdir, readFile, readdir, rename, rm, rmdir, stat, unlink, utimes, writ
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { parseCaffeinateTimeout } from "./duration";
+import { startScreenSaverWatcher } from "./screenSaver";
 
 export type CaffeinationReason =
   | { kind: "while"; appName: string }
@@ -402,7 +403,11 @@ export function stopMacCaffeinateIfMatches(expectedSessionId: string): Promise<C
   });
 }
 
-export async function startMacCaffeinate(args: string[], reason?: CaffeinationReason): Promise<CaffeinationState> {
+export async function startMacCaffeinate(
+  args: string[],
+  reason?: CaffeinationReason,
+  options?: { allowScreenSaver?: boolean },
+): Promise<CaffeinationState> {
   const durationSeconds = parseCaffeinateTimeout(args);
   return withSessionLock(async () => {
     await stopSession();
@@ -426,6 +431,7 @@ export async function startMacCaffeinate(args: string[], reason?: CaffeinationRe
       };
       await LocalStorage.setItem(SESSION_KEY, JSON.stringify(session));
       child.unref();
+      if (options?.allowScreenSaver) startScreenSaverWatcher(identity);
       return await readState();
     } catch (error) {
       // This child is still attached to this command and has not been reaped;
