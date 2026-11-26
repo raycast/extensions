@@ -26,8 +26,8 @@ export function looksLikeLogin(email: Email): boolean {
 type StoredEntries = Record<string, LoginInfo & { expiresAt: number; checkedByAI: boolean }>;
 const STORAGE_KEY = "loginCodes";
 
-// Raycast AI allows a handful of requests a minute, so one load asks about a few emails at most.
-const MAX_AI_REQUESTS = 3;
+// Raycast AI allows a handful of requests a minute, so a load asks about a few emails in one request.
+const MAX_AI_EMAILS = 5;
 
 async function storedEntries(): Promise<StoredEntries> {
   const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
@@ -60,16 +60,17 @@ export async function detectLoginInfo(emails: Email[]): Promise<Map<string, Logi
   if (pending.length === 0) return results;
 
   const contents = await getEmailContents(pending.map((email) => email.id));
-  const found: StoredEntries = {};
-  let aiRequests = 0;
-
-  for (const email of pending) {
+  const readable = pending.flatMap((email) => {
     const content = contents.get(email.id);
-    if (!content) continue;
+    return content ? [{ email, content }] : [];
+  });
+  const askAI = aiAvailable ? readable.slice(0, MAX_AI_EMAILS) : [];
+  const aiResults = askAI.length > 0 ? await extractWithAI(askAI) : null;
+
+  const found: StoredEntries = {};
+  for (const { email, content } of readable) {
     const patterns = extractWithPatterns(email, content);
-    const askAI = aiAvailable && aiRequests < MAX_AI_REQUESTS;
-    if (askAI) aiRequests++;
-    const ai = askAI ? await extractWithAI(email, content) : null;
+    const ai = aiResults?.get(email.id);
     const info = { code: ai?.code ?? patterns.code, link: ai?.link ?? patterns.link };
     results.set(email.id, info);
     found[email.id] = { ...info, expiresAt: email.receivedAt.getTime() + MAX_AGE_MS, checkedByAI: Boolean(ai) };
@@ -79,34 +80,46 @@ export async function detectLoginInfo(emails: Email[]): Promise<Map<string, Logi
   return results;
 }
 
-async function extractWithAI(email: Email, content: EmailContent): Promise<LoginInfo | null> {
-  const links = content.links.slice(0, 40).map((link, index) => `${index + 1}. ${link.title} -> ${link.url}`);
+type Readable = { email: Email; content: EmailContent };
+
+// One request for several emails. Returns null when the request fails, so nothing counts as checked.
+async function extractWithAI(items: Readable[]): Promise<Map<string, LoginInfo> | null> {
   const prompt = [
-    "This email may be a login, sign-up or verification email.",
-    "Extract the one-time code (verification code, login code, PIN) and/or the link the user must click to log in, verify or confirm.",
-    'Reply with JSON only: {"code": string|null, "link": number|null}, where link is the number of the link in the list.',
+    "Each email below may be a login, sign-up or verification email.",
+    "For each, extract the one-time code (verification code, login code, PIN) and/or the link the user must click to log in, verify or confirm.",
+    'Reply with JSON only: an array of {"email": number, "code": string|null, "link": number|null}, one per email, where link is the number of the link in that email\'s list.',
     "Use null when there is no such code or link. Ignore unsubscribe, tracking, help and marketing links.",
-    "",
-    `Subject: ${email.subject}`,
-    `From: ${email.from?.email ?? ""}`,
-    "",
-    content.text.slice(0, 6000),
-    "",
-    "Links:",
-    ...links,
+    ...items.flatMap(({ email, content }, index) => [
+      "",
+      `=== Email ${index + 1} ===`,
+      `Subject: ${email.subject}`,
+      `From: ${email.from?.email ?? ""}`,
+      "",
+      content.text.slice(0, 2000),
+      "",
+      "Links:",
+      ...content.links.slice(0, 20).map((link, i) => `${i + 1}. ${link.title} -> ${link.url}`),
+    ]),
   ].join("\n");
 
   try {
     const answer = await AI.ask(prompt, { creativity: "none" });
-    const json = JSON.parse(answer.slice(answer.indexOf("{"), answer.lastIndexOf("}") + 1)) as {
+    const json = JSON.parse(answer.slice(answer.indexOf("["), answer.lastIndexOf("]") + 1)) as {
+      email?: number;
       code?: string | null;
       link?: number | null;
-    };
-    const code = json.code?.trim() || null;
-    const link = typeof json.link === "number" ? (content.links[json.link - 1]?.url ?? null) : null;
-    // Only trust a code that actually appears in the email.
-    const haystack = `${email.subject} ${content.text}`;
-    return { code: code && haystack.includes(code) ? code : null, link };
+    }[];
+    const results = new Map<string, LoginInfo>(items.map(({ email }) => [email.id, { code: null, link: null }]));
+    for (const answer of json) {
+      const item = typeof answer.email === "number" ? items[answer.email - 1] : undefined;
+      if (!item) continue;
+      const code = answer.code?.trim() || null;
+      const link = typeof answer.link === "number" ? (item.content.links[answer.link - 1]?.url ?? null) : null;
+      // Only trust a code that actually appears in the email.
+      const haystack = `${item.email.subject} ${item.content.text}`;
+      results.set(item.email.id, { code: code && haystack.includes(code) ? code : null, link });
+    }
+    return results;
   } catch {
     return null;
   }
