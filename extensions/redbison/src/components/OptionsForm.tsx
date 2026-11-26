@@ -23,7 +23,7 @@ function OptionField({ option: o, value }: { option: ToolOption; value: Options[
     const initial = String(value ?? o.defaultValue ?? "");
     return (
       <Form.Dropdown id={o.key} title={title} info={info} defaultValue={initial}>
-        {initial === "" ? <Form.Dropdown.Item value="" title="Choose..." /> : null}
+        {initial === "" ? <Form.Dropdown.Item value="" title="Choose…" /> : null}
         {o.values.map((v) => (
           <Form.Dropdown.Item
             key={v.value}
