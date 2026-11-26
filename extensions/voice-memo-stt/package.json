@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "voice-memo-stt",
+  "title": "Voice Memos Transcription",
+  "description": "Search macOS Voice Memos recordings, transcribe them with ElevenLabs Scribe through vmt, and read, copy, or open the transcripts.",
+  "icon": "icon.png",
+  "author": "matsubokkuri",
+  "categories": ["Productivity"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-recordings",
+      "title": "Search Voice Memos",
+      "description": "Browse recordings, transcribe them, and read or copy the results.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vmtPath",
+      "type": "textfield",
+      "required": false,
+      "title": "vmt Executable",
+      "description": "Path to the vmt binary. Leave empty to look in the usual Homebrew locations.",
+      "placeholder": "/opt/homebrew/bin/vmt",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "bun test",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
