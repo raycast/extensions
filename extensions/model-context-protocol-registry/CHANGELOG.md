@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MotionVideo MCP Server] - {PR_MERGE_DATE}
+
+- Add MotionVideo to the official registry: search the motionvideo.xyz catalog of AI-made motion videos, pull the original prompt behind any entry, and browse motion tools, agent skills and studios. Read-only. Hosted Streamable HTTP server at https://mcp.motionvideo.xyz/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; catalog tools need no account or API key, OAuth 2.1 sign-in adds account and Pro tools.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
