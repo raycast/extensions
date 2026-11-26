@@ -10,4 +10,4 @@
 - Copy Resume Command for this machine's Claude Code and Codex sessions, and `Search Mash <query>` from Raycast's root search.
 - List matching chats or each matching message, from every machine or this one, with the dropdown beside the search bar (or ⌘1 and ⌘2); the choice is remembered.
 - Subagent and fork chats your agents start are left out of the latest chats and of search; a preference brings their matches into search, under the task each was started for.
-- When Mash can't search, show its message with ways to fix it: try again, the troubleshooting guide, or set where Mash is.
+- When Mash can't search, show its message with ways to fix it: try again, the troubleshooting guide, or set where Mash is, by choosing the `mash` file in the extension's preferences.

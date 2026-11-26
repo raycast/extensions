@@ -83,8 +83,9 @@ The extension runs `mash list-chats --local --exclude-subagents`,
 `mash view` and, for Search Memory, `mash memory`, so it needs a Mash release
 that has them. It finds `mash` in the usual
 install locations (the install script, Homebrew, cargo-binstall, mise, or the
-Mash desktop app in `/Applications` or `~/Applications`); set **Mash
-Executable** in the Mash extension's preferences if yours is elsewhere.
+Mash desktop app in `/Applications` or `~/Applications`); choose the file
+under **Mash Executable** in the Mash extension's preferences if yours is
+elsewhere.
 
 The extension reads only. It never changes, forgets or indexes anything.
 Chat text keeps its Markdown formatting, but images are shown as links and raw

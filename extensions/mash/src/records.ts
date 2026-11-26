@@ -33,7 +33,7 @@ export interface Memory {
 }
 
 /** A quote from a chat that supports a record. */
-export interface Evidence {
+interface Evidence {
   readonly chatId: string;
   readonly messageId: string;
   readonly quote: string;
@@ -42,7 +42,7 @@ export interface Evidence {
 }
 
 /** The most records one page holds; Mash lists at most 100 at a time. */
-export const RECORD_PAGE = 100;
+const RECORD_PAGE = 100;
 
 /**
  * Where a page of records starts: an offset among this machine's records, or

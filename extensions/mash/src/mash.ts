@@ -32,7 +32,7 @@ export interface Hit {
 }
 
 /** One matching message in a chat result. */
-export interface Match {
+interface Match {
   readonly messageId: string;
   readonly passage: string;
 }
@@ -121,15 +121,20 @@ export function installLocations(home: string): string[] {
   ];
 }
 
-/** The `mash` to run: the one the reader configured, else the first installed. */
+/**
+ * The `mash` to run: the file the reader chose, else the first installed.
+ * Raycast's file picker gives a full path, or nothing when no file is chosen;
+ * a path kept from when the preference was typed may still start with `~`.
+ */
 export function findMash(
   configured: string | undefined,
   home: string,
   exists: (path: string) => boolean,
 ): string | undefined {
   const chosen = configured?.trim();
-  if (chosen) return exists(chosen) ? chosen : undefined;
-  return installLocations(home).find(exists);
+  if (!chosen) return installLocations(home).find(exists);
+  const path = chosen === "~" || chosen.startsWith("~/") ? join(home, chosen.slice(1)) : chosen;
+  return exists(path) ? path : undefined;
 }
 
 /**
@@ -400,7 +405,7 @@ export function speaker(role: string, agent: string): string {
 
 export * from "./links";
 export { literal, quoted, rendered } from "./markdown";
-export { type Activity, type ActivityGroup, byActivity, lastActive } from "./activity";
+export { byActivity, lastActive } from "./activity";
 export { type ChatPosition, chatPosition, messageCount } from "./position";
 
 /** The agents Mash reads, by the IDs Mash gives them, with the names Mash shows. */

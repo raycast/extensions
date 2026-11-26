@@ -2,7 +2,7 @@
 import type { Hit } from "./mash";
 
 /** How the list groups chats by when they were last active. */
-export type Activity = "Today" | "This week" | "Earlier";
+type Activity = "Today" | "This week" | "Earlier";
 
 /** One group of rows, in the order they were ranked; undated rows have no title. */
 export interface ActivityGroup {

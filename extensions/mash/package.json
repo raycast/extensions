@@ -60,10 +60,9 @@
     {
       "name": "mashPath",
       "title": "Mash Executable",
-      "description": "Where the mash program is. Leave empty to look in the usual install locations.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "/opt/homebrew/bin/mash"
+      "description": "Choose the mash program if it is somewhere unusual. Leave it unset to look in the usual install locations.",
+      "type": "file",
+      "required": false
     },
     {
       "name": "subagentMatches",
@@ -85,6 +84,7 @@
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "eslint": "10.14.0",
+    "knip": "6.48.0",
     "prettier": "3.9.10",
     "typescript": "5.9.3"
   },
@@ -93,7 +93,8 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "knip": "knip"
   },
   "overrides": {
     "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
