@@ -5,6 +5,7 @@ import { confirmAndCollectBox, confirmAndDeleteBox } from "./hooks/useBoxActions
 import { Box, StatsResponse, Preset, Currency } from "./types";
 import { getErrorMessage } from "./utils/error-handler";
 import { formatCurrency, formatDate, formatNumber } from "./utils/format";
+import { calculateTotalValue } from "./validation/schemas";
 import BoxDetail from "./views/BoxDetail";
 import CollectionDetail from "./views/CollectionDetail";
 import CreateBoxForm from "./views/CreateBoxForm";
@@ -91,16 +92,15 @@ export default function DashboardCommand() {
 
   async function handleAddPresetSadaqah(box: Box, preset: Preset) {
     const amount = preset.amount || 1;
-    const totalValue = preset.value * amount;
+    const totalValue = calculateTotalValue(preset.value, amount);
 
     const currency = currencies.find((c: Currency) => c.id === preset.currencyId);
     const currencyDisplay = currency ? `${currency.name} (${currency.code})` : preset.currencyId;
 
     try {
       await addSadaqahCached(box.id, {
-        value: preset.value,
+        value: totalValue,
         currencyId: preset.currencyId,
-        amount,
       });
 
       showToast({

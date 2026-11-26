@@ -42,6 +42,13 @@ const optionalPositiveIntString = z
       });
       return z.NEVER;
     }
+    if (parsed > LIMITS.SADAQAH_AMOUNT_MAX) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Amount must be ${LIMITS.SADAQAH_AMOUNT_MAX} or less`,
+      });
+      return z.NEVER;
+    }
     return parsed;
   });
 
@@ -145,6 +152,10 @@ export const presetFormSchema = z.object({
   currencyId: z.string().min(1, "Currency is required"),
   amount: optionalPositiveIntString,
 });
+
+export function calculateTotalValue(value: number, amount: number = 1): number {
+  return Number((value * amount).toPrecision(12));
+}
 
 // Type inference
 export type CreateBoxInput = z.infer<typeof createBoxSchema>;

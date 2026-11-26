@@ -104,7 +104,7 @@ export default function PresetForm({ preset, currencies, onSuccess }: PresetForm
         defaultValue={preset?.amount ? String(preset.amount) : ""}
         error={amountError}
         onChange={() => setAmountError(undefined)}
-        info="Number of sadaqahs to add when using this preset"
+        info="Multiplier count (1–1,000); values are summed into a single sadaqah when triggered"
       />
       <Form.Dropdown
         id="currencyId"

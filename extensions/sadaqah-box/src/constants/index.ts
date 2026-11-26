@@ -29,6 +29,7 @@ export const LIMITS = {
   BOX_DESCRIPTION_MAX: 500,
   PRESET_NAME_MAX: 50,
   CURRENCY_CODE_MAX: 10,
+  SADAQAH_AMOUNT_MAX: 1000,
 } as const;
 
 // Error messages (user-friendly)

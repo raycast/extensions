@@ -3,7 +3,7 @@ import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@ray
 import { addSadaqahCached } from "../api/cached";
 import { useCurrencies } from "../hooks/useCurrencies";
 import { Box } from "../types";
-import { addSadaqahSchema, validateInput } from "../validation/schemas";
+import { addSadaqahSchema, calculateTotalValue, validateInput } from "../validation/schemas";
 import { getErrorMessage } from "../utils/error-handler";
 import { SUCCESS_MESSAGES } from "../constants";
 
@@ -38,12 +38,13 @@ export default function AddSadaqahForm({ box, onAdd }: AddSadaqahProps) {
     }
 
     const { amount, value, currencyId } = validation.data;
+    const totalValue =
+      value !== undefined && amount !== undefined ? calculateTotalValue(value, amount) : (value ?? amount);
 
     try {
       setIsSubmitting(true);
       await addSadaqahCached(box.id, {
-        amount,
-        value,
+        value: totalValue,
         currencyId: currencyId || box.baseCurrencyId,
       });
 
@@ -82,7 +83,7 @@ export default function AddSadaqahForm({ box, onAdd }: AddSadaqahProps) {
         placeholder="Enter value (e.g., 10.50)"
         error={valueError}
         onChange={() => setValueError(undefined)}
-        info="The monetary value per item"
+        info="The monetary value per item (multiplied by amount and added as one entry)"
       />
       <Form.TextField
         id="amount"
@@ -90,7 +91,7 @@ export default function AddSadaqahForm({ box, onAdd }: AddSadaqahProps) {
         placeholder="Enter amount (e.g., 5)"
         error={amountError}
         onChange={() => setAmountError(undefined)}
-        info="The number of coins/items"
+        info="Multiplier count (1–1,000, summed into one entry)"
       />
       <Form.Dropdown id="currencyId" title="Currency" info="Defaults to box's base currency">
         <Form.Dropdown.Item value="" title={`Default (${defaultCurrency?.code || box.baseCurrencyId})`} />

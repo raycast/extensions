@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   addSadaqahSchema,
+  calculateTotalValue,
   createBoxSchema,
   presetFormSchema,
   updateBoxSchema,
@@ -74,5 +75,31 @@ describe("validation schemas", () => {
       success: true,
       data: { name: "Daily", value: 5.5, amount: 2, currencyId: "cur_usd" },
     });
+  });
+
+  test("rejects amounts above 1000 in sadaqah and preset schemas and sums cleanly", () => {
+    const tooHighAdd = validateInput(addSadaqahSchema, {
+      value: "0.007",
+      amount: "10000",
+      currencyId: "",
+    });
+    expect(tooHighAdd.success).toBe(false);
+    if (!tooHighAdd.success) {
+      expect(tooHighAdd.fieldErrors.amount).toBe("Amount must be 1000 or less");
+    }
+
+    const tooHighPreset = validateInput(presetFormSchema, {
+      name: "Spam",
+      value: "0.007",
+      amount: "10000",
+      currencyId: "cur_try",
+    });
+    expect(tooHighPreset.success).toBe(false);
+    if (!tooHighPreset.success) {
+      expect(tooHighPreset.fieldErrors.amount).toBe("Amount must be 1000 or less");
+    }
+
+    expect(calculateTotalValue(0.07, 360)).toBe(25.2);
+    expect(calculateTotalValue(0.007, 360)).toBe(2.52);
   });
 });

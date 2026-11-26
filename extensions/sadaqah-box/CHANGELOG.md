@@ -4,6 +4,14 @@ All notable changes to the Sadaqah Box Raycast Extension will be documented in t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.3] - 2026-11-26
+
+### Changed
+- **Sum Multipliers Client-Side** – Preset quick-add and `AddSadaqahForm` now multiply `value * amount` cleanly into a single summed sadaqah entry instead of creating up to hundreds of individual rows per click
+
+### Fixed
+- **Amount Input Limit** – Added `LIMITS.SADAQAH_AMOUNT_MAX` (`1000`) validation to `addSadaqahSchema` and `presetFormSchema` so excessive multipliers (such as `10000`) are rejected in the form
+
 ## [1.1.2] - 2026-11-26
 
 ### Fixed
