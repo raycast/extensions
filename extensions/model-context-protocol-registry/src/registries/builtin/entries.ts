@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "roceebo",
+    title: "Roceebo",
+    description:
+      "Roceebo receipts and expenses: read your expenses and missing receipts, plus edits, receipts and budgets you approve in Roceebo. Hosted Streamable HTTP server at https://roceebo.com/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients; OAuth 2.1 sign-in with dynamic client registration, PKCE, and Client ID Metadata Documents. A Roceebo account is required.",
+    icon: "https://roceebo.com/icons/roceebo-512.png",
+    homepage: "https://roceebo.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://roceebo.com/mcp"],
+    },
+    remoteUrl: "https://roceebo.com/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
