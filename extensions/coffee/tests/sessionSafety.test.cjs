@@ -85,6 +85,17 @@ test("schedule expiry stops its session without saving over an edit made meanwhi
   assert.equal(h.storage.get(reason.day), edited);
 });
 
+test("schedule expiry stops a session with other times if the schedule is unchanged", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  const reason = expiredSchedule(h);
+  await utils.startCaffeinate(quiet, undefined, "-t 300", { ...reason, to: "23:59" });
+  await h.load("status.ts").checkSchedule();
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 1);
+  assert.equal(h.storage.has(sessionKey), false);
+  assert.equal(JSON.parse(h.storage.get(reason.day)).IsRunning, false);
+});
+
 test("conditional stop matches a scheduled identity and remains a no-op after it ends", async () => {
   const h = createHarness();
   const utils = h.load("utils.ts");
