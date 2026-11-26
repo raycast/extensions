@@ -23,7 +23,7 @@ function isExecutable(path: string): boolean {
 }
 
 export function resolveVmt(): string {
-  const { vmtPath } = getPreferenceValues<{ vmtPath?: string }>();
+  const { vmtPath } = getPreferenceValues<Preferences>();
   const configured = vmtPath?.trim();
   if (configured) {
     if (!isExecutable(configured)) {

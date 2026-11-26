@@ -19,12 +19,10 @@
   "preferences": [
     {
       "name": "vmtPath",
-      "type": "textfield",
+      "type": "file",
       "required": false,
       "title": "vmt Executable",
-      "description": "Path to the vmt binary. Leave empty to look in the usual Homebrew locations.",
-      "placeholder": "/opt/homebrew/bin/vmt",
-      "default": ""
+      "description": "The vmt binary. Leave empty to look in the usual Homebrew locations."
     }
   ],
   "dependencies": {
@@ -44,7 +42,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "bun test",
     "publish": "npx @raycast/api@latest publish"
   }
 }

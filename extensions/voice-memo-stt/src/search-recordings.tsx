@@ -2,16 +2,19 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Clipboard,
   Color,
   confirmAlert,
   Icon,
   List,
+  showHUD,
   showToast,
   Toast,
   openExtensionPreferences,
   Keyboard,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { readFile } from "node:fs/promises";
 import { useState } from "react";
 import { listRecordings, transcribe } from "./vmt";
 import { VmtError } from "./errors";
@@ -122,6 +125,17 @@ function RecordingItem({ recording, onChanged }: { recording: Recording; onChang
     }
   }
 
+  // Copy the transcript's text, not the file: pasting a file reference into an
+  // editor or chat does not paste the transcript.
+  async function copyTranscript(path: string) {
+    try {
+      await Clipboard.copy(await readFile(path, "utf8"));
+      await showHUD("Copied to Clipboard");
+    } catch (error) {
+      await showFailureToast(error, { title: "Cannot copy transcript" });
+    }
+  }
+
   return (
     <List.Item
       icon={statusIcon(recording)}
@@ -142,10 +156,11 @@ function RecordingItem({ recording, onChanged }: { recording: Recording; onChang
               <Action title="Transcribe" icon={Icon.Microphone} onAction={() => runTranscription()} />
             )}
             {output ? (
-              <Action.CopyToClipboard
+              <Action
                 title="Copy Transcript"
-                content={{ file: output.path }}
+                icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
+                onAction={() => copyTranscript(output.path)}
               />
             ) : null}
           </ActionPanel.Section>
@@ -171,7 +186,14 @@ function RecordingItem({ recording, onChanged }: { recording: Recording; onChang
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {output ? <Action title="Transcribe Again" icon={Icon.ArrowClockwise} onAction={transcribeAgain} /> : null}
+            {output ? (
+              <Action
+                title="Transcribe Again"
+                icon={Icon.ArrowClockwise}
+                style={Action.Style.Destructive}
+                onAction={transcribeAgain}
+              />
+            ) : null}
             <Action.CopyToClipboard
               title="Copy Recording Name"
               content={recording.path}

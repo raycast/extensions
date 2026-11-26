@@ -59,31 +59,3 @@ login shell, so `PATH` is not inherited.
 Install **Voice Memos Transcription** from the
 [Raycast Store](https://www.raycast.com/matsubokkuri/voice-memo-stt). Store
 updates arrive automatically; keep `vmt` current with `brew upgrade vmt`.
-
-To run a local checkout instead:
-
-```bash
-cd raycast-extension
-npm install
-npm run dev        # imports into Raycast and watches for changes
-```
-
-The extension stays in Raycast after you stop `npm run dev`. Run it again to
-pick up code changes.
-
-## Development
-
-```bash
-npm run test       # bun test — pure logic (output selection, error mapping)
-npm run build      # ray build — type-checks and bundles
-npm run lint       # ray lint
-npm run publish    # submit to the Raycast Store (opens a PR on raycast/extensions)
-```
-
-## How it talks to vmt
-
-The extension shells out and parses `vmt list --json`, whose shape is a contract
-declared in [`internal/listing`](https://github.com/matsubo/voice-memo-stt/blob/main/internal/listing/listing.go). Each item
-carries the transcription state and absolute paths to every written format, so
-the extension never rebuilds vmt's output-path rule itself. `src/types.ts`
-mirrors that document.
