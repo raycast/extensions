@@ -3,7 +3,7 @@ import { environment } from "@raycast/api";
 import fs from "node:fs";
 import path from "node:path";
 import { LOG_PREFIX } from "@/core/log";
-import { missingProcessOutcome, pollIntervalMs } from "./player-poll";
+import { missingProcessOutcome, pollIntervalMs, staleStatusFiles } from "./player-poll";
 
 // 跨进程共享的后台播放器 PID 文件：命令进程被回收后，
 // 其他进程(重开命令 / 菜单栏)仍能据此找到并停止后台播放。
@@ -15,7 +15,9 @@ const CMD_FILE = path.join(environment.supportPath, "audio-player.cmd");
 
 // 跨进程状态通道：后台播放进程每 0.5s 写入 "<当前秒> <总秒> <PLAYING|PAUSED>"，
 // 失败时写入 "FAILED <错误信息>"。worker 的 stdout 已接空，进度和失败原因都只走这个文件。
-const STATUS_FILE = path.join(environment.supportPath, "audio-player.status");
+// 每次播放各用一个文件：换曲时旧 worker 淡出期间可能写下 FAILED，共用一份会被新播放读到。
+const STATUS_FILE_PREFIX = "audio-player-";
+const STATUS_FILE_SUFFIX = ".status";
 
 // 轮询状态文件的间隔：worker 每 0.5s 写一次，这里比它密一些，好尽快拿到第一行状态。
 const STATUS_POLL_INTERVAL_MS = 200;
@@ -28,18 +30,21 @@ const STARTUP_POLL_INTERVAL_MS = 40;
 // 让 worker 退出前写下的 FAILED 行有机会被读到。
 const START_GRACE_MS = 5000;
 
-function readPidFile(): { pid: number; id: string; startedAt: number } | null {
+function readPidFile(): { pid: number; id: string; statusPath?: string } | null {
   try {
     const parsed = JSON.parse(fs.readFileSync(PID_FILE, "utf8"));
-    return typeof parsed?.pid === "number" && typeof parsed?.id === "string" ? parsed : null;
+    if (typeof parsed?.pid !== "number" || typeof parsed?.id !== "string") return null;
+    // 旧版 PID 文件没有 statusPath：缺了不算无效，只是读不到进度。
+    if (parsed.statusPath !== undefined && typeof parsed.statusPath !== "string") return null;
+    return parsed;
   } catch {
     return null;
   }
 }
 
-function writePidFile(pid: number, id: string): void {
+function writePidFile(pid: number, id: string, statusPath: string): void {
   try {
-    fs.writeFileSync(PID_FILE, JSON.stringify({ pid, id, startedAt: Date.now() }));
+    fs.writeFileSync(PID_FILE, JSON.stringify({ pid, id, startedAt: Date.now(), statusPath }));
   } catch {
     // 忽略写入失败
   }
@@ -192,10 +197,16 @@ export function commandRestart(): void {
   appendCommand(PLAYER_PROTOCOL.restart);
 }
 
-// 开新播放前清空状态文件，避免切回来时读到上一轮的残留进度。
-function resetStatusFile(): void {
+// 开新播放前删掉其余的状态文件：旧 worker 淡出时可能再写出一个，下一次播放时会被删掉。
+function removeStaleStatusFiles(keep: string): void {
   try {
-    fs.writeFileSync(STATUS_FILE, "");
+    for (const name of staleStatusFiles(fs.readdirSync(environment.supportPath), keep)) {
+      try {
+        fs.rmSync(path.join(environment.supportPath, name), { force: true });
+      } catch {
+        // 忽略
+      }
+    }
   } catch {
     // 忽略
   }
@@ -206,9 +217,9 @@ type StatusLine =
   | { kind: "failed"; message: string };
 
 // 读后台播放进程写入的状态文件；文件缺失 / 格式不符时返回 null。
-function readStatusLine(): StatusLine | null {
+function readStatusLine(statusPath: string): StatusLine | null {
   try {
-    const raw = fs.readFileSync(STATUS_FILE, "utf8").trim();
+    const raw = fs.readFileSync(statusPath, "utf8").trim();
     if (!raw) {
       return null;
     }
@@ -227,13 +238,17 @@ function readStatusLine(): StatusLine | null {
   }
 }
 
-// 读后台播放进程写入的实时状态；文件缺失 / 格式不符 / 写的是失败信息时返回 null。
+// 读后台播放进程写入的实时状态；PID 文件里没有 statusPath（旧版）、文件缺失 / 格式不符 / 写的是失败信息时返回 null。
 export function readPlayerStatus(): {
   positionSeconds: number;
   durationSeconds: number;
   paused: boolean;
 } | null {
-  const line = readStatusLine();
+  const statusPath = readPidFile()?.statusPath;
+  if (!statusPath) {
+    return null;
+  }
+  const line = readStatusLine(statusPath);
   if (!line || line.kind !== "status") {
     return null;
   }
@@ -268,6 +283,8 @@ export function startAudioPlayer(options: AudioPlayerOptions): AudioPlayerContro
   let pollTimer: ReturnType<typeof setInterval> | null = null;
   let startTimer: ReturnType<typeof setTimeout> | null = null;
   let startedAt = 0;
+  // 这次播放自己的状态文件：换曲时旧 worker 淡出期间写下的 FAILED 不会落到新播放上。
+  let statusPath: string | null = null;
   // 是否读到过第一行有效状态：读到过就说明播放真的开始了，之后进程消失是正常播完。
   let sawStatus = false;
   // 用户是否按过停止：按过之后进程消失是正常停止，不是启动失败。
@@ -329,7 +346,7 @@ export function startAudioPlayer(options: AudioPlayerOptions): AudioPlayerContro
       return;
     }
 
-    const line = readStatusLine();
+    const line = statusPath === null ? null : readStatusLine(statusPath);
 
     if (line?.kind === "failed") {
       stopPolling();
@@ -380,11 +397,15 @@ export function startAudioPlayer(options: AudioPlayerOptions): AudioPlayerContro
     }
 
     resetCommandFile();
-    resetStatusFile();
+    statusPath = path.join(
+      environment.supportPath,
+      `${STATUS_FILE_PREFIX}${process.pid}-${Date.now()}-${instanceId}${STATUS_FILE_SUFFIX}`,
+    );
+    removeStaleStatusFiles(statusPath);
 
     try {
       const { startPlayer } = await import("swift:../../../swift/audio-player");
-      const workerPid = await startPlayer(audioPath, CMD_FILE, STATUS_FILE);
+      const workerPid = await startPlayer(audioPath, CMD_FILE, statusPath);
 
       if (!active) {
         // 页面在启动过程中退出：把刚起来的 worker 停掉。
@@ -394,7 +415,7 @@ export function startAudioPlayer(options: AudioPlayerOptions): AudioPlayerContro
 
       pid = workerPid;
       startedAt = Date.now();
-      writePidFile(workerPid, id);
+      writePidFile(workerPid, id, statusPath);
 
       console.log(
         `${logPrefix} SPAWN`,

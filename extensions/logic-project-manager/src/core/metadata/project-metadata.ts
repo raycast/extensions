@@ -81,11 +81,44 @@ export async function getAllProjectMetadata(): Promise<ProjectMetadataStore> {
   return readStore();
 }
 
-// 只在该项目还没有元数据时写入（从废纸篓放回时还原用：期间若已有新数据，以现状为准）。
+// 并集：当前的排在前面，去掉重复。
+const unionValues = (current: string[], archived: string[]) => Array.from(new Set([...current, ...archived]));
+
+/** 恢复旧设置时按字段合并：只往空位里写，不覆盖新项目已有的选择。
+ *  pinned / pinOrder 保留当前的：pinOrder 是所有项目共用的一套顺序，写回旧值会和别的项目撞号。 */
+export function mergeProjectMetadata(current: ProjectMetadata, archived: ProjectMetadata): ProjectMetadata {
+  const base = withDefaults(current);
+  const old = withDefaults(archived);
+  const seenNames = new Set<string>();
+  const previousBounceNames: { name: string; before: number }[] = [];
+  for (const entry of [...base.previousBounceNames, ...old.previousBounceNames]) {
+    const key = entry.name.toLowerCase();
+    if (seenNames.has(key)) continue;
+    seenNames.add(key);
+    previousBounceNames.push(entry);
+  }
+  return {
+    stageId: base.stageId ?? old.stageId,
+    genreIds: unionValues(base.genreIds, old.genreIds),
+    collectionIds: unionValues(base.collectionIds, old.collectionIds),
+    pinned: base.pinned,
+    pinOrder: base.pinOrder,
+    notes: base.notes !== "" ? base.notes : old.notes,
+    externalBounceFolders: unionValues(base.externalBounceFolders, old.externalBounceFolders),
+    externalBounceFiles: unionValues(base.externalBounceFiles, old.externalBounceFiles),
+    bounceAliases: unionValues(base.bounceAliases, old.bounceAliases),
+    previousBounceNames,
+    excludedSharedBounces: unionValues(base.excludedSharedBounces, old.excludedSharedBounces),
+    externalBounceFingerprints: { ...old.externalBounceFingerprints, ...base.externalBounceFingerprints },
+  };
+}
+
+// 恢复旧设置（从废纸篓放回、Restore Previous Settings 都用）：当前没有元数据时整份写入，
+// 已有元数据时按字段合并，只往空位里写，不覆盖新项目已有的选择。
 export async function restoreProjectMetadata(projectId: string, metadata: ProjectMetadata): Promise<void> {
   await updateStore((store) => {
-    if (projectId in store) return null;
-    store[projectId] = metadata;
+    const current = store[projectId];
+    store[projectId] = current ? mergeProjectMetadata(current, metadata) : metadata;
     return store;
   });
 }

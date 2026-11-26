@@ -5,6 +5,16 @@ export function pollIntervalMs(sawStatus: boolean, startupMs: number, steadyMs: 
   return sawStatus ? steadyMs : startupMs;
 }
 
+/** 开新播放前要删掉的状态文件：只删本模块写过的 audio-player-*.status 和旧版的 audio-player.status，
+ *  保留这次要用的那个，别的文件（PID、命令文件）不动。 */
+export function staleStatusFiles(fileNames: string[], keep: string): string[] {
+  return fileNames.filter(
+    (name) =>
+      name !== keep &&
+      (name === "audio-player.status" || (name.startsWith("audio-player-") && name.endsWith(".status"))),
+  );
+}
+
 export type MissingProcessOutcome = "stopped" | "failed" | "wait";
 
 /**
