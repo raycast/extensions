@@ -1,6 +1,6 @@
 # PR Canary Changelog
 
-## [Canary in PR Description] - {PR_MERGE_DATE}
+## [Canary in PR Description] - 2026-11-26
 
 - Read the canary URL from the PR description, where CI may now post it, before falling back to PR comments
 - Recognize markdown links labelled Canary, e.g. `[SaaS Canary](…)`
