@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Roceebo MCP Server] - 2026-11-25
+
+- Add Roceebo to the official registry: receipts and expenses, with read access plus edits, receipts and budgets you approve in Roceebo. Hosted Streamable HTTP server at https://roceebo.com/mcp with OAuth 2.1 sign-in (dynamic client registration, PKCE, and Client ID Metadata Documents), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Roceebo account is required.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
