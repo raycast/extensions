@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { createBoxCached } from "../api/cached";
 import { useCurrencies } from "../hooks/useCurrencies";
-import { createBoxSchema, validateInput } from "../validation/schemas";
+import { createBoxSchema, validateField, validateInput } from "../validation/schemas";
 import { getErrorMessage } from "../utils/error-handler";
 import { SUCCESS_MESSAGES } from "../constants";
 
@@ -10,51 +11,52 @@ interface CreateBoxProps {
   onCreate?: () => void;
 }
 
+interface CreateBoxFormValues {
+  name: string;
+  description: string;
+  baseCurrencyId: string;
+}
+
 export default function CreateBoxForm({ onCreate }: CreateBoxProps) {
   const { pop } = useNavigation();
   const { data: currencies, isLoading: isLoadingCurrencies } = useCurrencies();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [nameError, setNameError] = useState<string | undefined>();
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
 
-  async function handleSubmit(values: { name: string; description: string; baseCurrencyId: string }) {
-    setNameError(undefined);
-    setDescriptionError(undefined);
+  const { handleSubmit, itemProps } = useForm<CreateBoxFormValues>({
+    initialValues: {
+      name: "",
+      description: "",
+      baseCurrencyId: "",
+    },
+    validation: {
+      name: (val) => validateField(createBoxSchema, "name", val ?? ""),
+      description: (val) => validateField(createBoxSchema, "description", val),
+    },
+    async onSubmit(values) {
+      const validation = validateInput(createBoxSchema, values);
+      if (!validation.success) {
+        return;
+      }
 
-    const validation = validateInput(createBoxSchema, values);
+      try {
+        setIsSubmitting(true);
+        await createBoxCached(validation.data);
 
-    if (!validation.success) {
-      setNameError(validation.fieldErrors.name);
-      setDescriptionError(validation.fieldErrors.description);
+        await showToast({
+          style: Toast.Style.Success,
+          title: SUCCESS_MESSAGES.BOX_CREATED,
+        });
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: validation.errors.join(", "),
-      });
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      await createBoxCached(validation.data);
-
-      showToast({
-        style: Toast.Style.Success,
-        title: SUCCESS_MESSAGES.BOX_CREATED,
-      });
-
-      onCreate?.();
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create box",
-        message: getErrorMessage(error),
-      });
-      setIsSubmitting(false);
-    }
-  }
+        onCreate?.();
+        pop();
+      } catch (error) {
+        await showFailureToast(new Error(getErrorMessage(error)), {
+          title: "Failed to create box",
+        });
+        setIsSubmitting(false);
+      }
+    },
+  });
 
   return (
     <Form
@@ -65,24 +67,12 @@ export default function CreateBoxForm({ onCreate }: CreateBoxProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Enter box name (e.g., Ramadan Charity)"
-        error={nameError}
-        onChange={() => setNameError(undefined)}
-      />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional description"
-        error={descriptionError}
-        onChange={() => setDescriptionError(undefined)}
-      />
+      <Form.TextField title="Name" placeholder="Enter box name (e.g., Ramadan Charity)" {...itemProps.name} />
+      <Form.TextArea title="Description" placeholder="Optional description" {...itemProps.description} />
       <Form.Dropdown
-        id="baseCurrencyId"
         title="Base Currency"
         info="Defaults to Gold (XAU) if not selected. Cannot be changed after sadaqahs are added."
+        {...itemProps.baseCurrencyId}
       >
         <Form.Dropdown.Item value="" title="Default (XAU)" />
         {currencies.map((currency) => (

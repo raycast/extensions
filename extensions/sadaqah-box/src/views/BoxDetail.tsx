@@ -12,6 +12,7 @@ import {
   Color,
   Keyboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getBoxCached, listSadaqahsCached, deleteSadaqahCached, listCollectionsCached } from "../api/cached";
 import { confirmAndCollectBox, confirmAndDeleteBox } from "../hooks/useBoxActions";
 import { getErrorMessage } from "../utils/error-handler";
@@ -65,10 +66,8 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
     } catch (error) {
       const message = getErrorMessage(error);
       setLoadError(message);
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(message), {
         title: "Failed to load box details",
-        message,
       });
     } finally {
       setIsLoading(false);
@@ -131,10 +130,8 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
         onSadaqahDeleted?.();
         await fetchBoxData();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(new Error(getErrorMessage(error)), {
           title: "Failed to delete sadaqah",
-          message: getErrorMessage(error),
         });
       }
     }

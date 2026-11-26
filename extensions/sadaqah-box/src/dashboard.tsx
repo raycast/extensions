@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { List, ActionPanel, Action, showToast, Toast, useNavigation, Icon, Color, Image, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { listBoxesCached, getStatsCached, addSadaqahCached, listCurrenciesCached } from "./api/cached";
 import { confirmAndCollectBox, confirmAndDeleteBox } from "./hooks/useBoxActions";
 import { Box, StatsResponse, Preset, Currency } from "./types";
@@ -59,10 +60,8 @@ export default function DashboardCommand() {
         }
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(getErrorMessage(error)), {
         title: "Failed to load data",
-        message: getErrorMessage(error),
       });
     } finally {
       setIsLoading(false);
@@ -111,10 +110,8 @@ export default function DashboardCommand() {
 
       await fetchData(true);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(getErrorMessage(error)), {
         title: "Failed to add sadaqah",
-        message: getErrorMessage(error),
       });
     }
   }

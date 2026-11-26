@@ -1,14 +1,12 @@
 /**
  * Caching utilities using Raycast Cache API
- * Provides TTL-based and host-scoped caching for API responses
+ * Provides TTL-based caching with a persisted key index so prefix invalidation works across command runs
  */
 
 import { Cache } from "@raycast/api";
 
 const cache = new Cache();
-
-// Track keys seen in this process so prefix invalidation can clear parameterized entries
-const trackedKeys = new Set<string>();
+const KEY_INDEX = "__cache_keys__";
 
 export const CACHE_TTL = {
   BOXES: 5 * 60 * 1000, // 5 minutes
@@ -23,6 +21,25 @@ interface CacheEntry<T> {
   data: T;
   timestamp: number;
   ttl: number;
+}
+
+function readKeyIndex(): Set<string> {
+  try {
+    const raw = cache.get(KEY_INDEX);
+    if (!raw) return new Set();
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? new Set(parsed.filter((k): k is string => typeof k === "string")) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function writeKeyIndex(keys: Set<string>): void {
+  if (keys.size === 0) {
+    cache.remove(KEY_INDEX);
+  } else {
+    cache.set(KEY_INDEX, JSON.stringify(Array.from(keys)));
+  }
 }
 
 /**
@@ -42,22 +59,19 @@ export function getCachedData<T>(key: CacheKey): T | null {
 
     const entry: CacheEntry<T> = JSON.parse(cached);
     if (Date.now() - entry.timestamp > entry.ttl) {
-      cache.remove(key);
-      trackedKeys.delete(key);
+      removeCachedData(key);
       return null;
     }
 
-    trackedKeys.add(key);
     return entry.data;
   } catch {
-    cache.remove(key);
-    trackedKeys.delete(key);
+    removeCachedData(key);
     return null;
   }
 }
 
 /**
- * Set cached data with TTL
+ * Set cached data with TTL and persist key in the index
  */
 export function setCachedData<T>(key: CacheKey, data: T, ttlMs: number = CACHE_TTL.DEFAULT): void {
   const entry: CacheEntry<T> = {
@@ -65,27 +79,43 @@ export function setCachedData<T>(key: CacheKey, data: T, ttlMs: number = CACHE_T
     timestamp: Date.now(),
     ttl: ttlMs,
   };
-  trackedKeys.add(key);
   cache.set(key, JSON.stringify(entry));
+
+  const keys = readKeyIndex();
+  if (!keys.has(key)) {
+    keys.add(key);
+    writeKeyIndex(keys);
+  }
 }
 
 /**
  * Remove cached data for a single key
  */
 export function removeCachedData(key: CacheKey): void {
-  trackedKeys.delete(key);
   cache.remove(key);
+  const keys = readKeyIndex();
+  if (keys.delete(key)) {
+    writeKeyIndex(keys);
+  }
 }
 
 /**
- * Remove all cached entries matching a prefix
+ * Remove all cached entries matching a prefix across command invocations
  */
 export function invalidateByPrefix(prefix: string): void {
-  for (const key of Array.from(trackedKeys)) {
+  const keys = readKeyIndex();
+  let changed = false;
+
+  for (const key of Array.from(keys)) {
     if (key.startsWith(prefix)) {
-      trackedKeys.delete(key);
       cache.remove(key);
+      keys.delete(key);
+      changed = true;
     }
+  }
+
+  if (changed) {
+    writeKeyIndex(keys);
   }
 }
 
@@ -93,7 +123,6 @@ export function invalidateByPrefix(prefix: string): void {
  * Clear all cached data
  */
 export function clearCache(): void {
-  trackedKeys.clear();
   cache.clear();
 }
 

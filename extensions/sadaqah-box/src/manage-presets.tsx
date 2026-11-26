@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import {
   List,
   ActionPanel,
@@ -12,6 +12,7 @@ import {
   Alert,
   Keyboard,
 } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import {
   getPresets,
   deletePreset,
@@ -32,34 +33,21 @@ interface ManagePresetsProps {
 
 export default function ManagePresetsCommand({ onPresetsChanged }: ManagePresetsProps) {
   const { push } = useNavigation();
-  const [presets, setPresets] = useState<Preset[]>([]);
-  const [isLoadingPresets, setIsLoadingPresets] = useState(true);
+  const {
+    data: presets = [],
+    isLoading: isLoadingPresets,
+    revalidate: revalidatePresets,
+  } = usePromise(getPresets, [], {
+    failureToastOptions: {
+      title: "Failed to load presets",
+    },
+  });
   const { data: currencies, isLoading: isLoadingCurrencies } = useCurrencies();
 
-  const fetchPresets = useCallback(async () => {
-    try {
-      setIsLoadingPresets(true);
-      const loadedPresets = await getPresets();
-      setPresets(loadedPresets);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load presets",
-        message: getErrorMessage(error),
-      });
-    } finally {
-      setIsLoadingPresets(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchPresets();
-  }, [fetchPresets]);
-
   const refreshAll = useCallback(async () => {
-    await fetchPresets();
+    await revalidatePresets();
     onPresetsChanged?.();
-  }, [fetchPresets, onPresetsChanged]);
+  }, [revalidatePresets, onPresetsChanged]);
 
   async function handleDeletePreset(preset: Preset) {
     const confirmed = await confirmAlert({
@@ -74,16 +62,14 @@ export default function ManagePresetsCommand({ onPresetsChanged }: ManagePresets
     if (confirmed) {
       try {
         await deletePreset(preset.id);
-        showToast({
+        await showToast({
           style: Toast.Style.Success,
           title: SUCCESS_MESSAGES.PRESET_DELETED,
         });
         await refreshAll();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(new Error(getErrorMessage(error)), {
           title: "Failed to delete preset",
-          message: getErrorMessage(error),
         });
       }
     }
@@ -97,16 +83,14 @@ export default function ManagePresetsCommand({ onPresetsChanged }: ManagePresets
   async function handleSetDefaultPreset(preset: Preset) {
     try {
       await setDefaultPreset(preset.id);
-      showToast({
+      await showToast({
         style: Toast.Style.Success,
         title: `"${preset.name}" set as default`,
       });
       await refreshAll();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(getErrorMessage(error)), {
         title: "Failed to set default preset",
-        message: getErrorMessage(error),
       });
     }
   }
@@ -114,16 +98,14 @@ export default function ManagePresetsCommand({ onPresetsChanged }: ManagePresets
   async function handleUnsetDefaultPreset() {
     try {
       await unsetDefaultPreset();
-      showToast({
+      await showToast({
         style: Toast.Style.Success,
         title: "Default preset removed",
       });
       await refreshAll();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(getErrorMessage(error)), {
         title: "Failed to unset default preset",
-        message: getErrorMessage(error),
       });
     }
   }
@@ -135,10 +117,8 @@ export default function ManagePresetsCommand({ onPresetsChanged }: ManagePresets
         await refreshAll();
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(getErrorMessage(error)), {
         title: "Failed to move preset",
-        message: getErrorMessage(error),
       });
     }
   }

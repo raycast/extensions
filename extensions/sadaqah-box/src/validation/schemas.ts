@@ -189,3 +189,19 @@ export function validateInput<T>(schema: z.ZodType<T>, data: unknown): Validatio
 
   return { success: false, errors, fieldErrors };
 }
+
+/**
+ * Validate a single field from a Zod object schema (for @raycast/utils useForm)
+ */
+export function validateField<T extends Record<string, z.ZodType>>(
+  schema: z.ZodObject<T>,
+  field: keyof T & string,
+  value: unknown,
+): string | undefined {
+  const fieldSchema = schema.shape[field];
+  if (!fieldSchema) {
+    return undefined;
+  }
+  const result = fieldSchema.safeParse(value);
+  return result.success ? undefined : result.error.issues[0]?.message;
+}

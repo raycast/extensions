@@ -4,37 +4,20 @@ All notable changes to the Sadaqah Box Raycast Extension will be documented in t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.1.3] - 2026-11-26
+## [Updates & Improvements] - {PR_MERGE_DATE}
 
 ### Changed
-- **Sum Multipliers Client-Side** – Preset quick-add and `AddSadaqahForm` now multiply `value * amount` cleanly into a single summed sadaqah entry instead of creating up to hundreds of individual rows per click
+- **Default API Host Updated** – Changed the default `API Host` preference from `https://sadaqahbox.apps.erklab.com` to `https://live.sadaqahbox.apps.erklab.com`. Existing users who relied on the previous default and have not customized their host should verify or update **API Host** in Extension Preferences if needed.
+- **Default Base Currency** – Updated the default box currency option in Create Box from `USD` to `Gold (XAU)` to match the SadaqahBox API.
+- **Preset Reordering Shortcuts** – Updated preset reordering shortcuts in **Manage Presets** to `⌘⌥↑` / `⌘⌥↓` on macOS (`Ctrl+Alt+↑` / `Ctrl+Alt+↓` on Windows), matching Raycast's standard move shortcuts.
 
 ### Fixed
-- **Amount Input Limit** – Added `LIMITS.SADAQAH_AMOUNT_MAX` (`1000`) validation to `addSadaqahSchema` and `presetFormSchema` so excessive multipliers (such as `10000`) are rejected in the form
-
-## [1.1.2] - 2026-11-26
-
-### Fixed
-- **Preset & Add Sadaqah Value Multiplication** – Removed client-side `value * amount` pre-multiplication in preset quick-add and `AddSadaqahForm` so unit `value` and `amount` map accurately to the updated API contract
-- **Stats, Pagination & Default Currency Alignment** – Aligned `StatsResponse` with `{ stats }` (`convertedTotal` / normalized `totalValue`), read top-level `total` on sadaqah and collection lists, and updated the default base currency label to `Gold (XAU)`
-
-## [1.1.0] - 2026-11-26
-
-### Fixed
-- **Sadaqah Amount Multiplication** – Fixed `AddSadaqahForm` to multiply `value * amount` when both are provided, matching the backend API contract
-- **HTTP Error Categorization** – Fixed `handleError` so `401`/`403`/`404`/`422`/`5xx` HTTP responses are properly categorized instead of falling back to generic unknown errors
-- **Description Clearing** – Fixed `EditBoxForm` and `updateBoxSchema` so clearing an existing box description properly updates it on the server
-- **Form Validation** – Separated `value` and `amount` field errors, enforced strict positive number parsing, and added inline `amount` errors on preset forms
-- **Cache Key Scoping & Invalidation** – Scoped API cache keys by `apiHost` and query parameters, and added prefix invalidation on mutations
-- **Safe Retries** – Restricted automatic retries to idempotent `GET` requests
-- **Preset Reordering & Recovery** – Normalized missing `order` fields before reordering and validated stored presets on load
-- **Box Detail Error Handling** – Added an error view with retry action when loading box details fails, and fixed stale box state after collection
-- **Platform Shortcuts** – Added cross-platform macOS/Windows shortcuts and Raycast common shortcuts
-
-### Changed
-- Reorganized internal views (`src/views/`), shared hooks (`src/hooks/`), and local storage (`src/storage/`)
-- Standardized package management on Bun and updated dependencies
-- Updated README header and erklab sponsorship branding
+- **Sadaqah Multiplier & Limits** – Quick-add presets and **Add Sadaqah** now multiply unit `value * amount` into a single summed sadaqah entry and cap the multiplier `amount` at `1,000`.
+- **Dashboard Totals & Pagination** – Aligned dashboard statistics with the `{ stats }` response (`convertedTotal` / normalized `totalValue`) and read top-level `total` counts on sadaqah and collection lists.
+- **Clearing Box Descriptions** – Fixed **Edit Box** so clearing an existing description removes it on the server.
+- **Error Reporting & Retries** – Fixed HTTP error categorization (`401`/`403`/`404`/`422`/`5xx`), restricted automatic retries to read requests, and added a **Retry** action when loading currencies or box details fails.
+- **Host-Scoped Caching** – Isolated cached boxes, stats, and currencies per `API Host` and persisted cache key tracking so updates from one command clear stale balances in other views.
+- **Preset Ordering & Validation** – Fixed preset reordering when older presets lack an `order` field, added field-level validation for `amount`, and ensured invalid stored presets are safely ignored.
 
 ## [Initial Version] - 2026-03-12
 

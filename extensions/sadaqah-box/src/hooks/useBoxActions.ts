@@ -1,4 +1,5 @@
 import { confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { deleteBoxCached, emptyBoxCached } from "../api/cached";
 import { getErrorMessage } from "../utils/error-handler";
 import { formatCurrency } from "../utils/format";
@@ -42,10 +43,8 @@ export async function confirmAndDeleteBox(
     await callbacks.onDeleted?.();
     return true;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error(getErrorMessage(error)), {
       title: "Failed to delete box",
-      message: getErrorMessage(error),
     });
     callbacks.onError?.();
     return false;
@@ -92,10 +91,8 @@ export async function confirmAndCollectBox(
     await callbacks.onCollected?.(response);
     return true;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error(getErrorMessage(error)), {
       title: "Failed to collect box",
-      message: getErrorMessage(error),
     });
     callbacks.onError?.();
     return false;

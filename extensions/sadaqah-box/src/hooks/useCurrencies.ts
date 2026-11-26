@@ -1,27 +1,26 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { showToast, Toast } from "@raycast/api";
 import { listCurrenciesCached } from "../api/cached";
-import { getErrorMessage } from "../utils/error-handler";
 import type { Currency } from "../types";
 
 /**
- * Shared hook to load and cache available currencies with toast error reporting
+ * Shared hook to load and cache available currencies scoped per API host
  */
 export function useCurrencies() {
+  const { apiHost } = getPreferenceValues<{ apiHost?: string }>();
+  const hostScope = apiHost?.trim() || "";
+
   return useCachedPromise(
-    async (): Promise<Currency[]> => {
+    async (host: string): Promise<Currency[]> => {
+      void host;
       const response = await listCurrenciesCached();
       return response.currencies;
     },
-    [],
+    [hostScope],
     {
       initialData: [] as Currency[],
-      onError(error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load currencies",
-          message: getErrorMessage(error),
-        });
+      failureToastOptions: {
+        title: "Failed to load currencies",
       },
     },
   );
