@@ -2,7 +2,7 @@
 
 ## [Keep preventing disk sleep in sessions without a time limit] - {PR_MERGE_DATE}
 
-- On macOS, **Prevent disk sleep** stopped working 5 seconds into sessions without a time limit, such as Caffeinate, Toggle Caffeinate, Caffeinate While, the menu bar's Indefinitely, and caffeination when Raycast starts. It now lasts for the whole session.
+- On macOS, **Prevent disk sleep** stopped working 5 seconds into sessions without a time limit, such as Caffeinate, Toggle Caffeinate, Caffeinate While, the menu bar's Indefinitely, and caffeination when Raycast starts. It now lasts for the whole session. If one was already running when you updated, start it again to apply the fix.
 - With any of the sleep options on, these sessions no longer turn on a display that's already off when they start, for example when Raycast starts while you're away. **Prevent display sleep** still keeps the display awake once it's on.
 
 ## [Menu bar error messages no longer break the menu] - 2026-11-17

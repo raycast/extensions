@@ -123,6 +123,8 @@ for (const [label, preferences, args, expected] of [
   ["while an app runs", {}, "-w 400", ["-dmi", "-w", "400"]],
   ["disk only", { preventDisplay: false, preventSystem: false }, undefined, ["-m"]],
   ["display only", { preventDisk: false, preventSystem: false }, undefined, ["-d"]],
+  ["system only", { preventDisplay: false, preventDisk: false }, undefined, ["-i"]],
+  ["AC power only", { ...nothingSelected, preventSleepOnAC: true }, undefined, ["-s"]],
   // Keeping -u when nothing else is asserted stops caffeinate from defaulting to -i.
   ["nothing selected", nothingSelected, undefined, ["-u"]],
   ["nothing selected while an app runs", nothingSelected, "-w 400", ["-u", "-w", "400"]],
