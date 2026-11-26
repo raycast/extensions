@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Detail, ActionPanel, Action, Icon, Toast, showToast, Color } from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon, Toast, showToast, Color, Keyboard } from "@raycast/api";
 import { ServiceHubService, GCPService } from "../ServiceHubService";
 
 interface ServiceDetailsProps {
@@ -241,13 +241,13 @@ ${serviceDetails.dependsOn.map((dep) => `| \`${dep}\` |`).join("\n")}
           <Action
             title={serviceDetails?.isEnabled ? "Disable Service" : "Enable Service"}
             icon={serviceDetails?.isEnabled ? Icon.XmarkCircle : Icon.CheckCircle}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.Edit}
             onAction={toggleServiceStatus}
           />
           <Action
             title="Refresh"
             icon={Icon.RotateClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={fetchServiceDetails}
           />
         </ActionPanel>

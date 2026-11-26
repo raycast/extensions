@@ -3,7 +3,7 @@
  * Shows a user-friendly error screen with an "Enable API" action for API-not-enabled errors
  */
 
-import { List, ActionPanel, Action, Icon, Color, open } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, open, Keyboard } from "@raycast/api";
 
 // Map of API services to their human-readable names and enable URLs
 const API_INFO: Record<string, { name: string; service: string }> = {
@@ -129,7 +129,7 @@ export function ApiErrorView({ error, projectId, apiName, onRetry, title }: ApiE
               title="Retry"
               icon={Icon.ArrowClockwise}
               onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           )}
         </ActionPanel>

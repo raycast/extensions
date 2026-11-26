@@ -20,7 +20,7 @@ import { RunLineage } from "./datasets";
 const PAGE_SIZE = 25;
 const STATES = ["failed", "running", "queued", "success"] as const;
 
-export function DagRuns(props: { env: ComposerEnvironment; dagId: string; initialState?: string }) {
+export function DagRuns(props: { env: ComposerEnvironment; dagId: string; initialState?: string; root?: boolean }) {
   const { env, dagId } = props;
   const [state, setState] = useState<string>(props.initialState ?? "all");
   const [searchText, setSearchText] = useState("");
@@ -59,7 +59,9 @@ export function DagRuns(props: { env: ComposerEnvironment; dagId: string; initia
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle={crumbs(env.id, dagId, total !== undefined ? `${total} runs` : undefined)}
+      navigationTitle={
+        props.root ? undefined : crumbs(env.id, dagId, total !== undefined ? `${total} runs` : undefined)
+      }
       searchBarPlaceholder="Filter loaded runs…  type:manual  run:2026-11"
       searchBarAccessory={
         <List.Dropdown tooltip="Run State" value={state} onChange={setState}>

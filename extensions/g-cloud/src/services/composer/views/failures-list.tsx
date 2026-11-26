@@ -42,6 +42,7 @@ interface EnvFailures {
 
 export function FailuresList(props: { env?: ComposerEnvironment; project?: string; root?: boolean }) {
   const { data: envData, isLoading: envLoading, error: envError, revalidate: revalidateEnvs } = useEnvironments();
+  const lookupErrors = envData?.errors ?? [];
   const prefHours = FAILURE_WINDOW_HOURS;
   const [hours, setHours] = useState(String(prefHours));
   const [groupByDag, setGroupByDag] = useState(false);
@@ -147,12 +148,36 @@ export function FailuresList(props: { env?: ComposerEnvironment; project?: strin
           error={envError}
           onRetry={() => refreshEnvironments(revalidateEnvs)}
         />
-      ) : (
+      ) : lookupErrors.length === 0 ? (
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title={isLoading ? "Loading…" : `No failed runs in the last ${windowLabel}`}
           description={`${scoped.length} environment(s) checked`}
         />
+      ) : null}
+      {lookupErrors.length > 0 && (
+        <List.Section
+          title="Environment Lookup Errors (Results Incomplete)"
+          subtitle={`${scoped.length} environment(s) checked`}
+        >
+          {lookupErrors.map((e) => (
+            <List.Item
+              key={`${e.project}/${e.location}`}
+              icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+              title={`${e.project} · ${e.location}`}
+              subtitle={e.message}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Retry Environment Scan"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() => refreshEnvironments(revalidateEnvs)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       )}
       {sections.map((s) => {
         const capped = s.total > s.runs.length && !parsed.tokens.length && !parsed.words.length;

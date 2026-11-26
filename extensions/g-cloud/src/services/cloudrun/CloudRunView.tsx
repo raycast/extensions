@@ -12,6 +12,7 @@ import {
   confirmAlert,
   Alert,
   getPreferenceValues,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
@@ -263,7 +264,7 @@ ${
           <Action
             title="Create Service"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={showCreateServiceForm}
           />
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchServices} />
@@ -287,7 +288,7 @@ ${
               <Action
                 title="Create Service"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={showCreateServiceForm}
               />
               <Action.OpenInBrowser
@@ -335,20 +336,20 @@ ${
                       <Action.OpenInBrowser
                         title="Open Service URL"
                         url={service.uri}
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        shortcut={Keyboard.Shortcut.Common.Open}
                       />
                     )}
                     <Action.OpenInBrowser
                       title="Open in Console"
                       url={`https://console.cloud.google.com/run/detail/${location}/${serviceName}?project=${projectId}`}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.OpenWith}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Manage">
                     <Action
                       title="Create Service"
                       icon={Icon.Plus}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      shortcut={Keyboard.Shortcut.Common.New}
                       onAction={showCreateServiceForm}
                     />
                     <Action
@@ -369,7 +370,7 @@ ${
                       <Action.CopyToClipboard
                         title="Copy Service URL"
                         content={service.uri}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                        shortcut={Keyboard.Shortcut.Common.Copy}
                       />
                     )}
                   </ActionPanel.Section>

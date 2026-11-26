@@ -11,6 +11,7 @@ import {
   Form,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { ApiErrorView } from "../../components/ApiErrorView";
@@ -218,7 +219,7 @@ ${
           <Action
             title="Create Function"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={showCreateFunctionForm}
           />
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchFunctions} />
@@ -242,7 +243,7 @@ ${
               <Action
                 title="Create Function"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={showCreateFunctionForm}
               />
               <Action.OpenInBrowser
@@ -297,20 +298,20 @@ ${
                       <Action.OpenInBrowser
                         title="Open Function URL"
                         url={url}
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        shortcut={Keyboard.Shortcut.Common.Open}
                       />
                     )}
                     <Action.OpenInBrowser
                       title="Open in Console"
                       url={`https://console.cloud.google.com/functions/details/${location}/${functionName}?project=${projectId}`}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.OpenWith}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Manage">
                     <Action
                       title="Create Function"
                       icon={Icon.Plus}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      shortcut={Keyboard.Shortcut.Common.New}
                       onAction={showCreateFunctionForm}
                     />
                     <Action
@@ -331,7 +332,7 @@ ${
                       <Action.CopyToClipboard
                         title="Copy Function URL"
                         content={url}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                        shortcut={Keyboard.Shortcut.Common.Copy}
                       />
                     )}
                   </ActionPanel.Section>

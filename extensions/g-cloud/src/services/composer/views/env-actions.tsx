@@ -25,7 +25,11 @@ export function EnvironmentActions(props: { env: ComposerEnvironment; title?: st
       {bucket && <Action.OpenInBrowser title="Open DAGs Bucket" url={bucket} icon={Icon.Folder} />}
       <Action.CopyToClipboard title="Copy Airflow URI" content={env.airflowUri} />
       <Action.CopyToClipboard title="Copy Environment Resource Name" content={env.name} />
-      <SaveQuicklinkAction context={{ project: env.project, env: env.name }} name={`Composer · ${env.id}`} />
+      <SaveQuicklinkAction
+        context={{ project: env.project, env: env.name }}
+        name={`Composer · ${env.id}`}
+        shortcut={false}
+      />
     </ActionPanel.Section>
   );
 }

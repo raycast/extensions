@@ -13,7 +13,7 @@ import { FULL_LINES, capChars, cloudLoggingUrl, errorsWithContext } from "../lib
 import { EnvironmentActions, crumbs, refreshShortcut } from "./env-actions";
 import { TaskLinks } from "./task-instances";
 
-export function TaskLog(props: { env: ComposerEnvironment; ti: TaskInstance; tryNumber?: number }) {
+export function TaskLog(props: { env: ComposerEnvironment; ti: TaskInstance; tryNumber?: number; root?: boolean }) {
   const { env, ti } = props;
   const maxTry = Math.max(1, ti.try_number);
   const [tryNumber, setTryNumber] = useState(Math.min(Math.max(1, props.tryNumber ?? maxTry), maxTry));
@@ -68,7 +68,7 @@ export function TaskLog(props: { env: ComposerEnvironment; ti: TaskInstance; try
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={crumbs(ti.dag_id, ti.task_id, `try ${tryNumber}`)}
+      navigationTitle={props.root ? undefined : crumbs(ti.dag_id, ti.task_id, `try ${tryNumber}`)}
       markdown={`${header}\n\n${body}`}
       metadata={
         <Detail.Metadata>

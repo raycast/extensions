@@ -56,6 +56,7 @@ export function ImportErrorsList(props: { env?: ComposerEnvironment; root?: bool
 
   const parsed = parseSearch(searchText);
   const total = (data ?? []).reduce((n, s) => n + s.errors.length, 0);
+  const lookupErrors = envData?.errors ?? [];
 
   return (
     <List
@@ -73,11 +74,35 @@ export function ImportErrorsList(props: { env?: ComposerEnvironment; root?: bool
           error={envError}
           onRetry={() => refreshEnvironments(revalidateEnvs)}
         />
-      ) : (
+      ) : lookupErrors.length === 0 ? (
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title={isLoading ? "Loading…" : `No import errors in ${scoped.length} environment(s)`}
         />
+      ) : null}
+      {lookupErrors.length > 0 && (
+        <List.Section
+          title="Environment Lookup Errors (Results Incomplete)"
+          subtitle={`${scoped.length} environment(s) checked`}
+        >
+          {lookupErrors.map((e) => (
+            <List.Item
+              key={`${e.project}/${e.location}`}
+              icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+              title={`${e.project} · ${e.location}`}
+              subtitle={e.message}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Retry Environment Scan"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() => refreshEnvironments(revalidateEnvs)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       )}
       {(data ?? []).map(({ env, errors, error }) => {
         const items = errors.filter((e) =>

@@ -114,7 +114,7 @@ const DEPTHS = [
   { value: "down:all", title: "Downstream Only · Full" },
 ];
 
-export function DagLineage(props: { env: ComposerEnvironment; dagId: string }) {
+export function DagLineage(props: { env: ComposerEnvironment; dagId: string; root?: boolean }) {
   const { env, dagId } = props;
   const [mode, setMode] = useState("both:all");
   const [hideFailureHandlers, setHideFailureHandlers] = useState(true);
@@ -221,7 +221,7 @@ export function DagLineage(props: { env: ComposerEnvironment; dagId: string }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={crumbs(env.id, dagId, "lineage")}
+      navigationTitle={props.root ? undefined : crumbs(env.id, dagId, "lineage")}
       searchBarPlaceholder="Filter lineage by DAG or dataset…"
       searchBarAccessory={
         <List.Dropdown tooltip="Direction & Depth" value={mode} onChange={setMode}>

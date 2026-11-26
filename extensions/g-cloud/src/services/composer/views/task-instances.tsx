@@ -69,6 +69,7 @@ export function TaskInstances(props: {
   dagId: string;
   runId: string;
   initialFilter?: "all" | "failed";
+  root?: boolean;
 }) {
   const { env, dagId, runId } = props;
   const [filter, setFilter] = useState<string>(props.initialFilter ?? "all");
@@ -116,7 +117,7 @@ export function TaskInstances(props: {
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle={crumbs(dagId, run?.state ?? undefined, `${tis.length} tasks`)}
+      navigationTitle={props.root ? undefined : crumbs(dagId, run?.state ?? undefined, `${tis.length} tasks`)}
       searchBarPlaceholder="Filter tasks…  task:dbt  op:Bash  is:mapped"
       searchBarAccessory={
         <List.Dropdown tooltip="Task State" value={filter} onChange={setFilter}>

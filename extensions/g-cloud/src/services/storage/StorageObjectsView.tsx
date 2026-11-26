@@ -12,6 +12,7 @@ import {
   Alert,
   Form,
   Image,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { exec } from "child_process";
@@ -809,7 +810,7 @@ export default function StorageObjectsView({
           <Action
             title="Upload File"
             icon={Icon.Upload}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={selectAndUploadFile}
           />
           <Action
@@ -821,7 +822,7 @@ export default function StorageObjectsView({
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={() => fetchObjects()}
           />
           <Action
@@ -843,7 +844,7 @@ export default function StorageObjectsView({
               <Action
                 title="Upload File"
                 icon={Icon.Upload}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={selectAndUploadFile}
               />
               <Action
@@ -899,7 +900,7 @@ export default function StorageObjectsView({
                   <Action
                     title="Upload File"
                     icon={Icon.Upload}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     onAction={selectAndUploadFile}
                   />
                   <Action
@@ -965,7 +966,7 @@ export default function StorageObjectsView({
                   <Action
                     title="Upload File"
                     icon={Icon.Upload}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     onAction={selectAndUploadFile}
                   />
                   <Action

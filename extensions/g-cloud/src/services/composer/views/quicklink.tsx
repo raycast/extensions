@@ -44,12 +44,12 @@ export function hierarchyDeeplink(ctx: HierarchyContext): string {
 }
 
 /** Save this level (environment, DAG, run, task log, lineage graph...) as a Raycast Quicklink. */
-export function SaveQuicklinkAction(props: { context: HierarchyContext; name: string }) {
+export function SaveQuicklinkAction(props: { context: HierarchyContext; name: string; shortcut?: boolean }) {
   return (
     <Action.CreateQuicklink
       title="Save as Quicklink"
       icon={Icon.Link}
-      shortcut={hotkey(["cmd", "shift"], "q")}
+      shortcut={props.shortcut === false ? undefined : hotkey(["cmd", "shift"], "q")}
       quicklink={{ name: props.name, link: hierarchyDeeplink(props.context) }}
     />
   );

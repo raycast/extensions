@@ -9,6 +9,7 @@ import {
   Form,
   useNavigation,
   Color,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { execFile } from "child_process";
@@ -437,7 +438,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
           <Action
             title="Refresh"
             icon={Icon.RotateClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={refreshAll}
           />
           <Action title="Switch Account" icon={Icon.Person} onAction={loginWithDifferentAccount} />
@@ -467,7 +468,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     <Action.OpenInBrowser
                       title="Open in Console"
                       url={resource.consoleUrl}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.Open}
                     />
                   )}
                   <Action.CopyToClipboard
@@ -517,7 +518,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                   <Action
                     title="Refresh Counts"
                     icon={Icon.RotateClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={refreshAll}
                   />
                   {selectedProject && (

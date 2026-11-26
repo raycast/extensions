@@ -1,5 +1,17 @@
 import { useEffect, useState, useCallback } from "react";
-import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  Color,
+  Toast,
+  showToast,
+  Form,
+  useNavigation,
+  Clipboard,
+  Keyboard,
+} from "@raycast/api";
 import { NetworkService, IPAddress } from "./NetworkService";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { maskIPIfEnabled } from "../../utils/maskSensitiveData";
@@ -208,12 +220,12 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={refreshIPs}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           <Action
             title="Create IP Address"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={() => {
               if (regions.length === 0) {
                 showToast({
@@ -353,12 +365,12 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   onAction={refreshIPs}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
                 <Action
                   title="Create IP Address"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() => {
                     if (regions.length === 0) {
                       showToast({

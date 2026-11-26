@@ -11,6 +11,7 @@ import {
   Color,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { IAMService, IAMPrincipal } from "./IAMService";
@@ -457,7 +458,7 @@ export default function IAMMembersByPrincipalView({
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={fetchIAMPolicy}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
           {selectedType && (

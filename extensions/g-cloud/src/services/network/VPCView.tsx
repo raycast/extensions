@@ -1,5 +1,17 @@
 import { useEffect, useState, useCallback } from "react";
-import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  Color,
+  Toast,
+  showToast,
+  Form,
+  useNavigation,
+  Clipboard,
+  Keyboard,
+} from "@raycast/api";
 import { NetworkService, VPC } from "./NetworkService";
 import SubnetsView from "./SubnetsView";
 import FirewallRulesView from "./FirewallRulesView";
@@ -135,12 +147,12 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={refreshVPCs}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           <Action
             title="Create Vpc Network"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={() => {
               if (!service) return;
               push(
@@ -241,12 +253,12 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   onAction={refreshVPCs}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
                 <Action
                   title="Create Vpc Network"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() => {
                     if (!service) return;
                     push(

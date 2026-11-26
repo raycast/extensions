@@ -344,7 +344,7 @@ function EventItem(props: { env: ComposerEnvironment; event: DatasetEvent; label
 }
 
 /** Run-level lineage: events that triggered this run, and events it emitted (+ runs they created). */
-export function RunLineage(props: { env: ComposerEnvironment; dagId: string; runId: string }) {
+export function RunLineage(props: { env: ComposerEnvironment; dagId: string; runId: string; root?: boolean }) {
   const { env, dagId, runId } = props;
   const { data, isLoading, error } = useCachedPromise(
     async (uri: string, d: string, r: string) => {
@@ -359,7 +359,11 @@ export function RunLineage(props: { env: ComposerEnvironment; dagId: string; run
     [env.airflowUri, dagId, runId],
   );
   return (
-    <List isLoading={isLoading} navigationTitle={crumbs(dagId, runId, "lineage")} searchBarPlaceholder="Filter runs…">
+    <List
+      isLoading={isLoading}
+      navigationTitle={props.root ? undefined : crumbs(dagId, runId, "lineage")}
+      searchBarPlaceholder="Filter runs…"
+    >
       {error && (
         <List.EmptyView icon={Icon.Warning} title="Could not load run lineage" description={errorText(error)} />
       )}

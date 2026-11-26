@@ -6,11 +6,12 @@ import { useCachedPromise } from "@raycast/utils";
 import { getProjects } from "../../../gcloud";
 import { CacheManager, Project } from "../../../utils/CacheManager";
 import { resolveGcloudPath, setCurrentProject, useCurrentProject } from "../lib/raycast";
+import { EnvironmentsList } from "./environments-list";
 
-export function ProjectPicker() {
-  const { pop } = useNavigation();
+export function ProjectPicker(props: { onSelect?: (projectId: string) => void }) {
+  const { pop, push } = useNavigation();
   const current = useCurrentProject();
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     async (): Promise<Project[]> => {
       const projects = await getProjects(await resolveGcloudPath());
       CacheManager.saveProjectsList(projects);
@@ -41,7 +42,12 @@ export function ProjectPicker() {
             icon={Icon.Switch}
             onAction={() => {
               setCurrentProject(p.id);
-              pop();
+              if (props.onSelect) {
+                props.onSelect(p.id);
+                pop();
+              } else {
+                push(<EnvironmentsList project={p.id} />);
+              }
             }}
           />
           <Action.CopyToClipboard title="Copy Project ID" content={p.id} />
@@ -52,6 +58,18 @@ export function ProjectPicker() {
 
   return (
     <List isLoading={isLoading} navigationTitle="Switch Project" searchBarPlaceholder="Search projects by name or id…">
+      {error && !all.length ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Could Not List Projects"
+          description={error instanceof Error ? error.message : String(error)}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {recent.length > 0 && <List.Section title="Recent Projects">{recent.map(item)}</List.Section>}
       <List.Section title="All Projects" subtitle={`${others.length}`}>
         {others.map(item)}
@@ -60,14 +78,14 @@ export function ProjectPicker() {
   );
 }
 
-export function SwitchProjectAction() {
+export function SwitchProjectAction(props: { onSelect?: (projectId: string) => void }) {
   const current = useCurrentProject();
   return (
     <Action.Push
       title={current ? `Switch Project (${current})…` : "Switch Project…"}
       icon={Icon.Switch}
       shortcut={hotkey(["cmd", "shift"], "o")}
-      target={<ProjectPicker />}
+      target={<ProjectPicker onSelect={props.onSelect} />}
     />
   );
 }

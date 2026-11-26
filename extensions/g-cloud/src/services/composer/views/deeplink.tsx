@@ -90,12 +90,12 @@ export function HierarchyLauncher(props: { context: HierarchyContext }) {
   if (!ctx.run && ctx.view === "tasks") return <DagTasks env={env} dagId={ctx.dag} />;
   if (!ctx.run && ctx.view === "graph")
     return <LineageGraphView env={env} dagId={ctx.dag} depth={ctx.depth === "full" ? Infinity : ctx.depth} />;
-  if (!ctx.run && ctx.view === "lineage") return <DagLineage env={env} dagId={ctx.dag} />;
+  if (!ctx.run && ctx.view === "lineage") return <DagLineage env={env} dagId={ctx.dag} root />;
   if (ctx.run && !ctx.task && ctx.view === "run-lineage")
-    return <RunLineage env={env} dagId={ctx.dag} runId={ctx.run} />;
-  if (!ctx.run) return <DagRuns env={env} dagId={ctx.dag} initialState={ctx.state} />;
-  if (!ctx.task) return <TaskInstances env={env} dagId={ctx.dag} runId={ctx.run} initialFilter={ctx.filter} />;
-  return <TaskLogLauncher env={env} ctx={ctx} />;
+    return <RunLineage env={env} dagId={ctx.dag} runId={ctx.run} root />;
+  if (!ctx.run) return <DagRuns env={env} dagId={ctx.dag} initialState={ctx.state} root />;
+  if (!ctx.task) return <TaskInstances env={env} dagId={ctx.dag} runId={ctx.run} initialFilter={ctx.filter} root />;
+  return <TaskLogLauncher env={env} ctx={ctx} root />;
 }
 
 function DatasetLauncher(props: { env: ComposerEnvironment; uri: string }) {
@@ -106,7 +106,7 @@ function DatasetLauncher(props: { env: ComposerEnvironment; uri: string }) {
   return <Detail markdown={`# Dataset not found\n\n\`${props.uri}\`${error ? `\n\n> ${errorText(error)}` : ""}`} />;
 }
 
-function TaskLogLauncher(props: { env: ComposerEnvironment; ctx: HierarchyContext }) {
+function TaskLogLauncher(props: { env: ComposerEnvironment; ctx: HierarchyContext; root?: boolean }) {
   const { env, ctx } = props;
   const { data, isLoading, error } = useCachedPromise(
     (uri: string, d: string, r: string) => clientFor({ airflowUri: uri }).listTaskInstances(d, r),
@@ -117,7 +117,7 @@ function TaskLogLauncher(props: { env: ComposerEnvironment; ctx: HierarchyContex
     ctx.map !== undefined
       ? data?.find((t) => t.task_id === ctx.task && t.map_index === ctx.map)
       : (data?.find((t) => t.task_id === ctx.task && t.map_index === -1) ?? data?.find((t) => t.task_id === ctx.task));
-  if (ti) return <TaskLog env={env} ti={ti} tryNumber={ctx.try} />;
+  if (ti) return <TaskLog env={env} ti={ti} tryNumber={ctx.try} root={props.root} />;
   if (isLoading) return <Detail isLoading markdown={`Resolving ${ctx.task}…`} />;
   return (
     <Detail
