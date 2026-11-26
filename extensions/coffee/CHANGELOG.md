@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Caffeinate Until stays open when the picked time has passed] - {PR_MERGE_DATE}
+
+- Caffeinate Until no longer closes when the time you picked has passed by the time you submit it; it shows "Selected time is in the past" and stays open so you can pick another time ([#34018](https://github.com/raycast/extensions/issues/34018)).
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).

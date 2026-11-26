@@ -31,12 +31,12 @@ function parseTypedTime(time: string): Date | null {
   return target;
 }
 
-async function caffeinateUntilTarget(target: Date) {
+async function caffeinateUntilTarget(target: Date): Promise<boolean> {
   const now = new Date();
   const totalSeconds = Math.ceil((target.getTime() - now.getTime()) / 1000);
   if (totalSeconds <= 0) {
     await showToast(Toast.Style.Failure, "Selected time is in the past");
-    return;
+    return false;
   }
   const formattedTime = target.toLocaleTimeString([], { timeStyle: "short" });
   const tomorrow = new Date(now);
@@ -53,6 +53,7 @@ async function caffeinateUntilTarget(target: Date) {
     `-t ${totalSeconds}`,
     { kind: "until", until: target.toISOString() },
   );
+  return true;
 }
 
 function defaultPickerTarget(): Date {
@@ -93,8 +94,8 @@ export default function Command(props: { arguments: Arguments.CaffeinateUntil })
                 showToast(Toast.Style.Failure, "Please select a time");
                 return;
               }
-              await caffeinateUntilTarget(values.target);
-              popToRoot();
+              const started = await caffeinateUntilTarget(values.target);
+              if (started) popToRoot();
             }}
           />
         </ActionPanel>

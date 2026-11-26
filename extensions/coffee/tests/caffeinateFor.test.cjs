@@ -248,6 +248,14 @@ test("caffeinateUntil picker rejects null target without starting caffeinate", a
   assert.deepEqual(events, []);
 });
 
+test("caffeinateUntil picker stays open when the picked time has passed by the time it's submitted", async () => {
+  const { onSubmit, events, api } = loadUntilPicker();
+  await onSubmit({ target: new Date(Date.now() - 60_000) });
+
+  assert.deepEqual(Array.from(api.showToast.mock.calls[0].arguments), ["failure", "Selected time is in the past"]);
+  assert.deepEqual(events, []);
+});
+
 test("closes the launcher before slow ownership persistence and still awaits startup", async () => {
   const { command, api, storage } = loadCommand();
   let release;
