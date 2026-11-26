@@ -109,12 +109,14 @@ export async function startCaffeinate(
   additionalArgs?: string,
   reason?: CaffeinationReason,
 ) {
-  parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
+  const timeout = parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
   if (process.platform === "win32") {
     const sessionId = await windowsStartCaffeinate(additionalArgs);
     await setWindowsCaffeinationReason(sessionId, reason);
   } else {
-    const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
+    // Without -t, caffeinate times out -u after 5 s and gives -m the same timeout.
+    const userActive = timeout === null && getPreferenceValues<Preferences>().preventDisk ? [] : ["-u"];
+    const args = [...userActive, ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
     await startMacCaffeinate(args, reason);
   }
 

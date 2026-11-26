@@ -117,6 +117,20 @@ test("natural expiry or watched-app exit clears ownership and never reuses its r
   assert.equal(h.storage.has(key), false);
 });
 
+test("untimed sessions drop -u while preventing disk sleep, as caffeinate's 5 s -u timeout would also end -m", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet);
+  await utils.startCaffeinate(quiet, undefined, "-w 400");
+  // Keeping -u when nothing else is asserted stops caffeinate from defaulting to -i.
+  Object.assign(h.preferences, { preventDisplay: false, preventSystem: false, preventDisk: false });
+  await utils.startCaffeinate(quiet);
+  assert.deepEqual(
+    h.processes.spawn.mock.calls.map(({ arguments: [, args] }) => Array.from(args)),
+    [["-dmi"], ["-dmi", "-w", "400"], ["-u"]],
+  );
+});
+
 for (const failure of ["denied", "malformed"]) {
   test(`a ${failure} process inspection preserves tracking and never signals any PID`, async () => {
     const h = createHarness();

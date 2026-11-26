@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] Keep preventing disk sleep in sessions without a time limit - {PR_MERGE_DATE}
+
+- On macOS, **Prevent disk sleep** stopped working 5 seconds into sessions without a time limit, such as Caffeinate, Toggle Caffeinate, Caffeinate While, the menu bar's Indefinitely, and caffeination when Raycast starts. It now lasts for the whole session.
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
