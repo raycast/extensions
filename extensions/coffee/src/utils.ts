@@ -303,11 +303,9 @@ export async function changeScheduleState(operation: "caffeinate" | "decaffeinat
       break;
     }
     case "decaffeinate": {
-      if (schedule.IsRunning === true || isNotTodaysSchedule(schedule)) {
-        schedule.IsManuallyDecafed = true;
-        schedule.IsRunning = false;
-        await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
-      }
+      schedule.IsManuallyDecafed = true;
+      schedule.IsRunning = false;
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
       break;
     }
 

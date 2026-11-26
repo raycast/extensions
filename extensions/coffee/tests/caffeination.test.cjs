@@ -322,6 +322,25 @@ test("an expired schedule cannot stop a replacement manual Coffee session", asyn
   assert.ok(h.table.has(200));
 });
 
+test("pausing today's schedule before it starts keeps it from starting", async () => {
+  const h = createHarness();
+  const day = schedule(h, false, "00:00", "23:59");
+  const utils = h.load("utils.ts");
+  await utils.changeScheduleState("decaffeinate", utils.parseSchedule(h.storage.get(day)));
+  assert.equal(await h.load("status.ts").checkSchedule(), false);
+  assert.equal(h.processes.spawn.mock.callCount(), 0);
+  assert.equal(JSON.parse(h.storage.get(day)).IsManuallyDecafed, true);
+});
+
+test("manual Caffeinate pauses today's schedule only while it runs", async () => {
+  for (const running of [false, true]) {
+    const h = createHarness();
+    const day = schedule(h, running, "00:00", "23:59");
+    await h.load("caffeinate.ts").default();
+    assert.equal(JSON.parse(h.storage.get(day)).IsManuallyDecafed, running);
+  }
+});
+
 test("status attributes external activity without a stale Coffee reason", async () => {
   const h = createHarness();
   h.addProcess(900);
