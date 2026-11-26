@@ -766,9 +766,10 @@ export function derivative(n: Node, x: string, angle: AngleMode = "rad"): Node {
       return mul(n, add(mul(D(n.r), call("ln", n.l)), div(mul(n.r, D(n.l)), n.l)));
     case "call": {
       const u = n.args[0];
-      const k = hasAngleUnit(u) ? null : angleFactor(angle);
-      // Forward trig: d/dx f(k·u) = k·f'(k·u)·u'. Inverse trig returns u-angles in the mode: divide by k.
-      const du = ["sin", "cos", "tan"].includes(n.name) && k ? mul(k, D(u)) : D(u);
+      const k = angleFactor(angle);
+      // Forward trig: d/dx f(k·u) = k·f'(k·u)·u', unless u carries its own angle unit (sin(x*_°)).
+      // Inverse trig always returns angles in the mode, whatever its argument: divide by k.
+      const du = ["sin", "cos", "tan"].includes(n.name) && k && !hasAngleUnit(u) ? mul(k, D(u)) : D(u);
       const dinv = (e: Node) => (["arcsin", "arccos", "arctan"].includes(n.name) && k ? div(e, k) : e);
       switch (n.name) {
         case "sin":

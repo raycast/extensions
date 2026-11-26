@@ -1086,26 +1086,95 @@ function criticalPoints(g: Node, x: string, dim: Dim, env: Env, exact: boolean):
 }
 
 /**
- * Drops solutions that break the conditions after |: an "or" of "and"-ed x=value answers is checked
- * one alternative at a time. Answers that still contain parameters (c1, symbolic ones) are kept.
+ * Applies the conditions after | to solutions, one "or" alternative of "and"-ed x=value answers at a time.
+ * Numeric answers that break a condition are dropped. When an answer still contains parameters
+ * (solve(x^2=a^2,x)|x>0, or c1 from an underdetermined system), the condition is rewritten in those
+ * parameters and kept with the answer (x=-a and a<0 or x=a and a>0), or dropped if it can never hold.
  */
 function applyConstraints(node: Node, env: Env): Node {
   if (!env.constraints?.length) return node;
-  const kept = disjuncts(node).filter((alt) => {
+  const plain = { ...env, constraints: [] };
+  const kept: Node[] = [];
+  for (const alt of disjuncts(node)) {
     const assign = new Map<string, Value>();
+    const symbolic = new Map<string, Node>();
+    let solvable = true;
     for (const r of conjuncts(alt)) {
-      if (r.type !== "rel" || r.op !== "=" || r.l.type !== "var") return true;
-      try {
-        const v = evaluate(r.r, { ...env, constraints: [] });
-        if (v.k !== "q") return true;
-        assign.set(r.l.name, v);
-      } catch {
-        return true;
+      if (r.type !== "rel" || r.op !== "=" || r.l.type !== "var") {
+        solvable = false;
+        break;
       }
+      let v: Value | null = null;
+      try {
+        v = evaluate(r.r, plain);
+      } catch {
+        // Contains parameters.
+      }
+      if (v?.k === "q") assign.set(r.l.name, v);
+      else symbolic.set(r.l.name, r.r);
     }
-    return satisfiesConstraints(assign, env);
-  });
+    if (!solvable) {
+      kept.push(alt);
+      continue;
+    }
+    if (!symbolic.size) {
+      if (satisfiesConstraints(assign, env)) kept.push(alt);
+      continue;
+    }
+    const conds = conditionsIn(symbolic, assign, env);
+    if (conds) kept.push(joinWith("and", [...conjuncts(alt), ...conds]));
+  }
   return kept.length ? joinWith("or", kept) : { type: "bool", value: false };
+}
+
+const isNonNegative = (n: Node) => n.type === "call" && (n.name === "sqrt" || n.name === "abs");
+
+const FLIP: Partial<Record<RelOp, RelOp>> = { "<": ">", ">": "<", "≤": "≥", "≥": "≤" };
+
+/**
+ * The conditions after | on the solved variables, rewritten in the parameters of a symbolic answer.
+ * Returns null when one of them can never hold.
+ */
+function conditionsIn(symbolic: Map<string, Node>, assign: Map<string, Value>, env: Env): Node[] | null {
+  const solved = new Set([...symbolic.keys(), ...assign.keys()]);
+  const subst = (n: Node): Node => {
+    if (n.type === "var" && symbolic.has(n.name)) return symbolic.get(n.name)!;
+    return mapChildren(n, subst);
+  };
+  const locals = new Map(env.locals ?? []);
+  assign.forEach((v, k) => locals.set(k, v));
+  const out: Node[] = [];
+  for (const c of env.constraints ?? []) {
+    for (const r of conjuncts(c)) {
+      if (r.type !== "rel" || !containsVar(r, solved)) continue;
+      let rel: Extract<Node, { type: "rel" }> = { ...r, l: subst(r.l), r: subst(r.r) };
+      try {
+        const alg = new Algebra(env, new Set(freeVars(rel, env)));
+        rel = { ...rel, l: alg.simplifyNode(rel.l), r: alg.simplifyNode(rel.r) };
+      } catch {
+        // Keep the unsimplified condition.
+      }
+      // -a>0 reads better as a<0.
+      if (rel.l.type === "neg" && rel.r.type === "num" && N.isZero(rel.r.value) && FLIP[rel.op])
+        rel = { ...rel, op: FLIP[rel.op]!, l: rel.l.arg };
+      // √(a) and abs(a) are never negative.
+      if (isNonNegative(rel.l) && rel.r.type === "num" && N.isZero(rel.r.value)) {
+        if (rel.op === "<") return null;
+        if (rel.op === "≥") continue;
+      }
+      try {
+        const v = evaluate(rel, { ...env, locals, constraints: [] });
+        if (v.k === "bool") {
+          if (!v.v) return null;
+          continue;
+        }
+      } catch {
+        // Depends on the parameters.
+      }
+      out.push(rel);
+    }
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------- systems
