@@ -1,5 +1,10 @@
 # Coffee Changelog
 
+## [Caffeinate Until and schedules end on time] - {PR_MERGE_DATE}
+
+- Caffeinate Until and schedules now end at their end time. Coffee turned the end time into a duration before it stopped the running session and started the new one, so they ended late by however long that took ([#34020](https://github.com/raycast/extensions/issues/34020)).
+- On Windows, they also end at their end time when the clock changes while they run.
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).

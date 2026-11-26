@@ -36,6 +36,25 @@ test("Windows retains app and window targets when no timeout is supplied", async
   assert.equal(config.windowHandle, 200);
 });
 
+test("Windows passes the end of Until and schedule sessions to its worker", async () => {
+  const h = createHarness({ platform: "win32" });
+  const start = mock.fn(async () => sessionId);
+  const adapter = h.load("windowsApi.ts", { "rust:../rust": { start_caffeinate: start } });
+  const utils = h.load("utils.ts", { "./windowsApi": adapter });
+  const endsAt = new Date(Date.now() + 60000).toISOString();
+  for (const reason of [
+    { kind: "until", until: endsAt },
+    { kind: "schedule", day: "monday", from: "09:00", to: "10:00", endsAt },
+    { kind: "for", endsAt },
+  ]) {
+    await utils.startCaffeinate({ menubar: false, status: false }, undefined, "-t 60", reason);
+  }
+  assert.deepEqual(
+    start.mock.calls.map(({ arguments: [config] }) => config.endsAt),
+    [Date.parse(endsAt), Date.parse(endsAt), null],
+  );
+});
+
 test("Windows state preserves native identity and normalizes absent optional fields", async () => {
   const h = createHarness({ platform: "win32" });
   const get = mock.fn(async () => ({ running: true, sessionId }));

@@ -42,6 +42,8 @@ function createHarness(options = {}) {
   const supportPath = mkdtempSync(path.join(tmpdir(), "coffee-test-"));
   after(() => rmSync(supportPath, { recursive: true, force: true }));
   const storage = options.storage ?? new Map();
+  // With options.now, the code under test reads the time from clock.now, which a test can move.
+  const clock = { now: options.now };
   const table = new Map();
   const createdAt = "Wed Oct 21 10:00:00 2026";
   const addProcess = (pid, values = {}) => {
@@ -123,7 +125,7 @@ function createHarness(options = {}) {
     windowsStopCaffeinateIfMatches: mock.fn(async () => false),
   };
   const dependencies = { "@raycast/api": api, "node:child_process": processes, "./windowsApi": windows };
-  const context = { process: fakeProcess };
+  const context = { process: fakeProcess, ...(options.now !== undefined && { Date: clockDate(clock) }) };
   const load = (filename, extra = {}) => loadSource(filename, { ...dependencies, ...extra }, context);
   return {
     api,
@@ -137,6 +139,19 @@ function createHarness(options = {}) {
     windows,
     preferences,
     supportPath,
+    clock,
+  };
+}
+
+function clockDate(clock) {
+  return class extends Date {
+    constructor(...args) {
+      super(...(args.length > 0 ? args : [clock.now]));
+    }
+
+    static now() {
+      return clock.now;
+    }
   };
 }
 module.exports = { createHarness, loadSource };

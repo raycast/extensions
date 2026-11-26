@@ -10,7 +10,7 @@ export type CaffeinationReason =
   | { kind: "while"; appName: string }
   | { kind: "for"; endsAt: string }
   | { kind: "until"; until: string }
-  | { kind: "schedule"; day: string; from: string; to: string };
+  | { kind: "schedule"; day: string; from: string; to: string; endsAt?: string };
 
 export interface CaffeinationState {
   sessionId: string | null;
@@ -83,9 +83,20 @@ export function parseReason(value: unknown): CaffeinationReason | undefined {
     typeof reason.day === "string" &&
     typeof reason.from === "string" &&
     typeof reason.to === "string"
-  )
-    return { kind: "schedule", day: reason.day, from: reason.from, to: reason.to };
+  ) {
+    const endsAt = reason.endsAt;
+    // Schedules saved before Coffee recorded their end have no endsAt.
+    const validEnd = typeof endsAt === "string" && Number.isFinite(Date.parse(endsAt));
+    return { kind: "schedule", day: reason.day, from: reason.from, to: reason.to, ...(validEnd && { endsAt }) };
+  }
   return undefined;
+}
+
+/** When an Until or schedule session ends, in milliseconds since the epoch. */
+export function calendarEnd(reason?: CaffeinationReason): number | undefined {
+  const value = reason?.kind === "until" ? reason.until : reason?.kind === "schedule" ? reason.endsAt : undefined;
+  const end = value === undefined ? NaN : Date.parse(value);
+  return Number.isFinite(end) ? end : undefined;
 }
 
 async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
@@ -403,11 +414,20 @@ export function stopMacCaffeinateIfMatches(expectedSessionId: string): Promise<C
 }
 
 export async function startMacCaffeinate(args: string[], reason?: CaffeinationReason): Promise<CaffeinationState> {
-  const durationSeconds = parseCaffeinateTimeout(args);
+  const timeout = parseCaffeinateTimeout(args);
+  const end = timeout === null ? undefined : calendarEnd(reason);
   return withSessionLock(async () => {
     await stopSession();
     const startedAt = Date.now();
-    const child = spawn(EXECUTABLE, args, { detached: true, stdio: "ignore" });
+    let launchArgs = args;
+    let durationSeconds = timeout;
+    if (end !== undefined) {
+      // Waiting for the lock and the previous session delays the start, so time -t from the end only now.
+      // caffeinate treats -t 0 as no limit, so an end that has just passed still gets a second.
+      durationSeconds = Math.max(1, Math.ceil((end - startedAt) / 1000));
+      launchArgs = args.map((arg, index) => (args[index - 1] === "-t" ? String(durationSeconds) : arg));
+    }
+    const child = spawn(EXECUTABLE, launchArgs, { detached: true, stdio: "ignore" });
     await new Promise<void>((resolve, reject) => {
       child.once("error", reject);
       child.once("spawn", resolve);

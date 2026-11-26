@@ -295,8 +295,8 @@ test("auto-start is independent of external activity and preserves a surviving C
   assert.ok(h.table.has(900));
 });
 
-function schedule(h, running, from, to) {
-  const day = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][new Date().getDay()];
+function schedule(h, running, from, to, date = new Date()) {
+  const day = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][date.getDay()];
   h.storage.set(day, JSON.stringify({ day, from, to, IsRunning: running, IsManuallyDecafed: false }));
   return day;
 }
@@ -320,6 +320,47 @@ test("an expired schedule cannot stop a replacement manual Coffee session", asyn
   await h.load("utils.ts").startCaffeinate(quiet);
   await h.load("status.ts").checkSchedule();
   assert.ok(h.table.has(200));
+});
+
+function slowStops(h, stopMs) {
+  h.fakeProcess.kill.mock.mockImplementation((pid) => {
+    h.clock.now += stopMs;
+    h.table.delete(pid);
+  });
+}
+
+test("Until times -t from its end once the session it replaces has stopped", async () => {
+  const h = createHarness({ now: Date.parse("2026-11-26T16:00:00Z") });
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet);
+  slowStops(h, 5000);
+  const until = new Date(h.clock.now + 60000).toISOString();
+  await utils.startCaffeinate(quiet, undefined, "-t 60", { kind: "until", until });
+  assert.equal(session(h).durationSeconds, 55);
+  assert.equal(session(h).startedAt + 55000, Date.parse(until));
+  // caffeinate treats -t 0 as no limit, so an end that passes while the previous session stops gets a second.
+  slowStops(h, 60000);
+  await utils.startCaffeinate(quiet, undefined, "-t 55", { kind: "until", until });
+  assert.equal(session(h).durationSeconds, 1);
+  assert.deepEqual(
+    h.processes.spawn.mock.calls.slice(1).map(({ arguments: [, args] }) => Array.from(args).slice(-2)),
+    [
+      ["-t", "55"],
+      ["-t", "1"],
+    ],
+  );
+});
+
+test("a schedule records its end and times -t from it once the session it replaces has stopped", async () => {
+  const now = new Date(2026, 10, 26, 10, 0);
+  const h = createHarness({ now: now.getTime() });
+  schedule(h, false, "09:00", "11:00", now);
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet);
+  slowStops(h, 5000);
+  assert.equal(await h.load("status.ts").checkSchedule(), true);
+  assert.deepEqual(Array.from(h.processes.spawn.mock.calls[1].arguments[1]).slice(-2), ["-t", "3595"]);
+  assert.equal((await utils.getCaffeinationState()).reason.endsAt, new Date(2026, 10, 26, 11, 0).toISOString());
 });
 
 test("status attributes external activity without a stale Coffee reason", async () => {

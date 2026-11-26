@@ -26,6 +26,9 @@ struct KeepAwakeConfig {
     prevent_system: bool,
     #[serde(rename = "durationSeconds")]
     duration_seconds: Option<u64>,
+    /// When an Until or schedule session ends, in milliseconds since the Unix epoch.
+    #[serde(rename = "endsAt")]
+    ends_at: Option<u64>,
     pid: Option<u32>,
     #[serde(rename = "windowHandle")]
     window_handle: Option<u64>,
@@ -50,6 +53,11 @@ struct StoredState {
 fn session_id(state: &StoredState) -> String {
     // Keep FILETIME ticks out of JavaScript numbers, which would lose precision.
     format!("{}:{}", state.pid, state.start_ticks)
+}
+
+/// Milliseconds since the Unix epoch on the wall clock, which follows clock changes.
+fn unix_millis() -> u64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |since| since.as_millis() as u64)
 }
 
 fn state_dir() -> Result<PathBuf, String> {
@@ -337,12 +345,21 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
         pid,
         start_time: now,
         start_ticks,
-        duration_seconds: config.duration_seconds,
+        duration_seconds: match config.ends_at {
+            // Status shows the end as start_time plus this, so measure it from the end as the worker starts.
+            Some(end) => Some(end.saturating_sub(unix_millis()).div_ceil(1000).max(1)),
+            None => config.duration_seconds,
+        },
     })?;
 
     let started = Instant::now();
     loop {
-        let timed_out = config.duration_seconds.is_some_and(|secs| started.elapsed().as_secs() >= secs);
+        let timed_out = match config.ends_at {
+            // The wall clock follows clock changes, as a time of day does. Run at least a second, as
+            // caffeinate -t 1 does on macOS, so start_caffeinate sees this worker even if its end has passed.
+            Some(end) => started.elapsed() >= Duration::from_secs(1) && unix_millis() >= end,
+            None => config.duration_seconds.is_some_and(|secs| started.elapsed().as_secs() >= secs),
+        };
         let app_gone = config.pid.is_some_and(|target_pid| !process_alive(target_pid))
             || config.window_handle.is_some_and(|hwnd| !window_alive(hwnd as usize, config.pid));
         if timed_out || app_gone || stop_requested() {
