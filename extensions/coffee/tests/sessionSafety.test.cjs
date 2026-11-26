@@ -38,6 +38,53 @@ test("delayed schedule expiry preserves a manual replacement and its saved metad
   assert.equal(JSON.parse(h.storage.get(reason.day)).IsRunning, false);
 });
 
+test("schedule expiry keeps a schedule extended and started during the check", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  const reason = expiredSchedule(h);
+  await utils.startCaffeinate(quiet, undefined, "-t 300", reason);
+  const extended = JSON.stringify({ ...JSON.parse(h.storage.get(reason.day)), to: "23:59" });
+  let replacement;
+  const status = h.load("status.ts", {
+    "./utils": {
+      ...utils,
+      getCaffeinationState: async () => {
+        h.storage.set(reason.day, extended);
+        await utils.startCaffeinate(quiet, undefined, "-t 300", { ...reason, to: "23:59" });
+        replacement = h.storage.get(sessionKey);
+        return utils.getCaffeinationState();
+      },
+    },
+  });
+  await status.checkSchedule();
+  assert.equal(h.storage.get(sessionKey), replacement);
+  assert.ok(h.table.has(JSON.parse(replacement).pid));
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 1); // Only the replaced schedule was stopped.
+  assert.equal(h.storage.get(reason.day), extended);
+});
+
+test("schedule expiry stops its session without saving over an edit made meanwhile", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  const reason = expiredSchedule(h);
+  await utils.startCaffeinate(quiet, undefined, "-t 300", reason);
+  const edited = JSON.stringify({ ...JSON.parse(h.storage.get(reason.day)), to: "23:59", IsRunning: false });
+  const status = h.load("status.ts", {
+    "./utils": {
+      ...utils,
+      stopCaffeinateIfMatches: async (...args) => {
+        const result = await utils.stopCaffeinateIfMatches(...args);
+        h.storage.set(reason.day, edited);
+        return result;
+      },
+    },
+  });
+  await status.checkSchedule();
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 1);
+  assert.equal(h.storage.has(sessionKey), false);
+  assert.equal(h.storage.get(reason.day), edited);
+});
+
 test("conditional stop matches a scheduled identity and remains a no-op after it ends", async () => {
   const h = createHarness();
   const utils = h.load("utils.ts");
