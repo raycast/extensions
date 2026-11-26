@@ -1,8 +1,8 @@
 /**
  * Talking to Mash: finding the `mash` program and the desktop app, reading what
  * `mash search --live`, `mash list-chats` and `mash view` answer, and the
- * mash:// links that open a chat in the Mash desktop app. Everything here is plain data in and out, so it is tested
- * without Raycast.
+ * mash:// links that open a chat in the Mash desktop app. Everything here is
+ * plain data in and out, so it is tested without Raycast.
  */
 import { join } from "node:path";
 
@@ -85,10 +85,11 @@ export interface ChatView {
   readonly total?: number;
 }
 
-/** What a chat reads as around one message: what was said, with the work between counted. */
-export type Passage =
-  | { readonly kind: "message"; readonly message: Message; readonly match: boolean }
-  | { readonly kind: "steps"; readonly count: number };
+/** One message of a glance at a chat, and whether it is the one the glance was opened at. */
+export interface Glimpse {
+  readonly message: Message;
+  readonly match: boolean;
+}
 
 /**
  * Where the Mash desktop app can be installed: the Applications folder for
@@ -174,7 +175,7 @@ const VIEW_CONTEXT = 12;
 
 export function viewArguments(hit: Pick<Hit, "messageId" | "machine">): string[] {
   // Real chats are mostly tool calls and output, so read widely enough to
-  // find a few messages that were actually said on each side of the match.
+  // find a message that was actually said on each side of the match.
   const read = ["view", hit.messageId, "--context", String(VIEW_CONTEXT)];
   // A message from another machine is read from the shared index, by that
   // machine; this machine's index does not hold it.
@@ -366,42 +367,30 @@ const count = (value: unknown): number | undefined =>
   typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined;
 
 /**
- * The messages to show around `matchId`: up to `around` said messages on each
- * side, with the steps between them counted instead of shown. A match that is
- * itself a step is still shown, since that is what the search found.
+ * A glance at a chat: the message `matchId` names, with the message said
+ * before it and the one said after. Tool calls, their output and thinking
+ * between them are passed over; a match that is itself such a step is still
+ * shown, since that is what the search found.
  */
-export function conversation(messages: readonly Message[], matchId: string, around = 2): Passage[] {
+export function glance(messages: readonly Message[], matchId: string): Glimpse[] {
   const found = messages.findIndex((message) => message.id === matchId);
   const anchor = found >= 0 ? found : messages.findIndex((message) => !message.step);
   if (anchor < 0) return [];
-  const shown = new Set([anchor]);
-  for (const direction of [-1, 1]) {
-    let kept = 0;
-    for (let index = anchor + direction; index >= 0 && index < messages.length && kept < around; index += direction) {
-      if (messages[index].step) continue;
-      shown.add(index);
-      kept += 1;
+  const said = (direction: number): number[] => {
+    for (let index = anchor + direction; index >= 0 && index < messages.length; index += direction) {
+      if (!messages[index].step) return [index];
     }
-  }
-  const first = Math.min(...shown);
-  const last = Math.max(...shown);
-  const passages: Passage[] = [];
-  let steps = 0;
-  for (let index = first; index <= last; index += 1) {
-    if (!shown.has(index)) {
-      steps += 1;
-      continue;
-    }
-    if (steps) passages.push({ kind: "steps", count: steps });
-    steps = 0;
-    passages.push({ kind: "message", message: messages[index], match: found >= 0 && index === anchor });
-  }
-  return passages;
+    return [];
+  };
+  return [...said(-1), anchor, ...said(1)].map((index) => ({
+    message: messages[index],
+    match: found >= 0 && index === anchor,
+  }));
 }
 
 /**
- * Who said a message: you, or the agent by name. A memory's source chat comes
- * without its agent, so its replies are headed "Assistant" rather than nothing.
+ * Who said a message: you, or the agent by name; "Assistant" for a chat whose
+ * agent Mash did not name.
  */
 export function speaker(role: string, agent: string): string {
   if (role === "user") return "You";
@@ -409,57 +398,8 @@ export function speaker(role: string, agent: string): string {
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
-/**
- * The mash:// link that opens a chat in the desktop app: at the matching
- * message for a match, or at the chat itself for a recent chat.
- */
-export function chatLink(hit: Pick<Hit, "chatId" | "messageId" | "matched" | "machine">): string {
-  const chat = `mash://chat/${encodeURIComponent(hit.chatId)}`;
-  // Another machine's chat opens by that machine, as the dashboard names it.
-  const params = new URLSearchParams({
-    ...(hit.machine ? { node: hit.machine } : {}),
-    ...(hit.matched ? { message: hit.messageId } : {}),
-  });
-  return params.size ? `${chat}?${params}` : chat;
-}
-
-/**
- * The terminal command that resumes a chat in its agent's CLI, in the folder
- * it ran in. Only an agent's own sessions can be resumed: a subagent's ID is
- * Mash's, not a session the agent knows, and another machine's session is
- * not on this one. The folder is quoted for a POSIX shell.
- */
-export function resumeCommand(
-  hit: Pick<Hit, "agent" | "chatId" | "project" | "subagent" | "machine">,
-): string | undefined {
-  if (hit.subagent || hit.machine) return undefined;
-  const resume =
-    hit.agent === "claude-code"
-      ? `claude --resume ${hit.chatId}`
-      : hit.agent === "codex"
-        ? `codex resume ${hit.chatId}`
-        : undefined;
-  if (!resume || !/^[\w-]+$/.test(hit.chatId)) return undefined;
-  return hit.project ? `cd '${hit.project.replace(/'/g, `'\\''`)}' && ${resume}` : resume;
-}
-
-/** The mash:// link that opens Mash's main window, as the panel's Open Mash does. */
-export const appLink = "mash://";
-
-/** The mash:// link for Mash's full search of the same words. */
-export function searchLink(query: string): string {
-  return `mash://search?${new URLSearchParams({ q: query.trim() })}`;
-}
-
-/**
- * The terminal command for Mash's full search of the same words, for readers
- * without the desktop app. The words are quoted for a POSIX shell.
- */
-export function searchCommand(query: string): string {
-  return `mash search '${query.trim().replace(/'/g, `'\\''`)}'`;
-}
-
-export { literal, rendered } from "./markdown";
+export * from "./links";
+export { literal, quoted, rendered } from "./markdown";
 export { type Activity, type ActivityGroup, byActivity, lastActive } from "./activity";
 export { type ChatPosition, chatPosition, messageCount } from "./position";
 

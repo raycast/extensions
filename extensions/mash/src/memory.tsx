@@ -17,7 +17,7 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { useMemo } from "react";
-import { ChatMessages } from "./chatMessages";
+import { GetApp } from "./getApp";
 import { agentIcon } from "./agentIcon";
 import { agentName, chatLink, findMash, type Hit, hasDesktopApp, MashError, mashEnvironment } from "./mash";
 import {
@@ -34,8 +34,10 @@ import {
 type Choice = "all" | MemoryKind;
 
 // Neutral icons, one shape per kind, so the kind reads without colour
-// competing with the agent tiles. Raycast has no sliders icon, so a
-// preference is the switch.
+// competing with the agent tiles. They follow the dashboard's set (bookmark,
+// sliders, sticky note) as far as Raycast's icons go: it has no sliders, so
+// a preference is the switch, and no sticky note, so a note is the page with
+// a folded corner.
 const kinds: { readonly value: MemoryKind; readonly title: string; readonly icon: Icon }[] = [
   { value: "decision", title: "Decisions", icon: Icon.Bookmark },
   { value: "preference", title: "Preferences", icon: Icon.Switch },
@@ -187,7 +189,7 @@ export default function Command() {
       {[...sections].map(([scope, memories]) => (
         <List.Section key={scope} title={scope} subtitle={String(memories.length)}>
           {memories.map((memory) => (
-            <MemoryItem key={memory.id} memory={memory} mash={mash} hasApp={hasApp} reload={revalidate} />
+            <MemoryItem key={memory.id} memory={memory} hasApp={hasApp} reload={revalidate} />
           ))}
         </List.Section>
       ))}
@@ -195,17 +197,7 @@ export default function Command() {
   );
 }
 
-function MemoryItem({
-  memory,
-  mash,
-  hasApp,
-  reload,
-}: {
-  memory: Memory;
-  mash: string;
-  hasApp: boolean;
-  reload: () => void;
-}) {
+function MemoryItem({ memory, hasApp, reload }: { memory: Memory; hasApp: boolean; reload: () => void }) {
   const kind = kinds.find((entry) => entry.value === memory.kind) ?? kinds[0];
   const source = memory.evidence[0];
   const recorder = recordedAgent(memory.recordedBy);
@@ -284,24 +276,13 @@ function MemoryItem({
       }
       actions={
         <ActionPanel>
-          {hit ? (
-            <Action.Push
-              title="Read Source Messages"
-              icon={Icon.Text}
-              target={
-                <ChatMessages hit={hit} mash={mash}>
-                  {hasApp ? (
-                    <Action.Open title="Open Chat in Mash" icon={Icon.AppWindow} target={chatLink(hit)} />
-                  ) : null}
-                  <Action.CopyToClipboard title="Copy Statement" icon={Icon.QuoteBlock} content={memory.statement} />
-                </ChatMessages>
-              }
-            />
-          ) : null}
+          {/* ↵ goes back to the chat a memory came from when the desktop app
+              can open it; without the app it copies the statement. */}
           {hit && hasApp ? (
             <Action.Open title="Open Source Chat in Mash" icon={Icon.AppWindow} target={chatLink(hit)} />
           ) : null}
           <Action.CopyToClipboard title="Copy Statement" icon={Icon.QuoteBlock} content={memory.statement} />
+          {hit && !hasApp ? <GetApp /> : null}
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Record ID"

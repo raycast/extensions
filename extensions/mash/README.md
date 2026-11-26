@@ -22,13 +22,18 @@ chats** in the extension's preferences. Type a query after **Search Mash** in
 Raycast's root search to start with it.
 From a chat you can:
 
-- **Read Messages** (↵) — what was said around the match, without leaving
-  Raycast, with how many messages come before and after it. Tool calls, their
-  output and the agent's thinking between messages are counted, not shown.
-  Beside the messages are the chat's agent, project, machine, when it was last
-  active and how many messages it has, with the match's place among them.
-- **Open Chat in Mash** (⌘↵) — the chat, at that message, in the Mash desktop
-  app. Offered only when the app is installed.
+- **Open Chat in Mash** (↵) — the chat, at the matching message, in the Mash
+  desktop app. Without the app, ↵ copies the way back into the chat instead
+  (**Copy Resume Command**, or **Copy Message ID** for a chat that can't be
+  resumed here), and **Get the Mash App** opens the
+  [downloads page](https://getmash.io/downloads/).
+- **Show Glance** (⌘Y) — a pane beside the list with the matching message
+  and the one said before and after it, without leaving Raycast: your own
+  messages as quotes, the words you searched for in bold, and code as it was
+  written. Tool calls, their output and the agent's thinking are passed over,
+  and long messages are cut short. Under them are the chat's agent, project,
+  machine, when it was last active and how many messages it has, with the
+  match's place among them. ⌘Y again hides it; the choice is remembered.
 - **Open in Codex** or **Open in Claude** (⌘O) — the session in its agent's
   own app: a Codex thread in the ChatGPT app, or a Claude Code session in the
   Claude app, in the folder it ran in. For a session the Claude app doesn't
@@ -61,9 +66,9 @@ from your chats on every machine (through the shared index, or this
 machine's alone when it has not joined one), grouped by the repository or
 project they apply to, newest first. Choose a kind beside the search field. Each shows why it was recorded,
 when it applies, the quotes from the chat behind it, and the agent that
-recorded it. **Read Source Messages** (↵) goes to the message it came from;
-**Open Source Chat in Mash** (⌘↵, with the desktop app) opens it there, and
-**Copy Statement** copies it. A record an agent proposed that you haven't
+recorded it. **Open Source Chat in Mash** (↵, with the desktop app) goes to
+the message it came from, and **Copy Statement** copies it; without the app,
+↵ copies the statement and **Get the Mash App** opens the downloads page. A record an agent proposed that you haven't
 confirmed is tagged **unconfirmed**.
 
 When Mash fails, the extension shows Mash's own message with the next steps:
