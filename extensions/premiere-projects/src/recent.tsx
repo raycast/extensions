@@ -11,7 +11,7 @@ import { useThumbnails } from "./hooks/useThumbnails";
 import { useViewMode } from "./hooks/useViewMode";
 import { getRecentPremiereProjects } from "./services/recents";
 import { filterPremiereFiles, sortPremiereFiles } from "./services/search";
-import { PremiereFile, SortOption } from "./types";
+import { SortOption } from "./types";
 
 const RECENT_SORT_STORAGE_KEY = "premiere_recent_sort_by";
 
@@ -20,7 +20,29 @@ export default function RecentProjectsCommand() {
   const defaultScope = prefs.searchScope === "all" ? "global" : "home";
 
   const [searchText, setSearchText] = useState<string>("");
-  const [sortBy, setSortBy] = useState<SortOption>("recent");
+
+  useEffect(() => {
+    async function migrateLegacyStorage() {
+      try {
+        const item = await LocalStorage.getItem(RECENT_SORT_STORAGE_KEY);
+        if (typeof item === "string") {
+          try {
+            JSON.parse(item);
+          } catch {
+            await LocalStorage.setItem(RECENT_SORT_STORAGE_KEY, JSON.stringify(item));
+          }
+        }
+      } catch {
+        // Non-blocking
+      }
+    }
+    migrateLegacyStorage();
+  }, []);
+
+  const { value: sortBy = "recent", setValue: setSortBy } = useLocalStorage<SortOption>(
+    RECENT_SORT_STORAGE_KEY,
+    "recent",
+  );
 
   const { value: selectedLocation = defaultScope, setValue: setSelectedLocation } = useLocalStorage<string>(
     "premiere_recent_location",
@@ -28,44 +50,20 @@ export default function RecentProjectsCommand() {
   );
 
   const {
-    data: recentProjects,
+    data: files = [],
     isLoading,
     error,
     revalidate,
+    mutate,
   } = usePromise(async () => {
     return await getRecentPremiereProjects(80);
   }, []);
 
-  const [files, setFiles] = useState<PremiereFile[]>([]);
-
-  useEffect(() => {
-    if (recentProjects) {
-      setFiles(recentProjects);
-    } else if (error) {
-      setFiles([]);
-    }
-  }, [recentProjects, error]);
-
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
   const thumbnails = useThumbnails(files);
 
-  useEffect(() => {
-    async function loadSavedSort() {
-      try {
-        const saved = await LocalStorage.getItem<string>(RECENT_SORT_STORAGE_KEY);
-        if (saved) {
-          setSortBy(saved as SortOption);
-        }
-      } catch {
-        // Fallback to default
-      }
-    }
-    loadSavedSort();
-  }, []);
-
-  const handleSortChange = async (newSort: SortOption) => {
+  const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort);
-    await LocalStorage.setItem(RECENT_SORT_STORAGE_KEY, newSort);
   };
 
   const handleLocationChange = (newLoc: string) => {
@@ -73,31 +71,42 @@ export default function RecentProjectsCommand() {
   };
 
   const handleFileRenamed = (oldPath: string, newPath: string) => {
-    setFiles((prev) =>
-      prev.map((f) => {
-        if (f.path === oldPath) {
-          const slashIdx = Math.max(newPath.lastIndexOf("/"), newPath.lastIndexOf("\\"));
-          const newName = slashIdx >= 0 ? newPath.slice(slashIdx + 1) : newPath;
-          const dotIdx = newName.lastIndexOf(".");
-          const newTitle = dotIdx > 0 ? newName.slice(0, dotIdx) : newName;
-          return {
-            ...f,
-            id: newPath,
-            path: newPath,
-            name: newName,
-            title: newTitle,
-          };
-        }
-        return f;
-      }),
-    );
+    mutate(Promise.resolve(), {
+      optimisticUpdate(currentFiles) {
+        if (!currentFiles) return [];
+        return currentFiles.map((f) => {
+          if (f.path === oldPath) {
+            const slashIdx = Math.max(newPath.lastIndexOf("/"), newPath.lastIndexOf("\\"));
+            const newName = slashIdx >= 0 ? newPath.slice(slashIdx + 1) : newPath;
+            const dotIdx = newName.lastIndexOf(".");
+            const newTitle = dotIdx > 0 ? newName.slice(0, dotIdx) : newName;
+            return {
+              ...f,
+              id: newPath,
+              path: newPath,
+              name: newName,
+              title: newTitle,
+            };
+          }
+          return f;
+        });
+      },
+      shouldRevalidateAfter: false,
+    });
   };
 
   const handleFileDeleted = (deletedPath: string) => {
-    setFiles((prev) => prev.filter((f) => f.path !== deletedPath));
+    mutate(Promise.resolve(), {
+      optimisticUpdate(currentFiles) {
+        if (!currentFiles) return [];
+        return currentFiles.filter((f) => f.path !== deletedPath);
+      },
+      shouldRevalidateAfter: false,
+    });
   };
 
   const displayedFiles = useMemo(() => {
+    if (error) return [];
     let list = files;
     if (selectedLocation && selectedLocation !== "global") {
       if (selectedLocation === "system") {
@@ -122,7 +131,7 @@ export default function RecentProjectsCommand() {
     }
     const filtered = filterPremiereFiles(list, searchText);
     return sortPremiereFiles(filtered, sortBy);
-  }, [files, searchText, sortBy, selectedLocation]);
+  }, [files, searchText, sortBy, selectedLocation, error]);
 
   const accessory = (
     <SortAndFilterDropdown

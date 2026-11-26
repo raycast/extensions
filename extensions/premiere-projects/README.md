@@ -20,7 +20,7 @@
 
 - 🕒 **Accurate Recent Projects**: Discovers genuine recently opened projects from Adobe Premiere Pro's profile preferences (`Adobe Premiere Pro Prefs` XML MRU list), Adobe MediaBrowser records, and system-level recents on both macOS and Windows.
 - 🔎 **Deep Project Search**: Search Premiere Pro (`.prproj`) projects by project title, parent directory, sequence names, or production name.
-- 🎬 **Native Metadata Extraction**: Automatically decompresses and parses gzip-compressed `.prproj` files to extract project schema version, sequence lists, timeline dimensions, aspect ratios, and frame rates without external dependencies.
+- 🎬 **Native Metadata Extraction**: Automatically decompresses a whole project buffer and parses gzip-compressed `.prproj` files to extract project schema version, sequence lists, timeline dimensions, aspect ratios, and frame rates without external dependencies.
 - 📁 **Adobe Productions Aware**: Automatically identifies projects that are part of an Adobe Production structure (via `.prodset` detection) and labels them clearly.
 - 🔲 **Grid & List Views**: Switch seamlessly between visual cards and dense list rows with full metadata inspector sidebar (`⌘V` on macOS, `Ctrl+V` on Windows).
 - 🧹 **Safe Media Cache Cleaner**: Free up gigabytes of disk space by purging Premiere Pro's temporary conformed audio (`.cfa`) and waveform peak (`.pek`) files while preserving critical user data and settings.
@@ -43,12 +43,12 @@
 | Shortcut (macOS) | Shortcut (Windows) | Action |
 |---|---|---|
 | `↵` (Return) | `Enter` | Open project in Adobe Premiere Pro |
-| `⌘Y` | `Space` / `Quick Look` | Quick Look rendered artwork / project preview |
+| `⌘Y` | `Ctrl+Y` | Quick Look rendered artwork / project preview |
 | `⌥⌘R` | `Alt+Ctrl+R` | Rename Project (collision & path safe) |
 | `⌥⌘D` | `Alt+Ctrl+D` | Edit Date Attributes (Backdate / Frontdate) |
 | `⌘V` | `Ctrl+V` | Toggle between Grid View and List View |
 | `⌘R` | `Ctrl+R` | Refresh file listings |
-| `⇧⌘C` | `Shift+Ctrl+C` | Copy Project File Path |
+| `⌥⌘C` | `Alt+Shift+C` | Copy Project File Path |
 | `⌥⌘K` | `Alt+Ctrl+K` | Purge Premiere Pro Media Cache |
 | `^X` | `Ctrl+X` | Delete Project (requires confirmation) |
 
@@ -67,9 +67,6 @@ Customize the extension via **Raycast Preferences** (`⌘,` on macOS, `Ctrl+,` o
 ## 🛠️ Supported Formats
 
 - `.prproj` — Adobe Premiere Pro Project (Gzip-compressed XML)
-- `.mogrt` — Motion Graphics Template
-- `.prfpset` — Premiere Pro Effect Preset
-- `.prodset` — Adobe Production Configuration
 
 ---
 

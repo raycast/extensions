@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { safeRenameProject } from "../services/file-operations";
 import { PremiereFile } from "../types";
 
@@ -9,35 +8,44 @@ interface RenameFormProps {
   onRenamed?: (newPath: string) => void;
 }
 
+interface RenameFormValues {
+  title: string;
+}
+
 export function RenameForm({ file, onRenamed }: RenameFormProps) {
   const { pop } = useNavigation();
-  const [title, setTitle] = useState(file.title);
-  const [error, setError] = useState<string | undefined>();
 
-  const handleSubmit = async () => {
-    const clean = title.trim();
-    if (!clean) {
-      setError("Project name cannot be empty");
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<RenameFormValues>({
+    async onSubmit(values) {
+      const clean = values.title.trim();
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Renaming project...",
+      });
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Renaming project...",
-    });
-
-    try {
-      const newPath = await safeRenameProject(file.path, clean);
-      toast.style = Toast.Style.Success;
-      toast.title = "Project renamed successfully";
-      if (onRenamed) {
-        onRenamed(newPath);
+      try {
+        const newPath = await safeRenameProject(file.path, clean);
+        toast.style = Toast.Style.Success;
+        toast.title = "Project renamed successfully";
+        if (onRenamed) {
+          onRenamed(newPath);
+        }
+        pop();
+      } catch (err: unknown) {
+        await showFailureToast(err, { title: "Failed to rename project" });
       }
-      pop();
-    } catch (err: unknown) {
-      await showFailureToast(err, { title: "Failed to rename project" });
-    }
-  };
+    },
+    validation: {
+      title(value) {
+        if (!value || !value.trim()) {
+          return "Project name cannot be empty";
+        }
+      },
+    },
+    initialValues: {
+      title: file.title,
+    },
+  });
 
   return (
     <Form
@@ -48,17 +56,7 @@ export function RenameForm({ file, onRenamed }: RenameFormProps) {
       }
     >
       <Form.Description title="Current Project" text={`${file.name} (${file.formattedSize})`} />
-      <Form.TextField
-        id="title"
-        title="New Name"
-        value={title}
-        error={error}
-        onChange={(val) => {
-          setTitle(val);
-          if (error) setError(undefined);
-        }}
-        placeholder="Enter new project name"
-      />
+      <Form.TextField {...itemProps.title} title="New Name" placeholder="Enter new project name" />
       <Form.Description text={`Extension (.${file.extension}) will be preserved automatically.`} />
     </Form>
   );

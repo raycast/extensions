@@ -1,3 +1,4 @@
+import { runPowerShellScript } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -100,10 +101,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const filterClause = cleanTerm.length > 0 ? ` | Where-Object { $_.Name -like '*${cleanTerm}*' }` : "";
     const script = `Get-ChildItem -LiteralPath ${escapedRoots} -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue${filterClause} | Select-Object -ExpandProperty FullName -First ${limit}`;
 
-    const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
-      timeout: 8000,
-      maxBuffer: 4 * 1024 * 1024,
-    });
+    const stdout = await runPowerShellScript(script, { timeout: 8000 });
 
     return stdout
       .split(/\r?\n/)
@@ -218,10 +216,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const script = `$sh = New-Object -ComObject WScript.Shell; Get-ChildItem -LiteralPath '${escapedRecentDir}' -Filter '*.lnk' -ErrorAction SilentlyContinue | ForEach-Object { try { $target = $sh.CreateShortcut($_.FullName).TargetPath; if ($target -and $target.EndsWith('.prproj', [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $target)) { $target } } catch {} }`;
 
     try {
-      const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
-        timeout: 6000,
-        maxBuffer: 2 * 1024 * 1024,
-      });
+      const stdout = await runPowerShellScript(script, { timeout: 6000 });
 
       return stdout
         .split(/\r?\n/)
