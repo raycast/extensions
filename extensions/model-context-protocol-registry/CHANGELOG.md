@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Databuddy MCP Server] - {PR_MERGE_DATE}
+
+- Add Databuddy to the official registry: cookieless web and product analytics (traffic, signups, funnels, errors, Core Web Vitals, session replays) and investigations that show why a metric moved. Hosted Streamable HTTP server at https://api.databuddy.cc/v1/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.

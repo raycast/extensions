@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "databuddy",
+    title: "Databuddy",
+    description:
+      "Cookieless web and product analytics from your AI assistant: ask about traffic, signups, funnels, errors, Core Web Vitals and session replays, and read investigations that show the evidence for why a metric moved. Changes to goals, funnels, feature flags and short links are previewed and wait for your approval. Official server run by Databuddy. Hosted Streamable HTTP server at https://api.databuddy.cc/v1/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth sign-in, where you choose the organization, websites and permissions. A Databuddy account is required (free plan available).",
+    icon: "https://raw.githubusercontent.com/databuddy-analytics/skills/main/assets/logo.png",
+    homepage: "https://www.databuddy.cc/docs/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.databuddy.cc/v1/mcp"],
+    },
+    remoteUrl: "https://api.databuddy.cc/v1/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
