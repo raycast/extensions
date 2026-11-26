@@ -266,11 +266,12 @@ async function fetchCanaryCommit(canaryUrl: string, versionPath: string, headRef
   }
 }
 
-// Folders of the canary URL, deepest first and ending with the host root: /pr-1/login/user → /pr-1/login/, /pr-1/, /.
+// Folders of the canary URL, deepest first and ending with the host root. The whole path counts as a folder too, since a
+// link like /pr-1 can name the preview itself: /pr-1/login/user → /pr-1/login/user/, /pr-1/login/, /pr-1/, /.
 function canaryFolders(canary: URL): string[] {
   const segments = canary.pathname
     .split("/")
-    .slice(1, -1)
+    .filter(Boolean)
     .slice(0, MAX_VERSION_FOLDERS - 1);
   return segments.map((_, i) => `/${segments.slice(0, segments.length - i).join("/")}/`).concat("/");
 }

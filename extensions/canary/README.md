@@ -38,7 +38,7 @@ The check is skipped for canaries on `localhost` or a private-network address, s
 
 The extension asks the canary itself: it requests **Canary Version Path** on the canary's host and compares the commit there with the pull request's latest commit. The file can be JSON with a `commit`, `sha`, `revision` or `version` field, such as `{"version":"d2e2463"}`, or plain text holding only the commit. A short commit like `d2e2463` is enough.
 
-A canary served under a path, such as `https://dashboard.example.com/pr-123/login/user`, is looked up in each folder of that URL, deepest first, down to the host root: `/pr-123/login/build-info.json`, `/pr-123/build-info.json`, then `/build-info.json`. The first one that holds a commit is used.
+A canary served under a path, such as `https://dashboard.example.com/pr-123/login/user`, is looked up in each folder of that URL, deepest first, down to the host root: `/pr-123/login/user/build-info.json`, `/pr-123/login/build-info.json`, `/pr-123/build-info.json`, then `/build-info.json`. The first one that holds a commit is used.
 
 ## Actions
 
