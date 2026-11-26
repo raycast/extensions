@@ -11,7 +11,6 @@ import {
   Keyboard,
   List,
   open,
-  showHUD,
   showToast,
   Toast,
   useNavigation,
@@ -49,8 +48,8 @@ import {
   TOKEN_SETTINGS_URL,
   trashEmail,
 } from "./util/jmap";
-import { demoFavicon } from "./util/demo";
 import { registrableDomain } from "./util/domain";
+import { escapeMarkdown } from "./util/markdown";
 import { detectLoginInfo, LoginInfo, looksLikeLogin } from "./util/login";
 
 const DEBOUNCE_MS = 300;
@@ -387,7 +386,8 @@ function EmailItem(props: EmailActionsProps & { isSelected: boolean; isShowingDe
       accessories={accessories}
       // Only the selected email loads its body, so scrolling the list stays fast.
       detail={
-        isShowingDetail && (isSelected ? <EmailPreview email={email} /> : <List.Item.Detail markdown={email.preview} />)
+        isShowingDetail &&
+        (isSelected ? <EmailPreview email={email} /> : <List.Item.Detail markdown={escapeMarkdown(email.preview)} />)
       }
       actions={<EmailActions {...props} />}
     />
@@ -483,7 +483,8 @@ function EmailActions(props: EmailActionsProps) {
         key="link"
         title="Open Login Link"
         url={login.link}
-        shortcut={Keyboard.Shortcut.Common.OpenWith}
+        // eslint-disable-next-line @raycast/prefer-common-shortcut
+        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
       />
     ),
   ].filter(Boolean);
@@ -518,7 +519,8 @@ function EmailActions(props: EmailActionsProps) {
         <Action
           title="Archive"
           icon={Icon.Box}
-          shortcut={Keyboard.Shortcut.Common.Edit}
+          // eslint-disable-next-line @raycast/prefer-common-shortcut
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
           onAction={thenPop(mailActions.archive)}
         />
         <Action
@@ -549,7 +551,7 @@ function EmailActions(props: EmailActionsProps) {
           onAction={async () => {
             try {
               await Clipboard.copy((await getEmailContent(email.id)).body);
-              await showHUD("Copied body");
+              await showToast({ style: Toast.Style.Success, title: "Copied body" });
             } catch (error) {
               await showFailureToast(error, { title: "Couldn't load email" });
             }
@@ -639,7 +641,7 @@ function AttachmentsSubmenu({ attachments }: { attachments: Attachment[] }) {
 }
 
 function emailMarkdown(email: Email, body: string | undefined): string {
-  return `## ${escapeMarkdown(email.subject)}\n\n${body ?? email.preview}`;
+  return `## ${escapeMarkdown(email.subject)}\n\n${body ?? escapeMarkdown(email.preview)}`;
 }
 
 function formatSize(bytes: number): string {
@@ -670,18 +672,12 @@ function senderIcon(from: Address | null, sender: string): Image.ImageLike {
   const avatar = getAvatarIcon(sender);
   const domain = from?.email.split("@")[1]?.toLowerCase();
   if (!domain || PERSONAL_DOMAINS.has(domain)) return avatar;
-  // .example is reserved for made-up addresses, like the demo mode's.
-  if (domain.endsWith(".example")) return demoFavicon(domain) ?? avatar;
   return getFavicon(`https://${registrableDomain(domain)}`, { fallback: avatar, mask: Image.Mask.RoundedRectangle });
 }
 
 function formatAddress(address: Address | null): string {
   if (!address) return "";
   return address.name ? `${address.name} <${address.email}>` : address.email;
-}
-
-function escapeMarkdown(text: string): string {
-  return text.replace(/([\\`*_[\]#<>])/g, "\\$1");
 }
 
 function truncate(text: string, length: number): string {

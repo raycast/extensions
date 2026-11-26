@@ -21,7 +21,9 @@ export function looksLikeLogin(email: Email): boolean {
 
 // Codes and links are only useful for a few days, so they're kept no longer than the emails
 // they come from. They're secrets, so they live in Raycast's encrypted LocalStorage.
-type StoredEntries = Record<string, LoginInfo & { expiresAt: number }>;
+// checkedByAI tells a pattern-only result (from a background refresh, or before AI was turned on)
+// apart from one AI has already looked at, so AI can still have a go later.
+type StoredEntries = Record<string, LoginInfo & { expiresAt: number; checkedByAI: boolean }>;
 const STORAGE_KEY = "loginCodes";
 
 // Raycast AI allows a handful of requests a minute, so one load asks about a few emails at most.
@@ -34,39 +36,46 @@ async function storedEntries(): Promise<StoredEntries> {
   return Object.fromEntries(Object.entries(entries).filter(([, entry]) => entry.expiresAt > now));
 }
 
+// Merged into what's saved now, not what was saved when this lookup started, so a lookup
+// that finished in the meantime (another command, the menu bar) keeps its results.
+async function saveEntries(found: StoredEntries): Promise<void> {
+  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify({ ...(await storedEntries()), ...found }));
+}
+
 export async function detectLoginInfo(emails: Email[]): Promise<Map<string, LoginInfo>> {
-  const entries = await storedEntries();
+  // Background runs (the menu bar's refresh) never use AI, so its budget goes to things you opened.
+  const aiAvailable =
+    getPreferenceValues<Preferences>().useAI &&
+    environment.canAccess(AI) &&
+    environment.launchType === LaunchType.UserInitiated;
+
+  const saved = await storedEntries();
   const results = new Map<string, LoginInfo>();
   const pending = emails.filter((email) => {
-    const entry = entries[email.id];
-    if (entry) results.set(email.id, { code: entry.code, link: entry.link });
-    return !entry;
+    const entry = saved[email.id];
+    const usable = entry && (entry.checkedByAI || !aiAvailable);
+    if (usable) results.set(email.id, { code: entry.code, link: entry.link });
+    return !usable;
   });
+  if (pending.length === 0) return results;
 
-  if (pending.length > 0) {
-    const contents = await getEmailContents(pending.map((email) => email.id));
-    // Background runs (the menu bar's refresh) never use AI, so its budget goes to things you opened.
-    const aiEnabled =
-      getPreferenceValues<Preferences>().useAI &&
-      environment.canAccess(AI) &&
-      environment.launchType === LaunchType.UserInitiated;
-    let aiRequests = 0;
+  const contents = await getEmailContents(pending.map((email) => email.id));
+  const found: StoredEntries = {};
+  let aiRequests = 0;
 
-    for (const email of pending) {
-      const content = contents.get(email.id);
-      if (!content) continue;
-      const patterns = extractWithPatterns(email, content);
-      const askAI = aiEnabled && aiRequests < MAX_AI_REQUESTS;
-      if (askAI) aiRequests++;
-      const ai = askAI ? await extractWithAI(email, content) : null;
-      const info = { code: ai?.code ?? patterns.code, link: ai?.link ?? patterns.link };
-      results.set(email.id, info);
-      // An email AI should have read but didn't is left uncached so a later load can try again.
-      if (!aiEnabled || ai) entries[email.id] = { ...info, expiresAt: email.receivedAt.getTime() + MAX_AGE_MS };
-    }
+  for (const email of pending) {
+    const content = contents.get(email.id);
+    if (!content) continue;
+    const patterns = extractWithPatterns(email, content);
+    const askAI = aiAvailable && aiRequests < MAX_AI_REQUESTS;
+    if (askAI) aiRequests++;
+    const ai = askAI ? await extractWithAI(email, content) : null;
+    const info = { code: ai?.code ?? patterns.code, link: ai?.link ?? patterns.link };
+    results.set(email.id, info);
+    found[email.id] = { ...info, expiresAt: email.receivedAt.getTime() + MAX_AGE_MS, checkedByAI: Boolean(ai) };
   }
 
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  await saveEntries(found);
   return results;
 }
 

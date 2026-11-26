@@ -2,7 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { mkdir, readdir, rm, stat, writeFile } from "fs/promises";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { tmpdir } from "os";
-import { DEMO_TOKEN, demoContent, demoEmails, demoList, demoMailboxes, isDemo } from "./demo";
+import { escapeMarkdown } from "./markdown";
 import { join } from "path";
 
 const SESSION_URL = "https://api.fastmail.com/jmap/session";
@@ -80,7 +80,6 @@ let mailboxesPromise: Promise<Mailbox[]> | null = null;
 const contentCache = new Map<string, EmailContent>();
 
 export async function getToken(): Promise<string | undefined> {
-  if (isDemo()) return DEMO_TOKEN;
   return LocalStorage.getItem<string>(TOKEN_KEY);
 }
 
@@ -152,7 +151,6 @@ async function call<T extends unknown[]>(methodCalls: unknown[][]): Promise<T> {
 }
 
 export async function getMailboxes(): Promise<Mailbox[]> {
-  if (isDemo()) return demoMailboxes;
   mailboxesPromise ??= getSession()
     .then(({ accountId }) =>
       call<[{ list: Mailbox[] }]>([
@@ -173,7 +171,6 @@ export const ALL_MAIL = "all";
 // With the Inbox selected, an empty search lists the inbox but typing searches all mail,
 // since that's usually what you're after. Any other folder scopes both.
 export async function listEmails(folder: string, query: string, page: number): Promise<EmailPage> {
-  if (isDemo()) return { emails: page === 0 ? demoList(folder, query) : [], hasMore: false };
   const mailboxes = await getMailboxes();
   const conditions: Record<string, unknown>[] = parseQuery(query, mailboxes);
 
@@ -194,7 +191,6 @@ export async function listEmails(folder: string, query: string, page: number): P
 
 // Everything received since the given time, newest first, except what's in the trash.
 export async function recentEmails(since: Date): Promise<Email[]> {
-  if (isDemo()) return demoEmails.filter((email) => email.receivedAt >= since && !email.mailboxIds.trash);
   const mailboxes = await getMailboxes();
   const trash = mailboxes.filter((m) => m.role === "trash").map((m) => m.id);
   const conditions: Record<string, unknown>[] = [{ after: since.toISOString().replace(/\.\d+Z$/, "Z") }];
@@ -203,7 +199,6 @@ export async function recentEmails(since: Date): Promise<Email[]> {
 }
 
 export async function getEmailContents(ids: string[]): Promise<Map<string, EmailContent>> {
-  if (isDemo()) return new Map(ids.flatMap((id) => (demoContent(id) ? [[id, demoContent(id)!]] : [])));
   const missing = ids.filter((id) => !contentCache.has(id));
   if (missing.length > 0) {
     const { accountId } = await getSession();
@@ -233,7 +228,6 @@ export async function getEmailContent(id: string): Promise<EmailContent> {
 }
 
 export async function openAttachment(attachment: Attachment): Promise<string> {
-  if (isDemo()) throw new Error("Attachments don't open in demo mode");
   const { accountId, downloadUrl, token } = await getSession();
   const name = attachment.name || "attachment";
   const url = downloadUrl
@@ -295,7 +289,6 @@ async function mailboxIdForRole(role: string): Promise<string> {
 }
 
 async function updateEmail(id: string, patch: Record<string, unknown>): Promise<void> {
-  if (isDemo()) return;
   const { accountId } = await getSession();
   const [{ notUpdated }] = await call<[{ notUpdated?: Record<string, { type: string; description?: string }> }]>([
     ["Email/set", { accountId, update: { [id]: patch } }, "set"],
@@ -411,7 +404,8 @@ function toContent(raw: RawContent): EmailContent {
   const hasRealText = text.trim().length > 0 && raw.textBody.some((part) => part.type === "text/plain");
 
   return {
-    body: html ? htmlToMarkdown(html) : text,
+    // Plain text is escaped so a sender can't sneak in Markdown, like an image that tracks reads.
+    body: html ? htmlToMarkdown(html) : escapeMarkdown(text),
     text: hasRealText ? text : htmlToText(html),
     links: html ? htmlLinks(html) : textLinks(text),
   };
