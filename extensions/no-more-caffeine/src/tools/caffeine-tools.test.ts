@@ -9,9 +9,13 @@ import previewCaffeine from "./preview-caffeine";
 
 const { storage } = vi.hoisted(() => ({ storage: new Map<string, string>() }));
 
-vi.mock("@raycast/api", () => ({
+vi.mock("@raycast/api", async () => ({
   Color: {},
-  environment: { ownerOrAuthorName: "atsushi_kawamura", extensionName: "no-more-caffeine" },
+  environment: {
+    assetsPath: (await import("node:path")).resolve("assets"),
+    ownerOrAuthorName: "atsushi_kawamura",
+    extensionName: "no-more-caffeine",
+  },
   getPreferenceValues: () => ({ bedtime: "22:00", halfLife: "5", maxCaffeineAtBedtime: "50" }),
   LocalStorage: {
     getItem: async (key: string) => storage.get(key),
@@ -39,7 +43,7 @@ describe("Raycast caffeine tools", () => {
     expect(result.todayIntakeMg).toBe(95);
     expect(result.estimatedCaffeineNowMg).toBeGreaterThan(0);
     expect(result.estimatedCaffeineAtBedtimeMg).toBeGreaterThan(0);
-    expect(result.timelineUrl).toMatch(/\/caffeine-timeline$/);
+    expect(result.timelineUrl).toBe("raycast://extensions/atsushi_kawamura/no-more-caffeine/caffeine-timeline");
     expect(LocalStorage.setItem).not.toHaveBeenCalled();
   });
 
@@ -117,6 +121,9 @@ describe("Raycast caffeine tools", () => {
     expect(summary.drinkCount).toBe(31);
     expect(summary.breakdown).toHaveLength(7);
     expect(summary).not.toHaveProperty("entries");
+    const chart = new URL(summary.historyUrl);
+    expect(chart.pathname).toBe("/atsushi_kawamura/no-more-caffeine/caffeine-history");
+    expect(JSON.parse(chart.searchParams.get("context") ?? "")).toEqual({ range: "week" });
 
     const page = await getCaffeineHistory({ range: "week", includeEntries: true });
     expect(page).toMatchObject({ entries: expect.any(Array), nextOffset: 30 });

@@ -1,4 +1,5 @@
 import { environment } from "@raycast/api";
+import { createDeeplink } from "@raycast/utils";
 import { BUILT_IN_PRESETS, caffeineForVolume, getDrinkPresets, servingDescription } from "../utils/drinkPresets";
 import { positiveAmount } from "../utils/intakeData";
 import { getCustomDrinks } from "../utils/storage";
@@ -77,6 +78,10 @@ export function commandUrl(
   command: "caffeine-timeline" | "caffeine-history" | "what-if",
   context?: Record<string, string | number>,
 ): string {
-  const url = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/${command}`;
-  return context ? `${url}?context=${encodeURIComponent(JSON.stringify(context))}` : url;
+  return createDeeplink({
+    command,
+    ownerOrAuthorName: environment.ownerOrAuthorName,
+    extensionName: environment.extensionName,
+    context,
+  });
 }
