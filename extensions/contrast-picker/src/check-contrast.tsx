@@ -1,42 +1,60 @@
-import { Clipboard, Detail, LaunchProps } from "@raycast/api";
+import { Clipboard, Detail, Form, LaunchProps, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import ContrastForm from "./components/ContrastForm";
 import ContrastResult from "./components/ContrastResult";
-import { resolveColors } from "./lib/extract";
-import { getPreferences } from "./lib/settings";
+import { extractColors, fillFromClipboard, resolveSlots } from "./lib/extract";
+import { getPreferences, useFontSettings } from "./lib/settings";
 import { ContrastContext } from "./lib/types";
 
 type Props = LaunchProps<{ arguments: Arguments.CheckContrast; launchContext?: ContrastContext }>;
 
-/** Reads the two newest clipboard entries. The older one is the text color, the newer one the background. */
+/** Reads the two newest clipboard entries and returns the colors in them, oldest first. */
 async function readClipboardColors(): Promise<string[]> {
   const read = (offset: number) => Clipboard.readText({ offset }).catch(() => undefined);
   const [newest, previous] = await Promise.all([read(0), read(1)]);
-  // A single entry such as "#fff on #000" holds both colors; otherwise use the two newest entries.
-  const fromNewest = resolveColors([newest]);
-  if (fromNewest.background) return [newest ?? ""];
-  return [previous ?? "", newest ?? ""];
+  return [...extractColors(previous), ...extractColors(newest)].slice(-2);
 }
 
 export default function Command(props: Props) {
   const { useClipboard } = getPreferences();
-  const given = resolveColors([
+  const given = resolveSlots(
     props.launchContext?.foreground ?? props.arguments.foreground,
     props.launchContext?.background ?? props.arguments.background,
-  ]);
+  );
   const needsClipboard = useClipboard && !(given.foreground && given.background);
 
   const { data: clipboard, isLoading } = usePromise(readClipboardColors, [], { execute: needsClipboard });
 
-  if (needsClipboard && isLoading) return <Detail isLoading markdown="" />;
+  if (needsClipboard && isLoading) return <Detail isLoading />;
 
-  const fromClipboard = needsClipboard ? resolveColors(clipboard ?? []) : {};
-  // Typed or picked colors win. The clipboard fills only what is missing.
-  const filled = resolveColors([
-    given.foreground,
-    given.background,
-    fromClipboard.foreground,
-    fromClipboard.background,
-  ]);
+  // Typed or picked colors keep their slot. The clipboard fills only the empty slots.
+  const colors = needsClipboard ? fillFromClipboard(given, clipboard ?? []) : given;
 
-  return <ContrastResult foreground={filled.foreground ?? ""} background={filled.background ?? ""} />;
+  if (colors.foreground && colors.background) {
+    return <ContrastResult foreground={colors.foreground} background={colors.background} />;
+  }
+  return <ColorForm foreground={colors.foreground} background={colors.background} />;
+}
+
+/** The form for missing colors. It opens the result as a new screen, so Esc returns to the form. */
+function ColorForm(props: { foreground?: string; background?: string }) {
+  const { push } = useNavigation();
+  const font = useFontSettings();
+
+  // Wait for the saved font settings. A form that opens with defaults would overwrite them.
+  if (font.isLoading) return <Form isLoading />;
+
+  return (
+    <ContrastForm
+      foreground={props.foreground}
+      background={props.background}
+      sizePx={font.sizePx}
+      weight={font.weight}
+      onSubmit={async (values) => {
+        if (values.sizePx) await font.setSize(values.sizePx);
+        if (values.weight) await font.setWeight(values.weight);
+        push(<ContrastResult foreground={values.foreground} background={values.background} />);
+      }}
+    />
+  );
 }

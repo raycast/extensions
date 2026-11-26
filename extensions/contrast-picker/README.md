@@ -1,4 +1,4 @@
-<img src="assets/icon.png" width="96" height="96" alt="Contrast Picker icon">
+<img src="media/icon.png" width="96" height="96" alt="Contrast Picker icon">
 
 # Contrast Picker
 
@@ -44,20 +44,8 @@ A transparent background is shown over white.
 ## Preferences
 
 - **Primary Fix Target**: WCAG AA (default), WCAG AAA or APCA
-- **Primary Copy Format**: HEX (default), OKLCH, RGB or Tailwind
+- **Primary Copy Format**: the format that ↵ uses to copy the fix. HEX (default), OKLCH, RGB or Tailwind. `⌘1` to `⌘4` always use HEX, OKLCH, RGB and Tailwind.
 - **Prefill from clipboard**: on by default. Needs Raycast Clipboard History for the second-to-last entry.
-
-## Development
-
-```bash
-npm install
-npm run dev        # ray develop: builds the Swift eyedropper and opens the extension in Raycast
-npm test           # unit tests for color math, WCAG, APCA and fixes
-npm run lint       # Raycast lint (manifest, icon, ESLint, Prettier)
-npm run build      # production build
-```
-
-Requires macOS 12+ and Xcode (for the Swift eyedropper).
 
 ## Credits
 

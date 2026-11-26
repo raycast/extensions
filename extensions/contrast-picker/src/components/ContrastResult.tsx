@@ -6,13 +6,14 @@ import {
   ApcaFont,
   FONT_SIZES,
   FONT_WEIGHTS,
+  FontWeight,
   analyze,
   formatLc,
   formatRatio,
   polarityLabel,
   targetLabel,
 } from "../lib/contrast";
-import { Fix, findAllFixes, primaryFix } from "../lib/fixes";
+import { FIX_MODES, Fix, FixMode, findAllFixes, primaryFix, tailwindFix } from "../lib/fixes";
 import { pickAgain } from "../lib/launch";
 import { buildMarkdown, changedColors, fixTitle, plainReport } from "../lib/report";
 import { getPreferences, useFontSettings } from "../lib/settings";
@@ -40,13 +41,15 @@ export default function ContrastResult(props: Props) {
     if (!parsedFg || !parsedBg) return undefined;
     const { fg, bg } = resolvePair(parsedFg, parsedBg);
     const report = analyze(fg, bg, font.sizePx, font.weight);
-    const fixes = findAllFixes(fg, bg, font.sizePx, font.weight);
+    // Transparent text changes with every new background. Only fixes that give a solid text color stay correct.
+    const modes: FixMode[] = parsedFg.alpha < 1 ? ["foreground", "both"] : FIX_MODES;
+    const fixes = findAllFixes(fg, bg, font.sizePx, font.weight, modes);
     const primary = primaryFix(fixes, preferences.fixTarget);
     const others = fixes.filter((fix) => fix !== primary);
     const notes: string[] = [];
     if (parsedFg.alpha < 1)
       notes.push(
-        `Text color has ${Math.round(parsedFg.alpha * 100)}% opacity. It is blended over the background before the check.`,
+        `Text color has ${Math.round(parsedFg.alpha * 100)}% opacity. The check mixes it with the background. Fixes use a solid text color.`,
       );
     if (parsedBg.alpha < 1)
       notes.push(`Background has ${Math.round(parsedBg.alpha * 100)}% opacity. It is shown over white.`);
@@ -70,16 +73,10 @@ export default function ContrastResult(props: Props) {
     if (values.weight) font.setWeight(values.weight);
   }
 
+  if (font.isLoading) return <Detail isLoading />;
+
   if (!result) {
-    return (
-      <ContrastForm
-        foreground={colors.foreground}
-        background={colors.background}
-        sizePx={font.sizePx}
-        weight={font.weight}
-        onSubmit={applyForm}
-      />
-    );
+    return <Detail markdown="These colors are not valid. Run the command again with two colors." />;
   }
 
   const { fg, bg, report, primary, others, markdown } = result;
@@ -88,8 +85,6 @@ export default function ContrastResult(props: Props) {
 
   return (
     <Detail
-      isLoading={font.isLoading}
-      navigationTitle={`Contrast ${formatRatio(report.ratio)}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
@@ -122,14 +117,18 @@ export default function ContrastResult(props: Props) {
         <ActionPanel>
           {primary ? (
             <ActionPanel.Section title={`Suggested Fix · ${targetLabel(primary.target)}`}>
-              {orderFormats(preferences.copyFormat).map(({ format, title, key }) => (
-                <Action.CopyToClipboard
-                  key={format}
-                  title={`Copy Fix as ${title}`}
-                  content={copyValue(primary, format)}
-                  shortcut={{ modifiers: ["cmd"], key }}
-                />
-              ))}
+              {orderFormats(preferences.copyFormat).map(({ format, title, key }) => {
+                const content = copyValue(primary, format, font.sizePx, font.weight);
+                if (content === undefined) return null;
+                return (
+                  <Action.CopyToClipboard
+                    key={format}
+                    title={`Copy Fix as ${title}`}
+                    content={content}
+                    shortcut={{ modifiers: ["cmd"], key }}
+                  />
+                );
+              })}
               <Action
                 title="Use Fix"
                 icon={Icon.Wand}
@@ -201,6 +200,7 @@ export default function ContrastResult(props: Props) {
               onAction={() =>
                 push(
                   <ContrastForm
+                    navigationTitle="Edit Colors"
                     foreground={colors.foreground}
                     background={colors.background}
                     sizePx={font.sizePx}
@@ -215,13 +215,19 @@ export default function ContrastResult(props: Props) {
           <ActionPanel.Section title="Copy">
             {others.length > 0 && (
               <ActionPanel.Submenu title="Copy Other Fix" icon={Icon.List} shortcut={{ modifiers: ["cmd"], key: "l" }}>
-                {others.map((fix) => (
-                  <Action.CopyToClipboard
-                    key={`${fix.target}-${fix.mode}`}
-                    title={`${fixTitle(fix)} — ${copyValue(fix, preferences.copyFormat)}`}
-                    content={copyValue(fix, preferences.copyFormat)}
-                  />
-                ))}
+                {others.map((fix) => {
+                  const content =
+                    copyValue(fix, preferences.copyFormat, font.sizePx, font.weight) ??
+                    copyValue(fix, "hex", font.sizePx, font.weight) ??
+                    "";
+                  return (
+                    <Action.CopyToClipboard
+                      key={`${fix.target}-${fix.mode}`}
+                      title={`${fixTitle(fix)} — ${content.split("\n")[0]}`}
+                      content={content}
+                    />
+                  );
+                })}
               </ActionPanel.Submenu>
             )}
             <Action.CopyToClipboard
@@ -269,10 +275,13 @@ function describeFont(font: ApcaFont): string {
   return `${font.px}px`;
 }
 
-/** The value to paste: the changed color, or both colors as CSS when the fix changes both. */
-function copyValue(fix: Fix, format: CopyFormat): string {
+/**
+ * The value to paste: the changed color, or both colors as CSS when the fix changes both.
+ * Tailwind classes are the nearest palette colors that still pass. Returns `undefined` if none pass.
+ */
+function copyValue(fix: Fix, format: CopyFormat, sizePx: number, weight: FontWeight): string | undefined {
+  if (format === "tailwind") return tailwindFix(fix, sizePx, weight);
   const colors = changedColors(fix);
   if (colors.length === 1) return formatColor(colors[0], format);
-  if (format === "tailwind") return `text-${formatColor(fix.fg, format)} bg-${formatColor(fix.bg, format)}`;
   return `color: ${formatColor(fix.fg, format)};\nbackground-color: ${formatColor(fix.bg, format)};`;
 }

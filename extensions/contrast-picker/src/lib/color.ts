@@ -127,17 +127,32 @@ export function fromOklch(l: number, c: number, h: number): RGB {
   return hexToRgb(toHex({ r, g, b }));
 }
 
+type PaletteEntry = { name: string; hex: string; rgb: RGB; color: Color };
+export type TailwindMatch = { name: string; hex: string; rgb: RGB; distance: number };
+
+let palette: PaletteEntry[] | undefined;
+
+function getPalette(): PaletteEntry[] {
+  palette ??= Object.entries(TAILWIND).map(([name, hex]) => {
+    const rgb = hexToRgb(hex);
+    return { name, hex, rgb, color: new Color("srgb", [rgb.r, rgb.g, rgb.b]) };
+  });
+  return palette;
+}
+
+/** All Tailwind palette colors, closest first (OKLab ΔE). */
+export function tailwindCandidates(rgb: RGB): TailwindMatch[] {
+  const target = new Color("srgb", [rgb.r, rgb.g, rgb.b]);
+  return getPalette()
+    .map(({ name, hex, rgb: value, color }) => ({ name, hex, rgb: value, distance: target.deltaE(color, "OK") }))
+    .sort((a, b) => a.distance - b.distance);
+}
+
 /** Finds the closest Tailwind CSS palette color (by OKLab ΔE). */
 export function nearestTailwind(rgb: RGB): { name: string; exact: boolean; hex: string } {
   const hex = toHex(rgb);
-  const target = new Color("srgb", [rgb.r, rgb.g, rgb.b]);
-  let best = { name: "", distance: Infinity, hex: "" };
-  for (const [name, value] of Object.entries(TAILWIND)) {
-    if (value === hex) return { name, exact: true, hex: value };
-    const distance = target.deltaE(new Color(value), "OK");
-    if (distance < best.distance) best = { name, distance, hex: value };
-  }
-  return { name: best.name, exact: false, hex: best.hex };
+  const [best] = tailwindCandidates(rgb);
+  return { name: best.name, exact: best.hex === hex, hex: best.hex };
 }
 
 export function formatColor(rgb: RGB, format: CopyFormat): string {

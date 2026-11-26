@@ -1,4 +1,4 @@
-import { RGB, fromOklch, toHex, toOklch } from "./color";
+import { RGB, fromOklch, tailwindCandidates, toHex, toOklch } from "./color";
 import { FixTarget, FontWeight, apcaLc, passesTarget, wcagRatio } from "./contrast";
 
 /** Which side of the pair the fix changes. */
@@ -69,11 +69,17 @@ function outOfRange(l: number): boolean {
 }
 
 /** All fixes for all targets and modes, without duplicates. */
-export function findAllFixes(fg: RGB, bg: RGB, sizePx: number, weight: FontWeight): Fix[] {
+export function findAllFixes(
+  fg: RGB,
+  bg: RGB,
+  sizePx: number,
+  weight: FontWeight,
+  modes: FixMode[] = FIX_MODES,
+): Fix[] {
   const seen = new Set<string>();
   const fixes: Fix[] = [];
   for (const target of FIX_TARGETS) {
-    for (const mode of FIX_MODES) {
+    for (const mode of modes) {
       const fix = findFix(fg, bg, { target, mode, sizePx, weight });
       if (!fix) continue;
       const key = `${target}:${toHex(fix.fg)}:${toHex(fix.bg)}`;
@@ -89,4 +95,33 @@ export function findAllFixes(fg: RGB, bg: RGB, sizePx: number, weight: FontWeigh
 export function primaryFix(fixes: Fix[], target: FixTarget): Fix | undefined {
   const forTarget = fixes.filter((fix) => fix.target === target);
   return FIX_MODES.map((mode) => forTarget.find((fix) => fix.mode === mode)).find(Boolean);
+}
+
+const TAILWIND_SEARCH_LIMIT = 40;
+
+/**
+ * Tailwind classes for a fix. Each class is the nearest palette color that still passes the target,
+ * so the copied class passes the check. Returns `undefined` when no palette color passes.
+ */
+export function tailwindFix(fix: Fix, sizePx: number, weight: FontWeight): string | undefined {
+  const passes = (fg: RGB, bg: RGB) => passesTarget(fg, bg, fix.target, sizePx, weight);
+
+  if (fix.mode === "foreground") {
+    return tailwindCandidates(fix.fg).find((candidate) => passes(candidate.rgb, fix.bg))?.name;
+  }
+  if (fix.mode === "background") {
+    return tailwindCandidates(fix.bg).find((candidate) => passes(fix.fg, candidate.rgb))?.name;
+  }
+
+  const fgCandidates = tailwindCandidates(fix.fg).slice(0, TAILWIND_SEARCH_LIMIT);
+  const bgCandidates = tailwindCandidates(fix.bg).slice(0, TAILWIND_SEARCH_LIMIT);
+  let best: { text: string; background: string; distance: number } | undefined;
+  for (const text of fgCandidates) {
+    for (const background of bgCandidates) {
+      const distance = text.distance + background.distance;
+      if (best && distance >= best.distance) continue;
+      if (passes(text.rgb, background.rgb)) best = { text: text.name, background: background.name, distance };
+    }
+  }
+  return best && `text-${best.text} bg-${best.background}`;
 }
