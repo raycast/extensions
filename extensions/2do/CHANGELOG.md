@@ -1,6 +1,6 @@
 # 2Do Changelog
 
-## [New View Tasks Scopes] - {PR_MERGE_DATE}
+## [New View Tasks Scopes] - 2026-11-26
 
 - New scopes in View Tasks: Now, Later Today, Tomorrow, and Deadlines (Overdue and Upcoming)
 - Paused tags appear as their own scopes, labeled Paused: {tag}
