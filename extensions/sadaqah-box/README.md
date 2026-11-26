@@ -1,25 +1,18 @@
-# Sadaqah Box Raycast Extension
+<h1 align="center"><img align="left" src="assets/extension-icon.png" width="48" alt="Sadaqah Box icon"><a href="https://erklab.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/erklab-logo-white.svg"><img align="right" src="assets/erklab-logo.svg" width="112" alt="erklab"></picture></a>Sadaqah Box</h1>
 
-<div align="center">
-  <img src="assets/extension-icon.png" alt="Sadaqah Box Logo" width="120" height="120">
+<p align="center"><strong>Track your charity boxes and sadaqahs directly from Raycast.</strong><br>
+Multi-currency support, quick-add presets, and automatic gold value conversion.</p>
 
-  **Track Your Charity & Sadaqah Contributions**
+<p align="center"><strong>Sponsored by <a href="https://erklab.com">erklab</a></strong> — Architecting production-grade systems with AI-driven velocity and human-centered precision.<br>
+<sub>Built for macOS &amp; Windows with Raycast API, TypeScript, and Better Auth.</sub></p>
 
-  Raycast extension for tracking your charitable giving (Sadaqah) with multi-currency support and gold value conversion.
+<p align="center">
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-blue.svg" alt="TypeScript"></a>
+  <a href="https://reactjs.org/"><img src="https://img.shields.io/badge/React-19-61dafb.svg" alt="React"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-red.svg" alt="License"></a>
+</p>
 
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-  [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://reactjs.org/)
-  [![License](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
-
-
-  ## Sponsor
-
-  <a href="https://erklab.com" target="_blank">
-    <img src="assets/erklab-logo.svg" alt="Erklab" width="120">
-  </a>
-
-  Sponsored by [erklab](https://erklab.com) — Architecting production-grade systems with AI-driven velocity and human-centered precision.
-</div>
+<!-- /header -->
 
 ## Demo
 
@@ -56,8 +49,8 @@
 ## Installation
 
 ### Prerequisites
-- Raycast installed on macOS
-- Node.js 18+ and npm
+- Raycast installed on macOS or Windows
+- [Bun](https://bun.sh/) installed
 - Access to a SadaqahBox API instance
 
 ### Setup
@@ -65,12 +58,12 @@
 1. Clone this repository:
 ```bash
 git clone <repository-url>
-cd sadaqahbox-raycast
+cd sadaqahbox-raycast-extension
 ```
 
 2. Install dependencies:
 ```bash
-npm install
+bun install
 ```
 
 3. Configure the extension in Raycast:
@@ -82,7 +75,7 @@ npm install
 
 4. Build and install:
 ```bash
-npm run build
+bun run build
 ```
 
 ## Configuration
@@ -127,31 +120,38 @@ Configure quick-add presets:
 ```
 src/
 ├── api/
-│   ├── client.ts          # Base HTTP client with timeout & retry
+│   ├── client.ts          # Base HTTP client with timeout & safe GET retry
 │   ├── index.ts           # API endpoint functions
-│   └── cached.ts          # Cached API wrappers
+│   └── cached.ts          # Host-scoped cached API wrappers
 ├── constants/
 │   └── index.ts           # App constants & configuration
+├── hooks/
+│   ├── useBoxActions.ts   # Shared delete & collect box confirmation flows
+│   └── useCurrencies.ts   # Shared currency fetching hook
+├── storage/
+│   └── presets-storage.ts # Validated LocalStorage for presets
 ├── utils/
 │   ├── cache.ts           # Raycast Cache utilities
 │   ├── error-handler.ts   # Error categorization & sanitization
-│   ├── security.ts        # Secure ID generation
+│   ├── format.ts          # Shared currency, number & date formatters
+│   ├── security.ts        # Secure ID generation & URL sanitization
 │   └── type-guards.ts     # Runtime type checking
 ├── validation/
-│   └── schemas.ts         # Zod validation schemas
+│   └── schemas.ts         # Zod validation schemas & field error mapping
+├── views/
+│   ├── AddSadaqahForm.tsx # Add sadaqah form
+│   ├── BoxDetail.tsx      # Box detail view
+│   ├── CollectionDetail.tsx # Collection receipt view
+│   ├── CreateBoxForm.tsx  # Create box form
+│   ├── EditBoxForm.tsx    # Edit box form
+│   └── PresetForm.tsx     # Unified create/edit preset form
 ├── data/
 │   ├── quotes.json        # Quranic verses & Hadith on sadaqah
 │   └── quotes.ts          # Quote types & utilities
 ├── services/
-│   └── quote-service.ts   # Random quote generation
+│   └── quote-service.ts   # Random quote helpers
 ├── dashboard.tsx          # Main dashboard command
-├── box-detail.tsx         # Box detail view
-├── create-box.tsx         # Create box form
-├── edit-box.tsx           # Edit box form
-├── add-sadaqah.tsx        # Add sadaqah form
-├── manage-presets.tsx     # Preset management
-├── collection-detail.tsx  # Collection receipt view
-├── presets-storage.ts     # LocalStorage for presets
+├── manage-presets.tsx     # Preset management command
 ├── auth-client.ts         # Better Auth client setup
 └── types.ts               # TypeScript type definitions
 ```
@@ -183,19 +183,25 @@ The extension communicates with a SadaqahBox backend API. All API calls include:
 
 ```bash
 # Development mode with hot reload
-npm run dev
+bun run dev
 
 # Build for production
-npm run build
+bun run build
+
+# Run unit tests
+bun test
+
+# Type-check TypeScript
+bun run typecheck
 
 # Run linting
-npm run lint
+bun run lint
 
 # Fix linting issues
-npm run fix-lint
+bun run fix-lint
 
 # Publish to Raycast Store
-npm run publish
+bun run publish
 ```
 
 ### Project Structure
@@ -273,6 +279,7 @@ MIT License - see LICENSE file for details
 
 ## Acknowledgments
 
+- Sponsored by [erklab](https://erklab.com)
 - Quranic verses and Hadith provided for inspiration
 - Built with [Raycast API](https://developers.raycast.com/)
 - Authentication powered by [Better Auth](https://www.better-auth.com/)

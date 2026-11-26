@@ -1,20 +1,98 @@
 /**
  * Validation schemas using Zod
- * Provides type-safe validation for all form inputs
+ * Provides type-safe validation and structured field errors for all form inputs
  */
 
 import { z } from "zod";
+import { LIMITS } from "../constants";
+
+const POSITIVE_DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
+const POSITIVE_INT_PATTERN = /^\d+$/;
+
+function parsePositiveNumber(val: string): number | null {
+  const trimmed = val.trim();
+  if (!POSITIVE_DECIMAL_PATTERN.test(trimmed)) {
+    return null;
+  }
+  const num = Number(trimmed);
+  return Number.isFinite(num) && num > 0 ? num : null;
+}
+
+function parsePositiveInt(val: string): number | null {
+  const trimmed = val.trim();
+  if (!POSITIVE_INT_PATTERN.test(trimmed)) {
+    return null;
+  }
+  const num = Number(trimmed);
+  return Number.isSafeInteger(num) && num > 0 ? num : null;
+}
+
+const optionalPositiveIntString = z
+  .string()
+  .optional()
+  .transform((val, ctx) => {
+    if (!val || val.trim() === "") {
+      return undefined;
+    }
+    const parsed = parsePositiveInt(val);
+    if (parsed === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Amount must be a positive whole number",
+      });
+      return z.NEVER;
+    }
+    return parsed;
+  });
+
+const optionalPositiveNumberString = z
+  .string()
+  .optional()
+  .transform((val, ctx) => {
+    if (!val || val.trim() === "") {
+      return undefined;
+    }
+    const parsed = parsePositiveNumber(val);
+    if (parsed === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Value must be a positive number",
+      });
+      return z.NEVER;
+    }
+    return parsed;
+  });
+
+const requiredPositiveNumberString = z
+  .string()
+  .transform((val) => val.trim())
+  .refine((val) => val.length > 0, "Value is required")
+  .transform((val, ctx) => {
+    const parsed = parsePositiveNumber(val);
+    if (parsed === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Value must be greater than 0",
+      });
+      return z.NEVER;
+    }
+    return parsed;
+  });
 
 // Box validation schemas
 export const createBoxSchema = z.object({
   name: z
     .string()
-    .min(1, "Name is required")
-    .max(100, "Name must be 100 characters or less")
-    .transform((val) => val.trim()),
+    .transform((val) => val.trim())
+    .pipe(
+      z
+        .string()
+        .min(1, "Name is required")
+        .max(LIMITS.BOX_NAME_MAX, `Name must be ${LIMITS.BOX_NAME_MAX} characters or less`),
+    ),
   description: z
     .string()
-    .max(500, "Description must be 500 characters or less")
+    .max(LIMITS.BOX_DESCRIPTION_MAX, `Description must be ${LIMITS.BOX_DESCRIPTION_MAX} characters or less`)
     .optional()
     .transform((val) => (val?.trim() ? val.trim() : undefined)),
   baseCurrencyId: z.string().optional(),
@@ -23,62 +101,80 @@ export const createBoxSchema = z.object({
 export const updateBoxSchema = z.object({
   name: z
     .string()
-    .min(1, "Name is required")
-    .max(100, "Name must be 100 characters or less")
     .transform((val) => val.trim())
+    .pipe(
+      z
+        .string()
+        .min(1, "Name is required")
+        .max(LIMITS.BOX_NAME_MAX, `Name must be ${LIMITS.BOX_NAME_MAX} characters or less`),
+    )
     .optional(),
+  // Preserve empty string "" so clearing an existing description sends "" to the API
   description: z
     .string()
-    .max(500, "Description must be 500 characters or less")
-    .optional()
-    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+    .max(LIMITS.BOX_DESCRIPTION_MAX, `Description must be ${LIMITS.BOX_DESCRIPTION_MAX} characters or less`)
+    .transform((val) => val.trim())
+    .optional(),
   baseCurrencyId: z.string().optional(),
 });
 
-// Sadaqah validation schemas
-export const addSadaqahSchema = z.object({
-  amount: z
-    .string()
-    .optional()
-    .refine((val) => !val || (!isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0), "Amount must be a positive number")
-    .transform((val) => (val ? parseInt(val, 10) : undefined)),
-  value: z
-    .string()
-    .optional()
-    .refine((val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) > 0), "Value must be a positive number")
-    .transform((val) => (val ? parseFloat(val) : undefined)),
-  currencyId: z.string().optional(),
-});
+// Sadaqah validation schema
+export const addSadaqahSchema = z
+  .object({
+    amount: optionalPositiveIntString,
+    value: optionalPositiveNumberString,
+    currencyId: z.string().optional(),
+  })
+  .refine((data) => data.amount !== undefined || data.value !== undefined, {
+    message: "Either amount or value is required",
+    path: ["value"],
+  });
 
-// Preset validation schemas
-export const createPresetSchema = z.object({
+// Preset validation schema (accepts form string inputs directly)
+export const presetFormSchema = z.object({
   name: z
     .string()
-    .min(1, "Name is required")
-    .max(50, "Name must be 50 characters or less")
-    .transform((val) => val.trim()),
-  value: z.number().positive("Value must be greater than 0"),
+    .transform((val) => val.trim())
+    .pipe(
+      z
+        .string()
+        .min(1, "Name is required")
+        .max(LIMITS.PRESET_NAME_MAX, `Name must be ${LIMITS.PRESET_NAME_MAX} characters or less`),
+    ),
+  value: requiredPositiveNumberString,
   currencyId: z.string().min(1, "Currency is required"),
-  amount: z.number().positive().optional(),
+  amount: optionalPositiveIntString,
 });
 
 // Type inference
 export type CreateBoxInput = z.infer<typeof createBoxSchema>;
 export type UpdateBoxInput = z.infer<typeof updateBoxSchema>;
 export type AddSadaqahInput = z.infer<typeof addSadaqahSchema>;
-export type CreatePresetInput = z.infer<typeof createPresetSchema>;
+export type PresetFormInput = z.infer<typeof presetFormSchema>;
 
-// Validation helper function
-export function validateInput<T>(
-  schema: z.ZodSchema<T>,
-  data: unknown,
-): { success: true; data: T } | { success: false; errors: string[] } {
+export type ValidationResult<T> =
+  { success: true; data: T } | { success: false; errors: string[]; fieldErrors: Record<string, string> };
+
+/**
+ * Validate data against a Zod schema and return structured field errors
+ */
+export function validateInput<T>(schema: z.ZodType<T>, data: unknown): ValidationResult<T> {
   const result = schema.safeParse(data);
 
   if (result.success) {
     return { success: true, data: result.data };
   }
 
-  const errors = result.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`);
-  return { success: false, errors };
+  const fieldErrors: Record<string, string> = {};
+  const errors: string[] = [];
+
+  for (const issue of result.error.issues) {
+    const field = issue.path.join(".");
+    if (field && !(field in fieldErrors)) {
+      fieldErrors[field] = issue.message;
+    }
+    errors.push(field ? `${field}: ${issue.message}` : issue.message);
+  }
+
+  return { success: false, errors, fieldErrors };
 }

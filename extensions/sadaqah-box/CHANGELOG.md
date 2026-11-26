@@ -4,6 +4,24 @@ All notable changes to the Sadaqah Box Raycast Extension will be documented in t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-11-26
+
+### Fixed
+- **Sadaqah Amount Multiplication** – Fixed `AddSadaqahForm` to multiply `value * amount` when both are provided, matching the backend API contract
+- **HTTP Error Categorization** – Fixed `handleError` so `401`/`403`/`404`/`422`/`5xx` HTTP responses are properly categorized instead of falling back to generic unknown errors
+- **Description Clearing** – Fixed `EditBoxForm` and `updateBoxSchema` so clearing an existing box description properly updates it on the server
+- **Form Validation** – Separated `value` and `amount` field errors, enforced strict positive number parsing, and added inline `amount` errors on preset forms
+- **Cache Key Scoping & Invalidation** – Scoped API cache keys by `apiHost` and query parameters, and added prefix invalidation on mutations
+- **Safe Retries** – Restricted automatic retries to idempotent `GET` requests
+- **Preset Reordering & Recovery** – Normalized missing `order` fields before reordering and validated stored presets on load
+- **Box Detail Error Handling** – Added an error view with retry action when loading box details fails, and fixed stale box state after collection
+- **Platform Shortcuts** – Added cross-platform macOS/Windows shortcuts and Raycast common shortcuts
+
+### Changed
+- Reorganized internal views (`src/views/`), shared hooks (`src/hooks/`), and local storage (`src/storage/`)
+- Standardized package management on Bun and updated dependencies
+- Updated README header and erklab sponsorship branding
+
 ## [Initial Version] - 2026-03-12
 
 ### Added
