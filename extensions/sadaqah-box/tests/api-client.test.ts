@@ -2,7 +2,7 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 import { ApiError } from "../src/utils/error-handler";
 
 let mockPreferences = {
-  apiHost: "https://sadaqahbox.apps.erklab.com/",
+  apiHost: "https://live.sadaqahbox.apps.erklab.com/",
   apiKey: "test-api-key",
 };
 
@@ -20,13 +20,13 @@ describe("api client", () => {
   afterEach(() => {
     globalThis.fetch = originalFetch;
     mockPreferences = {
-      apiHost: "https://sadaqahbox.apps.erklab.com/",
+      apiHost: "https://live.sadaqahbox.apps.erklab.com/",
       apiKey: "test-api-key",
     };
   });
 
   test("validates and normalizes apiHost and apiKey", () => {
-    expect(getApiHost()).toBe("https://sadaqahbox.apps.erklab.com");
+    expect(getApiHost()).toBe("https://live.sadaqahbox.apps.erklab.com");
     expect(getApiKey()).toBe("test-api-key");
 
     mockPreferences.apiHost = "ftp://invalid.example.com";

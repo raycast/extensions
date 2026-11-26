@@ -32,8 +32,8 @@
       "description": "The base URL of your SadaqahBox API (e.g., https://api.example.com)",
       "type": "textfield",
       "required": true,
-      "placeholder": "https://sadaqahbox.apps.erklab.com",
-      "default": "https://sadaqahbox.apps.erklab.com"
+      "placeholder": "https://live.sadaqahbox.apps.erklab.com",
+      "default": "https://live.sadaqahbox.apps.erklab.com"
     },
     {
       "name": "apiKey",

@@ -25,7 +25,7 @@ mock.module("@raycast/api", () => ({
     }
   },
   getPreferenceValues: () => ({
-    apiHost: "https://sadaqahbox.apps.erklab.com",
+    apiHost: "https://live.sadaqahbox.apps.erklab.com",
     apiKey: "test-key",
   }),
 }));
