@@ -4,16 +4,21 @@ const { EventEmitter, once } = require("node:events");
 const { existsSync, mkdirSync, readFileSync, writeFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { mock, test } = require("node:test");
+const { runInNewContext } = require("node:vm");
 const { createHarness, loadSource, makeTempDir } = require("./helpers.cjs");
 
-const { ACTIVE_ASSERTIONS, DECISION_SCRIPT, IDLE_TIME_SCRIPT, LAUNCH_VERDICT, SCREEN_SAVER_WATCHER } = loadSource(
-  "screenSaver.ts",
-  {},
-);
-const launchVerdict = new Function(`${LAUNCH_VERDICT}\nreturn launchVerdict;`)();
+const { ACTIVE_ASSERTIONS, DECISION_SCRIPT, IDLE_TIME_SCRIPT, SCREEN_SAVER_WATCHER } = loadSource("screenSaver.ts", {});
 const quiet = { menubar: false, status: false };
 const OPEN = "-b com.apple.ScreenSaver.Engine";
 const COFFEE = { pid: 200, type: "PreventUserIdleDisplaySleep" };
+const DISPLAY_ON = { AssertType: "PreventUserIdleDisplaySleep", AssertLevel: 255 };
+const UNLOCKED = {
+  session: { kCGSSessionOnConsoleKey: true },
+  displays: 1,
+  assertions: { 200: [DISPLAY_ON] },
+  delay: 600,
+  idle: 700,
+};
 const posixShell = { skip: process.platform === "win32" && "needs /bin/sh" };
 const macOS = { skip: process.platform !== "darwin" && "needs osascript" };
 
@@ -30,7 +35,7 @@ printf '  | "HIDIdleTime" = %s000000000\n' "$(cat "$file")"`,
   open: String.raw`echo "$(cat "$DIR/n") $*" >> "$DIR/open.log"`,
   date: String.raw`cat "$DIR/clock"`,
   sleep: String.raw`n=$(cat "$DIR/n"); echo "$n $*" >> "$DIR/sleep.log"
-echo $(($(cat "$DIR/clock") + $1 + $(cat "$DIR/$n/overshoot" 2>/dev/null || echo 0))) > "$DIR/clock"
+echo $(($(cat "$DIR/clock") + $1 + $(cat "$DIR/$n/drift" 2>/dev/null || echo 0))) > "$DIR/clock"
 echo $((n + 1)) > "$DIR/n"`,
 };
 
@@ -45,7 +50,7 @@ function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
   writeFileSync(join(dir, "clock"), "1000");
   writeFileSync(join(dir, "lstart"), "Wed Nov  5 09:15:52 2026\n");
   let limit;
-  steps.forEach(({ idle, recheck, decision, pgrep, overshoot, exits, ...step }, index) => {
+  steps.forEach(({ idle, recheck, decision, pgrep, drift, exits, ...step }, index) => {
     limit = step.limit ?? limit;
     const files = {
       idle,
@@ -53,7 +58,7 @@ function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
       limit: step.limit,
       decision: decision === undefined ? `launch ${limit}` : decision,
       pgrep,
-      overshoot,
+      drift,
       "exit.2": exits ? "" : undefined,
     };
     const poll = join(dir, String(index + 1));
@@ -72,15 +77,62 @@ function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
     timeout: 10_000,
   });
   const lines = (name) => (existsSync(join(dir, name)) ? readFileSync(join(dir, name), "utf8").trim().split("\n") : []);
+  const polls = (script) =>
+    lines("osascript.log")
+      .filter((line) => line.endsWith(` ${script}`))
+      .map((line) => line.split(" ")[0]);
   return {
     opened: lines("open.log"),
     slept: lines("sleep.log"),
     sampled: lines("ioreg.log"),
-    decided: lines("osascript.log")
-      .filter((line) => line.endsWith(" decision"))
-      .map((line) => line.split(" ")[0]),
+    decided: polls("decision"),
+    read: polls("limit"),
     pgrep: lines("pgrep.args"),
   };
+}
+
+// Stands in for the JXA bridge so the whole decision script runs on any platform.
+function decideWith(native) {
+  const key = (value) => (typeof value === "object" && value !== null ? value.value : value);
+  const wrap = (value) => ({
+    value,
+    isNil: () => value == null,
+    objectForKey: (name) => wrap(value[key(name)]),
+    get allKeys() {
+      return wrap(Object.keys(value));
+    },
+    get count() {
+      return value.length;
+    },
+    objectAtIndex: (index) => wrap(value[index]),
+  });
+  const $ = Object.assign((value) => value, {
+    CGSessionCopyCurrentDictionary: () => native.session,
+    CGGetActiveDisplayList: (max, list, count) => {
+      count[0] = native.displays;
+      return native.displayError ?? 0;
+    },
+    IOPMCopyAssertionsByProcess: (byPid) => {
+      byPid[0] = native.assertions;
+      return native.assertionError ?? 0;
+    },
+    CFPreferencesGetAppIntegerValue: (name, domain, valid) => {
+      assert.deepEqual([name, domain], ["idleTime", "com.apple.screensaver"]);
+      valid[0] = native.delay !== undefined;
+      return native.delay ?? 0;
+    },
+    CGEventSourceSecondsSinceLastEventType: (source, type) => {
+      assert.deepEqual([source, type], [0, 0xffffffff]);
+      return native.idle;
+    },
+  });
+  const ObjC = { import: () => {}, castRefToObject: wrap, unwrap: (object) => object.value };
+  return runInNewContext(`${DECISION_SCRIPT}\nrun(argv);`, {
+    $,
+    ObjC,
+    Ref: () => [],
+    argv: ["com.apple.screensaver", "200"],
+  });
 }
 
 for (const [platform, preferences, spawned] of [
@@ -225,7 +277,7 @@ for (const [name, steps, opened] of [
       { idle: 715 },
       { idle: 730 },
       { idle: 745 },
-      { limit: 0 },
+      { idle: 760, limit: 0 },
       {},
       {},
       {},
@@ -242,12 +294,34 @@ for (const [name, steps, opened] of [
     [`1 ${OPEN}`, `2 ${OPEN}`],
   ],
   [
+    "notices input between polls with a one-second delay",
+    [{ idle: 1, limit: 1 }, { idle: 14 }],
+    [`1 ${OPEN}`, `2 ${OPEN}`],
+  ],
+  [
     "rearms after input during a sleep that overran",
     [
-      { idle: 10, limit: 10, overshoot: 20 },
+      { idle: 10, limit: 10, drift: 20 },
       { idle: 30, limit: 10 },
     ],
     [`1 ${OPEN}`, `2 ${OPEN}`],
+  ],
+  [
+    "keeps waiting out a skipped screen saver when the wall clock jumps",
+    [{ idle: 600, limit: 600, decision: "blocked 600", drift: 30 }, { idle: 615 }],
+    [],
+  ],
+  [
+    "applies a shorter delay read while waiting out a skipped screen saver",
+    [
+      { idle: 1200, limit: 1200, decision: "blocked 1200" },
+      { idle: 1215 },
+      { idle: 1230 },
+      { idle: 1245 },
+      { idle: 1260, limit: 60 },
+      { idle: 1275 },
+    ],
+    [`6 ${OPEN}`],
   ],
 ]) {
   test(`screen saver watcher ${name}`, posixShell, () => {
@@ -255,12 +329,28 @@ for (const [name, steps, opened] of [
   });
 }
 
+test("screen saver watcher rereads the delay only on checks that don't decide", posixShell, () => {
+  const { read, decided } = runWatcher([
+    { idle: 100, limit: 600 },
+    { idle: 115 },
+    { idle: 130 },
+    { idle: 145 },
+    { idle: 700 },
+    { idle: 715 },
+    { idle: 730 },
+    { idle: 745 },
+    { idle: 760 },
+  ]);
+  assert.deepEqual({ read, decided }, { read: ["1", "9"], decided: ["5"] });
+});
+
 test("screen saver watcher skips idle sampling when the Lock Screen delay is Never", posixShell, () => {
   assert.deepEqual(runWatcher([{ idle: 5000, limit: 0 }]), {
     opened: [],
     slept: ["1 15"],
     sampled: [],
     decided: [],
+    read: ["1"],
     pgrep: [],
   });
 });
@@ -270,40 +360,69 @@ test("screen saver watcher exits at once when the PID belongs to a different pro
   assert.deepEqual({ opened, slept }, { opened: [], slept: [] });
 });
 
-for (const [name, state, verdict] of [
-  ["starts when only Coffee keeps the display awake", {}, "launch"],
+const elsewhere = (row) => ({ 200: [DISPLAY_ON], 2000: [row] });
+
+for (const [name, native, decision] of [
+  ["starts when only Coffee keeps the display awake", {}, "launch 600"],
   [
     "ignores other apps' system-only assertions",
-    { assertions: [COFFEE, { pid: 2000, type: "PreventUserIdleSystemSleep" }] },
-    "launch",
+    { assertions: elsewhere({ AssertType: "PreventUserIdleSystemSleep", AssertLevel: 255 }) },
+    "launch 600",
+  ],
+  [
+    "ignores released and suspended display assertions",
+    {
+      assertions: {
+        200: [DISPLAY_ON],
+        2000: [
+          { AssertType: "NoDisplaySleepAssertion", AssertLevel: 0 },
+          { ...DISPLAY_ON, AssertionIsStateSuspended: true },
+        ],
+      },
+    },
+    "launch 600",
   ],
   [
     "waits for a Chromium or Firefox video (NoDisplaySleepAssertion)",
-    { assertions: [COFFEE, { pid: 2000, type: "NoDisplaySleepAssertion" }] },
-    "blocked",
+    { assertions: elsewhere({ AssertType: "NoDisplaySleepAssertion", AssertLevel: 255 }) },
+    "blocked 600",
+  ],
+  ["waits for a Safari video (PreventUserIdleDisplaySleep)", { assertions: elsewhere(DISPLAY_ON) }, "blocked 600"],
+  [
+    "waits for a notification display wake",
+    { assertions: elsewhere({ AssertType: "DisplayWake", AssertLevel: 255 }) },
+    "blocked 600",
   ],
   [
-    "waits for a Safari video (PreventUserIdleDisplaySleep)",
-    { assertions: [{ pid: 2000, type: "PreventUserIdleDisplaySleep" }, COFFEE] },
-    "blocked",
+    "waits while the screen is locked",
+    { session: { kCGSSessionOnConsoleKey: true, CGSSessionScreenIsLocked: true } },
+    "blocked 600",
   ],
-  ["waits for a notification display wake", { assertions: [COFFEE, { pid: 2000, type: "DisplayWake" }] }, "blocked"],
-  ["waits while the screen is locked", { locked: true }, "blocked"],
-  ["waits while no display is awake", { displays: 0 }, "blocked"],
-  ["waits while another user is on the console", { onConsole: false }, "blocked"],
+  ["waits while no display is awake", { displays: 0 }, "blocked 600"],
+  ["waits while another user is on the console", { session: { kCGSSessionOnConsoleKey: false } }, "blocked 600"],
+  ["waits outside a login session", { session: null }, "blocked 600"],
   [
     "fails closed when Coffee's own display assertion is gone",
-    { assertions: [{ pid: 200, type: "PreventUserIdleSystemSleep" }] },
-    "unowned",
+    { assertions: { 200: [{ AssertType: "PreventUserIdleSystemSleep", AssertLevel: 255 }] } },
+    "unowned 600",
   ],
-  ["waits for the session clock to reach the delay", { idle: 599.9 }, "active"],
-  ["never starts when the delay is Never", { delay: 0 }, "active"],
+  [
+    "fails closed when Coffee's own display assertion is released",
+    { assertions: { 200: [{ ...DISPLAY_ON, AssertLevel: 0 }] } },
+    "unowned 600",
+  ],
+  ["waits for the session clock to reach the delay", { idle: 599.9 }, "active 600"],
+  ["never starts when the delay is Never", { delay: 0 }, "active 0"],
 ]) {
   test(`screen saver decision ${name}`, () => {
-    const idle = { onConsole: true, locked: false, displays: 1, assertions: [COFFEE], delay: 600, idle: 700 };
-    assert.equal(launchVerdict(200, { ...idle, ...state }), verdict);
+    assert.equal(decideWith({ ...UNLOCKED, ...native }), decision);
   });
 }
+
+test("screen saver decision fails, so the watcher retries, when macOS can't report its state", () => {
+  assert.throws(() => decideWith({ ...UNLOCKED, displayError: 1000 }), /Cannot list displays/);
+  assert.throws(() => decideWith({ ...UNLOCKED, assertionError: 1 }), /Cannot read power assertions/);
+});
 
 test("reads the Lock Screen delay the way loginwindow does", macOS, () => {
   const dir = makeTempDir("coffee-screen-saver-");

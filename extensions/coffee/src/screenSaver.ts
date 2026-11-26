@@ -32,7 +32,7 @@ export const ACTIVE_ASSERTIONS = `function activeAssertions(byPid) {
 
 // "blocked" covers the cases where loginwindow skips its idle screen saver and waits a full delay. Coffee's own
 // caffeinate -d is the one display assertion the watcher may override.
-export const LAUNCH_VERDICT = `function launchVerdict(pid, state) {
+const LAUNCH_VERDICT = `function launchVerdict(pid, state) {
   const keepsDisplayOn = (type) => type === "PreventUserIdleDisplaySleep" || type === "NoDisplaySleepAssertion";
   if (!state.onConsole || state.locked || state.displays === 0) return "blocked";
   if (state.assertions.some((a) => a.pid !== pid && (keepsDisplayOn(a.type) || a.type === "DisplayWake"))) {
@@ -51,12 +51,13 @@ function run(argv) {
   const session = ObjC.castRefToObject($.CGSessionCopyCurrentDictionary());
   const flag = (key) => !session.isNil() && Boolean(ObjC.unwrap(session.objectForKey(key)));
   const displays = Ref();
+  if ($.CGGetActiveDisplayList(0, null, displays) !== 0) throw new Error("Cannot list displays");
   const byPid = Ref();
   if ($.IOPMCopyAssertionsByProcess(byPid) !== 0) throw new Error("Cannot read power assertions");
   const state = {
     onConsole: flag("kCGSSessionOnConsoleKey"),
     locked: flag("CGSSessionScreenIsLocked"),
-    displays: $.CGGetActiveDisplayList(0, null, displays) === 0 ? displays[0] : 0,
+    displays: displays[0],
     assertions: activeAssertions(ObjC.castRefToObject(byPid[0])),
     delay: lockScreenDelay(argv[0]),
     // loginwindow's session clock: kCGEventSourceStateCombinedSessionState, kCGAnyInputEventType (not bridged).
@@ -66,7 +67,7 @@ function run(argv) {
 }`;
 
 // macOS skips its idle screen saver while any app prevents display sleep, including Coffee's caffeinate -d.
-export const SCREEN_SAVER_WATCHER = `pid=$1 started=$2 uid=$(id -u) armed=1 polls=0 limit= last=0 sampled= slept=0 hold=0
+export const SCREEN_SAVER_WATCHER = `pid=$1 started=$2 uid=$(id -u) armed=1 polls=0 limit= last=0 sampled= slept=0 blocked=
 owned() { [ "$(echo $(ps -p "$pid" -o lstart= 2>/dev/null))" = "$started" ]; }
 read_limit() {
   value=$(osascript -l JavaScript -e "$COFFEE_IDLE_TIME" com.apple.screensaver 2>/dev/null) || return
@@ -74,8 +75,17 @@ read_limit() {
   limit=$value
 }
 sample_idle() {
-  idle=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { print int($NF / 1000000000); exit }')
+  idle=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { printf "%d", $NF / 1000000; exit }')
   case $idle in "" | *[!0-9]*) return 1 ;; esac
+}
+# HIDIdleTime counts uptime, which runs at least as long as each sleep, so slower growth means input.
+# A poll that overran by a whole delay could hide input, so that counts as input too.
+had_input() {
+  [ "$idle" -lt $((limit * 1000)) ] || [ $((idle + 1)) -lt $((last + slept * 1000)) ] ||
+    { [ -n "$sampled" ] && [ $((now - sampled - slept)) -ge "$limit" ]; }
+}
+wake_in() {
+  [ $((($1 + 999) / 1000)) -lt $delay ] && delay=$((($1 + 999) / 1000))
 }
 decide() {
   set -- $(osascript -l JavaScript -e "$COFFEE_DECISION" com.apple.screensaver "$pid" 2>/dev/null)
@@ -91,28 +101,30 @@ start_screen_saver() {
   esac
 }
 while owned; do
-  delay=15
-  [ $((polls % 4)) = 0 ] && read_limit
+  delay=15 refresh=0
+  [ $((polls % 4)) = 0 ] && refresh=1
   polls=$((polls + 1))
-  if [ -n "$limit" ] && [ "$limit" -gt 0 ] && sample_idle; then
-    now=$(date +%s) elapsed=$slept
-    [ -n "$sampled" ] && [ $((now - sampled)) -gt $slept ] && elapsed=$((now - sampled))
-    # Both clocks round down to whole seconds, so 2 s of drift isn't input.
-    if [ "$idle" -lt "$limit" ] || [ $((idle + 2)) -lt $((last + elapsed)) ]; then armed=1 hold=0; fi
+  # Idle time means nothing without a delay, so read it before sampling.
+  [ $refresh = 1 ] && [ "\${limit:-0}" = 0 ] && refresh=0 && read_limit
+  if [ "\${limit:-0}" -gt 0 ] && sample_idle; then
+    now=$(date +%s)
+    had_input && armed=1 blocked=
     last=$idle sampled=$now slept=0
-    if [ "$idle" -lt "$limit" ]; then
-      [ $((limit - idle)) -lt $delay ] && delay=$((limit - idle))
-    elif [ $armed = 1 ] && [ "$idle" -lt "$hold" ]; then
-      [ $((hold - idle)) -lt $delay ] && delay=$((hold - idle))
+    if [ "$idle" -lt $((limit * 1000)) ]; then
+      wake_in $((limit * 1000 - idle))
+    elif [ $armed = 1 ] && [ -n "$blocked" ] && [ "$idle" -lt $((blocked + limit * 1000)) ]; then
+      wake_in $((blocked + limit * 1000 - idle))
     elif [ $armed = 1 ] && decide; then
+      refresh=0
       case $verdict in
         # A Touch ID unlock resets only this HID clock, so it must reach the delay too.
-        launch) sample_idle && [ "$idle" -ge "$limit" ] && start_screen_saver ;;
+        launch) sample_idle && [ "$idle" -ge $((limit * 1000)) ] && start_screen_saver ;;
         # Like loginwindow, check again only after another full delay.
-        blocked) hold=$((idle + limit)) ;;
+        blocked) blocked=$idle ;;
       esac
     fi
   fi
+  [ $refresh = 1 ] && read_limit
   slept=$((slept + delay))
   sleep $delay
 done`;
