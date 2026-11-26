@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-link-check",
+  "title": "App Link Check",
+  "description": "Check a domain's apple-app-site-association and assetlinks.json files and whether they list your iOS and Android app IDs.",
+  "icon": "icon.png",
+  "author": "sulhan_fuadi",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "check",
+      "title": "Check App Links",
+      "subtitle": "Universal Links and App Links",
+      "description": "Fetch and validate a domain's iOS and Android app link files.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "example.com",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "domain",
+          "type": "textfield",
+          "required": false,
+          "title": "Domain",
+          "placeholder": "example.com",
+          "description": "Domain to check when no argument is given. Host name only, without https:// or a path."
+        },
+        {
+          "name": "iosAppId",
+          "type": "textfield",
+          "required": false,
+          "title": "iOS App ID",
+          "placeholder": "TEAMID.com.example.app",
+          "description": "Apple team ID and bundle ID. If set, the check requires this app ID in the AASA file."
+        },
+        {
+          "name": "androidPackage",
+          "type": "textfield",
+          "required": false,
+          "title": "Android Package",
+          "placeholder": "com.example.app",
+          "description": "If set, the check requires this package with a signing certificate fingerprint in assetlinks.json."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
