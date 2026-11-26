@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Wixel MCP Server] - {PR_MERGE_DATE}
+
+- Add Wixel, the AI design studio by Wix, to the official registry: images, logos, slide decks, videos, documents and invitations from a request in plain words, plus quick image edits. Hosted Streamable HTTP server at https://mcp.wix.com/wixel with OAuth 2.1 sign-in (dynamic client registration, PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
