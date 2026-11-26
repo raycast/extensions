@@ -7,6 +7,31 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "sceneagent",
+    title: "SceneAgent",
+    description:
+      "Real2sim for robotics: turn a 3D capture of a real room or object (Gaussian splat, photogrammetry, LiDAR or video) into a simulation-ready scene. Each object is segmented and given collision, predicted physics (material, mass, friction) and parts with joints, then exported as USD or MJCF for Isaac Sim, Isaac Lab and MuJoCo. Agents can also render scenes, generate digital sisters with varied objects and lighting, and run policy evaluation experiments. Hosted Streamable HTTP server at https://app.sceneagent.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Calls need a SceneAgent API token from https://app.sceneagent.dev/account, sent as a Bearer token; in Raycast, replace YOUR_SCENEAGENT_TOKEN in the Authorization header. A SceneAgent account is required.",
+    icon: "https://sceneagent.dev/sceneagent-icon-512.png",
+    homepage: "https://sceneagent.dev/uses/mcp",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://app.sceneagent.dev/mcp",
+        "--header",
+        "Authorization:${SCENEAGENT_AUTH_HEADER}",
+      ],
+      env: {
+        SCENEAGENT_AUTH_HEADER: "Bearer YOUR_SCENEAGENT_TOKEN",
+      },
+    },
+    remoteUrl: "https://app.sceneagent.dev/mcp",
+    headers: {
+      Authorization: "Bearer YOUR_SCENEAGENT_TOKEN",
+    },
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
