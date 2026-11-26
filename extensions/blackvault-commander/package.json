@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "blackvault-commander",
+  "title": "BlackVault Commander",
+  "description": "Check BlackVault Commander service health and connect authorized computers to Raycast AI. Native MCP setup also supports iPhone and iPad.",
+  "icon": "icon.png",
+  "author": "liquiditystudio2",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect",
+      "title": "Connect BlackVault Commander",
+      "description": "Configure the authorized BlackVault Commander MCP connection and check service availability.",
+      "mode": "view",
+      "keywords": [
+        "MCP",
+        "AI",
+        "remote computer",
+        "OAuth"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.14.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@raycast/eslint-config": "latest",
+    "eslint": "^9",
+    "prettier": "^3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
