@@ -38,9 +38,14 @@ function loadSource(filename, dependencies, context = {}, cache = new Map()) {
   return exports;
 }
 
+function makeTempDir(prefix) {
+  const dir = mkdtempSync(path.join(tmpdir(), prefix));
+  after(() => rmSync(dir, { recursive: true, force: true }));
+  return dir;
+}
+
 function createHarness(options = {}) {
-  const supportPath = mkdtempSync(path.join(tmpdir(), "coffee-test-"));
-  after(() => rmSync(supportPath, { recursive: true, force: true }));
+  const supportPath = makeTempDir("coffee-test-");
   const storage = options.storage ?? new Map();
   const table = new Map();
   const createdAt = "Wed Oct 21 10:00:00 2026";
@@ -139,4 +144,4 @@ function createHarness(options = {}) {
     supportPath,
   };
 }
-module.exports = { createHarness, loadSource };
+module.exports = { createHarness, loadSource, makeTempDir };

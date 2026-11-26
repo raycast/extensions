@@ -97,7 +97,7 @@ Optionally have Coffee start caffeinating your computer (indefinitely) automatic
 
 On macOS, **Prevent display sleep** also stops the screen saver, because macOS doesn't start it while any app keeps the display awake. Enable **Allow screen saver** to keep the display awake and still start the screen saver after the delay set in **System Settings > Lock Screen > Start Screen Saver when inactive**. The display stays on while the screen saver runs, and your Mac locks as usual if it requires a password after the screen saver begins.
 
-Coffee follows the same rules as macOS. It uses the same delay, including **Never**, and doesn't start the screen saver while another app keeps the display awake (for example during video playback or a call), while the screen is locked, while no display is on, or while another user is using the Mac. A small `sh` process, whose command line includes `coffee-screen-saver`, runs alongside Coffee's session and exits when the session ends. The preference applies to sessions started after you change it and is not supported on Windows.
+Coffee follows the same rules as macOS. It uses the same delay, including **Never**, and doesn't start the screen saver while another app keeps the display awake (for example during video playback or a call), while the screen is locked, while no display is on, or while another user is using the Mac. Like macOS, it then waits a full delay before trying again. Coffee checks the delay about once a minute, so a change can take up to a minute to apply. A small `sh` process, whose command line includes `coffee-screen-saver`, runs alongside Coffee's session and exits when the session ends. The preference applies to sessions started after you change it and is not supported on Windows.
 
 ## Development
 
