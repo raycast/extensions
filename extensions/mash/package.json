@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mash",
   "title": "Mash",
-  "description": "Search your coding agents' chats, and the decisions and notes Mash remembers from them. Requires the Mash command-line tool.",
+  "description": "Search your coding agents' chats and the decisions and notes Mash remembers from them, using the Mash command-line tool.",
   "icon": "mash.png",
   "platforms": [
     "macOS"

@@ -3,9 +3,12 @@
  * remembers, each at its current revision, with the quotes that support
  * it. Plain data in and out, so it is tested without Raycast.
  */
-import { MashError, rendered } from "./mash";
+import { AGENTS, agentName, MashError, rendered } from "./mash";
 
 export type MemoryKind = "decision" | "preference" | "note";
+
+/** Where a record applies: one of Mash's scope kinds; anything else reads as personal. */
+export type ScopeKind = "repository" | "local_project" | "chat" | "personal";
 
 /** One remembered record at its current revision. */
 export interface Memory {
@@ -17,8 +20,12 @@ export interface Memory {
   readonly conditions: readonly string[];
   /** Where the record applies, short enough for a section title. */
   readonly scope: string;
+  /** What kind of place `scope` names, so it can be shown with its icon. */
+  readonly scopeKind: ScopeKind;
   /** The machine it was recorded on, when read from the shared index. */
   readonly machine?: string;
+  /** Who recorded it, as the recording agent named itself; not authenticated. */
+  readonly recordedBy: string;
   /** Not yet confirmed by the person: proposed by an agent from a chat. */
   readonly candidate: boolean;
   readonly recordedAt: Date | undefined;
@@ -100,7 +107,9 @@ function memory(record: Record<string, unknown>): Memory[] {
       rationale: text(body.rationale).trim(),
       conditions: Array.isArray(details.conditions) ? details.conditions.map(text).filter(Boolean) : [],
       scope: scopeLabel(object(record.scope)),
+      scopeKind: scopeKind(object(record.scope)),
       ...(text(record.node_id) ? { machine: text(record.node_id) } : {}),
+      recordedBy: text(body.recorded_by).trim(),
       candidate: text(body.review) === "candidate",
       recordedAt: typeof current.recorded_at === "number" ? new Date(current.recorded_at) : undefined,
       evidence: (Array.isArray(current.evidence) ? current.evidence.map(object) : [])
@@ -113,6 +122,12 @@ function memory(record: Record<string, unknown>): Memory[] {
         .filter((entry) => entry.chatId && entry.messageId),
     },
   ];
+}
+
+/** The kind of place a record applies to, as `scopeLabel` reads it. */
+export function scopeKind(scope: Record<string, unknown>): ScopeKind {
+  const kind = scope.kind;
+  return kind === "repository" || kind === "local_project" || kind === "chat" ? kind : "personal";
 }
 
 /**
@@ -158,4 +173,15 @@ export function memoryMarkdown(memory: Memory): string {
     });
   if (quotes.length) parts.push(`**From the chat:**\n\n${quotes.join("\n\n")}`);
   return parts.join("\n\n");
+}
+
+/**
+ * The agent a record names as its recorder, when the name is exactly one of
+ * Mash's agent IDs or display names (ignoring case). An agent names itself in
+ * its own words, so anything else, such as "claude", is shown as written and
+ * not matched to an agent by guesswork.
+ */
+export function recordedAgent(recordedBy: string): string | undefined {
+  const name = recordedBy.trim().toLowerCase();
+  return AGENTS.find((agent) => agent === name || agentName(agent).toLowerCase() === name);
 }

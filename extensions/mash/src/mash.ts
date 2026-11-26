@@ -75,6 +75,14 @@ export interface Message {
   readonly content: string;
   /** Work between what was said: a tool call, tool output, thinking or injected context. */
   readonly step?: boolean;
+  /** Its place in the whole chat, counting from 0, when Mash gives it. */
+  readonly ordinal?: number;
+}
+
+/** A `mash view` answer: some of a chat's messages, and how many it has in all when Mash says. */
+export interface ChatView {
+  readonly messages: Message[];
+  readonly total?: number;
 }
 
 /** What a chat reads as around one message: what was said, with the work between counted. */
@@ -331,20 +339,31 @@ export function parseChats(stdout: string): Hit[] {
   });
 }
 
-/** The messages in a `mash view` answer, oldest first. */
-export function parseView(stdout: string): Message[] {
-  const messages = answer(stdout).messages;
-  if (!Array.isArray(messages)) return [];
-  return messages.map((row: Record<string, unknown>) => {
+/** The messages in a `mash view` answer, oldest first, with the chat's message count. */
+export function parseView(stdout: string): ChatView {
+  const body = answer(stdout);
+  const rows = Array.isArray(body.messages) ? body.messages : [];
+  const messages = rows.map((row: Record<string, unknown>): Message => {
     // Mash gives `dialogue` only when it differs from the content: the
     // person's own words inside agent-added context, or empty for a message
     // where nobody said anything (a tool call, tool output, thinking).
     const said = typeof row.dialogue === "string" ? row.dialogue : undefined;
-    const message = { id: text(row.id), role: text(row.role) || "message", content: text(row.content) };
+    const message = {
+      id: text(row.id),
+      role: text(row.role) || "message",
+      content: text(row.content),
+      ...(count(row.ordinal) !== undefined ? { ordinal: count(row.ordinal) } : {}),
+    };
     if (said === undefined) return row.tools ? { ...message, step: true } : message;
     return said.trim() ? { ...message, content: said } : { ...message, step: true };
   });
+  const total = count(body.message_count);
+  return total === undefined ? { messages } : { messages, total };
 }
+
+/** A whole number Mash reported, or nothing. */
+const count = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined;
 
 /**
  * The messages to show around `matchId`: up to `around` said messages on each
@@ -380,10 +399,13 @@ export function conversation(messages: readonly Message[], matchId: string, arou
   return passages;
 }
 
-/** Who said a message: you, or the agent by name. */
+/**
+ * Who said a message: you, or the agent by name. A memory's source chat comes
+ * without its agent, so its replies are headed "Assistant" rather than nothing.
+ */
 export function speaker(role: string, agent: string): string {
   if (role === "user") return "You";
-  if (role === "assistant") return agentName(agent);
+  if (role === "assistant") return agentName(agent) || "Assistant";
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
@@ -437,82 +459,26 @@ export function searchCommand(query: string): string {
   return `mash search '${query.trim().replace(/'/g, `'\\''`)}'`;
 }
 
-/**
- * Chat history is untrusted text, and Raycast renders Markdown, where an image
- * or link would load a remote address. Text is shown in a code block fenced
- * longer than any run of backticks inside it, so nothing in it is interpreted.
- */
-export function literal(content: string, limit = 4000): string {
-  const clipped = content.length > limit ? `${content.slice(0, limit)}…` : content;
-  const longest = Math.max(2, ...Array.from(clipped.matchAll(/`+/g), (run) => run[0].length));
-  const fence = "`".repeat(longest + 1);
-  return `${fence}text\n${clipped}\n${fence}`;
-}
+export { literal, rendered } from "./markdown";
+export { type Activity, type ActivityGroup, byActivity, lastActive } from "./activity";
+export { type ChatPosition, chatPosition, messageCount } from "./position";
 
-/**
- * Chat history rendered as Markdown, so code, lists and emphasis read as they
- * did in the chat. History is untrusted, and Raycast loads images, so every
- * image is turned into a link (links load nothing until clicked) and raw HTML
- * tags are shown as text. Code blocks and code spans are left alone: Raycast
- * shows them literally.
- */
-export function rendered(content: string, limit = 4000): string {
-  const clipped = content.length > limit ? `${content.slice(0, limit)}…` : content;
-  let fence = "";
-  return clipped
-    .split("\n")
-    .map((line) => {
-      const opener = /^\s{0,3}(`{3,}|~{3,})/.exec(line)?.[1];
-      if (fence) {
-        if (opener && opener[0] === fence[0] && opener.length >= fence.length) fence = "";
-        return line;
-      }
-      if (opener) {
-        fence = opener;
-        return line;
-      }
-      return outsideCode(line);
-    })
-    .join("\n");
-}
+/** The agents Mash reads, by the IDs Mash gives them, with the names Mash shows. */
+const AGENT_NAMES: Readonly<Record<string, string>> = {
+  "claude-code": "Claude Code",
+  codex: "Codex",
+  copilot: "GitHub Copilot",
+  cursor: "Cursor",
+  opencode: "OpenCode",
+  antigravity: "Antigravity",
+};
 
-/**
- * Defuses images and HTML in one line, outside its code spans. A run of
- * backticks opens a code span only when the same run closes it later on the
- * line; an unmatched run is ordinary text, so what follows it is defused too.
- */
-function outsideCode(line: string): string {
-  const parts = line.split(/(`+)/);
-  const isRun = (part: string) => /^`+$/.test(part);
-  let shown = "";
-  for (let index = 0; index < parts.length; index += 1) {
-    const part = parts[index];
-    if (!isRun(part)) {
-      shown += part.replace(/!\[/g, "\\![").replace(/<(?=[a-zA-Z!/?])/g, "&lt;");
-      continue;
-    }
-    const close = parts.indexOf(part, index + 1);
-    if (close < 0) {
-      shown += part;
-      continue;
-    }
-    shown += parts.slice(index, close + 1).join("");
-    index = close;
-  }
-  return shown;
-}
+/** Every agent ID Mash reads. */
+export const AGENTS: readonly string[] = Object.keys(AGENT_NAMES);
 
 /** Names agents the way Mash does. */
 export function agentName(agent: string): string {
-  const names: Record<string, string> = {
-    "claude-code": "Claude Code",
-    codex: "Codex",
-    copilot: "GitHub Copilot",
-    cursor: "Cursor",
-    opencode: "OpenCode",
-    antigravity: "Antigravity",
-  };
-  return names[agent] ?? agent;
+  return AGENT_NAMES[agent] ?? agent;
 }
 
 /** The logo file under assets/agents for each agent Mash reads, and its brand colour.
