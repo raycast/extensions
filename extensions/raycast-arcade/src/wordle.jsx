@@ -587,7 +587,8 @@ export default function Wordle() {
 
         const result = {};
         for (const key in obj) {
-          result[key] = obj[key] / maxValue;
+          // With no wins yet every count is 0, and 0 / 0 would make every bar NaN wide
+          result[key] = maxValue > 0 ? obj[key] / maxValue : 0;
         }
 
         return result;
