@@ -22,11 +22,38 @@ async function fetchText(f: Fetch, url: string, follow: boolean) {
     redirect: follow ? "follow" : "manual",
     signal: AbortSignal.timeout(10_000),
   });
-  const text =
-    res.status >= 300 && res.status < 400
-      ? ""
-      : (await res.text()).slice(0, MAX_BYTES);
-  return { res, text };
+  if (res.status >= 300 && res.status < 400)
+    return { res, text: "", tooLarge: false };
+  const { text, tooLarge } = await readCapped(res);
+  return { res, text, tooLarge };
+}
+
+async function readCapped(
+  res: Response,
+): Promise<{ text: string; tooLarge: boolean }> {
+  if (!res.body) {
+    const text = await res.text();
+    return text.length > MAX_BYTES
+      ? { text: "", tooLarge: true }
+      : { text, tooLarge: false };
+  }
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BYTES) {
+      await reader.cancel();
+      return { text: "", tooLarge: true };
+    }
+    chunks.push(value);
+  }
+  return {
+    text: Buffer.concat(chunks).toString("utf8"),
+    tooLarge: false,
+  };
 }
 
 export function evaluateAasa(
@@ -36,13 +63,22 @@ export function evaluateAasa(
   const details: any[] = Array.isArray(data?.applinks?.details)
     ? data.applinks.details
     : [];
-  const ids: string[] = details.flatMap((d) =>
+  const raw: unknown[] = details.flatMap((d) =>
     Array.isArray(d?.appIDs) ? d.appIDs : d?.appID ? [d.appID] : [],
   );
+  const ids: string[] = raw.filter(
+    (v): v is string => typeof v === "string" && v.trim() !== "",
+  );
+  const malformed = raw.length - ids.length;
   if (ids.length === 0)
     return {
       status: "warn",
       detail: "File is valid JSON but lists no app IDs under applinks.details.",
+    };
+  if (malformed > 0)
+    return {
+      status: "warn",
+      detail: `${malformed} app ID entr${malformed === 1 ? "y is" : "ies are"} not a non-empty string. Valid: ${ids.join(", ")}.`,
     };
   const extras = data?.webcredentials ? " Has webcredentials." : "";
   if (iosAppId) {
@@ -78,15 +114,11 @@ export function evaluateAssetLinks(
       status: "warn",
       detail: "No android_app statement with handle_all_urls.",
     };
-  const badFp = apps
-    .flatMap((e: any) => (e.target.sha256_cert_fingerprints ?? []) as string[])
-    .filter((fp) => !SHA256.test(fp));
+  const fpsOf = (e: any): unknown[] =>
+    Array.isArray(e.target.sha256_cert_fingerprints)
+      ? e.target.sha256_cert_fingerprints
+      : [];
   const names = apps.map((e: any) => e.target.package_name as string);
-  if (badFp.length)
-    return {
-      status: "warn",
-      detail: `${badFp.length} fingerprint(s) are not SHA-256 colon-hex format.`,
-    };
   if (androidPackage) {
     const hit = apps.find((e: any) => e.target.package_name === androidPackage);
     if (!hit)
@@ -94,16 +126,34 @@ export function evaluateAssetLinks(
         status: "fail",
         detail: `${androidPackage} is not listed. Lists: ${names.join(", ")}.`,
       };
-    const n = (hit.target.sha256_cert_fingerprints ?? []).length;
-    return n
-      ? {
-          status: "ok",
-          detail: `Lists ${androidPackage} with ${n} fingerprint(s).`,
-        }
-      : {
-          status: "fail",
-          detail: `${androidPackage} is listed without a fingerprint.`,
-        };
+    if (fpsOf(hit).length === 0)
+      return {
+        status: "fail",
+        detail: `${androidPackage} is listed without a fingerprint.`,
+      };
+  }
+  const missing = apps.filter((e: any) => fpsOf(e).length === 0).length;
+  if (missing)
+    return {
+      status: "warn",
+      detail: `${missing} android_app statement(s) have no sha256_cert_fingerprints array with entries.`,
+    };
+  const badFp = apps
+    .flatMap((e: any) => fpsOf(e))
+    .filter((fp) => typeof fp !== "string" || !SHA256.test(fp));
+  if (badFp.length)
+    return {
+      status: "warn",
+      detail: `${badFp.length} fingerprint(s) are not SHA-256 colon-hex format.`,
+    };
+  if (androidPackage) {
+    const n = fpsOf(
+      apps.find((e: any) => e.target.package_name === androidPackage),
+    ).length;
+    return {
+      status: "ok",
+      detail: `Lists ${androidPackage} with ${n} fingerprint(s).`,
+    };
   }
   return {
     status: "ok",
@@ -124,7 +174,7 @@ export async function checkAasa(
     url,
   };
   try {
-    const { res, text } = await fetchText(f, url, false);
+    const { res, text, tooLarge } = await fetchText(f, url, false);
     if (res.status >= 300 && res.status < 400)
       return {
         ...base,
@@ -133,6 +183,12 @@ export async function checkAasa(
       };
     if (!res.ok)
       return { ...base, status: "fail", detail: `HTTP ${res.status}` };
+    if (tooLarge)
+      return {
+        ...base,
+        status: "fail",
+        detail: `Response is larger than ${MAX_BYTES / 1024} KiB.`,
+      };
     let data: unknown;
     try {
       data = JSON.parse(text);
@@ -162,7 +218,7 @@ export async function checkAssetLinks(
     url,
   };
   try {
-    const { res, text } = await fetchText(f, url, false);
+    const { res, text, tooLarge } = await fetchText(f, url, false);
     if (res.status >= 300 && res.status < 400)
       return {
         ...base,
@@ -171,6 +227,12 @@ export async function checkAssetLinks(
       };
     if (!res.ok)
       return { ...base, status: "fail", detail: `HTTP ${res.status}` };
+    if (tooLarge)
+      return {
+        ...base,
+        status: "fail",
+        detail: `Response is larger than ${MAX_BYTES / 1024} KiB.`,
+      };
     let data: unknown;
     try {
       data = JSON.parse(text);
@@ -179,7 +241,10 @@ export async function checkAssetLinks(
     }
     const result = evaluateAssetLinks(data, androidPackage);
     const ct = res.headers.get("content-type") ?? "";
-    if (result.status === "ok" && !/application\/json/i.test(ct))
+    if (
+      result.status === "ok" &&
+      ct.split(";")[0].trim().toLowerCase() !== "application/json"
+    )
       return {
         ...base,
         status: "warn",
