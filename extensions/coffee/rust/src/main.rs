@@ -191,13 +191,27 @@ fn creation_ticks_for_handle(handle: HANDLE) -> windows::core::Result<u64> {
     Ok(((creation.dwHighDateTime as u64) << 32) | (creation.dwLowDateTime as u64))
 }
 
-/// Whether the given PID is still the keep-awake worker that recorded
+/// Whether the given PID is still the running keep-awake worker that recorded
 /// `expected_ticks`. Compares the exact process-creation FILETIME (100ns
 /// granularity), so even a same-second PID reuse is rejected. Guards both the
 /// status queries and `stop_caffeinate` from treating an unrelated process as
 /// the worker.
 fn pid_matches_worker(pid: u32, expected_ticks: u64) -> bool {
-    process_creation_ticks(pid).is_some_and(|ticks| ticks == expected_ticks)
+    let handle = unsafe {
+        OpenProcess(
+            PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_SYNCHRONIZE,
+            false,
+            pid,
+        )
+    };
+    let Ok(handle) = handle else {
+        return false;
+    };
+    // Another program's handle keeps an exited process, and its creation time, openable.
+    let matches = matches!(process_has_exited(handle), Ok(false))
+        && creation_ticks_for_handle(handle).is_ok_and(|ticks| ticks == expected_ticks);
+    unsafe { let _ = CloseHandle(handle); }
+    matches
 }
 
 /// The full path of the executable backing `pid`, or `None` when it cannot be
@@ -810,6 +824,17 @@ mod tests {
         child.0.kill().expect("end test-owned child");
         child.0.wait().expect("wait for test-owned child");
         assert!(!stop_matching_process(pid, ticks).expect("exited identity is a no-op"));
+    }
+
+    #[test]
+    fn exited_worker_with_an_open_handle_does_not_match() {
+        let mut child = OwnedChild::spawn();
+        let (pid, ticks) = child.identity();
+        assert!(pid_matches_worker(pid, ticks));
+        child.0.kill().expect("end test-owned child");
+        child.0.wait().expect("wait for test-owned child");
+        // `Child` still holds its process handle, like Process Explorer would.
+        assert!(!pid_matches_worker(pid, ticks));
     }
 
     #[test]
