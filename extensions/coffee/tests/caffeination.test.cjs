@@ -117,19 +117,20 @@ test("natural expiry or watched-app exit clears ownership and never reuses its r
   assert.equal(h.storage.has(key), false);
 });
 
-test("untimed sessions drop -u while preventing disk sleep, as caffeinate's 5 s -u timeout would also end -m", async () => {
-  const h = createHarness();
-  const utils = h.load("utils.ts");
-  await utils.startCaffeinate(quiet);
-  await utils.startCaffeinate(quiet, undefined, "-w 400");
+for (const [label, preferences, args, expected] of [
+  ["default options", {}, undefined, ["-dmi"]],
+  ["while an app runs", {}, "-w 400", ["-dmi", "-w", "400"]],
+  ["disk only", { preventDisplay: false, preventSystem: false }, undefined, ["-m"]],
+  ["display only", { preventDisk: false, preventSystem: false }, undefined, ["-u", "-d"]],
   // Keeping -u when nothing else is asserted stops caffeinate from defaulting to -i.
-  Object.assign(h.preferences, { preventDisplay: false, preventSystem: false, preventDisk: false });
-  await utils.startCaffeinate(quiet);
-  assert.deepEqual(
-    h.processes.spawn.mock.calls.map(({ arguments: [, args] }) => Array.from(args)),
-    [["-dmi"], ["-dmi", "-w", "400"], ["-u"]],
-  );
-});
+  ["nothing selected", { preventDisplay: false, preventSystem: false, preventDisk: false }, undefined, ["-u"]],
+]) {
+  test(`untimed sessions drop -u only alongside -m, as caffeinate's 5 s -u timeout would also end -m: ${label}`, async () => {
+    const h = createHarness({ preferences });
+    await h.load("utils.ts").startCaffeinate(quiet, undefined, args);
+    assert.deepEqual(Array.from(h.processes.spawn.mock.calls[0].arguments[1]), expected);
+  });
+}
 
 for (const failure of ["denied", "malformed"]) {
   test(`a ${failure} process inspection preserves tracking and never signals any PID`, async () => {
