@@ -7,6 +7,7 @@ import {
 } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { spokenText } from "./spoken-text";
 import { preparePlayer } from "./player";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -22,11 +23,16 @@ export default async function command() {
       await showHUD("Select some text or copy it to the clipboard first");
       return;
     }
+    const narration = spokenText(text);
+    if (!narration) {
+      await showHUD("This selection has no readable text");
+      return;
+    }
     const app = await preparePlayer();
     const dir = await mkdtemp(join(environment.supportPath, "reading-"));
     try {
       const file = join(dir, selected ? "Selection.txt" : "Clipboard.txt");
-      await writeFile(file, text, { mode: 0o600 });
+      await writeFile(file, narration, { mode: 0o600 });
       await closeMainWindow();
       await run("/usr/bin/open", ["-a", app, file]);
     } catch (error) {

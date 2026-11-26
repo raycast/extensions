@@ -93,6 +93,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 }
 
+if CommandLine.arguments.count == 5, CommandLine.arguments[1] == "--synthesize",
+   let threads = Int32(CommandLine.arguments[3]), let speed = Float(CommandLine.arguments[4]) {
+    exit(voice_worker(CommandLine.arguments[2], threads, speed))
+}
+
 if CommandLine.arguments.count == 3, CommandLine.arguments[1] == "--control" {
     let identifier = "com.ramimaalouf.raycast.speakplayer"
     let players = NSRunningApplication.runningApplications(withBundleIdentifier: identifier)
