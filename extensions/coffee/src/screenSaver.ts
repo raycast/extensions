@@ -67,22 +67,28 @@ function run(argv) {
 }`;
 
 // macOS skips its idle screen saver while any app prevents display sleep, including Coffee's caffeinate -d.
-export const SCREEN_SAVER_WATCHER = `pid=$1 started=$2 uid=$(id -u) armed=1 polls=0 limit= last=0 sampled= slept=0 blocked=
-owned() { [ "$(echo $(ps -p "$pid" -o lstart= 2>/dev/null))" = "$started" ]; }
+export const SCREEN_SAVER_WATCHER = `pid=$1 started=$2 uid=$(id -u) armed=1 unknown=0 fresh=60 limit= last=0 slept=0 overran=0 blocked= blocked_for=
+# ps exits 1 without output once the PID is gone, and 0 without output when it can't read the process table.
+owner() {
+  lstart=$(ps -p "$pid" -o lstart= 2>/dev/null) || return 2
+  [ -n "$lstart" ] || return 1
+  [ "$(echo $lstart)" = "$started" ] || return 2
+}
 read_limit() {
+  fresh=0
   value=$(osascript -l JavaScript -e "$COFFEE_IDLE_TIME" com.apple.screensaver 2>/dev/null) || return
   case $value in "" | *[!0-9]*) return 1 ;; esac
   limit=$value
 }
 sample_idle() {
-  idle=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { printf "%d", $NF / 1000000; exit }')
-  case $idle in "" | *[!0-9]*) return 1 ;; esac
+  value=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { printf "%d", $NF / 1000000; exit }')
+  case $value in "" | *[!0-9]*) return 1 ;; esac
+  idle=$value
 }
-# HIDIdleTime counts uptime, which runs at least as long as each sleep, so slower growth means input.
-# A poll that overran by a whole delay could hide input, so that counts as input too.
+# HIDIdleTime only falls on input, and otherwise grows at least as much as each requested sleep.
+# A sleep that overran by a whole delay could hide input, so that counts too.
 had_input() {
-  [ "$idle" -lt $((limit * 1000)) ] || [ $((idle + 1)) -lt $((last + slept * 1000)) ] ||
-    { [ -n "$sampled" ] && [ $((now - sampled - slept)) -ge "$limit" ]; }
+  [ $((idle + 1)) -lt $((last + slept * 1000)) ] || [ "$overran" -ge $((limit * 1000)) ]
 }
 wake_in() {
   [ $((($1 + 999) / 1000)) -lt $delay ] && delay=$((($1 + 999) / 1000))
@@ -91,42 +97,56 @@ decide() {
   set -- $(osascript -l JavaScript -e "$COFFEE_DECISION" com.apple.screensaver "$pid" 2>/dev/null)
   [ $# = 2 ] || return
   case $2 in *[!0-9]*) return 1 ;; esac
-  verdict=$1 limit=$2
+  verdict=$1 limit=$2 fresh=0
 }
 start_screen_saver() {
   pgrep -q -x -u "$uid" ScreenSaverEngine
   case $? in
     0) armed=0 ;;
-    1) owned && open -b com.apple.ScreenSaver.Engine && armed=0 ;;
+    1) owner && open -b com.apple.ScreenSaver.Engine && armed=0 ;;
   esac
 }
-while owned; do
-  delay=15 refresh=0
-  [ $((polls % 4)) = 0 ] && refresh=1
-  polls=$((polls + 1))
-  # Idle time means nothing without a delay, so read it before sampling.
-  [ $refresh = 1 ] && [ "\${limit:-0}" = 0 ] && refresh=0 && read_limit
-  if [ "\${limit:-0}" -gt 0 ] && sample_idle; then
-    now=$(date +%s)
-    had_input && armed=1 blocked=
-    last=$idle sampled=$now slept=0
-    if [ "$idle" -lt $((limit * 1000)) ]; then
-      wake_in $((limit * 1000 - idle))
-    elif [ $armed = 1 ] && [ -n "$blocked" ] && [ "$idle" -lt $((blocked + limit * 1000)) ]; then
-      wake_in $((blocked + limit * 1000 - idle))
-    elif [ $armed = 1 ] && decide; then
-      refresh=0
-      case $verdict in
-        # A Touch ID unlock resets only this HID clock, so it must reach the delay too.
-        launch) sample_idle && [ "$idle" -ge $((limit * 1000)) ] && start_screen_saver ;;
-        # Like loginwindow, check again only after another full delay.
-        blocked) blocked=$idle ;;
-      esac
+# /usr/bin/time times the sleep on CLOCK_MONOTONIC, which setting the clock doesn't move.
+pause() {
+  measured=$(command time -p sleep "$delay" 2>&1 >/dev/null |
+    awk '$1 == "real" && $2 ~ /^[0-9]+[.][0-9]+$/ { printf "%d", $2 * 1000 + 0.5; exit }')
+  case $measured in "" | *[!0-9]*) measured=$((delay * 1000)) ;; esac
+  slept=$((slept + delay)) overran=$((overran + measured - delay * 1000)) fresh=$((fresh + delay))
+}
+while :; do
+  owner
+  case $? in 0) unknown=0 ;; 1) unknown=$((unknown + 1)) ;; *) break ;; esac
+  [ $unknown -ge 20 ] && break
+  delay=15
+  if [ $unknown = 0 ]; then
+    # Idle time means nothing without a delay, so read it before sampling.
+    [ $fresh -ge 60 ] && [ "\${limit:-0}" = 0 ] && read_limit
+    if [ "\${limit:-0}" -gt 0 ] && sample_idle; then
+      had_input && armed=1 blocked=
+      last=$idle slept=0 overran=0
+      # Wait out the delay in force when the blocker was seen, unless the delay has since shortened.
+      held=0
+      [ -n "$blocked" ] && held=$((blocked + (blocked_for < limit ? blocked_for : limit) * 1000))
+      if [ "$idle" -lt $((limit * 1000)) ]; then
+        wake_in $((limit * 1000 - idle))
+      elif [ $armed = 1 ] && [ "$idle" -lt $held ]; then
+        wake_in $((held - idle))
+      elif [ $armed = 1 ] && decide; then
+        case $verdict in
+          # A Touch ID unlock resets only this HID clock, so it must reach the delay too.
+          launch) sample_idle && [ "$idle" -ge $((limit * 1000)) ] && start_screen_saver ;;
+          blocked) sample_idle; blocked=$idle blocked_for=$limit ;;
+        esac
+      fi
+    fi
+    if [ $fresh -ge 60 ] && [ "\${limit:-0}" != 0 ]; then
+      previous=$limit
+      read_limit
+      # Act on a changed delay now rather than after another sleep.
+      [ "$limit" = "$previous" ] || continue
     fi
   fi
-  [ $refresh = 1 ] && read_limit
-  slept=$((slept + delay))
-  sleep $delay
+  pause
 done`;
 
 /** Start the screen saver after the Lock Screen delay for as long as this caffeinate process runs. Never throws. */

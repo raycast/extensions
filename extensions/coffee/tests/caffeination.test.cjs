@@ -467,6 +467,12 @@ for (const [name, setup] of [
   });
 }
 
+test("an unreadable command line fails the state read instead of hiding a previous Coffee session", async () => {
+  const h = createHarness();
+  h.addProcess(900, { ...legacyRow, args: "" });
+  await assert.rejects(h.load("utils.ts").getCaffeinationState(), /Cannot read the macOS process table/);
+});
+
 test("the first run fixes the legacy cutoff so later sessions never qualify", async () => {
   const h = createHarness();
   const utils = h.load("utils.ts");

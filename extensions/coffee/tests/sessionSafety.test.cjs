@@ -138,6 +138,23 @@ test("a targeted inspection failure after reading metadata preserves ownership",
   assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
 });
 
+test("a targeted inspection that can't read the process table preserves ownership", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet);
+  const saved = h.storage.get(sessionKey);
+  h.processes.execFile.mock.mockImplementation((executable, args, options, callback) => {
+    if (args.includes("200")) callback(null, "", "ps: Failure calling sysctl: Cannot allocate memory\n");
+    else {
+      const row = h.table.get(100);
+      callback(null, `${row.pid} ${row.uid} ${row.createdAt} ${row.executable}`, "");
+    }
+  });
+  await assert.rejects(utils.stopCaffeinate(quiet), /Failure calling sysctl/);
+  assert.equal(h.storage.get(sessionKey), saved);
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
+});
+
 test("Windows reasons are identity-bound and legacy metadata cannot authorize expiry", async () => {
   const h = createHarness({ platform: "win32" });
   const utils = h.load("utils.ts");

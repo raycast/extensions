@@ -22,21 +22,24 @@ const UNLOCKED = {
 const posixShell = { skip: process.platform === "win32" && "needs /bin/sh" };
 const macOS = { skip: process.platform !== "darwin" && "needs osascript" };
 
-// Every stub answers from the current poll's directory. The sleep stub ends a poll and advances a fake wall clock.
+// Every stub answers from the current poll's directory, and the sleep stub ends the poll. Idle files hold milliseconds.
 const STUBS = {
   ps: String.raw`n=$(cat "$DIR/n"); echo "$n" >> "$DIR/ps.log"
-[ -d "$DIR/$n" ] && [ ! -e "$DIR/$n/exit.$(grep -cx "$n" "$DIR/ps.log")" ] && cat "$DIR/lstart"; exit 0`,
+[ -e "$DIR/$n/unknown" ] && exit 0
+[ -d "$DIR/$n" ] && [ ! -e "$DIR/$n/exit.$(grep -cx "$n" "$DIR/ps.log")" ] || exit 1
+cat "$DIR/lstart"`,
   osascript: String.raw`n=$(cat "$DIR/n"); case "$*" in *IOPMCopyAssertionsByProcess*) file=decision ;; *) file=limit ;; esac
 echo "$n $file" >> "$DIR/osascript.log"; cat "$DIR/$n/$file"`,
   ioreg: String.raw`n=$(cat "$DIR/n"); echo "$n" >> "$DIR/ioreg.log"
 file="$DIR/$n/idle.$(grep -cx "$n" "$DIR/ioreg.log")"; [ -e "$file" ] || file="$DIR/$n/idle"
-printf '  | "HIDIdleTime" = %s000000000\n' "$(cat "$file")"`,
+printf '  | "HIDIdleTime" = %s000000\n' "$(cat "$file")"`,
   pgrep: String.raw`echo "$*" > "$DIR/pgrep.args"; exit $(cat "$DIR/$(cat "$DIR/n")/pgrep" 2>/dev/null || echo 1)`,
   open: String.raw`echo "$(cat "$DIR/n") $*" >> "$DIR/open.log"`,
-  date: String.raw`cat "$DIR/clock"`,
-  sleep: String.raw`n=$(cat "$DIR/n"); echo "$n $*" >> "$DIR/sleep.log"
-echo $(($(cat "$DIR/clock") + $1 + $(cat "$DIR/$n/drift" 2>/dev/null || echo 0))) > "$DIR/clock"
-echo $((n + 1)) > "$DIR/n"`,
+  time: String.raw`[ "$1" = -p ] && shift; poll="$DIR/$(cat "$DIR/n")"; drift=$(cat "$poll/drift" 2>/dev/null || echo 0)
+report=$(cat "$poll/report" 2>/dev/null); "$@"
+[ -n "$report" ] && echo "$report" >&2 && exit
+awk -v slept="$2" -v drift="$drift" 'BEGIN { printf "real %.2f\nuser 0.00\nsys 0.00\n", slept + drift }' >&2`,
+  sleep: String.raw`n=$(cat "$DIR/n"); echo "$n $*" >> "$DIR/sleep.log"; echo $((n + 1)) > "$DIR/n"`,
 };
 
 function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
@@ -47,19 +50,21 @@ function runWatcher(steps, started = "Wed Nov 5 09:15:52 2026") {
     writeFileSync(join(bin, name), `#!/bin/sh\n${body}\n`, { mode: 0o755 });
   }
   writeFileSync(join(dir, "n"), "1");
-  writeFileSync(join(dir, "clock"), "1000");
   writeFileSync(join(dir, "lstart"), "Wed Nov  5 09:15:52 2026\n");
+  const ms = (seconds) => (seconds === undefined ? undefined : Math.round(seconds * 1000));
   let limit;
-  steps.forEach(({ idle, recheck, decision, pgrep, drift, exits, ...step }, index) => {
+  steps.forEach(({ idle, recheck, decision, pgrep, drift, report, exits, unknown, ...step }, index) => {
     limit = step.limit ?? limit;
     const files = {
-      idle,
-      "idle.2": recheck,
+      idle: ms(idle),
+      "idle.2": ms(recheck),
       limit: step.limit,
       decision: decision === undefined ? `launch ${limit}` : decision,
       pgrep,
       drift,
+      report,
       "exit.2": exits ? "" : undefined,
+      unknown: unknown ? "" : undefined,
     };
     const poll = join(dir, String(index + 1));
     mkdirSync(poll);
@@ -298,8 +303,10 @@ for (const [name, steps, opened] of [
     [{ idle: 1, limit: 1 }, { idle: 14 }],
     [`1 ${OPEN}`, `2 ${OPEN}`],
   ],
+  ["notices input half a second into a poll", [{ idle: 10, limit: 10 }, { idle: 24.5 }], [`1 ${OPEN}`, `2 ${OPEN}`]],
+  ["ignores a millisecond of rounding in idle time", [{ idle: 600, limit: 600 }, { idle: 614.999 }], [`1 ${OPEN}`]],
   [
-    "rearms after input during a sleep that overran",
+    "rearms after input during a sleep that overran by a whole delay",
     [
       { idle: 10, limit: 10, drift: 20 },
       { idle: 30, limit: 10 },
@@ -307,9 +314,14 @@ for (const [name, steps, opened] of [
     [`1 ${OPEN}`, `2 ${OPEN}`],
   ],
   [
-    "keeps waiting out a skipped screen saver when the wall clock jumps",
-    [{ idle: 600, limit: 600, decision: "blocked 600", drift: 30 }, { idle: 615 }],
+    "keeps waiting out a skipped screen saver through a shorter overrun",
+    [{ idle: 600, limit: 600, decision: "blocked 600", drift: 30 }, { idle: 645 }],
     [],
+  ],
+  [
+    "falls back to the requested sleep when the timing report can't be read",
+    [{ idle: 10, limit: 10, report: "real 35,00" }, { idle: 25 }],
+    [`1 ${OPEN}`],
   ],
   [
     "applies a shorter delay read while waiting out a skipped screen saver",
@@ -319,15 +331,85 @@ for (const [name, steps, opened] of [
       { idle: 1230 },
       { idle: 1245 },
       { idle: 1260, limit: 60 },
-      { idle: 1275 },
+    ],
+    [`5 ${OPEN}`],
+  ],
+  [
+    "applies a shorter delay as soon as it's read",
+    [{ idle: 100, limit: 600 }, { idle: 115 }, { idle: 130 }, { idle: 145 }, { idle: 160, limit: 60 }],
+    [`5 ${OPEN}`],
+  ],
+  [
+    "waits a full delay after a blocker seen with a longer delay",
+    [
+      { idle: 120, limit: 60, decision: "blocked 300" },
+      { idle: 135 },
+      { idle: 300 },
+      { idle: 420, decision: "launch 300" },
+    ],
+    [`4 ${OPEN}`],
+  ],
+  [
+    "rechecks after the delay in force at the block when a longer delay is read while waiting",
+    [
+      { idle: 200, limit: 100, decision: "blocked 100" },
+      { idle: 215 },
+      { idle: 230 },
+      { idle: 245 },
+      { idle: 260, limit: 300 },
+      { idle: 320, decision: "launch 300" },
     ],
     [`6 ${OPEN}`],
+  ],
+  [
+    "waits a full delay from when the blocker was seen",
+    [
+      { idle: 60, limit: 60, decision: "blocked 60", recheck: 100 },
+      { idle: 115 },
+      { idle: 130 },
+      { idle: 145 },
+      { idle: 160 },
+    ],
+    [`5 ${OPEN}`],
+  ],
+  [
+    "keeps watching through a failed ownership check",
+    [
+      { idle: 700, limit: 600, unknown: true },
+      { idle: 715, limit: 600 },
+    ],
+    [`2 ${OPEN}`],
   ],
 ]) {
   test(`screen saver watcher ${name}`, posixShell, () => {
     assert.deepEqual(runWatcher(steps).opened, opened);
   });
 }
+
+test("screen saver watcher sleeps until a sub-second remainder of the delay", posixShell, () => {
+  const { slept, opened } = runWatcher([{ idle: 599.5, limit: 600 }, { idle: 600.5 }]);
+  assert.deepEqual({ first: slept[0], opened }, { first: "1 1", opened: [`2 ${OPEN}`] });
+});
+
+test("screen saver watcher makes no further decisions after a launch with a one-second delay", posixShell, () => {
+  const { decided } = runWatcher([
+    { idle: 1, limit: 1, drift: 0.5 },
+    { idle: 16.5, decision: "blocked 1", drift: 0.5 },
+    { idle: 32, decision: "blocked 1", drift: 0.5 },
+    { idle: 47.5, decision: "blocked 1" },
+  ]);
+  assert.deepEqual(decided, ["1"]);
+});
+
+test("screen saver watcher rereads the delay about once a minute with a short delay", posixShell, () => {
+  const steps = Array.from({ length: 13 }, (_, index) => ({ idle: 5, limit: index ? undefined : 10 }));
+  assert.deepEqual(runWatcher(steps).read, ["1", "13"]);
+});
+
+test("screen saver watcher gives up after 20 failed ownership checks in a row", posixShell, () => {
+  const { slept, sampled } = runWatcher(Array.from({ length: 25 }, () => ({ idle: 700, limit: 600, unknown: true })));
+  assert.deepEqual({ sleeps: slept.length, sampled }, { sleeps: 19, sampled: [] });
+});
 
 test("screen saver watcher rereads the delay only on checks that don't decide", posixShell, () => {
   const { read, decided } = runWatcher([

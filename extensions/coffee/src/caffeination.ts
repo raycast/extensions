@@ -102,10 +102,13 @@ async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
         maxBuffer: 8 * 1024 * 1024,
       },
       (error, stdout, stderr) => {
-        // macOS ps exits 1 without output when the selected PID no longer exists.
+        // macOS ps exits 1 without output when the selected PID no longer exists, and 0 without
+        // output when it can't read the process table.
         // Permission errors, timeouts and malformed output must not erase ownership.
         if (error && !(pid !== undefined && error.code === 1 && !stdout.trim() && !stderr.trim())) {
           reject(error);
+        } else if (!error && !stdout.trim()) {
+          reject(new Error(stderr.trim() || "Cannot read the macOS process table"));
         } else {
           resolve(stdout);
         }
@@ -135,6 +138,7 @@ async function getProcessArgs(pid: number): Promise<string | undefined> {
       { encoding: "utf8", env: { ...process.env, LC_ALL: "C" }, timeout: PROCESS_QUERY_TIMEOUT_MS },
       (error, stdout, stderr) => {
         if (error && !(error.code === 1 && !stdout.trim() && !stderr.trim())) reject(error);
+        else if (!error && !stdout.trim()) reject(new Error(stderr.trim() || "Cannot read the macOS process table"));
         else resolve(stdout);
       },
     );
