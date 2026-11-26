@@ -165,8 +165,11 @@ export function calculate(input: string, ctx: Context): CalcResult | CalcError {
       const af = fmt(a, o);
       if (af.nspire !== result.nspire) approx = af;
     }
-    if (assignment)
-      assignment = { ...assignment, value, source: `${toNspire(resNode, { digits: 15 })}→${assignment.name}` };
+    if (assignment) {
+      // The source is a readable fallback; the value itself is stored with encodeValue (exact, with angle/temperature meaning).
+      const full = valueToNode(value, { ...ctx.settings, mode: value.k === "q" && !value.num.e ? "auto" : "exact" });
+      assignment = { ...assignment, value, source: `${toNspire(full, { digits: 17 })}→${assignment.name}` };
+    }
     const showEq = solvedFor ? result : fmt(equationNode(parsed.node, resNode), o);
     return {
       ok: true,
@@ -260,4 +263,25 @@ export function translate(input: string, ctx: Context): (Formatted & { sourceFor
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
+}
+
+/** Serializes a value exactly (bigints, non-finite floats, angle and temperature flags) for storage. */
+export function encodeValue(v: Value): string {
+  return JSON.stringify(v, (_k, x) => {
+    if (typeof x === "bigint") return { $big: x.toString() };
+    if (typeof x === "number" && !Number.isFinite(x)) return { $num: String(x) };
+    return x;
+  });
+}
+
+/** Inverse of encodeValue; throws on malformed input. */
+export function decodeValue(s: string): Value {
+  const v = JSON.parse(s, (_k, x) => {
+    if (x && typeof x === "object" && typeof x.$big === "string") return BigInt(x.$big);
+    if (x && typeof x === "object" && typeof x.$num === "string") return Number(x.$num);
+    return x;
+  });
+  if (!v || typeof v !== "object" || !["q", "list", "bool", "expr"].includes(v.k))
+    throw new Error("Invalid stored value");
+  return v as Value;
 }

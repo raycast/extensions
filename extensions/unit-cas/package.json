@@ -2,15 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unit-cas",
   "title": "Unit CAS",
-  "description": "Calculator with units, conversions and solve() that reads and writes both LaTeX and TI-Nspire syntax",
+  "description": "Calculate with units, convert measurements, and solve equations using LaTeX or TI-Nspire syntax.",
   "icon": "icon.png",
   "author": "nosefa",
   "platforms": [
     "macOS"
   ],
   "categories": [
-    "Productivity",
-    "Developer Tools"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -36,9 +35,18 @@
       "required": false,
       "default": "auto",
       "data": [
-        { "title": "Auto", "value": "auto" },
-        { "title": "Exact", "value": "exact" },
-        { "title": "Approximate", "value": "approx" }
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Exact",
+          "value": "exact"
+        },
+        {
+          "title": "Approximate",
+          "value": "approx"
+        }
       ]
     },
     {
@@ -49,9 +57,18 @@
       "required": false,
       "default": "rad",
       "data": [
-        { "title": "Radian", "value": "rad" },
-        { "title": "Degree", "value": "deg" },
-        { "title": "Gradian", "value": "grad" }
+        {
+          "title": "Radian",
+          "value": "rad"
+        },
+        {
+          "title": "Degree",
+          "value": "deg"
+        },
+        {
+          "title": "Gradian",
+          "value": "grad"
+        }
       ]
     },
     {
@@ -62,11 +79,26 @@
       "required": false,
       "default": "6",
       "data": [
-        { "title": "Float 4", "value": "4" },
-        { "title": "Float 6", "value": "6" },
-        { "title": "Float 8", "value": "8" },
-        { "title": "Float 10", "value": "10" },
-        { "title": "Float 12", "value": "12" }
+        {
+          "title": "Float 4",
+          "value": "4"
+        },
+        {
+          "title": "Float 6",
+          "value": "6"
+        },
+        {
+          "title": "Float 8",
+          "value": "8"
+        },
+        {
+          "title": "Float 10",
+          "value": "10"
+        },
+        {
+          "title": "Float 12",
+          "value": "12"
+        }
       ]
     },
     {
@@ -77,8 +109,14 @@
       "required": false,
       "default": "latex",
       "data": [
-        { "title": "LaTeX", "value": "latex" },
-        { "title": "TI-Nspire", "value": "nspire" }
+        {
+          "title": "LaTeX",
+          "value": "latex"
+        },
+        {
+          "title": "TI-Nspire",
+          "value": "nspire"
+        }
       ]
     },
     {
@@ -102,6 +140,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3",
     "mathjax-full": "^3.2.2"
   },
   "devDependencies": {
@@ -110,15 +149,13 @@
     "@types/react": "^19.0.0",
     "eslint": "^9.0.0",
     "prettier": "^3.3.0",
-    "typescript": "^5.6.0",
-    "vitest": "^3.0.0"
+    "typescript": "^5.6.0"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
   }
 }

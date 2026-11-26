@@ -1,61 +1,93 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
   Color,
   Icon,
   Keyboard,
   List,
+  confirmAlert,
   environment,
   getPreferenceValues,
   showToast,
   Toast,
 } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { createHash } from "crypto";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, utimesSync, writeFileSync } from "fs";
 import { join } from "path";
-import { useEffect, useMemo, useState } from "react";
-import { AngleMode, CalcResult, Formatted, calculate, suggestConversions } from "./engine";
+import { useMemo, useState } from "react";
+import { AngleMode, CalcResult, Formatted, calculate, encodeValue, suggestConversions } from "./engine";
 import { texToSvg } from "./lib/mathjax";
 import {
-  Definition,
-  HistoryEntry,
-  Preferences,
-  addHistory,
-  buildContext,
+  ANGLE_KEY,
   ANGLE_MODES,
+  DEFS_KEY,
+  Definition,
+  HISTORY_KEY,
+  HistoryEntry,
+  buildContext,
   getSettings,
-  loadAngleMode,
-  saveAngleMode,
-  loadDefinitions,
-  loadHistory,
-  removeDefinition,
-  removeHistory,
-  saveDefinition,
+  isAngleMode,
+  withDefinition,
+  withHistoryEntry,
 } from "./lib/store";
 
 const prefs = getPreferenceValues<Preferences>();
+
+const MATH_DIR = join(environment.supportPath, "math");
+/** Rendered formulas kept on disk; the least recently used beyond this are deleted. */
+const MATH_CACHE_LIMIT = 200;
+
+/** Deletes the least recently used cached formula images beyond the limit. */
+function pruneMathCache() {
+  try {
+    const files = readdirSync(MATH_DIR)
+      .filter((f) => f.endsWith(".svg"))
+      .map((f) => ({ path: join(MATH_DIR, f), time: statSync(join(MATH_DIR, f)).mtimeMs }));
+    if (files.length <= MATH_CACHE_LIMIT) return;
+    files.sort((a, b) => b.time - a.time);
+    for (const f of files.slice(MATH_CACHE_LIMIT)) unlinkSync(f.path);
+  } catch {
+    // The cache folder may not exist yet.
+  }
+}
+pruneMathCache();
 
 /** Writes the typeset formula to the support folder and returns a markdown image, or null. */
 function mathImage(tex: string): string | null {
   if (!prefs.renderMath) return null;
   try {
     const color = environment.appearance === "dark" ? "#EDEDED" : "#1C1C1C";
-    const dir = join(environment.supportPath, "math");
     const file = join(
-      dir,
+      MATH_DIR,
       createHash("sha1")
         .update(color + tex)
         .digest("hex") + ".svg",
     );
-    if (!existsSync(file)) {
-      mkdirSync(dir, { recursive: true });
+    if (existsSync(file)) {
+      // Mark as recently used so pruning keeps it.
+      const now = new Date();
+      utimesSync(file, now, now);
+    } else {
+      mkdirSync(MATH_DIR, { recursive: true });
       writeFileSync(file, texToSvg(tex, color));
     }
     return `![](${encodeURI("file://" + file)})`;
   } catch {
     return null;
   }
+}
+
+/** Asks before an irreversible delete. */
+function confirmDelete(title: string, message: string): Promise<boolean> {
+  return confirmAlert({
+    title,
+    message,
+    icon: Icon.Trash,
+    primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+  });
 }
 
 function fence(label: string, code: string): string {
@@ -128,24 +160,15 @@ function usesAngles(nspire: string): boolean {
 
 export default function Command() {
   const [text, setText] = useState("");
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [defs, setDefs] = useState<Definition[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [angle, setAngle] = useState<AngleMode>(prefs.angleMode ?? "rad");
+  const historyStore = useLocalStorage<HistoryEntry[]>(HISTORY_KEY, []);
+  const defsStore = useLocalStorage<Definition[]>(DEFS_KEY, []);
+  const angleStore = useLocalStorage<AngleMode>(ANGLE_KEY, prefs.angleMode ?? "rad");
+  const history = historyStore.value ?? [];
+  const defs = defsStore.value ?? [];
+  const angle: AngleMode = isAngleMode(angleStore.value) ? angleStore.value : (prefs.angleMode ?? "rad");
+  const loading = historyStore.isLoading || defsStore.isLoading || angleStore.isLoading;
 
-  useEffect(() => {
-    Promise.all([loadHistory(), loadDefinitions(), loadAngleMode()]).then(([h, d, a]) => {
-      setHistory(h);
-      setDefs(d);
-      setAngle(a);
-      setLoading(false);
-    });
-  }, []);
-
-  const changeAngle = (mode: AngleMode) => {
-    setAngle(mode);
-    saveAngleMode(mode);
-  };
+  const changeAngle = (mode: AngleMode) => angleStore.setValue(mode);
   const nextAngle = ANGLE_MODES[(ANGLE_MODES.findIndex((m) => m.value === angle) + 1) % ANGLE_MODES.length];
   const angleAction = (
     <Action
@@ -161,8 +184,8 @@ export default function Command() {
   const conversions = useMemo(() => (result?.ok ? suggestConversions(result.value, ctx) : []), [result, ctx]);
 
   const remember = (r: CalcResult) => async () => {
-    setHistory(
-      await addHistory({
+    await historyStore.setValue(
+      withHistoryEntry(history, {
         input: text.trim(),
         inputLatex: r.input.latex,
         inputNspire: r.input.nspire,
@@ -175,11 +198,12 @@ export default function Command() {
 
   const store = async (r: CalcResult) => {
     const a = r.assignment!;
-    setDefs(
-      await saveDefinition({
+    await defsStore.setValue(
+      withDefinition(defs, {
         name: a.name,
         source: a.source,
         display: a.params ? r.input.nspire : `${a.name}:=${r.result.nspire}`,
+        value: !a.params && a.value ? encodeValue(a.value) : undefined,
       }),
     );
     await remember(r)();
@@ -330,14 +354,25 @@ export default function Command() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={async () => setDefs(await removeDefinition(d.name))}
+                    onAction={async () => {
+                      if (await confirmDelete(`Delete ${d.name}?`, "The stored definition will be removed."))
+                        await defsStore.setValue(defs.filter((x) => x.name !== d.name));
+                    }}
                   />
                   <Action
                     title="Delete All"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.RemoveAll}
-                    onAction={async () => setDefs(await removeDefinition(null))}
+                    onAction={async () => {
+                      if (
+                        await confirmDelete(
+                          "Delete All Definitions?",
+                          "Every stored variable and function will be removed.",
+                        )
+                      )
+                        await defsStore.setValue([]);
+                    }}
                   />
                 </ActionPanel>
               }
@@ -366,14 +401,20 @@ export default function Command() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={async () => setHistory(await removeHistory(h.input))}
+                    onAction={async () => {
+                      if (await confirmDelete("Delete History Entry?", h.inputNspire))
+                        await historyStore.setValue(history.filter((x) => x.input !== h.input));
+                    }}
                   />
                   <Action
                     title="Clear History"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.RemoveAll}
-                    onAction={async () => setHistory(await removeHistory(null))}
+                    onAction={async () => {
+                      if (await confirmDelete("Clear History?", "Every calculation in the history will be removed."))
+                        await historyStore.setValue([]);
+                    }}
                   />
                 </ActionPanel>
               }

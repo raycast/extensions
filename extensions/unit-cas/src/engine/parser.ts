@@ -883,19 +883,21 @@ class Parser {
   }
 
   private parseStatement(): Node {
-    // f(x):=body
-    if (this.tok.t === "id" && this.isOp("(", this.peek())) {
+    // f(x):=body, also LaTeX \mathit{myf}\left(x\right):=… as we export multi-letter names
+    const headName = defName(this.tok);
+    if (headName && this.isOp("(", this.peek())) {
       const save = this.i;
-      const name = this.tok.s;
+      const name = headName;
       this.i += 2;
       const params: string[] = [];
       let ok = true;
       while (!this.isOp(")")) {
-        if (this.tok.t !== "id") {
+        const param = defName(this.tok);
+        if (!param) {
           ok = false;
           break;
         }
-        params.push(this.tok.s);
+        params.push(param);
         this.i++;
         if (!this.eat(",")) break;
       }
@@ -1322,6 +1324,16 @@ class Parser {
     }
     throw new ParseError(`Unknown unit "${content}"`);
   }
+}
+
+/** A name in a definition header: a plain identifier, or LaTeX \mathit{name} / \operatorname{name}. */
+function defName(t: Tok): string | null {
+  if (t.t === "id") return t.s;
+  if (t.t === "raw" && (t.cmd === "mathit" || t.cmd === "operatorname")) {
+    const plain = t.args[0]?.replace(/\s+/g, "") ?? "";
+    if (/^[\p{L}][\p{L}\p{N}_]*$/u.test(plain)) return plain;
+  }
+  return null;
 }
 
 function describe(t: Tok): string {

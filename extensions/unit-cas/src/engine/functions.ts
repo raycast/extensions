@@ -4,7 +4,7 @@ import { Node } from "./ast";
 import { Env, EvalError, Q, Value, addQ, divQ, evaluate, mulQ, powQ, q, registerFunction } from "./evaluate";
 import * as N from "./num";
 import { freeVars, recognize } from "./solve";
-import { Algebra, derivative, expandUser } from "./symbolic";
+import { Algebra, nthDerivative } from "./symbolic";
 import { DIMLESS, dimEq, isDimless } from "./units";
 
 const asList = (v: Value, what: string): Value[] => {
@@ -265,8 +265,7 @@ function derivativeFn(args: Node[], env: Env): Value {
   argCount(args, 2, 3, "d(expression, variable[, order])");
   const x = varName(args[1], "d()");
   const order = args[2] ? Number(intOf(ev(args[2], env), "d()")) : 1;
-  let D = expandUser(args[0], env);
-  for (let i = 0; i < order; i++) D = new Algebra(env, new Set([x])).simplifyNode(derivative(D, x));
+  const D = nthDerivative(args[0], x, order, env);
   if (args[1].type === "rel") env = withLocal(env, x, ev(args[1].r, env));
   if (env.locals?.has(x) || env.vars.has(x)) {
     if (!freeVars(D, { ...env }).length) return evaluate(D, env);
@@ -313,7 +312,10 @@ registerFunction("nderiv", (args, env) => {
   );
 });
 
+/** Adaptive Simpson; NaN when the integrand is undefined somewhere, bounded total work. */
 function simpson(f: (t: number) => number, a: number, b: number): number {
+  let budget = 200_000;
+  let scale = 1;
   const rec = (
     a: number,
     b: number,
@@ -329,15 +331,23 @@ function simpson(f: (t: number) => number, a: number, b: number): number {
       rm = (m + b) / 2;
     const flm = f(lm),
       frm = f(rm);
+    if (!Number.isFinite(flm) || !Number.isFinite(frm)) return NaN;
+    budget -= 2;
     const left = ((m - a) / 6) * (fa + 4 * flm + fm),
       right = ((b - m) / 6) * (fm + 4 * frm + fb);
-    if (depth <= 0 || Math.abs(left + right - whole) <= 15 * eps) return left + right + (left + right - whole) / 15;
+    const est = left + right + (left + right - whole) / 15;
+    if (Math.abs(left + right - whole) <= 15 * eps) return est;
+    if (budget <= 0) return est;
+    // Out of depth: accept a small leftover error (integrable singularity), reject a large one (pole).
+    if (depth <= 0) return Math.abs(left + right - whole) <= 1e-4 * Math.max(1, scale) ? est : NaN;
     return rec(a, m, fa, flm, fm, left, depth - 1, eps / 2) + rec(m, b, fm, frm, fb, right, depth - 1, eps / 2);
   };
   const fa = f(a),
     fb = f(b),
     fm = f((a + b) / 2);
+  if (!Number.isFinite(fa) || !Number.isFinite(fb) || !Number.isFinite(fm)) return NaN;
   const whole = ((b - a) / 6) * (fa + 4 * fm + fb);
+  scale = Math.abs(b - a) * Math.max(Math.abs(fa), Math.abs(fb));
   return rec(a, b, fa, fm, fb, whole, 40, 1e-12 * Math.max(1, Math.abs(whole)));
 }
 
@@ -352,9 +362,11 @@ function integralFn(args: Node[], env: Env): Value {
   const f = numericFn(args[0], x, env, a.dim);
   let dimF: number[] | undefined;
   const g = (t: number) => {
-    // Nudge off singular endpoints.
-    const v = f(t) ?? f(t + 1e-12 * Math.max(1, Math.abs(t)));
-    if (!v) return NaN;
+    // Nudge off singular points (endpoints, removable singularities like sin(x)/x at 0).
+    const ok = (v: Q | null): v is Q => !!v && Number.isFinite(N.toF(v.num));
+    let v = f(t);
+    if (!ok(v)) v = f(t + 1e-12 * Math.max(1, Math.abs(t)));
+    if (!ok(v)) return NaN;
     dimF ??= v.dim;
     return N.toF(v.num);
   };

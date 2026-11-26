@@ -1,14 +1,5 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { AngleMode, Context, Settings, calculate } from "../engine";
-
-export interface Preferences {
-  calcMode: "auto" | "exact" | "approx";
-  angleMode: AngleMode;
-  digits: string;
-  primaryCopy: "latex" | "nspire";
-  nspireAscii: boolean;
-  renderMath: boolean;
-}
+import { getPreferenceValues } from "@raycast/api";
+import { AngleMode, Context, Settings, UserFunc, calculate, decodeValue } from "../engine";
 
 export function getSettings(angle?: AngleMode): Settings {
   const p = getPreferenceValues<Preferences>();
@@ -34,10 +25,15 @@ export interface Definition {
   name: string;
   source: string;
   display: string;
+  /** Exact stored value of a variable (encodeValue), independent of the display settings. */
+  value?: string;
 }
 
-const HISTORY_KEY = "history";
-const ANGLE_KEY = "angleMode";
+/** LocalStorage keys, read and written with useLocalStorage (JSON). */
+export const HISTORY_KEY = "history";
+export const DEFS_KEY = "definitions";
+export const ANGLE_KEY = "angle";
+const MAX_HISTORY = 100;
 
 export const ANGLE_MODES: { value: AngleMode; title: string; short: string }[] = [
   { value: "rad", title: "Radian", short: "RAD" },
@@ -45,66 +41,48 @@ export const ANGLE_MODES: { value: AngleMode; title: string; short: string }[] =
   { value: "grad", title: "Gradian", short: "GRAD" },
 ];
 
-/** The angle mode chosen in the command, falling back to the preference. */
-export async function loadAngleMode(): Promise<AngleMode> {
-  const saved = await LocalStorage.getItem<string>(ANGLE_KEY);
-  if (saved && ANGLE_MODES.some((m) => m.value === saved)) return saved as AngleMode;
-  return getPreferenceValues<Preferences>().angleMode ?? "rad";
+export const isAngleMode = (v: unknown): v is AngleMode => ANGLE_MODES.some((m) => m.value === v);
+
+export function withHistoryEntry(list: HistoryEntry[], e: HistoryEntry): HistoryEntry[] {
+  return [e, ...list.filter((h) => h.input !== e.input)].slice(0, MAX_HISTORY);
 }
 
-export async function saveAngleMode(mode: AngleMode): Promise<void> {
-  await LocalStorage.setItem(ANGLE_KEY, mode);
-}
-const DEFS_KEY = "definitions";
-const MAX_HISTORY = 100;
-
-async function readJson<T>(key: string, fallback: T): Promise<T> {
-  try {
-    const raw = await LocalStorage.getItem<string>(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
+export function withDefinition(list: Definition[], d: Definition): Definition[] {
+  return [d, ...list.filter((x) => x.name !== d.name)];
 }
 
-export const loadHistory = () => readJson<HistoryEntry[]>(HISTORY_KEY, []);
-export const loadDefinitions = () => readJson<Definition[]>(DEFS_KEY, []);
+const FUNC_HEAD = /^([\p{L}][\p{L}\p{N}_]*)\(/u;
+const isFunctionDef = (d: Definition) => FUNC_HEAD.exec(d.source)?.[1] === d.name;
 
-export async function addHistory(e: HistoryEntry): Promise<HistoryEntry[]> {
-  const list = (await loadHistory()).filter((h) => h.input !== e.input);
-  const next = [e, ...list].slice(0, MAX_HISTORY);
-  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-  return next;
-}
-
-export async function removeHistory(input: string | null): Promise<HistoryEntry[]> {
-  const next = input === null ? [] : (await loadHistory()).filter((h) => h.input !== input);
-  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-  return next;
-}
-
-export async function saveDefinition(d: Definition): Promise<Definition[]> {
-  const next = [d, ...(await loadDefinitions()).filter((x) => x.name !== d.name)];
-  await LocalStorage.setItem(DEFS_KEY, JSON.stringify(next));
-  return next;
-}
-
-export async function removeDefinition(name: string | null): Promise<Definition[]> {
-  const next = name === null ? [] : (await loadDefinitions()).filter((x) => x.name !== name);
-  await LocalStorage.setItem(DEFS_KEY, JSON.stringify(next));
-  return next;
-}
-
-/** Builds an evaluation context by replaying stored definitions in order. */
+/** Builds an evaluation context from stored definitions. */
 export function buildContext(settings: Settings, defs: Definition[]): Context {
   const ctx: Context = { settings, vars: new Map(), funcs: new Map() };
+  const replaySettings = { ...settings, mode: "auto" as const };
   // Oldest first so later definitions can use earlier ones.
-  for (const d of [...defs].reverse()) {
-    const r = calculate(d.source, { ...ctx, settings: { ...settings, mode: "auto" } });
-    if (!r.ok || !r.assignment) continue;
-    const a = r.assignment;
-    if (a.params && a.body) ctx.funcs.set(a.name, { params: a.params, body: a.body });
-    else if (a.value) ctx.vars.set(a.name, a.value);
+  const ordered = [...defs].reverse();
+  const funcs = ordered.filter(isFunctionDef);
+  // Register every function name before parsing any body: otherwise f(x):=g(x)*2 replayed before g
+  // would read g(x) as g·x.
+  const placeholder: UserFunc = { params: [], body: { type: "bool", value: false } };
+  for (const d of funcs) ctx.funcs.set(d.name, placeholder);
+  for (const d of funcs) {
+    const r = calculate(d.source, { ...ctx, settings: replaySettings });
+    if (r.ok && r.assignment?.params && r.assignment.body)
+      ctx.funcs.set(d.name, { params: r.assignment.params, body: r.assignment.body });
+    else ctx.funcs.delete(d.name);
+  }
+  for (const d of ordered) {
+    if (isFunctionDef(d)) continue;
+    if (d.value) {
+      try {
+        ctx.vars.set(d.name, decodeValue(d.value));
+        continue;
+      } catch {
+        // Fall back to replaying the source.
+      }
+    }
+    const r = calculate(d.source, { ...ctx, settings: replaySettings });
+    if (r.ok && r.assignment?.value) ctx.vars.set(r.assignment.name, r.assignment.value);
   }
   return ctx;
 }

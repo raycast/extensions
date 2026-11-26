@@ -1,15 +1,7 @@
-<img src="assets/icon.png" width="64" height="64" alt="">
-
 # Unit CAS
 
 A Raycast calculator that uses the **TI-Nspire unit system** and **solve functions**, and reads and writes both
 **LaTeX** and **TI-Nspire** text, so you can move a calculation between a LaTeX document and an Nspire without retyping it.
-
-```
-npm install
-npm run dev     # loads the extension into Raycast
-npm test        # engine test suite
-```
 
 ## Commands
 

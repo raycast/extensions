@@ -459,9 +459,14 @@ function callBuiltin(name: string, argNodes: Node[], env: Env): Value {
         const n = intArg(a, name),
           r = intArg(b, name);
         if (r < 0n || n < 0n || r > n) return q(N.ZERO);
+        // nCr(n,r) = nCr(n,n-r): multiply by the smaller count, dividing as we go (each step stays an integer).
+        const k = name === "ncr" && n - r < r ? n - r : r;
+        if (k > 20000n) throw new EvalError(`${name}(): result is too large to compute exactly`);
         let acc = 1n;
-        for (let i = 0n; i < r; i++) acc *= n - i;
-        if (name === "ncr") for (let i = 2n; i <= r; i++) acc /= i;
+        for (let i = 0n; i < k; i++) {
+          acc *= n - i;
+          if (name === "ncr") acc /= i + 1n;
+        }
         return q(N.rat(acc));
       });
     }

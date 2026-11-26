@@ -1,4 +1,4 @@
-import { Node, RelOp, conjuncts, containsVar, joinWith, walk } from "./ast";
+import { Node, RelOp, conjuncts, containsVar, disjuncts, joinWith, walk } from "./ast";
 import {
   ANGLE_FACTOR,
   AngleMode,
@@ -86,7 +86,8 @@ function sqrtRational(r: Num, negative: boolean): Root {
 
 /** Recognizes a float as a simple exact number: p/q, p/q·π or ±√(p/q). */
 export function recognize(v: number): Node | null {
-  if (!Number.isFinite(v)) return null;
+  // Beyond 2^53 a float no longer pins down an exact form.
+  if (!Number.isFinite(v) || Math.abs(v) > 2 ** 53) return null;
   if (Math.abs(v) < 1e-13) return numNode(N.ZERO);
   const r = N.toRat(v, 1000, 1e-10);
   if (r) return numNode(r);
@@ -99,6 +100,12 @@ export function recognize(v: number): Node | null {
         : { type: "mul", l: numNode(N.rat(absN)), r: { type: "const", name: "π" } };
     if (rp.d !== 1n) node = { type: "div", l: node, r: numNode(N.rat(rp.d)) };
     return rp.n < 0n ? { type: "neg", arg: node } : node;
+  }
+  // k/π, e.g. 180/π from degree-mode inverse trig derivatives.
+  const ip = N.toRat(v * Math.PI, 24, 1e-10);
+  if (ip && ip.e && ip.d === 1n) {
+    const node: Node = { type: "div", l: numNode(N.rat(ip.n < 0n ? -ip.n : ip.n)), r: { type: "const", name: "π" } };
+    return ip.n < 0n ? { type: "neg", arg: node } : node;
   }
   const r2 = N.toRat(v * v, 1000, 1e-10);
   if (r2 && r2.e && r2.n > 0n) return sqrtRational(r2, v < 0).node;
@@ -540,7 +547,11 @@ function exactPolyRoots(p: Poly): Root[] {
     if (!found) break;
   }
   const d = deg(p);
-  if (d === 2) roots.push(...exactQuadratic(p));
+  if (d === 1) {
+    // The candidate search above can miss roots with large denominators (1000001*x=1).
+    const r = N.div(N.neg(p[0]), p[1]);
+    roots.push({ v: N.toF(r), node: numNode(r) });
+  } else if (d === 2) roots.push(...exactQuadratic(p));
   else if (d === 4 && N.isZero(p[1]) && N.isZero(p[3])) {
     // Biquadratic: substitute y = x²
     for (const y of exactQuadratic([p[0], p[2], p[4]])) {
@@ -962,14 +973,22 @@ function solveInequality(rel: Extract<Node, { type: "rel" }>, x: string, dim: Di
   const f1 = makeF(g, [x], [dim], env);
   const f = (t: number) => f1([t]);
   const op = rel.op;
-  const crit: (Root & { kind: "root" | "pole" })[] = [];
+  const crit: (Root & { kind: "root" | "pole" | "bound" })[] = [];
+  // Boundaries of conditions on x (solve(x^2>4,x)|x<0) split the line too.
+  for (const c of env.constraints ?? []) {
+    for (const r of conjuncts(c)) {
+      if (r.type !== "rel" || freeVars(r, env).some((v) => v !== x) || !containsVar(r, new Set([x]))) continue;
+      for (const b of criticalPoints(difference(r), x, dim, env, exact)) crit.push({ ...b, kind: "bound" });
+    }
+  }
+  const inDomain = (t: number) => satisfiesConstraints(new Map([[x, q(N.fl(t), dim)]]), env);
   const rf = ratOf(g, x, env);
   if (rf) {
     if (isZeroPoly(rf.n)) return { type: "bool", value: op === "≤" || op === "≥" };
     for (const r of polyRoots(rf.n, exact)) crit.push({ ...r, kind: "root" });
     if (deg(rf.d) > 0) for (const r of polyRoots(rf.d, exact)) crit.push({ ...r, kind: "pole" });
   } else {
-    const scan = scanRoots(f);
+    const scan = scanRoots(f, ...boundsFromConstraints(x, dim, env));
     for (const r of rootsFromFloats(scan.roots, exact)) crit.push({ ...r, kind: "root" });
     for (const e of scan.edges)
       if (!crit.some((c) => Math.abs(c.v - e) < 1e-9 * Math.max(1, Math.abs(e))))
@@ -980,7 +999,7 @@ function solveInequality(rel: Extract<Node, { type: "rel" }>, x: string, dim: Di
   for (const c of crit) {
     const last = pts[pts.length - 1];
     if (last && Math.abs(last.v - c.v) <= 1e-9 * Math.max(1, Math.abs(c.v))) {
-      if (c.kind === "pole") last.kind = "pole";
+      if (c.kind === "pole" || (c.kind === "root" && last.kind === "bound")) Object.assign(last, c);
       continue;
     }
     pts.push(c);
@@ -1018,10 +1037,11 @@ function solveInequality(rel: Extract<Node, { type: "rel" }>, x: string, dim: Di
   for (let i = 0; i <= pts.length; i++) {
     const lo = pts[i - 1],
       hi = pts[i];
-    pieces.push({ lo, hi, ok: sat(mid(lo?.v, hi?.v)) });
+    const m = mid(lo?.v, hi?.v);
+    pieces.push({ lo, hi, ok: sat(m) && inDomain(m) });
     if (hi) {
       const atRoot = hi.kind === "root" ? (op === "≤" || op === "≥") && Number.isFinite(f(hi.v)) : sat(hi.v);
-      pieces.push({ point: hi, ok: atRoot });
+      pieces.push({ point: hi, ok: atRoot && inDomain(hi.v) });
     }
   }
   const varNode: Node = { type: "var", name: x };
@@ -1054,6 +1074,38 @@ function solveInequality(rel: Extract<Node, { type: "rel" }>, x: string, dim: Di
   }
   if (!out.length) return { type: "bool", value: false };
   return joinWith("or", out);
+}
+
+/** Points where g changes sign in x: roots and poles. */
+function criticalPoints(g: Node, x: string, dim: Dim, env: Env, exact: boolean): Root[] {
+  const rf = ratOf(g, x, env);
+  if (rf) return [...polyRoots(rf.n, exact), ...(deg(rf.d) > 0 ? polyRoots(rf.d, exact) : [])];
+  const f1 = makeF(g, [x], [dim], env);
+  const scan = scanRoots((t) => f1([t]));
+  return rootsFromFloats([...scan.roots, ...scan.edges], exact);
+}
+
+/**
+ * Drops solutions that break the conditions after |: an "or" of "and"-ed x=value answers is checked
+ * one alternative at a time. Answers that still contain parameters (c1, symbolic ones) are kept.
+ */
+function applyConstraints(node: Node, env: Env): Node {
+  if (!env.constraints?.length) return node;
+  const kept = disjuncts(node).filter((alt) => {
+    const assign = new Map<string, Value>();
+    for (const r of conjuncts(alt)) {
+      if (r.type !== "rel" || r.op !== "=" || r.l.type !== "var") return true;
+      try {
+        const v = evaluate(r.r, { ...env, constraints: [] });
+        if (v.k !== "q") return true;
+        assign.set(r.l.name, v);
+      } catch {
+        return true;
+      }
+    }
+    return satisfiesConstraints(assign, env);
+  });
+  return kept.length ? joinWith("or", kept) : { type: "bool", value: false };
 }
 
 // ---------------------------------------------------------------- systems
@@ -1266,7 +1318,10 @@ function solveSystem(
   const exact = env.settings.mode !== "approx" && !gs.some((g) => hasFloat(g, env));
   const lins = gs.map((g) => linOf(g, vars, env));
   if (lins.every((l): l is Lin => l !== null))
-    return solveLinearSystem(lins, vars, dims, exact && lins.every((l) => l.c.e && l.a.every((a) => a.e)));
+    return applyConstraints(
+      solveLinearSystem(lins, vars, dims, exact && lins.every((l) => l.c.e && l.a.every((a) => a.e))),
+      env,
+    );
   if (gs.length !== vars.length) throw new EvalError("Nonlinear systems need as many equations as unknowns");
   const fs = gs.map((g) => makeF(g, vars, dims, env));
   const guess = guesses.size ? vars.map((v) => guesses.get(v) ?? 1) : undefined;
@@ -1346,7 +1401,10 @@ export function solve(call: Call, env: Env): Value {
   const expanded = eqs.map((e) => expandFuncs(e, env) as Extract<Node, { type: "rel" }>);
   // Unknown letters besides the solve variables: solve symbolically, like the Nspire CAS.
   const others = freeVars({ type: "list", items: expanded }, env).filter((v) => !vars.includes(v));
-  if (others.length) return { k: "expr", node: solveSymbolic(expanded, vars, env, call.name === "zeros") };
+  if (others.length) {
+    const node = solveSymbolic(expanded, vars, env, call.name === "zeros");
+    return { k: "expr", node: call.name === "zeros" ? node : applyConstraints(node, env) };
+  }
 
   if (vars.length === 1 && expanded.length === 1) {
     const x = vars[0];
@@ -1462,8 +1520,9 @@ function symbolicRoots(alg: Algebra, rel: Extract<Node, { type: "rel" }>, x: str
         push(fracOf(N.ZERO));
         return out;
       }
-      const root = alg.powRational(rhs, N.div(N.ONE, e));
-      if (e.e && e.d === 1n && e.n % 2n === 0n) push(alg.neg(root));
+      const even = e.e && e.d === 1n && e.n % 2n === 0n;
+      const root = alg.powRational(rhs, N.div(N.ONE, e), even);
+      if (even) push(alg.neg(root));
       push(root);
       return out;
     }
@@ -1477,7 +1536,7 @@ function symbolicRoots(alg: Algebra, rel: Extract<Node, { type: "rel" }>, x: str
         push(alg.div(alg.neg(Bq), twoA));
         return out;
       }
-      const sq = alg.powRational(disc, N.rat(1n, 2n));
+      const sq = alg.powRational(disc, N.rat(1n, 2n), true);
       push(alg.div(alg.sub(alg.neg(Bq), sq), twoA));
       push(alg.div(alg.add(alg.neg(Bq), sq), twoA));
       return out;

@@ -111,9 +111,10 @@ export function iroot(n: bigint, k: number): bigint | null {
   if (n < 0n) return null;
   if (n < 2n) return n;
   const kb = BigInt(k);
-  let x = BigInt(Math.round(Math.pow(Number(n), 1 / k)));
-  if (!Number.isFinite(Number(n))) {
-    // Newton iteration for very large numbers.
+  let x: bigint;
+  if (n < 1n << 53n) x = BigInt(Math.round(Math.pow(Number(n), 1 / k)));
+  else {
+    // Newton iteration from above: the float estimate is inexact (or Infinity) for large numbers.
     x = 1n << BigInt(Math.ceil(n.toString(2).length / k));
     for (;;) {
       const y = ((kb - 1n) * x + n / x ** (kb - 1n)) / kb;
@@ -123,6 +124,13 @@ export function iroot(n: bigint, k: number): bigint | null {
   }
   for (const c of [x - 1n, x, x + 1n]) if (c >= 0n && c ** kb === n) return c;
   return null;
+}
+
+/** Natural logarithm of a positive bigint of any size. */
+function bigLog(n: bigint): number {
+  const s = n.toString();
+  if (s.length <= 300) return Math.log(Number(n));
+  return Math.log(Number(s.slice(0, 17))) + (s.length - 17) * Math.LN10;
 }
 
 export function pow(a: Num, b: Num): Num {
@@ -156,6 +164,10 @@ export function pow(a: Num, b: Num): Num {
   }
   const x = toF(a),
     y = toF(b);
+  if (a.e && a.n > 0n && (!Number.isFinite(x) || x === 0)) {
+    // Outside the float range (√(10^401)): work with logarithms so the result can still be a float.
+    return fl(Math.exp(y * (bigLog(a.n) - bigLog(a.d))));
+  }
   if (x < 0 && !Number.isInteger(y)) {
     // Real root of a negative number for odd denominators (Nspire real mode).
     const r = b.e ? b : toRat(y, 1000);

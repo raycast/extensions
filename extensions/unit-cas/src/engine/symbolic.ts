@@ -3,12 +3,12 @@
 // This powers symbolic solve(), d(), expand() and simplification of expressions with free variables.
 
 import { Node, containsVar, mapChildren, walk } from "./ast";
-import { Env, EvalError, evaluate, lookupVar } from "./evaluate";
+import { AngleMode, Env, EvalError, evaluate, lookupVar } from "./evaluate";
 import { toNspire, valueToNode } from "./format";
 import * as N from "./num";
 import { Num } from "./num";
 import { hasFloat, recognize } from "./solve";
-import { isDimless } from "./units";
+import { isDimless, lookupNspire } from "./units";
 
 type Factors = Map<string, Num>; // atom key -> positive rational exponent
 interface Mono {
@@ -130,6 +130,11 @@ function divideExact(n: Poly, d: Poly): Poly | null {
     rem = pAdd(rem, sub);
   }
   return rem.size ? null : q;
+}
+
+/** An exact rational with an even numerator and odd denominator, e.g. 2 or 2/3. */
+function isEvenRational(e: Num): boolean {
+  return e.e && e.n % 2n === 0n && e.d % 2n === 1n;
 }
 
 function constFrac(c: Num): Frac {
@@ -374,17 +379,26 @@ export class Algebra {
     return this.atomFrac({ type: "pow", l: this.toNode(base), r: this.simplifyNode(expNode) });
   }
 
-  /** Raises a fraction to a non-integer rational power; monomials keep their structure (√(a²b) = a√b). */
-  powRational(base: Frac, r: Num): Frac {
+  /**
+   * Raises a fraction to a non-integer rational power; monomials keep their structure (√(a²b) = |a|√b).
+   * `signFree` drops the absolute values when the caller takes ± of the result anyway (roots of x² = a²).
+   */
+  powRational(base: Frac, r: Num, signFree = false): Frac {
     if (r.e && r.d === 1n && r.n >= -24n && r.n <= 24n) return this.powInt(base, Number(r.n));
-    if (N.sign(r) < 0) return this.div(constFrac(N.ONE), this.powRational(base, N.neg(r)));
+    if (N.sign(r) < 0) return this.div(constFrac(N.ONE), this.powRational(base, N.neg(r), signFree));
     const monoPow = (p: Poly): Frac | null => {
       if (p.size !== 1) return null;
       const m = [...p.values()][0];
       let out = this.coefPow(m.c, r);
       if (!out) return null;
       const f: Factors = new Map();
-      m.f.forEach((e, k) => f.set(k, N.mul(e, r)));
+      for (const [k, e] of m.f) {
+        const er = N.mul(e, r);
+        // (x^2)^(1/2) = |x|: an even power of a possibly negative atom keeps its sign only if the result is even too.
+        if (!signFree && this.maybeNegative(k) && isEvenRational(e) && !isEvenRational(er)) {
+          out = this.mul(out, this.atomFrac({ type: "call", name: "abs", args: [this.atoms.get(k)!.node] }, er));
+        } else f.set(k, er);
+      }
       const n: Poly = new Map();
       addMono(n, { c: N.ONE, f });
       out = this.mul(out, { n, d: ONE_POLY() });
@@ -398,6 +412,13 @@ export class Algebra {
       return this.div(this.opaquePow(base.n, r), bottom);
     }
     return this.opaquePow(base.n, r, base.d);
+  }
+
+  /** Whether an atom may take negative values (variables and most calls; not π, units or abs()). */
+  private maybeNegative(key: string): boolean {
+    if (key.startsWith("#") || key.startsWith("_")) return false;
+    const node = this.atoms.get(key)?.node;
+    return !(node?.type === "call" && (node.name === "abs" || node.name === "sqrt" || node.name === "exp"));
   }
 
   private opaquePow(n: Poly, r: Num, d?: Poly): Frac {
@@ -454,10 +475,12 @@ export class Algebra {
     }
     if (node.name === "expand" && node.args.length >= 1) return this.from(node.args[0]);
     if (node.name === "d" || node.name === "derivative") {
-      const [expr, v] = node.args;
+      const [expr, v, k] = node.args;
       if (!v || v.type !== "var") throw new EvalError("d(expression, variable) needs a variable");
+      const kv = k ? this.exponentValue(k) : N.ONE;
+      if (!kv || !kv.e || kv.d !== 1n || kv.n < 0n) throw new EvalError("d(): the order must be a whole number");
       const inner = new Algebra(this.env, new Set([...this.symbols, v.name]));
-      return this.from(inner.toNode(inner.from(derivative(expandUser(expr, this.env), v.name))));
+      return this.from(inner.toNode(inner.from(nthDerivative(expr, v.name, Number(kv.n), this.env))));
     }
     const nf = this.numericFrac(node);
     if (nf) return nf;
@@ -692,11 +715,36 @@ const add = (l: Node, r: Node): Node => ({ type: "add", l, r });
 const pw = (l: Node, r: Node): Node => ({ type: "pow", l, r });
 const call = (name: string, ...args: Node[]): Node => ({ type: "call", name, args });
 
-/** Symbolic derivative of n with respect to x (unsimplified). */
-export function derivative(n: Node, x: string): Node {
+/** Radians per plain number in the angle mode, as a node (null in radian mode). */
+function angleFactor(angle: AngleMode): Node | null {
+  return angle === "rad" ? null : div({ type: "const", name: "π" }, num(angle === "deg" ? 180 : 200));
+}
+
+/** Whether a trig argument carries an explicit angle unit (sin(x*_°)), so the angle mode does not apply. */
+function hasAngleUnit(n: Node): boolean {
+  let found = false;
+  walk(n, (x) => {
+    if (x.type === "unit" && lookupNspire(x.name)?.angle) found = true;
+  });
+  return found;
+}
+
+/** The order-th derivative of n with respect to x, simplified after each step. */
+export function nthDerivative(n: Node, x: string, order: number, env: Env): Node {
+  if (order > 64) throw new EvalError("d(): the order is too large");
+  let D = expandUser(n, env);
+  for (let i = 0; i < order; i++) D = new Algebra(env, new Set([x])).simplifyNode(derivative(D, x, env.settings.angle));
+  return D;
+}
+
+/**
+ * Symbolic derivative of n with respect to x (unsimplified). Trig functions read plain numbers in the
+ * angle mode (sin(x) is sin(x·π/180) in degrees), so their derivatives carry that factor.
+ */
+export function derivative(n: Node, x: string, angle: AngleMode = "rad"): Node {
   const has = (e: Node) => containsVar(e, new Set([x]));
   if (!has(n)) return num(0);
-  const D = (e: Node) => derivative(e, x);
+  const D = (e: Node) => derivative(e, x, angle);
   switch (n.type) {
     case "var":
       return num(n.name === x ? 1 : 0);
@@ -718,7 +766,10 @@ export function derivative(n: Node, x: string): Node {
       return mul(n, add(mul(D(n.r), call("ln", n.l)), div(mul(n.r, D(n.l)), n.l)));
     case "call": {
       const u = n.args[0];
-      const du = D(u);
+      const k = hasAngleUnit(u) ? null : angleFactor(angle);
+      // Forward trig: d/dx f(k·u) = k·f'(k·u)·u'. Inverse trig returns u-angles in the mode: divide by k.
+      const du = ["sin", "cos", "tan"].includes(n.name) && k ? mul(k, D(u)) : D(u);
+      const dinv = (e: Node) => (["arcsin", "arccos", "arctan"].includes(n.name) && k ? div(e, k) : e);
       switch (n.name) {
         case "sin":
           return mul(call("cos", u), du);
@@ -737,11 +788,11 @@ export function derivative(n: Node, x: string): Node {
         case "root":
           return D(pw(u, div(num(1), n.args[1])));
         case "arcsin":
-          return div(du, call("sqrt", sub(num(1), pw(u, num(2)))));
+          return dinv(div(du, call("sqrt", sub(num(1), pw(u, num(2))))));
         case "arccos":
-          return { type: "neg", arg: div(du, call("sqrt", sub(num(1), pw(u, num(2))))) };
+          return dinv({ type: "neg", arg: div(du, call("sqrt", sub(num(1), pw(u, num(2))))) });
         case "arctan":
-          return div(du, add(num(1), pw(u, num(2))));
+          return dinv(div(du, add(num(1), pw(u, num(2)))));
         case "sinh":
           return mul(call("cosh", u), du);
         case "cosh":
