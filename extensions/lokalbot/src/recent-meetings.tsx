@@ -22,7 +22,6 @@ interface Meeting {
   has_system_track: boolean;
 }
 
-/** Format seconds as m:ss. */
 function duration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
