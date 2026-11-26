@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="tile"><rect x="32" y="32" width="448" height="448" rx="100"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect x="32" y="32" width="448" height="448" fill="#f5f3ee"/>
+    <path d="M480 32 L480 480 L32 480 Z" fill="#14171c"/>
+  </g>
+  <text x="168" y="246" text-anchor="middle" font-family="-apple-system, 'SF Pro Display', Helvetica, sans-serif" font-size="150" font-weight="700" fill="#14171c">A</text>
+  <text x="344" y="420" text-anchor="middle" font-family="-apple-system, 'SF Pro Display', Helvetica, sans-serif" font-size="150" font-weight="700" fill="#f5f3ee">a</text>
+  <circle cx="378" cy="134" r="46" fill="#ff5a36"/>
+  <circle cx="378" cy="134" r="46" fill="none" stroke="#14171c" stroke-width="10"/>
+</svg>

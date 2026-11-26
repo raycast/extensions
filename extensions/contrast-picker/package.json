@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "contrast-picker",
+  "title": "Contrast Picker",
+  "description": "Pick two colors from anywhere on screen, check WCAG 2.2 and APCA contrast, and copy an accessible fix in one keystroke.",
+  "icon": "icon.png",
+  "author": "omegaskiller",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "contrast",
+    "wcag",
+    "apca",
+    "accessibility",
+    "a11y",
+    "color",
+    "eyedropper"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "pick-and-check",
+      "title": "Pick & Check Contrast",
+      "subtitle": "Contrast Picker",
+      "description": "Pick the text color, then the background color, and see the contrast result with fixes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-contrast",
+      "title": "Check Contrast",
+      "subtitle": "Contrast Picker",
+      "description": "Check the contrast of two colors. Prefills from your last two copied colors.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "foreground",
+          "type": "text",
+          "placeholder": "Text color",
+          "required": false
+        },
+        {
+          "name": "background",
+          "type": "text",
+          "placeholder": "Background",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fixTarget",
+      "title": "Primary Fix Target",
+      "description": "The standard that the main suggested fix must pass.",
+      "type": "dropdown",
+      "required": false,
+      "default": "aa",
+      "data": [
+        {
+          "title": "WCAG AA",
+          "value": "aa"
+        },
+        {
+          "title": "WCAG AAA",
+          "value": "aaa"
+        },
+        {
+          "title": "APCA",
+          "value": "apca"
+        }
+      ]
+    },
+    {
+      "name": "copyFormat",
+      "title": "Primary Copy Format",
+      "description": "The format that the main copy action (⌘1) uses.",
+      "type": "dropdown",
+      "required": false,
+      "default": "hex",
+      "data": [
+        {
+          "title": "HEX - #767676",
+          "value": "hex"
+        },
+        {
+          "title": "OKLCH - oklch(0.556 0 0)",
+          "value": "oklch"
+        },
+        {
+          "title": "RGB - rgb(118 118 118)",
+          "value": "rgb"
+        },
+        {
+          "title": "Tailwind - neutral-500",
+          "value": "tailwind"
+        }
+      ]
+    },
+    {
+      "name": "useClipboard",
+      "label": "Prefill from clipboard",
+      "description": "When Check Contrast opens without colors, use the last two copied colors.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3",
+    "apca-w3": "^0.1.9",
+    "colorjs.io": "^0.7.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.11",
+    "@types/react": "^19.3.3",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "react": "^19.3.1",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "generate:tailwind": "node scripts/generate-tailwind-colors.mjs",
+    "pull": "ray pull-contributions",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
