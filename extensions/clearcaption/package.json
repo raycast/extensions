@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clearcaption",
   "title": "ClearCaption YouTube Transcript",
-  "description": "Get YouTube transcripts, translate them with timestamps kept, and copy text or SRT subtitles. Requires a free Apify account and API token.",
+  "description": "Get YouTube transcripts, translate them with timestamps kept, and copy text or SRT subtitles using a free Apify account and API token.",
   "icon": "icon.png",
   "author": "andrii2203",
   "categories": [
