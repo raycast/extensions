@@ -47,6 +47,7 @@ interface ProcessIdentity {
 interface ManagedSession extends ProcessIdentity {
   version: 1;
   startedAt: number;
+  monotonicStartMs?: number;
   durationSeconds: number | null;
   reason?: CaffeinationReason;
 }
@@ -149,6 +150,21 @@ async function getProcessIdentity(pid: number): Promise<ProcessIdentity | undefi
 
 function sessionId(session: ManagedSession): string {
   return JSON.stringify([session.pid, session.uid, session.createdAt, session.executable, session.startedAt]);
+}
+
+// On macOS, libuv reads hrtime from mach_continuous_time, which counts time asleep.
+function monotonicNowMs(): number {
+  return Number(process.hrtime.bigint() / 1_000_000n);
+}
+
+function hasEnded({ durationSeconds, monotonicStartMs, reason, startedAt }: ManagedSession): boolean {
+  if (durationSeconds === null) return false;
+  // Until and schedule sessions end at a time of day, and older records have no monotonic start.
+  const elapsedMs =
+    reason?.kind === "until" || reason?.kind === "schedule" || monotonicStartMs === undefined
+      ? Date.now() - startedAt
+      : monotonicNowMs() - monotonicStartMs;
+  return elapsedMs >= durationSeconds * 1000;
 }
 
 function sameProcess(left: ProcessIdentity, right?: ProcessIdentity): boolean {
@@ -265,6 +281,7 @@ async function readSession(processes?: ProcessIdentity[]): Promise<ManagedSessio
       value.executable === EXECUTABLE &&
       typeof value.createdAt === "string" &&
       Number.isFinite(value.startedAt) &&
+      (value.monotonicStartMs === undefined || Number.isFinite(value.monotonicStartMs)) &&
       (value.durationSeconds === null || (Number.isSafeInteger(value.durationSeconds) && value.durationSeconds > 0))
     )
       session = { ...value, reason: parseReason(value.reason) };
@@ -314,6 +331,11 @@ async function findLegacySession(
 async function readState(): Promise<CaffeinationState> {
   const processes = await listProcesses();
   const session = await readSession(processes);
+  // caffeinate's -t timer doesn't count time asleep, so it can outlive the session's end.
+  if (session && hasEnded(session)) {
+    await stopSession(hasEnded);
+    return readState();
+  }
   const legacy = await findLegacySession(processes, session);
   const externalCount = processes.filter(
     ({ executable, pid }) => (executable === EXECUTABLE || executable === "caffeinate") && pid !== session?.pid,
@@ -330,19 +352,15 @@ async function readState(): Promise<CaffeinationState> {
   };
 }
 
-async function stopSession(expectedSessionId?: string): Promise<boolean> {
+async function stopSession(matches: (session: ManagedSession) => boolean = () => true): Promise<boolean> {
   const session = await readSession();
-  if (!session) return false;
-  if (
-    expectedSessionId !== undefined &&
-    (sessionId(session) !== expectedSessionId || session.reason?.kind !== "schedule")
-  ) {
-    return false;
-  }
+  if (!session || !matches(session)) return false;
   let stopped = false;
   // Recheck immediately before signalling; neither a cached PID nor a matching
   // process name is sufficient to stop someone else's inhibitor.
   if (sameProcess(session, await getProcessIdentity(session.pid))) {
+    // The clock can change during that inspection.
+    if (!matches(session)) return false;
     try {
       process.kill(session.pid, "SIGTERM");
       stopped = true;
@@ -397,7 +415,9 @@ export function stopMacLegacyCaffeinate(expected: LegacySession): Promise<Caffei
 
 export function stopMacCaffeinateIfMatches(expectedSessionId: string): Promise<ConditionalStopResult> {
   return withSessionLock(async () => {
-    const stopped = await stopSession(expectedSessionId);
+    const stopped = await stopSession(
+      (session) => sessionId(session) === expectedSessionId && session.reason?.kind === "schedule",
+    );
     return { stopped, state: await readState() };
   });
 }
@@ -407,6 +427,7 @@ export async function startMacCaffeinate(args: string[], reason?: CaffeinationRe
   return withSessionLock(async () => {
     await stopSession();
     const startedAt = Date.now();
+    const monotonicStartMs = monotonicNowMs();
     const child = spawn(EXECUTABLE, args, { detached: true, stdio: "ignore" });
     await new Promise<void>((resolve, reject) => {
       child.once("error", reject);
@@ -421,6 +442,7 @@ export async function startMacCaffeinate(args: string[], reason?: CaffeinationRe
         ...identity,
         version: 1,
         startedAt,
+        monotonicStartMs,
         durationSeconds,
         reason,
       };

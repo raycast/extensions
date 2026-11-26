@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [End timed sessions on time after the Mac sleeps] - {PR_MERGE_DATE}
+
+- On macOS, sessions with a time limit ran past their end by however long the Mac slept, because `caffeinate`'s timer doesn't count time asleep: Caffeinate For, Caffeinate Until, the menu bar's durations, schedules, and AI requests with a duration or end time. Coffee now stops its session the first time it checks after the end, and the menu bar and Caffeinate Status check about once a minute ([#34023](https://github.com/raycast/extensions/issues/34023)).
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
