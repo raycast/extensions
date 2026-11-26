@@ -120,11 +120,10 @@ export function scanEnvironments(projects: string[], force = false): Promise<Env
     await tokens().get(); // fail once (auth / gcloud missing) instead of once per region
     const raw = await listEnvironments(tokens(), projects, locationList(), { concurrency: 20 });
     projects.forEach((p) => {
-      // A region that failed this time keeps its previous answer rather than being forgotten.
-      const failed = new Set(raw.errors.filter((e) => e.project === p).map((e) => e.location));
-      const kept = (readLocations(p)?.locations ?? []).filter((l) => failed.has(l));
+      // Keep failed regions in scope so subsequent menu-bar checks retry them.
+      const failed = raw.errors.filter((e) => e.project === p).map((e) => e.location);
       const found = raw.environments.filter((e) => e.project === p).map((e) => e.location);
-      rememberLocations(p, [...found, ...kept]);
+      rememberLocations(p, [...found, ...failed]);
     });
     // Identical failures across regions (API disabled, no access) collapse into one row per project.
     const seen = new Map<string, EnvironmentListing["errors"][number]>();
