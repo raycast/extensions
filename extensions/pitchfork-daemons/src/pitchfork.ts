@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { accessSync, constants } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import { Action, Daemon, decode, formatElapsed } from "./model";
+import { Action, Daemon, decode, formatElapsed, isOutdated, isSupervisorDown, MIN_VERSION } from "./model";
 
 const home = homedir();
 const CANDIDATES = [
@@ -15,6 +15,7 @@ const CANDIDATES = [
 ];
 
 export class MissingBinaryError extends Error {}
+export class OutdatedBinaryError extends Error {}
 
 function isExecutable(path: string) {
   try {
@@ -52,8 +53,22 @@ function run(file: string, args: string[], { timeout = 30_000 } = {}): Promise<s
   });
 }
 
+async function list(): Promise<string> {
+  try {
+    return await run(binary(), ["list", "--json"]);
+  } catch (error) {
+    if (error instanceof MissingBinaryError || (error instanceof Error && isSupervisorDown(error.message))) throw error;
+    // An older Pitchfork fails with a raw CLI error; say what to do about it instead.
+    const version = await run(binary(), ["--version"]).catch(() => "");
+    if (isOutdated(version)) {
+      throw new OutdatedBinaryError(`${version.trim()} is too old. Update to Pitchfork ${MIN_VERSION} or newer.`);
+    }
+    throw error;
+  }
+}
+
 export async function listDaemons(): Promise<Daemon[]> {
-  const daemons = decode(await run(binary(), ["list", "--json"]));
+  const daemons = decode(await list());
   const pids = daemons.filter((d) => d.status === "running" && Number.isInteger(d.pid)).map((d) => d.pid);
   if (!pids.length) return daemons;
   // ps exits non-zero when any pid is gone but still prints the rest.

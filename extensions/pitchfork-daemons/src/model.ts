@@ -31,6 +31,16 @@ export function isSupervisorDown(message: string): boolean {
   return /connection_failed|failed to connect to supervisor/i.test(message);
 }
 
+export const MIN_VERSION = "2.30";
+
+/** True when `pitchfork --version` output names a version older than MIN_VERSION; false when it can't be read. */
+export function isOutdated(versionOutput: string): boolean {
+  const match = /(\d+)\.(\d+)/.exec(versionOutput);
+  if (!match) return false;
+  const [major, minor] = MIN_VERSION.split(".").map(Number);
+  return Number(match[1]) < major || (Number(match[1]) === major && Number(match[2]) < minor);
+}
+
 export function namespaceOf(daemon: Daemon): string {
   if (daemon.namespace) return daemon.namespace;
   const index = daemon.id.lastIndexOf("/");

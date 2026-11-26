@@ -1,7 +1,16 @@
-import { Color, Icon, launchCommand, LaunchType, MenuBarExtra, open, openExtensionPreferences } from "@raycast/api";
+import {
+  Color,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  open,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { Action, Daemon, daemonActions, daemonUrl, isSupervisorDown, nameOf, namespaceOf } from "./model";
-import { listDaemons, MissingBinaryError, startSupervisor } from "./pitchfork";
+import { listDaemons, MissingBinaryError, OutdatedBinaryError, startSupervisor } from "./pitchfork";
 import { ACTION_ICON, runAction, statusIcon, VERB } from "./ui";
 
 export default function Command() {
@@ -34,13 +43,25 @@ export default function Command() {
           title="Start Pitchfork Supervisor"
           icon={Icon.Play}
           onAction={async () => {
-            await startSupervisor();
+            try {
+              await startSupervisor();
+            } catch (e) {
+              const message = e instanceof Error ? e.message : String(e);
+              await showHUD(`Could not start the supervisor: ${message.slice(0, 80)}`);
+            }
             revalidate();
           }}
         />
       )}
       {error && !(error instanceof MissingBinaryError) && !isSupervisorDown(error.message) && (
-        <MenuBarExtra.Item title={`Could not read Pitchfork: ${error.message.slice(0, 80)}`} icon={Icon.Warning} />
+        <MenuBarExtra.Item
+          title={
+            error instanceof OutdatedBinaryError
+              ? error.message
+              : `Could not read Pitchfork: ${error.message.slice(0, 80)}`
+          }
+          icon={Icon.Warning}
+        />
       )}
       {namespaces.map((ns) => (
         <MenuBarExtra.Section key={ns} title={ns}>

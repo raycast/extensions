@@ -1,4 +1,4 @@
-import { Color, Icon, Image, Toast, showToast } from "@raycast/api";
+import { Color, environment, Icon, Image, showHUD, Toast, showToast } from "@raycast/api";
 import { Action, Daemon } from "./model";
 import { control } from "./pitchfork";
 
@@ -21,6 +21,17 @@ export function statusIcon(daemon: Daemon, pending?: Action): Image.ImageLike {
 }
 
 export async function runAction(action: Action, ids: string[], label: string): Promise<boolean> {
+  // Menu bar commands run in the background, where the Toast API is not available.
+  if (environment.commandMode === "menu-bar") {
+    try {
+      await control(action, ids);
+      await showHUD(`${VERB[action]} finished: ${label}`);
+      return true;
+    } catch {
+      await showHUD(`Could not ${action} ${label}`);
+      return false;
+    }
+  }
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `${PENDING[action][0].toUpperCase()}${PENDING[action].slice(1)}`,

@@ -23,7 +23,7 @@ import {
   nameOf,
   namespaceOf,
 } from "./model";
-import { listDaemons, MissingBinaryError, startSupervisor } from "./pitchfork";
+import { listDaemons, MissingBinaryError, OutdatedBinaryError, startSupervisor } from "./pitchfork";
 import { ACTION_ICON, PENDING, runAction, statusColor, statusIcon, VERB } from "./ui";
 
 const ALL = "__all__";
@@ -239,6 +239,22 @@ function Failure({ error, onRecover }: { error: Error; onRecover: () => void }) 
                 onRecover();
               }}
             />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+  if (error instanceof OutdatedBinaryError) {
+    return (
+      <List.EmptyView
+        icon={Icon.ArrowUp}
+        title="Update Pitchfork"
+        description={error.message}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Update Pitchfork" url="https://pitchfork.jdx.dev" />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRecover} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
