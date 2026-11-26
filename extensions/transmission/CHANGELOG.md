@@ -1,6 +1,6 @@
 # Transmission Changelog
 
-## [Fix React version mismatch] - {PR_MERGE_DATE}
+## [Fix React version mismatch] - 2026-11-26
 
 - Update `react` and `react-dom` to `19.3.1` to match the current Raycast runtime, fixing the "Incompatible React versions" error
 
