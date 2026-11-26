@@ -13,6 +13,7 @@ A lightweight Raycast extension for managing Google Cloud resources efficiently.
 - **IAM Management**: View and modify permissions for users, groups, and service accounts
 - **Network Services**: Manage VPC networks, subnets, IP addresses, and firewall rules
 - **Doctor View**: Diagnose and troubleshoot your gcloud setup
+- **Cloud Composer (Airflow)**: Browse environments, DAGs, runs, task logs, failures, performance history and dataset lineage (read-only)
 
 ## Prerequisites
 
@@ -34,6 +35,14 @@ If you have a custom gcloud installation path, you can override it in preference
 1. Open Raycast and search for "Google Cloud"
 2. Open the action panel and click "Configure Extension"
 3. Set your custom gcloud path (leave empty for auto-detection)
+
+### Cloud Composer
+
+- Open it from the hub (**Cloud Composer**) or from its commands: Composer Environments, Search Airflow DAGs, Recent Airflow Failures, Airflow Datasets & Lineage, Airflow DAG Performance, Airflow Import Errors, and Discover Composer Environments.
+- The selected project is shared with the hub. Switch it with the dropdown or **Switch Project…** (⌘⇧O). **Discover** scans the projects you can access for Composer environments, one region at a time.
+- The Composer API has no location wildcard, so every region is checked. This takes a few seconds per project and the result is cached.
+- The Airflow REST API is called with your gcloud access token. Your account needs a role such as `roles/composer.user` on the environment.
+- Supports Airflow 2.x environments (Composer 2 and 3). Airflow 3 environments are listed, but you can't browse them yet.
 
 ## License
 
