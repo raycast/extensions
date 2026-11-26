@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unit-cas",
+  "title": "Unit CAS",
+  "description": "Calculator with units, conversions and solve() that reads and writes both LaTeX and TI-Nspire syntax",
+  "icon": "icon.png",
+  "author": "nosefa",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate",
+      "title": "Calculate",
+      "description": "Evaluate expressions with units, conversions and solve() — paste LaTeX or TI-Nspire text",
+      "mode": "view"
+    },
+    {
+      "name": "units",
+      "title": "Browse Units",
+      "description": "Browse the TI-Nspire units and physical constants",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "calcMode",
+      "title": "Calculation Mode",
+      "description": "Auto keeps integers and fractions exact unless a decimal is entered (like the Nspire's Auto mode)",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        { "title": "Auto", "value": "auto" },
+        { "title": "Exact", "value": "exact" },
+        { "title": "Approximate", "value": "approx" }
+      ]
+    },
+    {
+      "name": "angleMode",
+      "title": "Angle Mode",
+      "description": "Default unit for angles without an explicit angle unit. Switch it from the search bar dropdown or with ⌘⇧A while calculating.",
+      "type": "dropdown",
+      "required": false,
+      "default": "rad",
+      "data": [
+        { "title": "Radian", "value": "rad" },
+        { "title": "Degree", "value": "deg" },
+        { "title": "Gradian", "value": "grad" }
+      ]
+    },
+    {
+      "name": "digits",
+      "title": "Display Digits",
+      "description": "Significant digits for decimal results",
+      "type": "dropdown",
+      "required": false,
+      "default": "6",
+      "data": [
+        { "title": "Float 4", "value": "4" },
+        { "title": "Float 6", "value": "6" },
+        { "title": "Float 8", "value": "8" },
+        { "title": "Float 10", "value": "10" },
+        { "title": "Float 12", "value": "12" }
+      ]
+    },
+    {
+      "name": "primaryCopy",
+      "title": "Primary Copy Format",
+      "description": "Format copied when pressing Enter",
+      "type": "dropdown",
+      "required": false,
+      "default": "latex",
+      "data": [
+        { "title": "LaTeX", "value": "latex" },
+        { "title": "TI-Nspire", "value": "nspire" }
+      ]
+    },
+    {
+      "name": "nspireAscii",
+      "title": "TI-Nspire Export",
+      "label": "Use ASCII operators (@>, sqrt, <=) instead of ►, √, ≤",
+      "description": "Plain ASCII is easier to type into the Nspire computer software by hand",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "renderMath",
+      "title": "Math Preview",
+      "label": "Render LaTeX in the detail pane",
+      "description": "Typesets the input and result locally with MathJax",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "mathjax-full": "^3.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
