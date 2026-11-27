@@ -50,7 +50,7 @@ export default function Command() {
   // The folder chosen in the form; until then, where Finder is (else home).
   // A late answer from Finder never replaces a folder the user chose.
   const [chosen, setChosen] = useState<string[]>();
-  const { data: finder } = usePromise(frontFinderFolder);
+  const { data: finder, isLoading } = usePromise(frontFinderFolder);
   const folder = chosen ?? [finder ?? homedir()];
 
   async function search(values: Values) {
@@ -69,6 +69,7 @@ export default function Command() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           {/* eslint-disable-next-line @raycast/prefer-title-case -- forkz is the app's name, lowercase */}
