@@ -7,8 +7,7 @@ import { agentLogo } from "./mash";
  * assets/agent-tiles holds a light and a dark version of each.
  */
 export function agentIcon(agent: string): Image.ImageLike {
-  const logo = agentLogo(agent);
-  if (!logo) return Icon.Message;
-  const name = logo.file.replace(/\.svg$/, "");
+  const name = agentLogo(agent);
+  if (!name) return Icon.Message;
   return { source: { light: `agent-tiles/${name}-light.svg`, dark: `agent-tiles/${name}-dark.svg` } };
 }

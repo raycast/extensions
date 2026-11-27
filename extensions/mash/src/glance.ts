@@ -52,7 +52,7 @@ export function queryTerms(query: string): string[] {
  * the address's query.
  */
 export function speakerPicture(who: Speaker, assets: string, dark: boolean): string {
-  const name = who.kind === "you" ? "you" : agentLogo(who.agent)?.file.replace(/\.svg$/, "");
+  const name = who.kind === "you" ? "you" : agentLogo(who.agent);
   if (!name) return "";
   const file = pathToFileURL(join(assets, "agent-tiles", `${name}-${dark ? "dark" : "light"}.svg`));
   return `![](${file.href}?raycast-width=${PICTURE_SIZE}&raycast-height=${PICTURE_SIZE})`;

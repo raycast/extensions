@@ -431,16 +431,18 @@ export function agentName(agent: string): string {
   return AGENT_NAMES[agent] ?? agent;
 }
 
-/** The logo file under assets/agents for each agent Mash reads, and its brand colour.
- * Logos in ink follow Raycast's theme instead. */
-export function agentLogo(agent: string): { file: string; tint?: string } | undefined {
-  const logos: Record<string, { file: string; tint?: string }> = {
-    "claude-code": { file: "claude.svg", tint: "#d97757" },
-    codex: { file: "openai.svg" },
-    copilot: { file: "githubcopilot.svg", tint: "#8957e5" },
-    cursor: { file: "cursor.svg" },
-    opencode: { file: "opencode.svg" },
-    antigravity: { file: "antigravity.svg", tint: "#3d7fd6" },
+/**
+ * The name of each agent's logo tile in assets/agent-tiles, which holds a
+ * `NAME-light.svg` and a `NAME-dark.svg` of each.
+ */
+export function agentLogo(agent: string): string | undefined {
+  const logos: Record<string, string> = {
+    "claude-code": "claude",
+    codex: "openai",
+    copilot: "githubcopilot",
+    cursor: "cursor",
+    opencode: "opencode",
+    antigravity: "antigravity",
   };
   return logos[agent];
 }
