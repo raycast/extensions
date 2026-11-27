@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Winly MCP Server] - {PR_MERGE_DATE}
+
+- Add Winly to the official registry: run your Instagram and Facebook DMs from Claude, ChatGPT or any AI agent. Hosted Streamable HTTP server at https://app.sbccrm.com/bld/api/mcp with OAuth 2.1 sign-in (PKCE, dynamic client registration) or an API key in the `X-API-Key` header, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
