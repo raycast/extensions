@@ -1,6 +1,6 @@
 # iPF OS Changelog
 
-## [Meals planning and AI assistance] - {PR_MERGE_DATE}
+## [Meals planning and AI assistance] - 2026-11-27
 
 - Add My Meals, weekly planning with persistent drafts, history, availability, absence notices and reminder preferences.
 - Add compatible meal selection, recent/popular previews, review before submission and recovery for uncertain writes.
