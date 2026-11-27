@@ -15,7 +15,7 @@ import {
 import { SecretManagerService, Secret } from "./SecretManagerService";
 import SecretDetailView from "./SecretDetailView";
 import CreateSecretForm from "./components/CreateSecretForm";
-import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
+import { ServiceViewBar } from "../../utils/ServiceViewBar";
 import { CacheManager } from "../../utils/CacheManager";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
@@ -307,7 +307,14 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search secrets by name or labels..."
-      searchBarAccessory={<QuickProjectSwitcher gcloudPath={gcloudPath} onProjectSelect={onProjectChange} />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="secrets"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Create Secret" icon={Icon.Plus} onAction={handleCreateSecret} />

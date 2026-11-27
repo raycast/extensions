@@ -246,6 +246,13 @@ export class CacheManager {
     cache.remove(CACHE_KEYS.SELECTED_PROJECT);
     cache.remove(CACHE_KEYS.PROJECT_TIMESTAMP);
     cache.remove(CACHE_KEYS.RECENTLY_USED_PROJECTS);
+    try {
+      if (fs.existsSync(PREFS_FILE_PATH)) {
+        fs.unlinkSync(PREFS_FILE_PATH);
+      }
+    } catch (error) {
+      console.error("Failed to remove project preferences file:", error);
+    }
   }
 
   static saveProjectsList(projects: Project[]): void {
@@ -479,6 +486,14 @@ export class CacheManager {
       console.error("Failed to parse recent resources:", error);
       return [];
     }
+  }
+
+  static subscribeToRecentResources(onChange: (resources: RecentResource[]) => void): () => void {
+    return cache.subscribe((key) => {
+      if (key === undefined || key === CACHE_KEYS.RECENT_RESOURCES) {
+        onChange(CacheManager.getRecentResources());
+      }
+    });
   }
 
   static removeRecentResource(id: string, type: ResourceType, projectId: string): RecentResource[] {

@@ -27,9 +27,10 @@ import { friendlyErrorMessage } from "../../utils/errorMessages";
 interface CloudFunctionsViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function CloudFunctionsView({ projectId, gcloudPath }: CloudFunctionsViewProps) {
+export default function CloudFunctionsView({ projectId, gcloudPath, onProjectChange }: CloudFunctionsViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [functions, setFunctions] = useState<CloudFunction[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -228,7 +229,14 @@ ${
       isLoading={isLoading}
       searchBarPlaceholder="Search Cloud Functions..."
       navigationTitle={`Cloud Functions - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="cloudfunctions" />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="cloudfunctions"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action

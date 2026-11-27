@@ -1,5 +1,9 @@
 # Tutti Changelog
 
+## [Refresh Store Artwork] - 2026-11-26
+
+- Use the Tutti 2.0 app icon and show brightness and microphone mute commands in the Store preview.
+
 ## [Display Brightness and Microphone Mute] - 2026-11-25
 
 These commands require Tutti 2.1.0 or later.

@@ -11,6 +11,7 @@ export type Task = {
   list_id: string;
   list_title: string;
   completed: boolean;
+  completion_date?: string;
   starred: boolean;
   priority: "none" | "low" | "medium" | "high";
   start_date?: string;
@@ -21,7 +22,11 @@ export type Task = {
   task_type: "normal" | "project" | "checklist";
   recurrence?: RawRecurrence | null;
   action: { type: string; value?: string };
-  presentation: { due_date_formatted?: string; is_overdue: boolean };
+  presentation: {
+    start_date_formatted?: string;
+    due_date_formatted?: string;
+    is_overdue: boolean;
+  };
 };
 
 export type Recurrence = {
@@ -237,6 +242,67 @@ export function toDate(date?: string, time?: string) {
   return new Date(`${date}T00:00:00.001`);
 }
 
+// Local "yyyy-MM-dd" for the day after `now`.
+export function ymdTomorrow(now = new Date()) {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return ymd(d);
+}
+
+// Splits Today into Now and Later Today: a task has started unless it has a start time still ahead.
+export function hasStarted(task: Task, now = new Date()) {
+  if (!task.start_time) return true;
+  const start = toDate(task.start_date, task.start_time);
+  return !start || start <= now;
+}
+
+// Sort key: start date/time if present, else due. Timed before full-day on the same day (`~` after times).
+function datedSortKey(task: Task) {
+  if (task.start_date) return `${task.start_date} ${task.start_time ?? "~"}`;
+  if (task.due_date) return `${task.due_date} ${task.due_time ?? "~"}`;
+  return null;
+}
+
+// Dated scopes: start ascending, falling back to due per task; undated last; ties by task_id.
+export function sortByStartThenDue(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) => compareKeys(datedSortKey(a), datedSortKey(b), a, b));
+}
+
+// Deadlines: Overdue then Upcoming, each by due date ascending (timed before full-day).
+export function deadlineSections(tasks: Task[]): [string, Task[]][] {
+  const sorted = sortByDueDate(tasks);
+  return [
+    ["Overdue", sorted.filter((t) => t.presentation.is_overdue)],
+    ["Upcoming", sorted.filter((t) => !t.presentation.is_overdue)],
+  ];
+}
+
+function compareKeys(ka: string | null, kb: string | null, a: Task, b: Task, descending = false) {
+  if (ka === null && kb === null) return a.task_id < b.task_id ? -1 : a.task_id > b.task_id ? 1 : 0;
+  if (ka === null) return 1;
+  if (kb === null) return -1;
+  if (ka < kb) return descending ? 1 : -1;
+  if (ka > kb) return descending ? -1 : 1;
+  return a.task_id < b.task_id ? -1 : a.task_id > b.task_id ? 1 : 0;
+}
+
+// Due date ascending; timed before full-day; undated last.
+export function sortByDueDate(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) => {
+    const ka = a.due_date ? `${a.due_date} ${a.due_time ?? "~"}` : null;
+    const kb = b.due_date ? `${b.due_date} ${b.due_time ?? "~"}` : null;
+    return compareKeys(ka, kb, a, b);
+  });
+}
+
+// Done: newest completions first; missing completion_date last.
+export function sortByCompletionDateDesc(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) => {
+    const ka = a.completion_date ?? null;
+    const kb = b.completion_date ?? null;
+    return compareKeys(ka, kb, a, b, true);
+  });
+}
+
 // Tag picker choices: all tags plus the task's own. 2Do can leave a task's tag out of list_tags,
 // and a picker value with no matching item is dropped on save, which would remove the tag.
 export function tagOptions(tags: Tag[] = [], task?: Task): Tag[] {
@@ -414,10 +480,24 @@ export function repeatRule(task: Task) {
   return rule;
 }
 
-// Scope values are 2Do collection ids ("list:<id>", "smart-list:<id>") or "focus:<name>".
+// Scope values are 2Do collection ids ("list:<id>", "smart-list:<id>"), "paused-tag:<id>", or "focus:<name>".
 export function scopeArgs(scope: string) {
   const [kind, id] = scope.split(":");
   if (kind === "list") return { list_id: id, include_completed: false };
   if (kind === "smart-list") return { smart_list_id: id, include_completed: false };
+  if (kind === "paused-tag") return { focus: "all", include_completed: false, paused_filter: "only" as const };
+  if (kind === "focus" && id === "tomorrow") {
+    const day = ymdTomorrow();
+    return {
+      focus: "all",
+      include_completed: false,
+      start_on_or_after: day,
+      start_on_or_before: day,
+    };
+  }
+  if (kind === "focus" && id === "deadlines")
+    return { focus: "all", include_completed: false, due_on_or_before: "9999-12-31" };
+  // Now and Later Today query Today's focus; the UI splits with hasStarted.
+  if (kind === "focus" && (id === "now" || id === "later-today")) return { focus: "today", include_completed: false };
   return { focus: id, include_completed: id === "done" };
 }

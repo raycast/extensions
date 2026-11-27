@@ -750,6 +750,7 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       searchBarAccessory={
         <QuickProjectSwitcher
           gcloudPath={gcloudPath}
+          currentProjectId={projectId}
           onProjectSelect={(selectedProjectId) => {
             if (selectedProjectId !== projectId) {
               push(<BucketIAMView projectId={selectedProjectId} gcloudPath={gcloudPath} bucketName={bucketName} />);

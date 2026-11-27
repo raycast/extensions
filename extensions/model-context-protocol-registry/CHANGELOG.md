@@ -1,5 +1,13 @@
 # Model Context Protocol Registry Changelog
 
+## [Add RZLT MCP Server] - 2026-11-27
+
+- Add RZLT to the official registry: services, case studies, a fit check and a free website AI-readiness check from RZLT, an AI-native growth and marketing agency, plus send_message (sends only after the user approves the text). 7 tools. Hosted Streamable HTTP server at https://mcp.rzlt.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Webstory MCP Server] - 2026-11-27
+
+- Add Webstory to the official registry: work on Webstory stories from an AI assistant. See how stories are doing, edit drafts, bring in photos and videos, make preview and share links, and read comments, chats and orders. Hosted Streamable HTTP server at https://webstoryapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Webstory account.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.

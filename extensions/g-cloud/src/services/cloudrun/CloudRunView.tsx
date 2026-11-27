@@ -62,9 +62,10 @@ const CPU_OPTIONS = [
 interface CloudRunViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function CloudRunView({ projectId, gcloudPath }: CloudRunViewProps) {
+export default function CloudRunView({ projectId, gcloudPath, onProjectChange }: CloudRunViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [services, setServices] = useState<CloudRunService[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export default function CloudRunView({ projectId, gcloudPath }: CloudRunViewProp
   useEffect(() => {
     initializeQuickLink(projectId);
     fetchServices();
-  }, []);
+  }, [projectId, gcloudPath]);
 
   async function fetchServices() {
     setIsLoading(true);
@@ -273,7 +274,14 @@ ${
       isLoading={isLoading}
       searchBarPlaceholder="Search Cloud Run services..."
       navigationTitle={`Cloud Run - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="cloudrun" />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="cloudrun"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action

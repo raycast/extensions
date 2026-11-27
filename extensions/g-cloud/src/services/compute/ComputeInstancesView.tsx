@@ -35,9 +35,10 @@ import {
 interface ComputeInstancesViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeInstancesViewProps) {
+export default function ComputeInstancesView({ projectId, gcloudPath, onProjectChange }: ComputeInstancesViewProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [instances, setInstances] = useState<ComputeInstance[]>([]);
   const [filteredInstances, setFilteredInstances] = useState<ComputeInstance[]>([]);
@@ -479,7 +480,14 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       searchText={searchText}
       onSearchTextChange={setSearchText}
       navigationTitle={`VM Instances - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="compute"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Create Vm Instance" icon={{ source: Icon.Plus }} onAction={createVMInstance} />
