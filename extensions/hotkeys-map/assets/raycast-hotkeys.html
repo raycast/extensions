@@ -1504,7 +1504,8 @@ function getCanonicalCombo(item) {
     customTitles: "raycast_custom_titles_v1",
     customHkGroups: "raycast_custom_hk_groups_v1",
     customApps: "raycast_custom_app_layers_v1",
-    hiddenApps: "raycast_hidden_app_layers_v1"
+    hiddenApps: "raycast_hidden_app_layers_v1",
+    isStarterData: "raycast_is_starter_data_v1"
   };
   Object.entries(map).forEach(([k, lsKey]) => {
     if (ps[k] !== undefined) {
@@ -1513,7 +1514,22 @@ function getCanonicalCombo(item) {
   });
 })();
 
-let isStarterData = !localStorage.getItem("raycast_hotkeys_custom_v1");
+const STARTER_FLAG_KEY = "raycast_is_starter_data_v1";
+let isStarterData = (() => {
+  try {
+    const saved = localStorage.getItem(STARTER_FLAG_KEY);
+    if (saved !== null) return JSON.parse(saved) === true;
+  } catch {}
+  return !localStorage.getItem("raycast_hotkeys_custom_v1");
+})();
+
+function setStarterData(flag) {
+  isStarterData = Boolean(flag);
+  try { localStorage.setItem(STARTER_FLAG_KEY, JSON.stringify(isStarterData)); } catch {}
+  const banner = document.getElementById("starterBanner");
+  if (banner && isStarterData) delete banner.dataset.dismissed;
+  updateStarterIndicator();
+}
 
 function updateStarterIndicator() {
   const banner = document.getElementById("starterBanner");
@@ -1529,13 +1545,13 @@ function updateStarterIndicator() {
 }
 
 function persistUserState() {
-  isStarterData = false;
   updateStarterIndicator();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(HOTKEYS));
     localStorage.setItem(ALIASES_STORAGE_KEY, JSON.stringify(ALIASES));
     localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(GROUPS));
     localStorage.setItem(IGNORED_CONFLICTS_KEY, JSON.stringify([...ignoredConflicts]));
+    localStorage.setItem(STARTER_FLAG_KEY, JSON.stringify(isStarterData));
   } catch {}
   if (window.webkit?.messageHandlers?.saveUserState) {
     try {
@@ -1547,12 +1563,13 @@ function persistUserState() {
         customTitles: CUSTOM_TITLES,
         customHkGroups: CUSTOM_HK_GROUPS,
         customApps: JSON.parse(localStorage.getItem(CUSTOM_APPS_KEY) || "{}"),
-        hiddenApps: JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]")
+        hiddenApps: JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]"),
+        isStarterData
       };
       window.webkit.messageHandlers.saveUserState.postMessage({ json: JSON.stringify(payload, null, 2) + "\n" });
     } catch {}
   }
-  if (window.webkit?.messageHandlers?.saveHotkeysJson) {
+  if (!isStarterData && window.webkit?.messageHandlers?.saveHotkeysJson) {
     try {
       window.webkit.messageHandlers.saveHotkeysJson.postMessage({
         json: JSON.stringify({ groups: GROUPS, hotkeys: HOTKEYS, aliases: ALIASES }, null, 2) + "\n"
@@ -3023,6 +3040,7 @@ document.getElementById("applyJsonBtn").onclick = () => {
       };
     });
     HOTKEYS = validated;
+    setStarterData(false);
     persistUserState();
     jsonModal.classList.remove("open");
     render();
@@ -3034,6 +3052,7 @@ document.getElementById("applyJsonBtn").onclick = () => {
 
 document.getElementById("resetJsonBtn").onclick = () => {
   HOTKEYS = structuredClone(DEFAULT_HOTKEYS);
+  setStarterData(true);
   persistUserState();
   jsonTextarea.value = JSON.stringify(HOTKEYS, null, 2);
   modalError.style.display = "none";
@@ -3574,6 +3593,7 @@ async function runMcpSync({ silent = false } = {}) {
     pill.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block;flex-shrink:0"></span><span>MCP · ${timeStr}</span>${refreshSvg}`;
     statusEl.style.color = "#34d399";
     statusEl.textContent = `✓ Synced ${foundHotkeys.length} live hotkeys & ${foundAliases.length} aliases from Raycast!`;
+    setStarterData(false);
     persistUserState();
     render();
   } catch (err) {
