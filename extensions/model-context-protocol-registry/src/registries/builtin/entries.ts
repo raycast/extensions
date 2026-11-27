@@ -7,6 +7,83 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "betadrop",
+    title: "BetaDrop",
+    description:
+      "Publish iOS and Android beta builds and share an over-the-air install link from your AI assistant. Publish a build from an upload link or a public URL, check an upload, list builds, read install stats and tester feedback, re-point standing links, manage registered iPhone UDIDs, webhooks and API tokens. 23 tools. Official server run by BetaDrop. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a BetaDrop account is required (free to start), and you sign in through the browser with no token to paste. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://betadrop.app/apple-touch-icon.png",
+    homepage: "https://betadrop.app/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.betadrop.app"],
+    },
+    remoteUrl: "https://mcp.betadrop.app",
+  },
+  {
+    name: "betadrop-local",
+    title: "BetaDrop (Local)",
+    description:
+      "Publish iOS and Android beta builds and share an over-the-air install link from your AI assistant, running on your own computer over stdio. 28 tools, including publishing a build file from disk. Official server run by BetaDrop; Node.js 20 or newer is required. A BetaDrop account is required (free to start): ask your assistant to sign in with the betadrop_login tool, or set BETADROP_TOKEN to an API token from BetaDrop Settings, Developer, API tokens.",
+    icon: "https://betadrop.app/apple-touch-icon.png",
+    homepage: "https://github.com/betadrop-app/betadrop-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@betadrop/mcp"],
+    },
+  },
+  {
+    name: "figment-mac",
+    title: "Figment Mac hosting",
+    description:
+      "Rent a Mac in the cloud by the hour or the day from your AI agent: check plans, prices and which Macs are free now, create an agent account with no sign-in, get a Stripe link for prepaid credit, order a Mac, follow its setup, get SSH access and a one-time link to the Mac screen, and stop it when the task is done. 8 tools. Hosted Streamable HTTP server; the tools list without sign-in, and ordering needs the API key from the account tool, sent as a Bearer header or a tool argument. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://figment.so/logo-256.png",
+    homepage: "https://figment.so",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://figment.so/api/mcp"],
+    },
+    remoteUrl: "https://figment.so/api/mcp",
+  },
+  {
+    name: "scigantic",
+    title: "Scigantic",
+    description:
+      "Find public scientific datasets from your AI assistant. Search a catalog of 8,000+ datasets (genomics, cryo-EM, neuroimaging, chemistry, earth observation, climate), read a dataset's schema card with its file formats, columns and sample rows, list its files, get code that loads it, and find the datasets behind a paper. Read-only tools. Hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://scigantic.com/scigantic-icon-512.png",
+    homepage: "https://scigantic.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.scigantic.com/mcp/catalog"],
+    },
+    remoteUrl: "https://api.scigantic.com/mcp/catalog",
+  },
+  {
+    name: "infograph",
+    title: "Infograph",
+    description:
+      "Ask questions about your own business data and get exact answers. Infograph syncs your apps (Shopify, Stripe, Google Analytics, ad accounts), databases and spreadsheets into one private data lake; your AI finds the right tables, runs read-only SQL across sources over every row, and builds live dashboards, reports and analyses you can open and share. It never writes to the apps your data came from. 14 MCP tools. Official server run by Infograph. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an Infograph account is required, a free one works, and you pick the account to connect on the consent screen. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://infograph.ai/favicon-512x512.png",
+    homepage: "https://infograph.ai/docs/ai-connect",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.infograph.ai/mcp"],
+    },
+    remoteUrl: "https://app.infograph.ai/mcp",
+  },
+  {
+    name: "geoboom",
+    title: "GEOboom",
+    description:
+      "Run link building and mention outreach in GEOboom from your AI assistant: find pages to approach by keywords, AI-question prompts or competitor domains, decide which prospects fit, read and reply to publisher threads, record placements and recheck that links are live. Official server run by GEOboom. Hosted Streamable HTTP server with OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration); a GEOboom account is required. Sending email and spending credits are off by default and need an account owner to grant them. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://github.com/user-attachments/assets/f0be6980-d6f6-40c0-9022-ea628bbf1310",
+    homepage: "https://www.geoboom.io/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.geoboom.io/mcp"],
+    },
+    remoteUrl: "https://api.geoboom.io/mcp",
+  },
+  {
     name: "cleanedweb",
     title: "CleanedWeb",
     description:

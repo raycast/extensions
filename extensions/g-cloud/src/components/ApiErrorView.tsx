@@ -14,6 +14,7 @@ const API_INFO: Record<string, { name: string; service: string }> = {
   storage: { name: "Cloud Storage", service: "storage.googleapis.com" },
   secretmanager: { name: "Secret Manager", service: "secretmanager.googleapis.com" },
   sqladmin: { name: "Cloud SQL Admin", service: "sqladmin.googleapis.com" },
+  artifactregistry: { name: "Artifact Registry", service: "artifactregistry.googleapis.com" },
   logging: { name: "Cloud Logging", service: "logging.googleapis.com" },
   iam: { name: "IAM", service: "iam.googleapis.com" },
   container: { name: "Kubernetes Engine", service: "container.googleapis.com" },

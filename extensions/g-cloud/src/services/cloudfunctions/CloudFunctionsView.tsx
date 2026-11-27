@@ -17,6 +17,7 @@ import { ApiErrorView } from "../../components/ApiErrorView";
 import { CloudFunction } from "../../utils/gcpApi";
 import { CloudFunctionsService } from "./CloudFunctionsService";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
 import { CreateFunctionForm } from "./components/CreateFunctionForm";
@@ -143,7 +144,21 @@ export default function CloudFunctionsView({ projectId, gcloudPath, onProjectCha
     }
   }
 
+  function recordRecentFunction(fn: CloudFunction) {
+    const { location, functionName } = extractFunctionInfo(fn);
+    CacheManager.saveRecentResource({
+      id: `${location}/${functionName}`,
+      type: "cloudfunctions",
+      name: functionName,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/functions/details/${location}/${functionName}?project=${projectId}`,
+      metadata: { location },
+    });
+  }
+
   function viewFunctionDetails(fn: CloudFunction) {
+    recordRecentFunction(fn);
     const { location, functionName, runtime, entryPoint, memory, timeout, url, triggerDescription } =
       extractFunctionInfo(fn);
     const status = getFunctionStatus(fn);
@@ -188,6 +203,7 @@ ${
   }
 
   async function showInvokeForm(fn: CloudFunction) {
+    recordRecentFunction(fn);
     const { functionName, url } = extractFunctionInfo(fn);
     if (!url) {
       showToast({

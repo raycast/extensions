@@ -1258,6 +1258,7 @@
 /extensions/greptile                                                @clins1994
 /extensions/grist                                                   @xmok
 /extensions/grok-ai                                                 @andreiciobotar
+/extensions/grok-bots                                               @stanidesis
 /extensions/grokipedia                                              @Visual-Studio-Coder @0xdhrv
 /extensions/groq                                                    @maximilianzuern @dezik @agungjsp
 /extensions/groq-tools                                              @juice49
@@ -1541,6 +1542,7 @@
 /extensions/keito                                                   @eluce2 @bchopson @mrpunkin
 /extensions/keka                                                    @aonez
 /extensions/kensaku                                                 @ooodnakov
+/extensions/kero                                                    @comf4rtnoise
 /extensions/kesha-voice-kit                                         @drakulavich
 /extensions/key-value                                               @NirLevy98 @pernielsentikaer @gkpln3
 /extensions/keyboard-brightness                                     @neo773 @belyakov-am @DannySeidel @pernielsentikaer @ramith123 @stefankosticc
@@ -1740,6 +1742,7 @@
 /extensions/mac-fan-control                                         @triuzzi
 /extensions/mac-mouse-fix                                           @marcjulianschwarz
 /extensions/mac-network-location-changer                            @rfscouto
+/extensions/mac-performance-monitor                                 @SARRAF-5757
 /extensions/mach-triage                                             @mwhobrey
 /extensions/macos-appearance-changer                                @neo773
 /extensions/macos-tweaks                                            @gfazioli
@@ -2280,6 +2283,7 @@
 /extensions/percentage-calculator                                   @theapache64
 /extensions/perchance-generator                                     @Visual-Studio-Coder
 /extensions/performance-hud                                         @say4n
+/extensions/perigon                                                 @galen-perigon
 /extensions/perplexity                                              @third774 @third774
 /extensions/perplexity-api                                          @maximilianzuern @xilopaint @thomaspaulmann
 /extensions/perry                                                   @vmotta8 @pernielsentikaer
