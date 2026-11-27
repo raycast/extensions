@@ -1,5 +1,6 @@
 import { ActionPanel, Action, Detail, showToast, Toast, Icon, confirmAlert, Alert } from "@raycast/api";
 import { useState, useEffect } from "react";
+import QRCode from "qrcode";
 import { WalletService, WalletData } from "./services/wallet-service";
 
 export default function ExportWallet() {
@@ -8,6 +9,8 @@ export default function ExportWallet() {
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(false);
   const [privateKey, setPrivateKey] = useState<string>("");
   const [publicKey, setPublicKey] = useState<string>("");
+  const [addressQR, setAddressQR] = useState<string>("");
+  const [privateKeyQR, setPrivateKeyQR] = useState<string>("");
   const walletService = WalletService.getInstance();
 
   useEffect(() => {
@@ -26,6 +29,10 @@ export default function ExportWallet() {
 
       setPrivateKey(privKey);
       setPublicKey(pubKey);
+
+      // Render QR codes locally so the keys never leave the machine
+      setAddressQR(await QRCode.toDataURL(wallet.address, { width: 200 }));
+      setPrivateKeyQR(await QRCode.toDataURL(privKey, { width: 200 }));
     } catch (error) {
       console.error("Error loading wallet:", error);
       await showToast({
@@ -70,10 +77,6 @@ export default function ExportWallet() {
       title: "Sensitive Data Hidden",
       message: "Wallet information is now protected",
     });
-  };
-
-  const getQRCodeUrl = (data: string): string => {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
   };
 
   const markdown = `# 📤 Export Wallet Information
@@ -126,8 +129,8 @@ ${publicKey}
 5. **Verify recipient addresses** carefully before sending transactions
 
 ### 📱 QR Codes for Mobile Import:
-- **Address QR**: ![Address QR](${getQRCodeUrl(walletData.address)})
-- **Private Key QR**: ![Private Key QR](${getQRCodeUrl(privateKey)})
+- **Address QR**: ![Address QR](${addressQR})
+- **Private Key QR**: ![Private Key QR](${privateKeyQR})
 
 ### 💡 Best Practices:
 - **Write down your mnemonic phrase** on paper and store it safely

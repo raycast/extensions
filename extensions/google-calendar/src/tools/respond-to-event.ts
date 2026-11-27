@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getNotificationLevel, serializeEvent } from "../lib/events";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
+import { canChangeResponseStatus } from "../lib/utils";
 import { tool as getCurrentUser } from "./get-current-user";
 
 type Input = {
@@ -47,7 +48,12 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
 const tool = async (input: Input) => {
   const preferences = getPreferenceValues<Preferences>();
   const calendarId = input.calendarId ?? "primary";
-  const { attendee } = await getSelfAttendee(input);
+  const { event, attendee } = await getSelfAttendee(input);
+  if (!canChangeResponseStatus(event)) {
+    throw new Error(
+      "This event does not support changing the response. Only active, regular invitations can be answered (birthdays and other special event types cannot).",
+    );
+  }
   const calendar = getCalendarClient();
   await calendar.events.patch({
     calendarId,

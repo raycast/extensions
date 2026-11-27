@@ -17,6 +17,7 @@ import { ApiErrorView } from "../../components/ApiErrorView";
 import { CloudFunction } from "../../utils/gcpApi";
 import { CloudFunctionsService } from "./CloudFunctionsService";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
 import { CreateFunctionForm } from "./components/CreateFunctionForm";
@@ -26,9 +27,10 @@ import { friendlyErrorMessage } from "../../utils/errorMessages";
 interface CloudFunctionsViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function CloudFunctionsView({ projectId, gcloudPath }: CloudFunctionsViewProps) {
+export default function CloudFunctionsView({ projectId, gcloudPath, onProjectChange }: CloudFunctionsViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [functions, setFunctions] = useState<CloudFunction[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -142,7 +144,21 @@ export default function CloudFunctionsView({ projectId, gcloudPath }: CloudFunct
     }
   }
 
+  function recordRecentFunction(fn: CloudFunction) {
+    const { location, functionName } = extractFunctionInfo(fn);
+    CacheManager.saveRecentResource({
+      id: `${location}/${functionName}`,
+      type: "cloudfunctions",
+      name: functionName,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/functions/details/${location}/${functionName}?project=${projectId}`,
+      metadata: { location },
+    });
+  }
+
   function viewFunctionDetails(fn: CloudFunction) {
+    recordRecentFunction(fn);
     const { location, functionName, runtime, entryPoint, memory, timeout, url, triggerDescription } =
       extractFunctionInfo(fn);
     const status = getFunctionStatus(fn);
@@ -187,6 +203,7 @@ ${
   }
 
   async function showInvokeForm(fn: CloudFunction) {
+    recordRecentFunction(fn);
     const { functionName, url } = extractFunctionInfo(fn);
     if (!url) {
       showToast({
@@ -212,7 +229,14 @@ ${
       isLoading={isLoading}
       searchBarPlaceholder="Search Cloud Functions..."
       navigationTitle={`Cloud Functions - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="cloudfunctions" />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="cloudfunctions"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action

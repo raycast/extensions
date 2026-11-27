@@ -13,6 +13,7 @@ import {
   CloudSqlBackupRun,
 } from "../../utils/gcpApi";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { ApiErrorView } from "../../components/ApiErrorView";
 import { CloudShellAction } from "../../components/CloudShellAction";
@@ -122,6 +123,17 @@ interface InstanceSectionProps {
   onViewDetails?: () => void;
 }
 
+function recordRecentCloudSqlInstance(instance: CloudSqlInstance, projectId: string) {
+  CacheManager.saveRecentResource({
+    id: instance.name,
+    type: "cloudsql",
+    name: instance.name,
+    projectId,
+    accessedAt: Date.now(),
+    consoleUrl: `https://console.cloud.google.com/sql/instances/${instance.name}/overview?project=${projectId}`,
+  });
+}
+
 /** Shared by the instance list and the instance detail view so both offer the same actions. */
 function InstanceNavigationSection({ instance, projectId, gcloudPath, onViewDetails }: InstanceSectionProps) {
   const { push } = useNavigation();
@@ -133,21 +145,28 @@ function InstanceNavigationSection({ instance, projectId, gcloudPath, onViewDeta
         title="View Databases"
         icon={Icon.List}
         shortcut={{ modifiers: ["cmd"], key: "d" }}
-        onAction={() => push(<DatabasesView projectId={projectId} gcloudPath={gcloudPath} instance={instance} />)}
+        onAction={() => {
+          recordRecentCloudSqlInstance(instance, projectId);
+          push(<DatabasesView projectId={projectId} gcloudPath={gcloudPath} instance={instance} />);
+        }}
       />
       <Action
         title="View Users"
         icon={Icon.Person}
         shortcut={{ modifiers: ["cmd"], key: "u" }}
-        onAction={() => push(<UsersView projectId={projectId} gcloudPath={gcloudPath} instance={instance} />)}
+        onAction={() => {
+          recordRecentCloudSqlInstance(instance, projectId);
+          push(<UsersView projectId={projectId} gcloudPath={gcloudPath} instance={instance} />);
+        }}
       />
       <Action
         title="View Backups"
         icon={Icon.Clock}
         shortcut={{ modifiers: ["cmd"], key: "b" }}
-        onAction={() =>
-          push(<BackupsView projectId={projectId} gcloudPath={gcloudPath} instanceName={instance.name} />)
-        }
+        onAction={() => {
+          recordRecentCloudSqlInstance(instance, projectId);
+          push(<BackupsView projectId={projectId} gcloudPath={gcloudPath} instanceName={instance.name} />);
+        }}
       />
       <Action.OpenInBrowser
         title="Open in Console"
@@ -207,9 +226,10 @@ function TruncatedNoticeItem({ resource, consoleUrl }: { resource: string; conso
 interface CloudSqlViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProps) {
+export default function CloudSqlView({ projectId, gcloudPath, onProjectChange }: CloudSqlViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [instances, setInstances] = useState<CloudSqlInstance[]>([]);
   const [isTruncated, setIsTruncated] = useState(false);
@@ -220,7 +240,7 @@ export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProp
   useEffect(() => {
     initializeQuickLink(projectId);
     fetchInstances();
-  }, []);
+  }, [projectId, gcloudPath]);
 
   async function fetchInstances() {
     setIsLoading(true);
@@ -260,6 +280,7 @@ export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProp
   }
 
   function viewInstanceDetails(instance: CloudSqlInstance) {
+    recordRecentCloudSqlInstance(instance, projectId);
     const status = getInstanceStatus(instance);
     const settings = instance.settings;
     const backup = settings?.backupConfiguration;
@@ -374,7 +395,14 @@ ${
       isLoading={isLoading}
       searchBarPlaceholder="Search Cloud SQL instances..."
       navigationTitle={`Cloud SQL - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="cloudsql" />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="cloudsql"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchInstances} />

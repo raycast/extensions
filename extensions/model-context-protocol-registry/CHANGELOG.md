@@ -4,6 +4,57 @@
 
 - Add flypod to the official registry: publish a folder of static files or Markdown at an HTTPS share link, then update, roll back, protect or delete it. Hosted Streamable HTTP server at https://flypod.dev/mcp with no sign-in needed, and OAuth 2.1 at https://flypod.dev/account/mcp to keep sites; a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Rename the UberLLM entry] - 2026-11-27
+
+- Rename the UberLLM entry to MartLLM (id `martllm`) and move its homepage, icon and remote server to martllm.com. Same service, accounts and API keys; the placeholder env var is now `MARTLLM_AUTH_HEADER`.
+
+## [Add Valkiria MCP Server] - 2026-11-27
+
+- Add Valkiria to the official registry: ask about the ad accounts connected to your Valkiria workspace (spend, results, campaign health), draft campaigns and propose changes that wait for your approval in Valkiria. Hosted Streamable HTTP server at https://valkiria.pro/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) through `mcp-remote`.
+## [Add Ace Data Cloud media and search MCP servers] - 2026-11-27
+
+- Add separate install entries for the Ace Data Cloud music, image, video, speech, search and chat services. Choose the server for the task; the entries show account and billing requirements.
+
+## [Add Klakix MCP Server] - 2026-11-27
+
+- Add Klakix to the official registry: generate AI video, images, voiceovers and music from your assistant (Seedance, Kling, Veo, Wan, Nano Banana, GPT Image and more). Hosted Streamable HTTP server at https://klakix.com/api/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a free Klakix account; generations spend credits.
+
+## [Add BetaDrop MCP Server] - 2026-11-27
+
+- Add BetaDrop to the official registry: publish iOS and Android beta builds and share an over-the-air install link from your AI assistant, check uploads, list builds, read install stats and tester feedback, re-point standing links, and manage registered iPhone UDIDs, webhooks and API tokens. 23 tools. Hosted Streamable HTTP server at https://mcp.betadrop.app with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A local stdio server (`npx -y @betadrop/mcp`, 28 tools) is added as BetaDrop (Local).
+
+## [Add Figment Mac hosting MCP Server] - 2026-11-27
+
+- Add Figment Mac hosting to the official registry: rent a Mac in the cloud by the hour or the day from your AI agent (plans and prices, prepaid credit through a Stripe link, order, SSH and screen access, stop). 8 tools. Hosted Streamable HTTP server at https://figment.so/api/mcp with an API key from its account tool, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Scigantic MCP Server] - 2026-11-27
+
+- Add Scigantic to the official registry: search a catalog of 8,000+ public scientific datasets, read a dataset's schema card, list its files and get code that loads it. Hosted Streamable HTTP server at https://api.scigantic.com/mcp/catalog with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Infograph MCP Server] - 2026-11-27
+
+- Add Infograph to the official registry: ask questions about your own business data and build live dashboards from it. Infograph syncs your apps, databases and spreadsheets into one private data lake, and the server lets your AI run read-only SQL across all of it. Hosted Streamable HTTP server at https://app.infograph.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Works with a free Infograph account.
+
+## [Add GEOboom MCP Server] - 2026-11-27
+
+- Add GEOboom to the official registry: run link building and mention outreach (prospecting, publisher threads, placements and link rechecks) from your AI assistant. Hosted Streamable HTTP server at https://api.geoboom.io/mcp with OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GEOboom account.
+
+## [Add CleanedWeb MCP Server] - 2026-11-27
+
+- Add CleanedWeb to the official registry: find and run maintained REST APIs that return structured records from public websites (job boards, marketplaces, app stores, package registries, research databases). Hosted Streamable HTTP server at https://api.cleanedweb.com/mcp?profile=catalog with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Searching is free; runs are paid per accepted record.
+
+## [Add NameReef Domain Generator MCP Server] - 2026-11-27
+
+- Add NameReef Domain Generator to the official registry: describe your project in plain words and get domain names no one has registered yet, each checked against registry data with a one-line reason; check names you already have in mind, shortlist the ones you like and keep searches in projects. Hosted Streamable HTTP server at https://namereef.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A free NameReef account is created while connecting.
+
+## [Add RZLT MCP Server] - 2026-11-27
+
+- Add RZLT to the official registry: services, case studies, a fit check and a free website AI-readiness check from RZLT, an AI-native growth and marketing agency, plus send_message (sends only after the user approves the text). 7 tools. Hosted Streamable HTTP server at https://mcp.rzlt.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Webstory MCP Server] - 2026-11-27
+
+- Add Webstory to the official registry: work on Webstory stories from an AI assistant. See how stories are doing, edit drafts, bring in photos and videos, make preview and share links, and read comments, chats and orders. Hosted Streamable HTTP server at https://webstoryapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Webstory account.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.

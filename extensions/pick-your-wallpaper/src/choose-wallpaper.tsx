@@ -9,9 +9,14 @@ import { File } from "./types/file";
 const preferences = getPreferenceValues<Preferences>();
 const wallpaperDir = preferences.wallpaperFolder;
 
+const ALL_CATEGORIES = "all";
+const UNCATEGORIZED = "uncategorized";
+const CATEGORY_PREFIX = "category:";
+
 export default function Command() {
   const [wallpapers, setWallpapers] = useState<File[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORIES);
   const [isLoading, setIsLoading] = useState(true);
   const [descriptions, setDescriptions] = useState<DescriptionCache>({});
 
@@ -31,11 +36,30 @@ export default function Command() {
     }
   }, [wallpapers]);
 
+  // Subfolders of the wallpaper folder become categories automatically
+  const categories = [...new Set(wallpapers.flatMap((file) => (file.category ? [file.category] : [])))].sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
+  );
+  const hasUncategorized = wallpapers.some((file) => !file.category);
+
+  // A remembered category may have been renamed or removed since the last run
+  const isKnownCategory =
+    selectedCategory === ALL_CATEGORIES ||
+    (selectedCategory === UNCATEGORIZED && hasUncategorized) ||
+    categories.includes(selectedCategory.slice(CATEGORY_PREFIX.length));
+  const activeCategory = isKnownCategory ? selectedCategory : ALL_CATEGORIES;
+
+  const categoryWallpapers = wallpapers.filter((file) => {
+    if (activeCategory === ALL_CATEGORIES) return true;
+    if (activeCategory === UNCATEGORIZED) return !file.category;
+    return file.category === activeCategory.slice(CATEGORY_PREFIX.length);
+  });
+
   // Unified search: score by keyword overlap across filename + description + tags
   const displayedWallpapers = (() => {
-    if (!searchText.trim()) return wallpapers;
+    if (!searchText.trim()) return categoryWallpapers;
     const queryWords = searchText.toLowerCase().split(/\s+/).filter(Boolean);
-    return wallpapers
+    return categoryWallpapers
       .map((file) => {
         const desc = descriptions[file.path];
         const baseName = path.basename(file.name, path.extname(file.name)).replace(/[-_]/g, " ");
@@ -63,6 +87,24 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by name, color, mood, or style…"
       isLoading={isLoading}
+      searchBarAccessory={
+        categories.length > 0 ? (
+          <Grid.Dropdown tooltip="Category" storeValue onChange={setSelectedCategory}>
+            <Grid.Dropdown.Item title="All Wallpapers" value={ALL_CATEGORIES} icon={Icon.AppWindowGrid3x3} />
+            {hasUncategorized && <Grid.Dropdown.Item title="Uncategorized" value={UNCATEGORIZED} icon={Icon.Image} />}
+            <Grid.Dropdown.Section title="Categories">
+              {categories.map((category) => (
+                <Grid.Dropdown.Item
+                  key={category}
+                  title={category}
+                  value={`${CATEGORY_PREFIX}${category}`}
+                  icon={Icon.Folder}
+                />
+              ))}
+            </Grid.Dropdown.Section>
+          </Grid.Dropdown>
+        ) : undefined
+      }
     >
       <Grid.EmptyView
         icon={Icon.Image}

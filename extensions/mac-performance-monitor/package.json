@@ -1,0 +1,915 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mac-performance-monitor",
+  "title": "Mac Performance Monitor",
+  "description": "View CPU, memory, GPU, disk, power, and thermal history and quit busy apps; requires Mac Performance Monitor with recording enabled.",
+  "icon": "extension-icon.png",
+  "author": "SARRAF",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Performance Dashboard",
+      "subtitle": "Mac Performance Monitor",
+      "description": "Consolidated view of panels selected from all categories (CPU, Memory, etc)",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "slot1",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 1 (Left)",
+          "default": "memory_pressure",
+          "description": "Select panel for Row 1, Left",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 1 (Left)"
+        },
+        {
+          "name": "slot2",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 2 (Right)",
+          "default": "top_memory",
+          "description": "Select panel for Row 1, Right",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 2 (Right)"
+        },
+        {
+          "name": "slot3",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 3 (Left)",
+          "default": "cpu_usage",
+          "description": "Select panel for Row 2, Left",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 3 (Left)"
+        },
+        {
+          "name": "slot4",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 4 (Right)",
+          "default": "top_cpu",
+          "description": "Select panel for Row 2, Right",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 4 (Right)"
+        },
+        {
+          "name": "slot5",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 5 (Left)",
+          "default": "gpu_usage",
+          "description": "Select panel for Row 3, Left",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 5 (Left)"
+        },
+        {
+          "name": "slot6",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 6 (Right)",
+          "default": "top_gpu",
+          "description": "Select panel for Row 3, Right",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 6 (Right)"
+        },
+        {
+          "name": "slot7",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 7 (Left)",
+          "default": "power_consumption",
+          "description": "Select panel for Row 4, Left",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 7 (Left)"
+        },
+        {
+          "name": "slot8",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 8 (Right)",
+          "default": "top_energy",
+          "description": "Select panel for Row 4, Right",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 8 (Right)"
+        },
+        {
+          "name": "slot9",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 9 (Left)",
+          "default": "disk_io",
+          "description": "Select panel for Row 5, Left",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 9 (Left)"
+        },
+        {
+          "name": "slot10",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 10 (Right)",
+          "default": "top_disk",
+          "description": "Select panel for Row 5, Right",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 10 (Right)"
+        },
+        {
+          "name": "slot11",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 11 (Left)",
+          "default": "memory_composition",
+          "description": "Select panel for Row 6, Left",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 11 (Left)"
+        },
+        {
+          "name": "slot12",
+          "type": "dropdown",
+          "required": false,
+          "label": "Panel 12 (Right)",
+          "default": "thermals",
+          "description": "Select panel for Row 6, Right",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Memory Pressure",
+              "value": "memory_pressure"
+            },
+            {
+              "title": "Memory Composition Breakdown",
+              "value": "memory_composition"
+            },
+            {
+              "title": "CPU Usage",
+              "value": "cpu_usage"
+            },
+            {
+              "title": "GPU Usage",
+              "value": "gpu_usage"
+            },
+            {
+              "title": "Disk Read & Write Records",
+              "value": "disk_io"
+            },
+            {
+              "title": "Power Consumption",
+              "value": "power_consumption"
+            },
+            {
+              "title": "Thermals",
+              "value": "thermals"
+            },
+            {
+              "title": "Top Memory Users",
+              "value": "top_memory"
+            },
+            {
+              "title": "Top CPU Users",
+              "value": "top_cpu"
+            },
+            {
+              "title": "Top GPU Users",
+              "value": "top_gpu"
+            },
+            {
+              "title": "Top Disk Users",
+              "value": "top_disk"
+            },
+            {
+              "title": "Top Energy Users",
+              "value": "top_energy"
+            }
+          ],
+          "title": "Panel 12 (Right)"
+        }
+      ]
+    },
+    {
+      "name": "memory",
+      "title": "Memory Stats",
+      "subtitle": "Mac Performance Monitor",
+      "description": "Shows memory pressure, composition, and apps sorted by RAM usage",
+      "mode": "view"
+    },
+    {
+      "name": "cpu",
+      "title": "CPU Stats",
+      "subtitle": "Mac Performance Monitor",
+      "description": "Shows the CPU usage graph and apps sorted by CPU usage",
+      "mode": "view"
+    },
+    {
+      "name": "gpu",
+      "title": "GPU Stats",
+      "subtitle": "Mac Performance Monitor",
+      "description": "Shows the GPU usage graph and the apps using the GPU",
+      "mode": "view"
+    },
+    {
+      "name": "disk",
+      "title": "Disk Stats",
+      "subtitle": "Mac Performance Monitor",
+      "description": "Shows read/write throughput graphs and apps sorted by disk I/O",
+      "mode": "view"
+    },
+    {
+      "name": "energy",
+      "title": "Power & Thermals Stats",
+      "subtitle": "Mac Performance Monitor",
+      "description": "Shows power consumption, thermals, and apps sorted by energy impact",
+      "mode": "view"
+    },
+    {
+      "name": "copy-ai-instructions",
+      "title": "Copy AI Instructions",
+      "subtitle": "Mac Performance Monitor",
+      "description": "Copies structured context and database rules for AI agents",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultRange",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Time Range",
+      "description": "Time window for graphs on initial view. Capped at how long Mac Performance Monitor keeps high-res history. Change 'Settings>Advanced>High Resolution Logging' in Mac Performance Monitor to see more history (upto 2 days)",
+      "default": "30m",
+      "data": [
+        {
+          "title": "Last 5 Minutes",
+          "value": "5m"
+        },
+        {
+          "title": "Last 15 Minutes",
+          "value": "15m"
+        },
+        {
+          "title": "Last 30 Minutes",
+          "value": "30m"
+        },
+        {
+          "title": "Last 1 Hour",
+          "value": "1h"
+        },
+        {
+          "title": "Last 2 Hours",
+          "value": "2h"
+        },
+        {
+          "title": "Last 6 Hours",
+          "value": "6h"
+        },
+        {
+          "title": "Last 12 Hours",
+          "value": "12h"
+        },
+        {
+          "title": "Last 24 Hours",
+          "value": "24h"
+        },
+        {
+          "title": "Last 48 Hours",
+          "value": "48h"
+        }
+      ]
+    },
+    {
+      "name": "refreshCadence",
+      "type": "dropdown",
+      "required": false,
+      "title": "Live Refresh Cadence",
+      "description": "How frequently to refresh stats while command is open",
+      "default": "2s",
+      "data": [
+        {
+          "title": "Every 1 Second",
+          "value": "1s"
+        },
+        {
+          "title": "Every 2 Seconds",
+          "value": "2s"
+        },
+        {
+          "title": "Every 5 Seconds",
+          "value": "5s"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
