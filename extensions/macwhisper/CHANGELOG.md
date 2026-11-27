@@ -1,6 +1,6 @@
 # MacWhisper Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Transcribe File, Transcribe Finder Selection, Transcribe Latest Recording and Batch Transcribe Folder commands; Transcribe File streams single plain-text transcripts as they are produced; Batch Transcribe Folder lists the written transcripts with a preview
 - Summarize Recording (summary, action items, translation, chapters… with Raycast AI, in the language and with the AI model of your choice), Generate Subtitles and Export Presets (including Meeting Notes) commands
