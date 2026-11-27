@@ -1,6 +1,6 @@
 # Grok Bots Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Chat with Grok Bot: pick one of your Grok Bots from a searchable list and send it a prompt.
 - Each Bot shows a preview of its latest message, and ⌘Y opens a panel with the Bot's recent chat.
