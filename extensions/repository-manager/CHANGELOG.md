@@ -1,6 +1,6 @@
 # Repository Manager Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-11-27
 - Add native Windows support with platform-specific defaults and keyboard shortcuts.
 - Open Windows Terminal, PowerShell, and Command Prompt in the repository directory.
 - Support Windows paths, PATH lookup, and package-manager command shims.
