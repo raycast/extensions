@@ -1,0 +1,350 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-browser",
+  "title": "Search Browser",
+  "description": "Search open tabs, pinned tabs, bookmarks, and browsing history in Search Browser, open URLs, new windows, and private tabs.",
+  "icon": "command-icon.png",
+  "author": "eike_stang",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Web",
+    "Productivity"
+  ],
+  "keywords": [
+    "search",
+    "search browser",
+    "office commun",
+    "browser",
+    "tabs",
+    "bookmarks",
+    "history",
+    "webkit"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "title": "Search Engine",
+      "description": "Search engine used when searching the web from Search Browser commands.",
+      "required": false,
+      "default": "browser",
+      "data": [
+        {
+          "title": "Search Browser Default",
+          "value": "browser"
+        },
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Kagi",
+          "value": "kagi"
+        },
+        {
+          "title": "Brave Search",
+          "value": "brave"
+        },
+        {
+          "title": "Startpage",
+          "value": "startpage"
+        },
+        {
+          "title": "Qwant",
+          "value": "qwant"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        },
+        {
+          "title": "Ecosia",
+          "value": "ecosia"
+        },
+        {
+          "title": "Perplexity",
+          "value": "perplexity"
+        }
+      ]
+    },
+    {
+      "name": "includeRemoteTabs",
+      "type": "checkbox",
+      "title": "iCloud Tabs",
+      "label": "Include iCloud tabs from other devices",
+      "description": "Show tabs synced via iCloud from your other devices in Search Tabs and Search All.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "includePinnedTabs",
+      "type": "checkbox",
+      "title": "Pinned Tabs",
+      "label": "Include pinned tabs",
+      "description": "Include pinned tabs in Search Tabs and Search All.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "fetchRemoteFavicons",
+      "type": "checkbox",
+      "title": "Online Favicons",
+      "label": "Fetch missing favicons online",
+      "description": "When disabled, only Search Browser's local cached favicons are used so hostnames are never sent to external favicon services.",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search All",
+      "subtitle": "Search Browser",
+      "description": "Search open tabs, pinned tabs, bookmarks, and browsing history in Search Browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Search Browser",
+      "description": "Browse and search open, pinned, and iCloud tabs in Search Browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Search Browser",
+      "description": "Search your saved bookmarks in Search Browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Search Browser",
+      "description": "Search your browsing history in Search Browser",
+      "mode": "view"
+    },
+    {
+      "name": "open-url",
+      "title": "Open URL",
+      "subtitle": "Search Browser",
+      "description": "Open a URL or web search in Search Browser. Uses a clipboard URL if no argument is given.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL or search query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Search Browser",
+      "description": "Open a new tab in Search Browser, optionally with a URL or search query",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "URL or search query (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Search Browser",
+      "description": "Create a new Search Browser window",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-private-tab",
+      "title": "New Private Tab",
+      "subtitle": "Search Browser",
+      "description": "Open a new private tab in Search Browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-current-tab",
+      "title": "Copy Current Tab URL",
+      "subtitle": "Search Browser",
+      "description": "Copy the URL of the active tab in Search Browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "reopen-closed-tab",
+      "title": "Reopen Closed Tab",
+      "subtitle": "Search Browser",
+      "description": "Reopen the most recently closed tab in Search Browser",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-open-tabs",
+      "title": "Get Open Tabs",
+      "description": "Return open tabs across Search Browser windows, including space, profile, active state, and permission status."
+    },
+    {
+      "name": "get-focused-tab",
+      "title": "Get Focused Tab",
+      "description": "Return the currently active tab in the frontmost Search Browser window."
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search browsing history in Search Browser for matching entries."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search saved bookmarks in Search Browser for matching entries."
+    },
+    {
+      "name": "open-url",
+      "title": "Open URL",
+      "description": "Open an HTTP(S) URL or web search query in Search Browser."
+    }
+  ],
+  "ai": {
+    "instructions": "Search Browser's AppleScript dictionary is read-only and intentionally excludes private tabs. History and bookmarks are read from local JSON files on disk. Use open-url only for HTTP/HTTPS URLs or web search queries.",
+    "evals": [
+      {
+        "input": "@search-browser what tabs do I have open?",
+        "mocks": {
+          "get-open-tabs": {
+            "isRunning": true,
+            "permissionDenied": false,
+            "count": 2,
+            "tabs": [
+              {
+                "title": "Search Browser",
+                "url": "https://searchbrowser.app/",
+                "space": "Personal",
+                "isActive": true
+              },
+              {
+                "title": "YouTube",
+                "url": "https://www.youtube.com/",
+                "space": "Personal",
+                "isActive": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-open-tabs"
+          },
+          {
+            "includes": "searchbrowser.app"
+          }
+        ]
+      },
+      {
+        "input": "@search-browser find raycast in my history",
+        "mocks": {
+          "search-history": {
+            "count": 1,
+            "entries": [
+              {
+                "title": "Raycast Developers",
+                "url": "https://developers.raycast.com/",
+                "visitCount": 4,
+                "lastVisited": "2026-11-27T12:00:00.000Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "query": "raycast"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@search-browser search my bookmarks for github",
+        "mocks": {
+          "search-bookmarks": {
+            "count": 1,
+            "bookmarks": [
+              {
+                "title": "GitHub",
+                "url": "https://github.com/",
+                "folder": "Work"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "github"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@search-browser open https://searchbrowser.app/",
+        "mocks": {
+          "open-url": {
+            "opened": true,
+            "url": "https://searchbrowser.app/",
+            "isSearch": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-url",
+              "arguments": {
+                "urlOrQuery": "https://searchbrowser.app/"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsc --outDir .test-dist --module commonjs --target ES2023 --esModuleInterop --skipLibCheck --strict src/lib/constants.ts src/lib/types.ts src/lib/utils.ts src/lib/storage.ts src/lib/applescript-parser.ts && node --test tests/*.test.mjs && rm -rf .test-dist",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
