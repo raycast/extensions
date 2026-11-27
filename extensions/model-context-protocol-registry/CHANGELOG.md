@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Rename the UberLLM entry] - {PR_MERGE_DATE}
+## [Rename the UberLLM entry] - 2026-11-27
 
 - Rename the UberLLM entry to MartLLM (id `martllm`) and move its homepage, icon and remote server to martllm.com. Same service, accounts and API keys; the placeholder env var is now `MARTLLM_AUTH_HEADER`.
 
