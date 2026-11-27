@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "observe-mac-processes",
+  "title": "Observe macOS Processes",
+  "description": "Snapshots macOS processes, rolls up child workers into parent apps with functional labels, aggregates CPU/RAM, and deep links to in-browser task managers.",
+  "icon": "extension-icon.png",
+  "author": "janice_wong",
+  "categories": [
+    "System",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Observe Processes",
+      "subtitle": "Process Aggregator & Deep Links",
+      "description": "Snapshot running processes, roll up child workers, aggregate CPU/memory, and deep-link to browser task managers.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.17.2",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api publish"
+  }
+}
