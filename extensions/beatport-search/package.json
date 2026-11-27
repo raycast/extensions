@@ -23,7 +23,8 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
-    "@raycast/api": "^2.14.0"
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -31,14 +32,12 @@
     "@types/react": "19.3.0",
     "eslint": "^10.11.0",
     "prettier": "^3.9.9",
-    "typescript": "~5.9.3",
-    "vitest": "^5.0.1"
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "fix-lint": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt's not allowed to publish a Raycast extension to npm\" && exit 1",

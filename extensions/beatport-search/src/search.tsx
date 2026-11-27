@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Icon, List, type LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { searchBeatport, type ArtistChoice, type ChartEntry, type Results } from "./tracks";
+import { usePromise } from "@raycast/utils";
+import { setTimeout as delay } from "node:timers/promises";
+import { useRef, useState } from "react";
+import { searchBeatport, type ArtistChoice, type ChartEntry } from "./tracks";
 import {
   resultSections,
   selectResult,
@@ -16,44 +18,37 @@ export default function Command({ fallbackText }: LaunchProps) {
 
 function SearchView({ initialText, entry }: { initialText: string; entry?: ChartEntry }) {
   const [text, setText] = useState(initialText);
-  const [attempt, setAttempt] = useState(0);
+  const abortable = useRef<AbortController>(null);
   const [list, setList] = useState<ResultList>();
   const query = text.trim();
   const canSearch = query.length >= 2;
   const current = canSearch && list?.query === query ? list : undefined;
   const searchUrl = "https://www.beatport.com/search?q=" + encodeURIComponent(query);
 
-  useEffect(() => {
-    setList(undefined);
-    if (!canSearch) return;
-    const controller = new AbortController();
-    const publish = (result: Results, pending: boolean) => {
-      if (!controller.signal.aborted) setList((previous) => updateList(previous, query, result, pending));
-    };
-    const timer = setTimeout(async () => {
-      try {
-        const matches = await searchBeatport(
+  const { isLoading, revalidate } = usePromise(
+    async (term: string, wanted: ChartEntry | undefined) => {
+      const signal = abortable.current!.signal;
+      await delay(450, undefined, { signal });
+      const matches = await searchBeatport(term, signal, wanted, (preview) => {
+        if (!signal.aborted) setList((previous) => updateList(previous, term, preview, true));
+      });
+      return { term, matches };
+    },
+    [query, query === initialText ? entry : undefined],
+    {
+      abortable,
+      execute: canSearch,
+      onWillExecute: () => setList(undefined),
+      onData: ({ term, matches }) => setList((previous) => updateList(previous, term, matches, false)),
+      onError: (error) =>
+        setList({
           query,
-          controller.signal,
-          query === initialText ? entry : undefined,
-          (initial) => publish(initial, true),
-        );
-        publish(matches, false);
-      } catch (error) {
-        if (!controller.signal.aborted)
-          setList({
-            query,
-            sections: [],
-            pending: false,
-            error: error instanceof Error && /429|rate.limit/i.test(error.message) ? "limit" : "failed",
-          });
-      }
-    }, 450);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [canSearch, query, attempt, initialText, entry]);
+          sections: [],
+          pending: false,
+          error: /429|rate.limit/i.test(error.message) ? "limit" : "failed",
+        }),
+    },
+  );
 
   const loading = canSearch && !current;
   function select(id: string | null) {
@@ -66,7 +61,7 @@ function SearchView({ initialText, entry }: { initialText: string; entry?: Chart
       searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder="Artist or track name"
-      isLoading={loading || current?.pending}
+      isLoading={canSearch && (loading || isLoading)}
       selectedItemId={current?.selectedId}
       onSelectionChange={select}
     >
@@ -97,7 +92,7 @@ function SearchView({ initialText, entry }: { initialText: string; entry?: Chart
             canSearch ? (
               <ActionPanel>
                 <Action.OpenInBrowser title="Search on Beatport" url={searchUrl} />
-                {current?.error && <Action title="Retry Search" onAction={() => setAttempt((value) => value + 1)} />}
+                {current?.error && <Action title="Retry Search" onAction={revalidate} />}
               </ActionPanel>
             ) : undefined
           }

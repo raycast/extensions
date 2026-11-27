@@ -17,9 +17,3 @@ Try **Trashlagoon**. An exact artist match puts the profile first. If several ar
 ## Search service and privacy
 
 The extension sends your query to [Exa](https://exa.ai/mcp) after you pause typing. It can send follow-up searches for a specific mix, an artist profile or the first three unresolved chart positions. Raycast loads available track covers and portraits from Beatport’s image CDN. Search results depend on what Exa has indexed. If Exa reaches its free rate limit or a search fails, choose **Retry Search** or press Return to search on Beatport in your browser.
-
-## Development
-
-This release supports macOS. Windows has not been verified.
-
-From the extension directory, run `npm ci` and `npm run dev`. Run `npm test`, `npm run typecheck`, `npm run lint` and `npm run build -- --environment dist --output dist` before publishing. The [native verification skill](https://github.com/chapati23/raycast-extensions/tree/main/.agents/skills/verify-beatport) exercises search, charts, artwork and retry in Raycast.
