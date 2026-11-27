@@ -4814,7 +4814,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "AI Chat by Ace Data Cloud",
     description:
       "Discover supported models and start or continue a conversation. A connected Ace Data Cloud account is required. Usage is billed to that account.",
-    icon: "https://avatars.githubusercontent.com/u/156096448?s=192&v=4",
+    icon: "https://raw.githubusercontent.com/AceDataCloud/ModelProviderDify/main/_assets/icon.png",
     homepage: "https://github.com/AceDataCloud/AiChatMCP",
     configuration: {
       command: "npx",
