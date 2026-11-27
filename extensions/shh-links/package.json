@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shh-links",
+  "title": "Shh Links",
+  "description": "Paste links into Discord as [site](<url>), [text](<url>) or <url>, so Discord shows no preview embed.",
+  "icon": "icon.png",
+  "author": "xpectrum",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-link",
+      "title": "Paste Link Without Embed",
+      "description": "Check the text (the site's name, or what you selected in Discord) and the URL taken from the clipboard, then paste the link into Discord without sending it.",
+      "mode": "view",
+      "keywords": [
+        "discord",
+        "embed",
+        "preview",
+        "masked",
+        "markdown",
+        "link"
+      ]
+    },
+    {
+      "name": "paste-clipboard",
+      "title": "Paste Clipboard Without Embed",
+      "description": "Paste the links on the clipboard into Discord as [site](<url>), with no form. Words selected in Discord become the link text.",
+      "mode": "no-view",
+      "keywords": [
+        "discord",
+        "embed",
+        "preview",
+        "masked",
+        "markdown",
+        "link"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --test test/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "untrack",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Links",
+      "label": "Remove tracking parameters",
+      "description": "Drop utm_*, fbclid, gclid and similar parameters from the pasted links."
+    }
+  ]
+}
