@@ -21,7 +21,7 @@ the Devbroom app (free) from [devbroom.com](https://devbroom.com).
   confirm. Folders go to the Trash, and you can put them back from the Trash or
   from History in Devbroom. **Delete for Good** skips the Trash and asks you to
   confirm again; your organization can turn it off. Worktrees are removed with
-  git, never forced. Scan again with Cmd+R.
+  git, never forced. Scan again with ⌘R.
 
 Cleaning runs `devbroom clean --only` for the items you chose, so Devbroom checks
 each one again right before cleaning: anything that is no longer Ready is left
