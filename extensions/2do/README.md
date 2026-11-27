@@ -68,7 +68,7 @@ By default, Cancel Task follows 2Do's convention: it adds the **Cancelled** tag 
 
 Cancelling a project or checklist that still has open subtasks asks first, because completing it completes them too.
 
-For a repeating task, Cancel Task cancels only this occurrence. It completes the task, then tags, moves or deletes only the completed occurrence, so the next one is left as it was.
+For a repeating task, Complete and Tag, Move to List and Complete, and Delete cancel only this occurrence. They complete the task, then tag, move or delete only the completed occurrence, so the next one is left as it was. Tag Only doesn't complete anything, so it tags the repeating task itself and leaves it at its current date.
 
 **Mark as Not Done** (⌘D) on a cancelled task undoes the cancel: it removes the cancel tag. A task cancelled into the Cancel List asks which list it goes back to, since 2Do doesn't record where it came from.
 

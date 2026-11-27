@@ -18,7 +18,6 @@ import { useEffect, useRef } from "react";
 import {
   actionURL,
   applyCancelMark,
-  CancelPrefs,
   cancelTask,
   clearCancelMark,
   completeParent,
@@ -128,7 +127,7 @@ export function TaskItem({
     seenEpoch.current = refreshEpoch;
     if (isParent && !t.completed) void revalidateItems();
   }, [refreshEpoch, isParent, t.completed, revalidateItems]);
-  const prefs = getPreferenceValues<CancelPrefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const links = taskLinks(t);
   const actionTarget = actionURL(t.action);
   const primary = actionTarget
@@ -197,6 +196,7 @@ export function TaskItem({
       await showToast({ style: Toast.Style.Success, title: "Completed" });
       onChange();
     } catch (error) {
+      onChange(); // Some items may already be cancelled.
       await showFailureToast(error, { title: "Could not complete task" });
     }
   }
@@ -230,6 +230,7 @@ export function TaskItem({
       await showToast({ style: Toast.Style.Success, title: deletes ? "Deleted" : "Cancelled" });
       onChange();
     } catch (error) {
+      onChange(); // The task may already be completed; show it as it is now.
       await showFailureToast(error, { title: "Could not cancel task" });
     }
   }
@@ -277,8 +278,8 @@ export function TaskItem({
               icon={Icon.CheckCircle}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             >
-              <Action title="Complete Task and Its Items" onAction={() => completeWithItems(false)} />
-              <Action title="Complete Task and Cancel Remaining Items" onAction={() => completeWithItems(true)} />
+              <Action title="Complete All Items" icon={Icon.CheckCircle} onAction={() => completeWithItems(false)} />
+              <Action title="Cancel Remaining Items" icon={Icon.XMarkCircle} onAction={() => completeWithItems(true)} />
             </ActionPanel.Submenu>
           ) : inCancelList(t, prefs) ? (
             <Action.Push
@@ -410,11 +411,16 @@ function RelocateCancelledForm({
   stayCompleted?: boolean;
 }) {
   const { pop } = useNavigation();
-  const prefs = getPreferenceValues<CancelPrefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const lists = useCachedPromise(() => twoDo<{ list: TwoDoList[] }>("list_lists").then((r) => r.list));
   const title = stayCompleted ? "Mark as Complete Instead" : "Mark as Not Done";
 
   async function submit({ list_id }: { list_id: string }) {
+    // Without a destination, clearCancelMark would skip the move and leave the task cancelled.
+    if (!lists.data?.some((l) => l.list_id === list_id && l.list_id !== task.list_id)) {
+      await showFailureToast(new Error("Choose the list the task goes back to."), { title: "No list chosen" });
+      return;
+    }
     try {
       if (stayCompleted) await clearCancelMark(task, prefs, list_id);
       else await reopenTask(task, prefs, list_id);

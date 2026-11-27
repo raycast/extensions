@@ -480,11 +480,8 @@ export function repeatRule(task: Task) {
   return rule;
 }
 
-export type CancelPrefs = {
-  cancelBehavior: "complete-and-tag" | "tag" | "move" | "delete";
-  cancelTag: string;
-  cancelList: string;
-};
+// Generated from package.json's preferences, so a manifest change can't leave this shape behind.
+export type CancelPrefs = Pick<Preferences, "cancelBehavior" | "cancelTag" | "cancelList">;
 
 export async function findTag(title: string) {
   const { tags } = await twoDo<{ tags: Tag[] }>("list_tags");
@@ -500,22 +497,31 @@ export async function requireTag(title: string, fix: string): Promise<Tag> {
 
 // Completes `task` and returns the ID of the completed occurrence. For a repeating task, 2Do keeps the
 // open task (moved to its next date) and adds a completed copy, which only a search by title finds.
-// 2Do's search finds nothing without a list to search in, so it searches the task's list.
+// 2Do's search finds nothing without a list to search in, so it searches the task's list. The copy is
+// the one completed same-title task that wasn't there before; anything else is ambiguous and rejected
+// before the caller changes it.
 async function completeOccurrence(task: Task) {
-  const { task: after } = await twoDo<{ task: Task }>("complete_task", { task_id: task.task_id });
-  if (after.completed) return after.task_id;
-  const { tasks } = await twoDo<{ tasks: Task[] }>("query_tasks", {
-    list_id: task.list_id,
-    search: task.title,
-    include_completed: true,
-    paused_filter: "include",
-  });
-  const [copy] = tasks
-    .filter((t) => t.completed && t.title === task.title && t.task_id !== task.task_id)
-    .sort((a, b) => (b.completion_date ?? "").localeCompare(a.completion_date ?? ""));
-  if (!copy)
-    throw new Error("Completed this occurrence, but couldn't find it to finish cancelling. Check 2Do's Done view.");
-  return copy.task_id;
+  if (!isRepeating(task)) {
+    await twoDo("complete_task", { task_id: task.task_id });
+    return task.task_id;
+  }
+  const completedCopies = async () => {
+    const { tasks } = await twoDo<{ tasks: Task[] }>("query_tasks", {
+      list_id: task.list_id,
+      search: task.title,
+      include_completed: true,
+      paused_filter: "include",
+    });
+    return tasks.filter((t) => t.completed && t.title === task.title && t.task_id !== task.task_id);
+  };
+  const before = new Set((await completedCopies()).map((t) => t.task_id));
+  await twoDo("complete_task", { task_id: task.task_id });
+  const added = (await completedCopies()).filter((t) => !before.has(t.task_id));
+  if (added.length !== 1)
+    throw new Error(
+      `Completed this occurrence, but couldn't ${added.length ? "tell which completed task it is" : "find it"} to finish cancelling. Check 2Do's Done view.`,
+    );
+  return added[0].task_id;
 }
 
 // 2Do's own convention is a completed task carrying a "Cancelled" tag. The task is completed first,
@@ -542,9 +548,19 @@ export async function cancelTask(task: Task, p: CancelPrefs) {
     return;
   }
   const taskId = p.cancelBehavior === "tag" ? task.task_id : await completeOccurrence(task);
-  if (tag) await twoDo("update_task", { task_id: taskId, tag_update: { operation: "append", tag_ids: [tag.tag_id] } });
-  if (target) await twoDo("move_task", { task_id: taskId, list_id: target.list_id });
-  if (p.cancelBehavior === "delete") await twoDo("delete_task", { task_id: taskId });
+  try {
+    if (tag)
+      await twoDo("update_task", { task_id: taskId, tag_update: { operation: "append", tag_ids: [tag.tag_id] } });
+    if (target) await twoDo("move_task", { task_id: taskId, list_id: target.list_id });
+    if (p.cancelBehavior === "delete") await twoDo("delete_task", { task_id: taskId });
+  } catch (error) {
+    // The task is already completed, so cancelling again would complete the next occurrence. Point at
+    // the completed task instead, where the unfinished step can be redone without completing again.
+    if (p.cancelBehavior === "tag") throw error;
+    const finish =
+      p.cancelBehavior === "delete" ? "delete it from 2Do's Done view" : "use Mark as Cancelled Instead on it in Done";
+    throw new Error(`Completed this task, but couldn't finish cancelling it. To finish, ${finish}.`, { cause: error });
+  }
 }
 
 // Completes a project or checklist. 2Do completes its open items along with it; with `cancelItems`,

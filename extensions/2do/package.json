@@ -73,7 +73,8 @@
       "description": "The 2Do tag that marks a cancelled task. It must already exist in 2Do.",
       "type": "textfield",
       "required": false,
-      "default": "Cancelled"
+      "default": "Cancelled",
+      "placeholder": "Cancelled"
     },
     {
       "name": "cancelList",
@@ -81,7 +82,8 @@
       "description": "The 2Do list cancelled tasks move to, for \"Move to List and Complete\".",
       "type": "textfield",
       "required": false,
-      "default": ""
+      "default": "",
+      "placeholder": "Cancelled Tasks"
     }
   ],
   "scripts": {
