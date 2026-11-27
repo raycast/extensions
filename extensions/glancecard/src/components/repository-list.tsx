@@ -13,11 +13,16 @@ interface Found {
 }
 
 /** Your repositories, and any public one on GitHub as you type. */
-export function RepositoryList({ initial }: { initial: string }) {
+export function RepositoryList({ initial, pushed = false }: { initial: string; pushed?: boolean }) {
   const [text, setText] = useState(initial);
   const query = text.trim();
-  const { data: mine, isLoading: loadingMine } = useMyRepositories();
-  const { data: found, isLoading: searching } = useCachedPromise(
+  const { data: mine, isLoading: loadingMine, error: mineError, revalidate: reloadMine } = useMyRepositories();
+  const {
+    data: found,
+    isLoading: searching,
+    error: searchError,
+    revalidate: search,
+  } = useCachedPromise(
     async (q: string) =>
       q.length < 2
         ? []
@@ -38,6 +43,7 @@ export function RepositoryList({ initial }: { initial: string }) {
 
   return (
     <List
+      navigationTitle={pushed ? "Add a Repository Card" : undefined}
       isLoading={loadingMine || searching}
       filtering={false}
       searchText={text}
@@ -45,6 +51,25 @@ export function RepositoryList({ initial }: { initial: string }) {
       throttle
       searchBarPlaceholder="Your repositories, or search GitHub (owner/name opens one)"
     >
+      {(mineError || searchError) && !shownMine.length && !others.length && !direct ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not read GitHub"
+          description={(mineError ?? searchError)?.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  if (mineError) reloadMine();
+                  if (searchError) search();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {direct && !mineNames.has(direct.toLowerCase()) ? (
         <List.Section title="Open">
           <Item full={direct} description="Any public repository, by owner/name" />
@@ -76,7 +101,7 @@ function Item({ full, description, stars }: { full: string; description: string 
           <Action.Push
             title="Show Looks"
             icon={Icon.AppWindowGrid3x3}
-            target={<LookGrid target={{ kind: "repo", full }} />}
+            target={<LookGrid target={{ kind: "repo", full }} pushed />}
           />
           <Action.OpenInBrowser title="Open on GitHub" url={`https://github.com/${full}`} />
         </ActionPanel>

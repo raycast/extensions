@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "glancecard",
   "title": "Glancecard",
-  "description": "See any GitHub profile or repository as a glancecard in every look, save or copy the SVG, and set up the free GitHub Action that keeps the cards in your READMEs fresh.",
+  "description": "View any GitHub profile or repository as a glancecard in 25 looks, save the SVG, set up README cards, and ask AI for GitHub stats.",
   "icon": "extension-icon.png",
   "author": "Undolog",
   "platforms": [
@@ -70,7 +70,8 @@
       "title": "Personal Access Token",
       "description": "Optional. Leave empty to sign in with GitHub; a token needs no scope to read public data.",
       "type": "password",
-      "required": false
+      "required": false,
+      "placeholder": "ghp_… (optional)"
     },
     {
       "name": "timeZone",
@@ -94,7 +95,191 @@
     }
   ],
   "ai": {
-    "instructions": "- The numbers are glancecard's, read from GitHub's public data; `readAt` says when. Contributions follow GitHub's own calendar for the last year.\n- starHistory counts the stars still given, by the day they were given; it can be a star or two short of the repository's total. Null means GitHub had no history to give.\n- commitsLastYear counts the default branch only; when commitsLastYearIsCapped is true the repository has more than glancecard reads, so say \"at least\".\n- These tools only read: to show a card, point to the Profile Card or Repository Card command; to put cards in a README, to Set up Glancecard."
+    "instructions": "- The numbers are glancecard's, read from GitHub's public data; `readAt` says when. Contributions follow GitHub's own calendar for the last year.\n- starHistory counts the stars still given, by the day they were given; it can be a star or two short of the repository's total. Null means GitHub had no history to give.\n- commitsLastYear counts the default branch only; when commitsLastYearIsCapped is true the repository has more than glancecard reads, so say \"at least\".\n- These tools only read: to show a card, point to the Profile Card or Repository Card command; to put cards in a README, to Set up Glancecard.",
+    "evals": [
+      {
+        "input": "@glancecard how many stars did gfazioli/glancecard get in the last 30 days?",
+        "mocks": {
+          "get-repository-stats": {
+            "repository": "gfazioli/glancecard",
+            "description": "Your GitHub profile and repositories, at a glance",
+            "stars": 7,
+            "forks": 0,
+            "watchers": 1,
+            "openIssues": 0,
+            "openPullRequests": 0,
+            "mergedPullRequests": 23,
+            "latestTag": "v0.9.0",
+            "totalCommits": 77,
+            "commitsLast30Days": 33,
+            "commitsLastYear": 77,
+            "commitsLastYearIsCapped": false,
+            "activeDaysLastYear": 21,
+            "currentStreakDays": 3,
+            "longestStreakDaysLastYear": 6,
+            "busiestWeekday": "Wednesday",
+            "peakHour": 12,
+            "languages": [
+              {
+                "language": "JavaScript",
+                "share": "78%"
+              },
+              {
+                "language": "HTML",
+                "share": "14%"
+              }
+            ],
+            "releases": 10,
+            "releaseDownloads": 0,
+            "contributors": 1,
+            "starHistory": {
+              "total": 7,
+              "last30Days": 4,
+              "lastYear": 7,
+              "bestWeek": {
+                "weekOf": "2026-10-12",
+                "stars": 3
+              },
+              "firstStar": "2026-10-14"
+            },
+            "readAt": "2026-11-27T12:00:00.000Z",
+            "url": "https://github.com/gfazioli/glancecard"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-repository-stats",
+              "arguments": {
+                "repository": {
+                  "includes": "gfazioli/glancecard"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@glancecard how many followers does octocat have, and which of their repositories has the most stars?",
+        "mocks": {
+          "get-profile-stats": {
+            "login": "octocat",
+            "name": "The Octocat",
+            "followers": 21000,
+            "following": 9,
+            "publicRepositories": 8,
+            "starsAcrossPublicRepositories": 19500,
+            "forksOfPublicRepositories": 160000,
+            "contributionsLastYear": 312,
+            "commitsLastYear": 201,
+            "pullRequests": 30,
+            "mergedPullRequests": 22,
+            "issuesOpened": 14,
+            "mostStarred": [
+              {
+                "name": "Spoon-Knife",
+                "stars": 13000,
+                "language": "HTML"
+              },
+              {
+                "name": "Hello-World",
+                "stars": 3100,
+                "language": null
+              }
+            ],
+            "languagesByRepositories": [
+              {
+                "language": "Ruby",
+                "repositories": 3
+              },
+              {
+                "language": "HTML",
+                "repositories": 2
+              }
+            ],
+            "starHistory": {
+              "total": 19500,
+              "last30Days": 180,
+              "lastYear": 2300,
+              "bestWeek": {
+                "weekOf": "2024-03-10",
+                "stars": 95
+              },
+              "firstStar": "2011-01-26"
+            },
+            "readAt": "2026-11-27T12:00:00.000Z",
+            "url": "https://github.com/octocat"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-profile-stats",
+              "arguments": {
+                "login": {
+                  "includes": "octocat"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@glancecard what is the busiest weekday on gfazioli/glancecard?",
+        "mocks": {
+          "get-repository-stats": {
+            "repository": "gfazioli/glancecard",
+            "description": "Your GitHub profile and repositories, at a glance",
+            "stars": 7,
+            "forks": 0,
+            "watchers": 1,
+            "openIssues": 0,
+            "openPullRequests": 0,
+            "mergedPullRequests": 23,
+            "latestTag": "v0.9.0",
+            "totalCommits": 77,
+            "commitsLast30Days": 33,
+            "commitsLastYear": 77,
+            "commitsLastYearIsCapped": false,
+            "activeDaysLastYear": 21,
+            "currentStreakDays": 3,
+            "longestStreakDaysLastYear": 6,
+            "busiestWeekday": "Wednesday",
+            "peakHour": 12,
+            "languages": [
+              {
+                "language": "JavaScript",
+                "share": "78%"
+              },
+              {
+                "language": "HTML",
+                "share": "14%"
+              }
+            ],
+            "releases": 10,
+            "releaseDownloads": 0,
+            "contributors": 1,
+            "starHistory": {
+              "total": 7,
+              "last30Days": 4,
+              "lastYear": 7,
+              "bestWeek": {
+                "weekOf": "2026-10-12",
+                "stars": 3
+              },
+              "firstStar": "2026-10-14"
+            },
+            "readAt": "2026-11-27T12:00:00.000Z",
+            "url": "https://github.com/gfazioli/glancecard"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-repository-stats"
+          }
+        ]
+      }
+    ]
   },
   "dependencies": {
     "@raycast/api": "^2.1.0",

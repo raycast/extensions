@@ -12,7 +12,6 @@ import {
   dependabotEntry,
   buildPrompt,
   buildWorkflow,
-  defaultBranch,
   dependabotFile,
   editFileUrl,
   fileBase,
@@ -45,7 +44,7 @@ interface Embed {
 }
 
 /** Copies an embed and opens the README editor of the repository it belongs in. */
-function EmbedAction({ embed, branch }: { embed: Embed; branch?: string }) {
+function EmbedAction({ embed }: { embed: Embed }) {
   return (
     <Action
       title={`Copy ${embed.title} Embed and Edit README`}
@@ -54,7 +53,7 @@ function EmbedAction({ embed, branch }: { embed: Embed; branch?: string }) {
         await Clipboard.copy(embed.text);
         const toast = await showToast({ style: Toast.Style.Animated, title: `Opening ${embed.full}'s README` });
         try {
-          await open(readmeEditUrl(embed.full, branch ?? (await defaultBranch(embed.full))));
+          await open(await readmeEditUrl(embed.full));
           toast.style = Toast.Style.Success;
           toast.title = "Embed copied";
           toast.message = "Paste it where the card belongs, then commit";
@@ -177,18 +176,11 @@ export function SetupResult({ setup, status }: { setup: Setup; status: SetupStat
               )
             ) : null}
             {home ? (
-              <Action.OpenInBrowser
-                title="Run It on GitHub"
-                icon={Icon.Play}
-                url={workflowRunUrl(login, path)}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-              />
+              <Action.OpenInBrowser title="Run It on GitHub" icon={Icon.Play} url={workflowRunUrl(login, path)} />
             ) : null}
             {embeds.map((e) =>
               // Without a profile repository there is no README to edit yet, nor a branch to name.
-              home ? (
-                <EmbedAction key={e.full} embed={e} branch={e.full === `${login}/${login}` ? branch : undefined} />
-              ) : null,
+              home ? <EmbedAction key={e.full} embed={e} /> : null,
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
@@ -292,13 +284,8 @@ export function PatchResult({
       actions={
         <ActionPanel>
           {unchanged ? null : <WorkflowAction status={status} path={workflow.path} text={patched.text} exists />}
-          <EmbedAction embed={embed} branch={card.kind === "profile" ? branch : undefined} />
-          <Action.OpenInBrowser
-            title="Run It on GitHub"
-            icon={Icon.Play}
-            url={workflowRunUrl(login, workflow.path)}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-          />
+          <EmbedAction embed={embed} />
+          <Action.OpenInBrowser title="Run It on GitHub" icon={Icon.Play} url={workflowRunUrl(login, workflow.path)} />
           <Action title="Copy Embed" icon={Icon.Code} onAction={() => copy(embed.text, "the embed")} />
           {unchanged ? null : (
             <Action

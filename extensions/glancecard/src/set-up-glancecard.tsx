@@ -18,11 +18,11 @@ function SetUpGlancecard() {
   // over is there, named for what it does.
   const setUp = status?.workflow ? (
     <>
-      <Action.Push title="Add a Repository Card" icon={Icon.PlusCircle} target={<RepositoryList initial="" />} />
+      <Action.Push title="Add a Repository Card" icon={Icon.PlusCircle} target={<RepositoryList initial="" pushed />} />
       <Action.Push
         title="Change Your Profile Card"
         icon={Icon.Person}
-        target={<LookGrid target={{ kind: "profile", login: status.login }} />}
+        target={<LookGrid target={{ kind: "profile", login: status.login }} pushed />}
       />
       <Action.Push title="Start over with a New Workflow" icon={Icon.Wand} target={<SetupForm />} />
     </>
@@ -56,7 +56,7 @@ function SetUpGlancecard() {
   const behind = workflow?.version && workflow.version !== latest;
 
   return (
-    <List isLoading={isLoading} navigationTitle="Glancecard on Your GitHub">
+    <List isLoading={isLoading}>
       <List.Item
         title="Profile repository"
         subtitle={repo}

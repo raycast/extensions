@@ -113,7 +113,8 @@ async function findWorkflow(repo: string, defaultZone: string): Promise<FoundWor
     const file = await restOrNull<{ content: string; html_url: string }>(`/repos/${repo}/contents/${f.path}`);
     if (!file) continue;
     const text = decode(file.content);
-    if (/gfazioli\/glancecard@/.test(text))
+    // A step of its own, not a mention in a comment.
+    if (/^\s*(?:-\s+)?uses:\s*["']?gfazioli\/glancecard@/m.test(text))
       return { path: f.path, url: file.html_url, text, ...parseWorkflow(text, defaultZone) };
   }
   return null;
@@ -290,8 +291,17 @@ export const newFileUrl = (login: string, branch: string, filename: string, valu
 export const editFileUrl = (login: string, branch: string, filename: string) =>
   `https://github.com/${login}/${login}/edit/${encodeURIComponent(branch)}/${filename}`;
 
-export const readmeEditUrl = (full: string, branch: string) =>
-  `https://github.com/${full}/edit/${encodeURIComponent(branch)}/README.md`;
+/**
+ * The page that edits a repository's README, whatever its name (README.md, readme.md, README.rst…),
+ * or the page that creates README.md when it has none.
+ */
+export async function readmeEditUrl(full: string): Promise<string> {
+  const branch = await defaultBranch(full);
+  const readme = await restOrNull<{ path: string }>(`/repos/${full}/readme`);
+  return readme
+    ? `https://github.com/${full}/edit/${encodeURIComponent(branch)}/${readme.path}`
+    : `https://github.com/${full}/new/${encodeURIComponent(branch)}?filename=README.md`;
+}
 
 export const workflowRunUrl = (login: string, path: string) =>
   `https://github.com/${login}/${login}/actions/workflows/${path.split("/").pop()}`;

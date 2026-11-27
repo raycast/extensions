@@ -38,7 +38,7 @@ import { choiceFor, defaultLook, lookGroups, lookTitle, otherSide, seasonNote } 
 import { UseOnGitHub, type SetupRequest } from "./setup-form";
 
 /** Every look of a card, each drawn with the card's own data: picking a look is seeing it. */
-export function LookGrid({ target }: { target: Target }) {
+export function LookGrid({ target, pushed = false }: { target: Target; pushed?: boolean }) {
   const { card, isLoading, error, revalidate } = useCard(target);
   const [options, setOptions] = useCardOptions();
   const [selected, setSelected] = useState(defaultLook(environment.appearance));
@@ -50,7 +50,7 @@ export function LookGrid({ target }: { target: Target }) {
       columns={3}
       aspectRatio={profile ? "3/4" : "3/2"}
       fit={Grid.Fit.Contain}
-      navigationTitle={targetTitle(card?.target ?? target)}
+      navigationTitle={pushed ? targetTitle(card?.target ?? target) : undefined}
       searchBarPlaceholder="Filter looks"
       selectedItemId={defaultLook(environment.appearance)}
     >
@@ -210,7 +210,6 @@ function CardActions({ card, look, options, setOptions, onRefresh, show, onSide 
         <Action
           title="Copy SVG File"
           icon={Icon.Document}
-          shortcut={Keyboard.Shortcut.Common.CopyName}
           onAction={async () => {
             await Clipboard.copy({ file: exportFile(card, look, options) });
             await showHUD(`Copied ${exportName(card, look)}`);
@@ -241,7 +240,7 @@ function CardActions({ card, look, options, setOptions, onRefresh, show, onSide 
             />
           ))}
         </ActionPanel.Submenu>
-        <ActionPanel.Submenu title="Stars" icon={Icon.Star} shortcut={Keyboard.Shortcut.Common.Duplicate}>
+        <ActionPanel.Submenu title="Stars" icon={Icon.Star}>
           {STARS.map((value) => (
             <Action
               key={value}
