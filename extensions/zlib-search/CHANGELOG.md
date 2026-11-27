@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Install Docs Update] - 2026-11-25
+
+### Changed
+
+- README: the Homebrew formula was renamed from `zlib` to `zlib-cli`; updated the install command and added one-time instructions for replacing the old formula
+- README: added troubleshooting for the `Access denied` search error caused by zlib CLI versions older than 0.0.16
+
 ## [Website Search Fallback] - 2026-10-11
 
 ### Added

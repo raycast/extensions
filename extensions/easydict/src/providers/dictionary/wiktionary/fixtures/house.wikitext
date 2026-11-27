@@ -1,0 +1,1599 @@
+{{also|House}}
+==English==
+
+===Etymology 1===
+{{etymon|en|id=building|:inh|enm:hous<id:house>|tree=1}}
+{{wikidata lexeme|L512}}
+{{root|en|ine-pro|*(s)kewH-}}
+
+From {{inh|en|enm|hous}}, {{m|enm|hus}}, from {{inh|en|ang|hūs|t=dwelling, shelter, house}}, from {{inh|en|gmw-pro|*hūs}}, from {{inh|en|gem-pro|*hūsą|t=house}}, possibly from {{der|en|ine-pro|*(s)kews-}}, from {{m|ine-pro|*(s)kewH-|t=to cover, hide}}. More at {{l|en|hose}}.
+
+Eclipsed non-native {{noncog|enm|mees}}, {{m|enm|meson}}, {{m|enm|measoun|t=house}}, borrowed from {{noncog|xno|mes}}, {{m|fro|mies}}, {{m|fro|meis}}, {{m|fro|maisun|t=house}}. The uncommon plural form ''housen'' is from {{inh|en|enm|husen}}, {{m|enm|housen}}. (The Old English nominative plural was simply {{m|ang|hūs}}.)
+{{col-top|2|cog}}
+Cognate with {{cog|sco|hoose}}, {{m|sco|oos|t=house}}, {{cog|yol|heouse}}, {{m|yol|houze}}, {{m|yol|howze|t=house}}, {{cog|frr|hüs|t=house}}, {{cog|stq|Huus}}, {{m|stq|Húus|t=house}}, {{cog|fy|hûs|t=house}}, {{cog|gsw|hous}}, {{m|gsw|hus}}, {{m|gsw|husch}}, {{m|gsw|hüs}}, {{m|gsw|hüüsch|t=house}}, {{cog|bar|-}}, {{cog|cim|-}}, {{cog|mhn|haus|t=house}}, {{cog|gmw-cfr|Haus}}, {{m|gmw-cfr|Hous}}, {{m|gmw-cfr|Huus|t=home}}, {{cog|nl|huis|t=house}}, {{cog|nds-nl|hoes}}, {{m|nds-nl|huus|t=house}}, {{cog|de|Haus}}, {{m|de|Hauß|t=house}}, {{cog|nds-de|Huus|t=house}}, {{cog|li|hoes}}, {{m|li|Huus|t=house}}, {{cog|lb|Haus|t=house}}, {{cog|wym|haojs}}, {{m|wym|haus}}, {{m|wym|hoüz|t=house}}, {{cog|yi|הויז|t=house}}, {{cog|da,nb,nn,sv|hus|t=house}}, {{cog|ovd|aus|t=house}}, {{cog|fo,is|hús|t=house}}, {{cog|gme-cgo|hus|t=house}}; also {{cog|kw|kudha|t=to conceal, hide}}, {{cog|cy|cuddio|t=to hide}}, {{cog|la|cutis|t=human skin; hide, leather}}, {{cog|grc|κεύθω|t=to cover, hide}}, {{cog|xto|kāc|t=hide, skin}}, {{cog|sa|स्कुनाति|t=to cover}}.
+{{col-bottom}}
+
+====Alternative forms====
+* {{alt|en|hoose||Northumbrian}}
+* {{alt|en|houss||obsolete}}
+
+====Pronunciation====
+* {{IPA|en|/haʊ̯s/|[haʊ̯s]|a=RP,GA}}
+** {{audio|en|en-us-house-noun.ogg|a=US}}
+* {{IPA|en|/haws/|a=SSBE}}
+** {{audio|en|En-uk-house.ogg|a=UK}}
+* {{IPA|en|/hæʊ̯s/|[hæʊ̯s]|a=Southern US,Midland US,Mid-Atlantic US,NYC,AU,NZ,[[w:Fronting (sound change)|/aʊ̯/-fronting]]}}
+* {{a|en|CA|Canadian raising}}
+**  {{IPA|en|/hɐʊ̯s/|[hɐʊ̯s]|;|/hɜʊ̯s/|;|[hɜʊ̯s]|;|/hʌʊ̯s/|[hʌʊ̯s]|;|/həʊ̯s/|[həʊ̯s]}}
+*** {{audio|en|En-ca-raising-house.ogg|a=CA}}
+* {{IPA|en|/haːs/|a=Pittsburgh,ZA,[[w:Monophthongization|/aʊ̯/-monophthongization]]}}
+* {{IPA|en|/hʌʉ̯s/|[hʌʉ̯s]|a=Scotland}}
+* {{a|en|IE}}
+** {{IPA|en|/hɛʊ̯s/|[hɛʊ̯s]|a=Standard Irish,Dublin}}
+** {{IPA|en|/hɐʏ̯s/|[hɐʏ̯s]|a=Ulster}}
+** {{IPA|en|/hɐʊ̯s/|[hɐʊ̯s]|a=Munster,Cork}}
+* {{IPA|en|/huːs/|[huːs]|a=Geordie}}
+* {{rhymes|en|aʊs|s=1}}
+* {{hyph|en|house}}
+
+====Noun====
+[[File:Niigata NCM Peasant Rice Farmers House.jpg|thumb|The '''house''' of a Japanese rice farmer]]
+[[File:9, Strada Spătarului, Bucharest (Romania).jpg|thumb|A city-'''house'''. In this photo, its garden does not appear]]
+{{en-noun|~|s|housen<l:dialectal>|hice<l:chiefly,humorous>}}
+
+# {{senseid|en|structure as abode of human beings}} A structure built or serving as an [[abode]] of human beings. {{defdate|from 9th c.}}
+#: {{ux|en|This is my '''house''' and my family's ancestral home.}}
+#* {{RQ:Marshall Squire's Daughter|III
+|passage=The big '''houses''', and there are a good many of them, lie for the most part in what may be called by courtesy the valleys. You catch a glimpse of them sometimes at a little distance from the [railway] line, which seems to have shown some ingenuity in avoiding them,{{nb...}}.}}
+#* {{RQ:Lincoln Pratt's Patients|chapter=1|passage=Pretty soon I struck into a sort of path&nbsp;{{nb...}}. It twisted and turned,{{...}}and opened out into a big clear space like a lawn. And, back of the lawn, was a big, old-fashioned '''house''', with piazzas stretching in front of it, and all blazing with lights. 'Twas the '''house''' I'd seen the roof of from the beach.}}
+## {{lb|en|Hong Kong|only used in names}} An [[apartment building]] within a [[public]] [[housing estate]].
+# {{senseid|en|container}} A container; a thing which houses another.
+#* {{quote-book|en|title=Science in the Kitchen: A Scientific Treatise on Food Substances and Their Dietetic Properties, Together with a Practical Explanation of the Principles of Healthful Cookery, and a Large Number of Original, Palatable, and Wholesome Recipes|passage=The purposes of food are to promote growth, to supply force and heat, and to furnish material to repair the waste which is constantly taking place in the body. Every breath, every thought, every motion, wears out some portion of the delicate and wonderful '''house''' in which we live.|year=1892|author=w:Ella Eaton Kellogg|page=25|pageurl=https://www.google.ca/books/edition/Science_in_the_Kitchen/97tGAQAAMAAJ?hl=en&gbpv=1&pg=PA25|chapter=Foods|publisher=Health Publishing Company|location=Michigan|edition=Revised|url=https://www.google.ca/books/edition/Science_in_the_Kitchen/97tGAQAAMAAJ?hl=en&gbpv=0}}
+# {{senseid|en|housing}} {{lb|en|uncountable}} Size and quality of residential accommodations; [[housing#Noun|housing]].
+#* {{quote-journal|en|title=When Will the Slump End?|work=Newsweek|date=Nov 6, 2007|passage=Those homeowners who bought too much '''house''', or borrowed against inflated values are now going to be liable for their own poor decisions.}}
+# {{senseid|en|building for single household residence}} A building intended to contain a single household, as opposed to an [[apartment]] or [[condominium]] or building containing these.
+#: {{cot|en|apartment|condo|condominium|flat}}
+# {{senseid|en|household}} The people who live in a house; a [[household]]. {{defdate|from 9th c.}}
+#* {{RQ:KJV|Acts|10|2|passage=one that feared God with all his '''house'''}}
+# {{senseid|en|building housing something other than humans}} A [[building]] used for something other than a [[residence]] {{q|typically with qualifying word}}. {{defdate|from 10th c.}}
+#: {{ux|en|The former carriage '''house''' had been made over into a guest '''house'''.}}
+#: {{ux|en|On arriving at the zoo, we immediately headed for the [[monkey house|monkey '''house''']].}}
+## {{senseid|en|place of business, company, organization}} A place of [[business]]; a company or organisation, especially a [[printing press]], a [[publishing]] company, or a [[couturier]]. {{defdate|from 10th c.}}
+##: {{ux|en|A small publishing '''house''' would have a contract with an independent fulfillment '''house'''.}}
+##* {{RQ:Dickens Little Dorrit|passage=I have a good banker in this city, but I would not wish to draw upon the '''house''' until the time when I shall draw for a round sum.}}
+## {{senseid|en|place of public accommodation or entertainment}} A place of public accommodation or entertainment, especially a [[public house]], an [[inn]], a [[restaurant]], a [[theatre]], or a [[casino]]; or the management thereof. {{defdate|from 10th c.}}
+##: {{ux|en|One more, sir, then I'll have to stop serving you – rules of the '''house''', I'm afraid.}}
+##: {{ux|en|The '''house''' always wins.}}
+##* {{quote-journal|en|year=1964|title=Northwest Ohio Quarterly|volume=36|page=185|passage=The farce comedy which followed, ''When We're Married'' by Charles Burnham, was heartily praised, with the character man singled out for special extollation. The production filled the '''house'''.}}
+##* {{quote-journal|en|date=27 Aug 77|volume=5|number=8|journal=Gay Community News|page=9|author=Steve Savage;Susan "Suki" Eagan|title=Everything You Wanted to Know About Suki, But Were Too Distracted In Chaps to Ask Her|text=Frazier and Gary worked for me for free — for six months — they didn't take any money from the '''house'''. They worked for tips.}}
+## {{lb|en|historical}} A [[workhouse]].
+##* {{quote-book|en|title=Reports from the Commissioners|passage=To this the pauper replied that he did not want that, and that rather than be sent to the '''house''' he would look out for work.|year=1834|author=Great Britain. Parliament. House of Commons|page=169|volume=29}}
+# The audience for a live theatrical or similar performance. {{defdate|from 10th c.}}
+#: {{ux|en|After her swan-song, there wasn't a dry eye in the '''house'''.}}
+#* {{RQ:Orczy Miss Elliott|story=The Affair at the Novelty Theatre|chapter=2|passage=Miss Phyllis Morgan, as the hapless heroine dressed in the shabbiest of clothes, appears in the midst of a gay and giddy throng; she apostrophises all and sundry there, including the villain, and has a magnificent scene which always brings down the '''house''', and nightly adds to her histrionic laurels.}}
+# {{lb|en|politics}} A building where a deliberative assembly meets; whence the assembly itself, particularly a component of a [[legislature]]. {{defdate|from 10th c.}}
+#: {{ux|en|The petition was so ridiculous that the '''house''' rejected it after minimal debate.}}
+# A [[dynasty]]; a family with its [[ancestor]]s and [[descendant]]s, especially a royal or noble one. {{defdate|from 10th c.}}
+#: {{ux|en|A curse lay upon the '''House''' of Atreus.}}
+# {{lb|en|metaphorical}} A place of [[rest]] or [[repose]]. {{defdate|from 9th c.}}
+#* {{RQ:Jonson Every Man in His Humour|text=Like a pestilence, it doth infect / The '''houses''' of the brain.}}
+#* {{RQ:Scott Lord of the Isles|text=Such hate was his, when his last breath / Renounced the peaceful '''house''' of death {{nb...}}.}}
+# A [[grouping]] of [[schoolchildren]] for the purposes of competition in sports and other activities. {{defdate|from 19th c.}}
+#: {{ux|en|I was a member of Spenser '''house''' when I was at school.}}
+# An [[animal]]'s [[shelter]] or [[den]], or the shell of an animal such as a [[snail]], used for protection. {{defdate|from 10th c.}}
+# {{lb|en|astrology}} One of the twelve divisions of an astrological chart. {{defdate|from 14th c.}}
+#* {{quote-book|en|title=Religion and the Decline of Magic|passage=Since there was a limited number of planets, '''houses''' and signs of the zodiac, the astrologers tended to reduce human potentialities to a set of fixed types and to postulate only a limited number of possible variations.|year=1971|author=[[w:en:Keith Thomas (historian)|Sir Keith Vivian Thomas]]|page=313|isbn=978-0-14-013744-6|year_published=2012|publisher=[[w:en:Folio Society|The Folio Society]]}}
+# {{lb|en|cartomancy}} The fourth [[Lenormand]] card.
+# {{lb|en|chess|now|rare}} A [[square]] on a [[chessboard]], regarded as the proper place of a [[piece]]. {{defdate|from 16th c.}}
+# {{lb|en|curling}} The four [[concentric]] circles where points are scored on the [[ice]]. {{defdate|from 19th c.}}
+# [[lotto|Lotto]]; [[bingo]]. {{defdate|from 20th c.}}
+# {{lb|en|uncountable}} A [[child]]ren's [[game]] in which the players [[pretend]] to be members of a [[household]].
+#: {{ux|en|As the babysitter, Emma always acted as the mother whenever the kids demanded to play '''house'''.}}
+# {{lb|en|US|dialect}} A small [[stand]] of [[tree]]s in a [[swamp]].
+# {{lb|en|sudoku}} A set of cells in a [[sudoku]] puzzle which must contain each digit exactly once, such as a row, column, or 3×3 box.
+# {{lb|en|American football|slang|with “the”}} The [[end zone]].
+
+=====Synonyms=====
+* {{s|establishment}} {{l|en|shop}}
+* {{s|company or organisation}} {{l|en|shop}}
+
+=====Hypernyms=====
+* {{l|en|building}}
+* {{l|en|dwelling}}, {{l|en|residence}}
+
+=====Hyponyms=====
+{{col4|en
+|alehouse
+|auction house
+|backhouse
+|basket house
+|birdhouse
+|boathouse
+|boghouse
+|bog-house
+|bottle house
+|chapter house
+|coffee house
+|common house|Commons House
+|cophouse|skookum house
+|country house
+|doghouse
+|doll's house
+|dosshouse
+|doss-house
+|dreamhouse
+|dream house
+|flophouse,flop-house
+|frame house
+|full house
+|glasshouse
+|God's house
+|Government House
+|Greek house
+|greenhouse
+|grow house|discount house|private house|soul house
+|guesthouse,guest-house,guest house
+|halfway house
+|haunted house
+|house museum
+|house of assembly
+|House of Commons
+|house of correction
+|house of detention
+|house of God
+|house of ill fame
+|house of ill repute
+|House of Lords
+|house of office
+|Houses of Parliament
+|house of worship
+|icehouse
+|jakeshouse
+|lighthouse|bathing house|bettering house|live house|Lord's house|terrace house
+|little house
+|longhouse,long-house,long house
+|lower house
+|meetinghouse,meeting-house,meeting house
+|morthouse
+|move house
+|outhouse
+|playhouse,play-house,play house
+|poorhouse
+|prisonhouse
+|privy house
+|public house
+|publishing house
+|pumphouse
+|pump house
+|royal house
+|safehouse
+|schoolhouse
+|school house
+|scouthouse
+|shithouse
+|shophouse
+|siegehouse
+|springhouse
+|storehouse
+|tea house
+|tiny house
+|town house
+|toy house
+|tribal house
+|upper house
+|warehouse
+|wartime house
+|weather house
+|Wendy house
+|White House
+|whorehouse
+}}
+
+=====Derived terms=====
+{{col|en|acceptance house
+|accepting house
+|accommodation house
+|acid house
+|action house
+|a house divided against itself cannot stand
+|a house is not a home
+|airhouse
+|ale-house
+|alehouse
+|almshouse
+|alms-house
+|ambient house
+|animal house
+|apartment house
+|Archie Bunker house
+|armshouse
+|art-house,art house
+|audit house
+|automated clearing house
+|baby-house
+|back house,back-house,backhouse
+|back of house
+|baghouse
+|bakehouse
+|balti house
+|Baltimore house
+|bargehouse
+|barrelhouse
+|basket-house
+|bath-house,bathhouse
+|bat house
+|bawdy house,bawdy-house
+|bawdy-house bottle
+|beachhouse,beach house
+|Beck Houses
+|beef house,beef-house,beefhouse
+|beehouse
+|beerhouse
+|bellhouse
+|bet the house
+|big as a house
+|bighouse
+|big house
+|big room house
+|birdhouse
+|birthhouse
+|black-house
+|black house spider
+|bleachhouse
+|blockhouse
+|bloghouse
+|bloodhouse
+|blowing house
+|boarding-house
+|boarding house
+|boathouse
+|boghouse
+|boilerhouse
+|boiling-house
+|bonehouse
+|bone-house wasp
+|booby house
+|bookhouse
+|booley house
+|boom house
+|boom-house
+|boomhouse
+|bottom the house
+|bounce house
+|bouncy house
+|box house
+|brewhouse
+|brick house
+|bring down the house
+|bringhouse
+|bring the house down
+|broilerhouse
+|broiler house
+|brothel-house
+|brothel house
+|bughouse
+|bunkhouse
+|burning house
+|cadet house
+|cakehouse
+|call house
+|can house
+|canhouse
+|card house
+|cardhouse
+|card-house
+|carehouse
+|carhouse
+|car-house
+|Carlton House desk
+|carriage house
+|carthouse
+|cat-house
+|cathouse
+|cat house
+|Cecil house
+|ceilidh house
+|cellhouse
+|chapter-house
+|chargehouse
+|charnel house
+|charnel-house
+|charterhouse
+|chattel house
+|chicken house,chickenhouse
+|chookhouse
+|chophouse
+|chop house
+|churchhouse
+|chute house
+|cider house
+|clean house
+|clearing house
+|clockhouse
+|clubhouse
+|coach house
+|coalhouse
+|cobhouse
+|coffee-house
+|coffeehouse
+|cohouse
+|coldhouse
+|common house gecko
+|common house martin
+|compliments of the house
+|compting house
+|conditioning house
+|congee house
+|conjee house
+|consoo-house
+|content house
+|cook-house
+|cookhouse
+|coolhouse
+|corn house
+|cothouse
+|council house
+|countinghouse
+|counting-house
+|counting house
+|country-house
+|court-house
+|courthouse
+|couture house
+|cowhouse
+|crack house
+|crackhouse
+|craphouse
+|crazyhouse
+|cribhouse
+|crimp house
+|crimping house
+|Cross Houses
+|cubby house
+|culverhouse
+|curry house
+|Custom House
+|custom house,customhouse
+|customs house
+|customshouse
+|dairyhouse
+|deaconess-house
+|deadhouse
+|dead house
+|death house
+|deckhouse
+|deep house
+|dehouse
+|detached house
+|dice house
+|dishouse
+|disorderly house
+|diva house
+|dog house
+|doghouse
+|dollhouse
+|dollshouse
+|dope house
+|doss house
+|dosshouse
+|double house
+|doubthouse
+|dovehouse
+|down the house
+|draft house
+|drafthouse
+|draught house
+|draught-house
+|dress the house
+|drug house
+|dual house
+|dwelling-house
+|dwellinghouse
+|dwelling house
+|dye-house
+|dyehouse
+|earthhouse
+|eating house
+|eat someone out of house and home
+|eco-house
+|engine house
+|Eurohouse
+|fancy house
+|farm-house
+|farmhouse
+|farm house
+|fashion house
+|fat as a house
+|Fence Houses
+|Fencehouses
+|fern house
+|ferryhouse
+|fidget house
+|fieldhouse
+|field house
+|fire house
+|firehouse
+|fishhouse
+|fish house
+|fish-house
+|Five Houses
+|flash house
+|flathouse
+|fleshhouse
+|flophouse
+|folk house
+|forcing house
+|forehouse
+|forever house
+|four door house
+|fowl-house
+|fowlhouse
+|frater-house
+|frater house
+|frat house
+|free house
+|front-of-house
+|front of house
+|front-of-house curtain
+|front of the house
+|fuckhouse
+|fund house
+|fun house
+|funhouse
+|future house
+|gabberhouse
+|gambling house
+|gaming house
+|garden house
+|gashouse
+|gas-house egg
+|gate house
+|gatehouse
+|get one's house in order
+|get on like a house on fire
+|ghetto house
+|ghost house
+|giant house spider
+|gig-house
+|gighouse
+|gig house
+|gillhouse
+|gingerbread house
+|ginhouse
+|glasshouse
+|glebe-house
+|goathouse
+|gong-house
+|good house
+|goosehouse
+|go to the goat's house for wool
+|great house
+|greenhouse
+|grindhouse
+|groghouse
+|growhouse
+|grubhouse
+|guardhouse
+|guesthouse
+|gunhouse
+|hall house
+|handbag house
+|hashhouse
+|hash house
+|headhouse
+|head house
+|hellhouse
+|hell house
+|henhouse
+|hen house
+|hen-house
+|hice
+|Hilton House
+|hip house
+|hizzle
+|hizzy
+|hoard-house
+|hoghouse
+|honey house
+|hoop house
+|hot-house
+|hothouse
+|housage
+|housane
+|house advantage
+|house agent
+|house arrest
+|house-arrest
+|houseback
+|house ball
+|house band
+|house-barn
+|house barn
+|housebarn
+|houseblessing
+|housebling
+|houseblock
+|houseboat
+|housebody
+|houseboi
+|housebook
+|housebote
+|house-bote
+|housebound
+|house boy
+|house-boy
+|houseboy
+|house brand
+|housebreak
+|house breaker
+|housebreaker
+|house-breaker
+|housebreaking
+|house-broken
+|housebroken
+|housebuilder
+|housebuilding
+|housebuyer
+|housebuying
+|house-call
+|house call
+|housecar
+|house car
+|housecare
+|housecarl
+|housecat
+|house cat
+|house centipede
+|housecest
+|house church
+|houseclean
+|housecleaner
+|housecleaning
+|housecloth
+|house-coat
+|housecoat
+|house-commune
+|house cooling party
+|housecraft
+|house cricket
+|house curtain
+|house cut
+|house-detective
+|house detective
+|house dick
+|house divided
+|house dog
+|house door
+|house-door
+|housedress
+|house dust mite
+|housefather
+|housefellow
+|house finch
+|housefire
+|house flag
+|house-flag
+|house flea
+|house floor
+|housefly
+|housefolk
+|house frau
+|housefrock
+|housefront
+|houseful
+|housefurnishing
+|house gecko
+|housegirl
+|housegod
+|house god
+|house-green
+|houseguest
+|house guest
+|househead
+|house-heating
+|househelp
+|house hermit
+|household
+|householder
+|househubby
+|house-hunt
+|househunter
+|house-hunter
+|house-hunting
+|house husband
+|househusband
+|house in Virginia
+|house keeper
+|house-keeper
+|housekeeper
+|housekeeping
+|housekey
+|house lamb
+|house leader
+|houseleader
+|houseleek
+|house left
+|houseless
+|houselet
+|houselight
+|house lights
+|houselike
+|house-like
+|houseline
+|houseling
+|house lizard
+|housemade
+|housemaid
+|house maid
+|house-maid
+|housemaiden
+|housemaker
+|housemaking
+|houseman
+|house manager
+|house martin
+|house master
+|housemaster
+|housemate
+|houseminder
+|housemistress
+|house money
+|house moss
+|housemother
+|house mouse
+|house mover
+|house music
+|house negro
+|house nigga
+|house nigger
+|house number
+|house of accommodation
+|house of assignation
+|House of Burgesses
+|house of call
+|house of cards
+|house of commons
+|house of ease
+|house of easement
+|house officer
+|house of horrors
+|house of mercy
+|house of mirrors
+|house of prayer
+|house of refuge
+|house of tolerance
+|house organ
+|houseowner
+|house painter
+|housepainter
+|housepainting
+|housepants
+|houseparent
+|house party
+|houseperson
+|housepet
+|house phone
+|housephone
+|housepig
+|houseplant
+|house plant
+|house plunder
+|house-plunder
+|house points
+|house poor
+|housepost
+|housepride
+|house proud
+|house-proud
+|houseproud
+|houser
+|houseraising
+|house rat
+|house right
+|house-roof
+|houseroom
+|house rule
+|house-search
+|houseshare
+|houseshoe
+|house show
+|house shrew
+|house-sit
+|house sit
+|house sitter
+|house-sitter
+|house slave
+|houseslave
+|house slipper
+|house-slipper
+|housesmith
+|house snake
+|house society
+|house sparrow
+|house spider
+|house spirit
+|housespouse
+|house style
+|house take
+|house-to-house
+|house top
+|housetop
+|house-top
+|house trailer
+|house train
+|housetrain
+|house-train
+|house-trained
+|housetruck
+|house wall
+|house-wall
+|houseward
+|housewards
+|houseware
+|housewarmer
+|house warming
+|housewarming
+|house-warming
+|housewear
+|housewide
+|housewife
+|house-wife
+|house wine
+|housewoman
+|housework
+|houseworker
+|housewrap
+|housewrecker
+|house wren
+|housewright
+|housey
+|housey-housey
+|housie
+|housing
+|housy-housy
+|husband
+|hush house
+|hussif
+|hussy
+|husting
+|ice house
+|icehouse
+|ice-house
+|in-house
+|in house
+|insect house
+|interhouse
+|in the house
+|iron house
+|Italo house
+|it takes a heap of living to make a house a home
+|it takes a heap o' livin' to make a house a home
+|it takes a lot of living to make a house a home
+|jailhouse
+|jakeshouse
+|jakes house
+|jakes-house
+|jewelhouse
+|Jew's house
+|jobbing house
+|johnny house
+|jook house
+|joss house
+|joy house
+|juke house
+|keekwilee-house
+|keep house
+|kill house
+|kutcha house
+|lady of the house
+|laithe-house
+|laithe house
+|Lake House
+|lakehouse
+|laneway house
+|LAN house
+|lazar house
+|lazar-house
+|leaping-house
+|leaping house
+|lich-house,lych-house
+|light house
+|lighthouse
+|like a house afire
+|limehouse
+|lit-house
+|lockhouse
+|lockup house
+|lodge house
+|lodge-house
+|lodgehouse
+|lodging-house
+|lodging house
+|Lofthouse
+|loghouse
+|Lombard house
+|lower house
+|madhouse
+|main house
+|malthouse,malt house
+|managed house
+|man of the house
+|manor house
+|market-house
+|mask house
+|masthouse
+|matchbox house
+|McHouse
+|meat house
+|meeting house
+|meetinghouse
+|meeting-house
+|member of lower house
+|member of upper house
+|microhouse
+|milkhouse
+|milk-house
+|milk house
+|millhouse
+|minster house
+|model house
+|Mollie house
+|mollie house
+|mollie-house
+|Molly house
+|molly-house
+|molly house
+|monkey-house
+|motherhouse
+|move house
+|movie house
+|movie-house
+|mudhouse
+|mughouse
+|multihouse
+|music house
+|nail house
+|narrow house
+|neathouse
+|neat-house
+|necessary house
+|negro-house
+|Newhouse
+|news-house
+|night house
+|night-house
+|northern house martin
+|nut full house
+|nut-house
+|nut house
+|nuthouse
+|oast house
+|odorous house ant
+|office-house
+|one's house in order
+|on the house
+|open house
+|opera house
+|opera house trap
+|operetta house
+|orchard house
+|orehouse
+|orphaned house
+|orphan house
+|outhouse
+|out-house
+|out of house and home
+|overhouse
+|oyster house
+|packed house
+|packhouse
+|packinghouse
+|palmhouse
+|panel house
+|panhouse
+|paper house
+|paper the house
+|parish house
+|parlor house
+|parrothouse
+|passage-house
+|passage house
+|peelhouse
+|peg house
+|pension house
+|penthouse
+|people's house
+|pesthouse
+|petty-house
+|picket-house
+|picket house
+|Pict's house
+|Picts' house
+|picture house
+|pie house
+|pigeonhouse
+|pilothouse
+|pisshouse
+|pithouse
+|plank house
+|plant-house
+|playhouse
+|play with house money
+|pleasure house
+|poolhouse
+|pool house
+|poor house
+|poorhouse
+|porterhouse
+|porthouse
+|posthouse
+|post house
+|post-house
+|posting house
+|pot-house
+|poultryhouse
+|powerhouse
+|prayerhouse
+|printing-house
+|printing house
+|prisonhouse
+|prison house
+|private-wire house
+|privy-house
+|progressive house
+|proof house
+|public-house
+|pumphouse
+|punch house
+|punk house
+|put one's house in order
+|raghouse
+|ranchhouse
+|rasp-house
+|rat house
+|receiving house
+|rehouse
+|renthouse
+|resthouse
+|rest house
+|roadhouse
+|rock house
+|rock the house
+|rooming house
+|rope-house
+|rough-house
+|rough house
+|roughhouse
+|roundhouse
+|round house
+|row house
+|rowhouse
+|run of house
+|safehouse
+|safe house
+|salthouse
+|sammy-house
+|schoolhouse
+|school-house
+|section-house
+|seedhouse
+|senate-house
+|set one's house in order
+|settlement house
+|shadehouse
+|shafthouse
+|share house
+|sharehouse
+|shaving house
+|sheephouse
+|shithouse
+|shit house
+|shoothouse
+|shophouse
+|shotgun house
+|shouse
+|showerhouse
+|showhouse
+|sickhouse
+|siegehouse
+|siege-house
+|siege house
+|skeleton in one's house
+|skeleton in the house
+|slaughterhouse
+|smallest room in the house
+|smokehouse
+|snow house
+|sober house
+|sober living house
+|society house
+|software house
+|sole house
+|speakhouse
+|spicehouse
+|spinning house
+|spirit house
+|spitalhouse
+|spite house
+|split the house
+|sponging house
+|sponging-house
+|spookhouse
+|sporting house
+|spring house
+|springhouse
+|spunging-house
+|stagehouse
+|starter house
+|statehouse
+|state house
+|station house
+|station-house
+|stationhouse
+|steak house
+|steakhouse
+|steeplehouse
+|Stenhouse
+|stillhouse
+|stilt house
+|stinkhouse
+|Stonehouse
+|store-house
+|storehouse
+|stormhouse
+|stovehouse
+|stroke house
+|study house
+|sugar house
+|sugar-house
+|sugarhouse
+|summer-house
+|summerhouse
+|summer house
+|Sunday house
+|superhouse
+|sweathouse
+|tackle house
+|tackle-house
+|tacklehouse
+|take it to the house
+|tan house
+|tanhouse
+|taphouse
+|teahouse
+|tech house
+|Tecla house
+|telescope house
+|tenement house
+|terraced house
+|the call is coming from inside the house
+|the house
+|the house always wins
+|the house down
+|throw stones in a glass house
+|tied house
+|tiring-house
+|tollhouse
+|toolhouse
+|to the house
+|tower house
+|townhouse
+|toyhouse
+|tract house
+|transition house
+|trap-house
+|trap house
+|traphouse
+|treasure house
+|treehouse
+|tree house
+|tropical house
+|trugging-house
+|try house
+|unhouse
+|unhoused
+|up and down house
+|use the master's tools to dismantle the master's house
+|victualling house
+|waffle house
+|wafflehouse
+|warehouse
+|warmhouse
+|washhouse,wash house
+|watchhouse
+|watch house
+|waterhouse
+|watering house
+|wayhouse
+|weigh house
+|weighhouse
+|wellhouse
+|well-house
+|wheelhouse
+|wheel house
+|wheel-house
+|Whitehouse
+|White House Station
+|whorehouse
+|whore house
+|winehouse
+|winterhouse
+|wirehouse
+|witch house
+|woman of the house
+|woodhouse
+|woolhouse
+|work house
+|wring-house
+
+}}
+
+=====Descendants=====
+{{top3}}
+* {{desc|bi|haos}}
+* {{desc|cpi|houso}}
+* {{desc|pcm|haus}}
+* {{desc|pis|haos}}
+* {{desc|tpi|haus}}
+* {{desctree|srn|oso}}
+* {{desc|yue|house|tr=hau<sup>1</sup> si<sup>2</sup>|bor=1}}
+* {{desc|zh|浩室|bor=1}}
+* {{desc|ja|ハウス|tr=hausu|bor=1}}
+{{bottom}}
+
+=====Translations=====
+{{see translation subpage|Noun}}
+
+=====Further reading=====
+* {{pedia|house}}
+* {{pedia|house (astrology)}}
+* {{pedia|house (disambiguation)}}
+
+===Etymology 2===
+{{wikidata lexeme|L23571}}
+From {{inh|en|enm|housen}}, from {{inh|en|ang|hūsian}}, from {{inh|en|gem-pro|*hūsōną|t=to house, live, dwell}}, from the noun (see above). Compare {{cog|nl|huizen|t=to live, dwell, reside}}, {{cog|nds-de|husen|t=to live, dwell, reside}}, {{cog|de|hausen|t=to live, dwell, reside}}, {{cog|nn|husa|t=to house}}, {{cog|fo|húsa|t=to house}}, {{cog|is|húsa|t=to shelter, house}}.
+
+====Pronunciation====
+* {{enPR|houz}}, {{IPA|en|/haʊz/}}
+* {{audio|en|en-us-house-verb.ogg|a=US}}
+* {{rhymes|en|aʊs|aʊz|s=1}}
+* {{homophones|en|how's}}
+
+====Verb====
+{{en-verb}}
+
+# {{lb|en|transitive}} To [[keep]] within a structure or container.
+#: {{ux|en|The car is '''housed''' in the garage.}}
+#* {{RQ:Evelyn Sylva|edition=2nd|title=Kalendarium|chaptername=November|page=29|passage='''Houſe''' your choiceſt ''Carnations'', or rather ſet them under a ''Pent-houſe'' againſt a South-wall, ſo as a covering being thrown over them to preſerve them in extremity of ''weather'', they may yet enjoy the freer ''air'' at all other times.}}
+#* {{quote-journal|en|year=1961|month=November|title=Talking of Trains: The North Eastern's new rail-mounted piling unit|journal=Trains Illustrated|page=646|text=Now, covered concrete troughs to '''house''' the cables are laid parallel with the railway lines, cheapening maintenance because of improved accessibility for inspection and repair.}}
+#* {{quote-web|en|date=2025-07-15|author=James Osborne|title=Could you have survived as a Roman soldier? Here's the surprising truth about life in the ancient army|work=History Extra|url=https://www.historyextra.com/period/survive-as-a-roman-soldier-truth-about-daily-life/|archiveurl=https://web.archive.org/web/20250715125322/https://www.historyextra.com/period/survive-as-a-roman-soldier-truth-about-daily-life/|text=Meanwhile, in permanent garrisons, soldiers had access to military hospitals and medical care, with Roman forts '''housing''' some of the most advanced medical facilities in the empire.}}
+# {{lb|en|transitive}} To admit to residence; to [[harbor]].
+#* {{RQ:Sidney Arcadia|1|41|Palladius wished him [...] to '''house''' all the Helots.}}
+# To take shelter or lodging; to abide; to lodge.
+#* {{RQ:Shakespeare Romeo and Juliet|III|v|passage=You shall not '''house''' with me.}}
+#* {{quote-journal
+|en
+|date=October 05, 1996
+|author=w:Robert Whymant
+|title=Tokyo tries to calm islands row
+|journal=w:The Times
+|url=https://archive.org/details/NewsUK1996UKEnglish/Oct%2005%201996%2C%20The%20Times%2C%20%2365702%2C%20UK%20%28en%29/
+|issn=0140-0460
+|oclc=181820531
+|section=Overseas News
+|page=15
+|pageurl=https://archive.org/details/NewsUK1996UKEnglish/Oct%2005%201996%2C%20The%20Times%2C%20%2365702%2C%20UK%20%28en%29/page/n38/
+|column=2
+|text=The federation yesterday vowed to occupy Uotsuri, one of the islands, and build a permanent structure to '''house''' six members.}}
+# {{lb|en|transitive|astrology}} To dwell within one of the twelve astrological houses.
+#* {{RQ:Dryden Georgics|1|passage=Where Saturn '''houses'''.}}
+# {{lb|en|transitive}} To contain or cover mechanical parts.
+# {{lb|en|transitive}} To contain one part of an object for the purpose of locating the whole.
+#: {{ux|en|The joists were '''housed''' into the side walls, rather than being hung from them.}}
+# {{lb|en|obsolete}} To drive to a shelter.
+#* {{RQ:Shakespeare Comedy of Errors|5|1|passage=Euen now we '''hous'd''' him in the Abbey heere}}
+# {{lb|en|obsolete}} To deposit and cover, as in the grave.
+#* {{RQ:Sandys Psalmes|passage=Oh! can your counsel his despair defer , Who now is '''housed''' in his sepulchre}}
+# {{lb|en|nautical}} To [[stow]] in a safe place; to take down and make safe.
+#: {{ux|en|to '''house''' the upper spars}}
+# {{senseid|en|eat, especially, scarf down}} {{lb|en|North America|slang|transitive}} To [[eat]]; especially, to [[scarf down]].
+#* '''2019''', {{w|Joe Lawson (writer)|Joe Lawson}}, ''Shameless'' ({{w|Shameless (season 10)|series 10}}, episode 4, "A Little Gallagher Goes a Long Way")
+#*: All you wanna do is drink a fifth, '''house''' a lasagna, and hide in a dumpster until that baby stops crying.
+
+=====Synonyms=====
+* {{s|keep within a structure or container}} {{l|en|store}}
+* {{s|admit to residence}} {{l|en|accommodate}}, {{l|en|harbor}}/[[harbour]], [[host]], [[put up]]
+* {{s|contain or enclose mechanical parts}} {{l|en|enclose}}
+
+=====Derived terms=====
+{{col|en|housable|unhousable}}
+
+=====Translations=====
+{{trans-top|keep within a structure or container}}
+* Asturian: {{t|ast|atroxar}}, {{t|ast|almacenar}}
+* Bulgarian: {{t|bg|помещавам|impf}}, {{t|bg|поместя|pf}}
+* Danish: {{t|da|indhuse}}
+* Dutch: {{t+|nl|behuizen}}
+* French: {{t+|fr|garer}}, {{t+|fr|loger}}
+* Galician: {{t+|gl|almacenar}}
+* Italian: {{t+|it|collocare}}
+* Macedonian: {{t|mk|сместува}}
+* Portuguese: {{t+|pt|armazenar}}
+* Romanian: {{t+|ro|casă|f}}
+* Russian: {{t+|ru|вмеща́ть}}
+* Spanish: {{t+|es|almacenar}}
+* Swahili: {{t+|sw|nyumba}}
+* Turkish: {{t+|tr|barındırmak}}
+{{trans-bottom}}
+
+{{trans-top|admit to residence}}
+* Asturian: {{t|ast|aposentar}}, {{t|ast|agospedar}}, {{t|ast|agospiar}}, {{t|ast|acoller}}
+* Bulgarian: {{t+|bg|приемам|impf}}, {{t+|bg|приема|pf}}
+* Catalan: {{t+|ca|allotjar}}
+* Dutch: {{t+|nl|onderbrengen}}
+* Esperanto: {{t|eo|loĝigi}}
+* French: {{t+|fr|héberger}}, {{t+|fr|abriter}}, {{t+|fr|loger}}
+* Galician: {{t+|gl|albergar}}, {{t+|gl|aloxar}}
+* German: {{t+|de|unterbringen}}, {{t+|de|beherbergen}}
+* Ido: {{t+|io|lojigar}}
+* Italian: {{t+|it|alloggiare}}
+* Macedonian: {{t|mk|вдомува}}, {{t|mk|сместува}}
+* Portuguese: {{t+|pt|alojar}}, {{t+|pt|hospedar}}
+* Romanian: {{t+|ro|găzdui}}, {{t+|ro|adăposti}}, {{t+|ro|primi}}
+* Russian: {{t+|ru|помеща́ть}}, {{t+|ru|сели́ть}}
+* Spanish: {{t+|es|alojar}}, {{t+|es|hospedar}}, {{t+|es|albergar}}
+{{trans-bottom}}
+
+{{trans-top|take shelter}}
+* Asturian: {{t|ast|atechar}}, {{t|ast|abellugar}}
+* Bulgarian: {{t|bg|подслонявам се|impf}}, {{t|bg|подслоня се|pf}}
+* Galician: {{t+|gl|albergar}}
+* Māori: {{t|mi|whakawhare}}
+{{trans-bottom}}
+
+{{trans-top|dwell within one of the twelve astrological houses}}
+* Bulgarian: {{t-check|bg|съм в}}
+* Swahili: {{t+|sw|nyumba}}
+{{trans-bottom}}
+
+{{trans-top|contain or enclose mechanical parts}}
+* Bulgarian: {{t+check|bg|съдържам}}
+* Spanish: {{t+|es|encajar}}, {{t+|es|envolver}}
+* Swahili: {{t+|sw|nyumba}}
+* Turkish: {{t+|tr|barındırmak}}
+{{trans-bottom}}
+
+===Etymology 3===
+Probably from [[w:Warehouse (nightclub)|The Warehouse]], a [[nightclub]] in [[Chicago]], [[Illinois]], USA, where the music became popular around 1985.
+
+====Pronunciation====
+* {{enPR|hous}}, {{IPA|en|/haʊs/}}
+
+====Noun====
+{{en-noun|-}}
+
+# {{senseid|en|genre of music}} {{lb|en|music genre}} [[house music|House music]].
+#* {{quote-book|en|author=[[w:Colin Larkin (writer)|Colin Larkin]]|title=The Virgin Encyclopedia of Dance Music|location=London|publisher=w:Virgin Books|year=1998|page=73|isbn=978-0-7535-0252-5|passage={{...}} their music is influenced as much by Roxy Music and the Ramones as it is by '''house''' and techno pioneers.}}
+#* {{quote-journal|en|author=w:Philip Sherburne|title=Exos, ''Strength'' [album review]|journal=CMJ New Music Monthly|location=Great Neck, N.Y.|publisher=[[w:CMJ|College Media]]|month=March|year=2001|issue=91|page=66|pageurl=https://books.google.com/books?id=vSoEAAAAMBAJ&pg=PA66|issn=1074-6978|passage=And while hard, minimal [[techno]] has become increasingly influenced by '''house''' and [[w:Oval (musical project)|Oval]]-esque "glitch" stylistics, Exos keeps it old school on ''Strength'', infusing his own style with the force of hard techno purists [[w:Surgeon (musician)|Surgeon]] and Oliver Ho.}}
+#* {{quote-book|en|author=Mark Jonathan Butler|title=Unlocking the Groove: Rhythm, Meter, and Musical Design in Electronic Dance Music|location=Bloomington, Ind.|publisher=w:Indiana University Press|year=2006|page=45|isbn=978-0-253-34662-9|passage=The first genre of American dance music to become popular in the United Kingdom was Chicago '''house'''. Although music from Detroit was soon imported as well, it was often treated as subcategory of '''house''', and for many years the most common English term for electronic dance music in general was "'''house'''" or "acid '''house'''". {{...}} During the formative years of techno and '''house''', the musicians involved interacted in various ways.}}
+
+=====Descendants=====
+{{top4}}
+* {{desc|be|гаўс|bor=1}}
+* {{desc|bg|хаус|bor=1}}
+* {{desc|ca|house|bor=1}}
+* {{desc|zh|浩室音樂|bor=1|der=1}}
+* {{desc|cs|house|bor=1}}
+* {{desc|da|house|bor=1}}
+* {{desc|nl|house|bor=1}}
+* {{desc|eo|haŭzo|bor=1}}
+* {{desc|et|house|bor=1}}
+* {{desc|fi|house|bor=1}}
+* {{desc|fr|house|bor=1}}
+* {{desc|gl|house|bor=1}}
+* {{desc|ka|ჰაუსი|bor=1}}
+* {{desc|de|House|bor=1}}
+* {{desc|el|χάουζ|bor=1}}
+* {{desc|hu|house|bor=1}}
+* {{desc|is|house|bor=1}}
+* {{desc|id|house|bor=1}}
+* {{desc|it|house|bor=1}}
+* {{desc|ja|ハウス|tr=hausu|bor=1}}
+* {{desc|ko|하우스|bor=1}}
+* {{desc|lv|hauss|bor=1}}
+* {{desc|lt|house|bor=1}}
+* {{desc|lmo|house|bor=1}}
+* {{desc|nb|house|bor=1}}
+* {{desc|nn|house|bor=1}}
+* {{desc|oc|house|bor=1}}
+* {{desc|pl|house|bor=1}}
+* {{desc|pt|house|bor=1}}
+* {{desc|qu|house|bor=1}}
+* {{desc|ro|house|bor=1}}
+* {{desc|ru|ха́ус|bor=1}}
+* {{desc|sh|хауз|house|bor=1}}
+* {{desc|sk|house|bor=1}}
+* {{desc|sl|house|bor=1}}
+* {{desc|es|house|bor=1}}
+* {{desc|sv|house|bor=1}}
+* {{desc|tr|house|bor=1}}
+* {{desc|uk|хауз|bor=1}}
+* {{desc|cy|House|bor=1}}
+* {{desc|fy|house|bor=1}}
+{{bottom}}
+
+=====Translations=====
+{{trans-see|genre of music|house music}}
+
+{{cln|en|heteronyms}}
+{{C|en|Buildings|Games|History|Housing|Music|Collectives|Gambling}}
+
+==Chinese==
+
+===Etymology===
+From {{bor|yue|en|house}}.
+
+===Pronunciation===
+{{zh-pron
+|c=hau1 si2
+|cat=n
+}}
+
+===Noun===
+{{head|zh|noun}}
+
+# {{lb|zh|Hong Kong Cantonese}} [[mansion]]; large [[#English|house]] {{zh-mw|c:間}}
+
+==Czech==
+
+===Pronunciation===
+* {{cs-IPA}}
+
+===Etymology 1===
+
+====Noun====
+{{cs-noun|n}}
+
+# [[gosling]]
+
+=====Declension=====
+{{cs-ndecl|n.tstem}}
+
+===Etymology 2===
+{{ubor|cs|en|house}}, originally from a {{glossary|clipping|clipped}} form of {{l|en|house music}}.
+
+===Pronunciation===
+* {{cs-IPA|ɦaʊ̯s}}
+
+====Noun====
+{{cs-noun|m-in}}
+
+# [[house music]], house (a genre of music)
+#: {{syn|cs|house music}}
+
+=====Declension=====
+{{cs-ndecl|m.foreign}}
+
+===Further reading===
+* {{R:cs:PSJC}}
+* {{R:cs:SSJC}}
+* {{R:cs:IJP}}
+
+{{C|cs|Baby animals|Geese|Music}}
+
+==Dutch==
+
+===Etymology===
+From {{bor|nl|en|house}}. {{doublet|nl|huis|osso}}.
+
+===Pronunciation===
+* {{IPA|nl|/ɦɑu̯s/}}
+* {{audio|nl|Nl-house.ogg}}
+* {{hyphenation|nl|house}}
+* {{rhymes|nl|ɑu̯s}}
+
+===Noun===
+{{nl-noun|m|-|-}}
+
+# [[house music]], house (a genre of music)
+#: {{syn|nl|housemuziek}}
+
+====Derived terms====
+* {{l|nl|gabberhouse}}
+* {{l|nl|smurfenhouse}}
+
+==Finnish==
+
+===Etymology===
+From {{bor|fi|en|house}}.
+
+===Pronunciation===
+{{fi-p|haus|h=hou.se}}
+
+===Noun===
+{{head|fi|noun|uncountable}}
+
+# {{lb|fi|music}} [[house music]], house {{gloss|a genre of music}}
+
+====Declension====
+{{fi-decl-nalle|n=sg|hous|||a}}
+
+===Further reading===
+* {{R:fi:KTSK|accessdate=2023-07-02}}
+
+==French==
+
+===Pronunciation===
+* {{fr-asph}} {{fr-IPA|hawsse}}
+
+===Noun===
+{{fr-noun|f|-}}
+
+# [[house music]], house (a genre of music)
+#: {{syn|fr|house music}}
+
+===Anagrams===
+* {{l|fr|houes}}, {{l|fr|houés}}
+
+{{C|fr|Musical genres}}
+
+==Hungarian==
+
+===Etymology===
+{{ubor|hu|en|house}}.
+
+===Pronunciation===
+* {{hu-IPA|hauz}}
+* {{hyphenation|hu|house}}<ref>{{R:OsirisHelyes 2006}}</ref>
+* {{rhymes|hu|uz|s=2}}
+
+===Noun===
+{{hu-noun|-|-ok}}
+
+# {{lb|hu|music}} [[house music]], house (a type of electronic dance music with an uptempo beat and recurring kickdrum)
+
+====Declension====
+{{hu-infl-nom|house-o|o|-|v=z}}{{hu-pos-otok|house-||ai}}
+
+====Derived terms====
+* {{l|hu|house-parti}}
+* {{l|hu|house-zene}}
+
+===References===
+<references/>
+
+==Middle English==
+
+===Etymology 1===
+
+====Noun====
+{{head|enm|noun|var=1}} 
+
+# {{alt form|enm|hous}}
+
+===Etymology 2===
+
+====Verb====
+{{head|enm|verb|var=1}} 
+
+# {{alt form|enm|housen}}
+
+==Norwegian Bokmål==
+{{wp|nb:}}
+
+===Etymology===
+From {{der|nb|en|house}}, {{m|en|house music}}. {{doublet|nb|hus}}.
+
+===Noun===
+{{head|nb|noun|g=m|indeclinable}} {{lb|nb|uncountable}}
+
+# [[house music]], house (a genre of music)
+
+====Synonyms====
+* {{l|nb|housemusikk}}
+
+===References===
+* {{R:nb:OB}}
+
+{{C|nb|Music}}
+
+==Norwegian Nynorsk==
+
+===Etymology===
+From {{bor|nn|en|house}}. {{doublet|nn|hus}}.
+
+===Noun===
+{{head|nn|noun|g=m}}
+
+# [[house music]], house (a genre of music)
+
+==Polish==
+{{wp|pl:}}
+
+===Etymology===
+{{ety|pl|:bor|en:house|text=+|tree=1}}
+
+===Pronunciation===
+{{pl-pr|haus|h=house}}
+
+===Noun===
+{{pl-noun|m-in}}
+
+# [[house music]], {{l|en|house}} {{gl|genre of music}}
+
+====Declension====
+{{pl-ndecl|<m.inan.sg>}}
+
+====Derived terms====
+{{col|pl|title=adjectives|house'owy|housowy}}
+
+===Further reading===
+* {{R:pl:PWN}}
+
+{{C|pl|Musical genres}}
+
+==Portuguese==
+
+===Etymology===
+{{ety|pt|:ubor|en:house|text=+|tree=1}}
+
+===Pronunciation===
+{{pt-IPA|br=ráuse}}
+* {{rhyme|pt|awzi|s=2}}
+
+===Noun===
+{{pt-noun|m|-}}
+
+# [[house music]], {{l|en|house}} {{gl|a genre of music}}
+#: {{syn|pt|música house}}
+
+==Romanian==
+
+===Etymology===
+{{ety|ro|:ubor|en:house|text=+|tree=1}}
+
+===Noun===
+{{ro-noun|m|-}}
+
+# [[house music]]
+
+====Declension====
+{{ro-noun-m|n=sg}}
+
+==Spanish==
+
+===Etymology===
+{{ety|es|:ubor|en:house music|text=+|tree=1}}
+
+===Pronunciation===
+{{es-pr|jaus}}
+
+===Noun===
+{{es-noun|m|-}}
+
+# [[house music]], house (a genre of music)
+#: {{syn|es|música house}}
+
+====Usage notes====
+{{es-unadapted}}
+
+===Further reading===
+* {{R:es:DRAE}}
+
+==Swedish==
+
+===Etymology===
+From {{bor|sv|en|house music}}.
+
+===Noun===
+{{sv-noun|c}}
+
+# [[house music]], house (a genre of music)
+
+====Declension====
+{{sv-noun-unc-irreg-c}}
+
+====Synonyms====
+* {{l|sv|housemusik}}, {{l|sv|house-musik}}
+
+{{C|sv|Music}}

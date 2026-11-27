@@ -40,7 +40,7 @@ function UpgradeContent() {
   const handleAction = useCallback(() => {
     // Show the refreshed results, rather than those fetched by the upgrade
     upgrade.reset();
-    revalidate();
+    return revalidate();
   }, [upgrade, revalidate]);
 
   return (

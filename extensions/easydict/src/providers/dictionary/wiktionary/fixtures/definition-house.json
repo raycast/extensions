@@ -1,0 +1,358 @@
+{
+  "en": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "English",
+      "definitions": [
+        { "definition": "" },
+        {
+          "definition": "A structure built or serving as an <a rel=\"mw:WikiLink\" href=\"/wiki/abode\" title=\"abode\">abode</a> of human beings. <style data-mw-deduplicate=\"TemplateStyles:r90144991\" typeof=\"mw:Extension/templatestyles\" about=\"#mwt95\">.mw-parser-output .defdate{font-size:smaller}</style>",
+          "parsedExamples": [{ "example": "This is my <b>house</b> and my family's ancestral home." }],
+          "examples": ["This is my <b>house</b> and my family's ancestral home."]
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\"></span> An <a rel=\"mw:WikiLink\" href=\"/wiki/apartment_building\" title=\"apartment building\">apartment building</a> within a <a rel=\"mw:WikiLink\" href=\"/wiki/public\" title=\"public\">public</a> <a rel=\"mw:WikiLink\" href=\"/wiki/housing_estate\" title=\"housing estate\">housing estate</a>."
+        },
+        { "definition": "" },
+        { "definition": "A container; a thing which houses another." },
+        { "definition": "" },
+        {
+          "definition": "<span class=\"usage-label-sense\"></span> Size and quality of residential accommodations; <a rel=\"mw:WikiLink\" href=\"/wiki/housing#Noun\" title=\"housing\">housing</a>."
+        },
+        { "definition": "" },
+        {
+          "definition": "A building intended to contain a single household, as opposed to an <a rel=\"mw:WikiLink\" href=\"/wiki/apartment\" title=\"apartment\">apartment</a> or <a rel=\"mw:WikiLink\" href=\"/wiki/condominium\" title=\"condominium\">condominium</a> or building containing these."
+        },
+        { "definition": "" },
+        {
+          "definition": "The people who live in a house; a <a rel=\"mw:WikiLink\" href=\"/wiki/household\" title=\"household\">household</a>. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt109\" typeof=\"mw:Extension/templatestyles\">"
+        },
+        { "definition": "" },
+        {
+          "definition": "A <a rel=\"mw:WikiLink\" href=\"/wiki/building\" title=\"building\">building</a> used for something other than a <a rel=\"mw:WikiLink\" href=\"/wiki/residence\" title=\"residence\">residence</a> . <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt114\" typeof=\"mw:Extension/templatestyles\">",
+          "parsedExamples": [
+            { "example": "The former carriage <b>house</b> had been made over into a guest <b>house</b>." },
+            {
+              "example": "On arriving at the zoo, we immediately headed for the <a rel=\"mw:WikiLink\" href=\"/wiki/monkey_house#English\" title=\"monkey house\">monkey <b>house</b></a>."
+            },
+            {
+              "example": "A small publishing <b>house</b> would have a contract with an independent fulfillment <b>house</b>."
+            },
+            { "example": "One more, sir, then I'll have to stop serving you – rules of the <b>house</b>, I'm afraid." },
+            { "example": "The <b>house</b> always wins." }
+          ],
+          "examples": [
+            "The former carriage <b>house</b> had been made over into a guest <b>house</b>.",
+            "On arriving at the zoo, we immediately headed for the <a rel=\"mw:WikiLink\" href=\"/wiki/monkey_house#English\" title=\"monkey house\">monkey <b>house</b></a>.",
+            "A small publishing <b>house</b> would have a contract with an independent fulfillment <b>house</b>.",
+            "One more, sir, then I'll have to stop serving you – rules of the <b>house</b>, I'm afraid.",
+            "The <b>house</b> always wins."
+          ]
+        },
+        {
+          "definition": "A place of <a rel=\"mw:WikiLink\" href=\"/wiki/business\" title=\"business\">business</a>; a company or organisation, especially a <a rel=\"mw:WikiLink\" href=\"/wiki/printing_press\" title=\"printing press\">printing press</a>, a <a rel=\"mw:WikiLink\" href=\"/wiki/publishing\" title=\"publishing\">publishing</a> company, or a <a rel=\"mw:WikiLink\" href=\"/wiki/couturier\" title=\"couturier\">couturier</a>. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt119\" typeof=\"mw:Extension/templatestyles\">",
+          "parsedExamples": [
+            {
+              "example": "A small publishing <b>house</b> would have a contract with an independent fulfillment <b>house</b>."
+            }
+          ],
+          "examples": [
+            "A small publishing <b>house</b> would have a contract with an independent fulfillment <b>house</b>."
+          ]
+        },
+        {
+          "definition": "A place of public accommodation or entertainment, especially a <a rel=\"mw:WikiLink\" href=\"/wiki/public_house\" title=\"public house\">public house</a>, an <a rel=\"mw:WikiLink\" href=\"/wiki/inn\" title=\"inn\">inn</a>, a <a rel=\"mw:WikiLink\" href=\"/wiki/restaurant\" title=\"restaurant\">restaurant</a>, a <a rel=\"mw:WikiLink\" href=\"/wiki/theatre\" title=\"theatre\">theatre</a>, or a <a rel=\"mw:WikiLink\" href=\"/wiki/casino\" title=\"casino\">casino</a>; or the management thereof. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt124\" typeof=\"mw:Extension/templatestyles\">",
+          "parsedExamples": [
+            { "example": "One more, sir, then I'll have to stop serving you – rules of the <b>house</b>, I'm afraid." },
+            { "example": "The <b>house</b> always wins." }
+          ],
+          "examples": [
+            "One more, sir, then I'll have to stop serving you – rules of the <b>house</b>, I'm afraid.",
+            "The <b>house</b> always wins."
+          ]
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\"></span> A <a rel=\"mw:WikiLink\" href=\"/wiki/workhouse\" title=\"workhouse\">workhouse</a>."
+        },
+        {
+          "definition": "The audience for a live theatrical or similar performance. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt131\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">",
+          "parsedExamples": [{ "example": "After her swan-song, there wasn't a dry eye in the <b>house</b>." }],
+          "examples": ["After her swan-song, there wasn't a dry eye in the <b>house</b>."]
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt135\" typeof=\"mw:Transclusion\"></span> A building where a deliberative assembly meets; whence the assembly itself, particularly a component of a <a rel=\"mw:WikiLink\" href=\"/wiki/legislature\" title=\"legislature\">legislature</a>. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt136\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">",
+          "parsedExamples": [
+            { "example": "The petition was so ridiculous that the <b>house</b> rejected it after minimal debate." }
+          ],
+          "examples": ["The petition was so ridiculous that the <b>house</b> rejected it after minimal debate."]
+        },
+        {
+          "definition": "A <a rel=\"mw:WikiLink\" href=\"/wiki/dynasty\" title=\"dynasty\">dynasty</a>; a family with its <a rel=\"mw:WikiLink\" href=\"/wiki/ancestor\" title=\"ancestor\">ancestors</a> and <a rel=\"mw:WikiLink\" href=\"/wiki/descendant\" title=\"descendant\">descendants</a>, especially a royal or noble one. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt139\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">",
+          "parsedExamples": [{ "example": "A curse lay upon the <b>House</b> of Atreus." }],
+          "examples": ["A curse lay upon the <b>House</b> of Atreus."]
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt142\" typeof=\"mw:Transclusion\"></span> A place of <a rel=\"mw:WikiLink\" href=\"/wiki/rest\" title=\"rest\">rest</a> or <a rel=\"mw:WikiLink\" href=\"/wiki/repose\" title=\"repose\">repose</a>. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt143\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">"
+        },
+        {
+          "definition": "A <a rel=\"mw:WikiLink\" href=\"/wiki/grouping\" title=\"grouping\">grouping</a> of <a rel=\"mw:WikiLink\" href=\"/wiki/schoolchildren\" title=\"schoolchildren\">schoolchildren</a> for the purposes of competition in sports and other activities. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt147\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">",
+          "parsedExamples": [{ "example": "I was a member of Spenser <b>house</b> when I was at school." }],
+          "examples": ["I was a member of Spenser <b>house</b> when I was at school."]
+        },
+        {
+          "definition": "An <a rel=\"mw:WikiLink\" href=\"/wiki/animal\" title=\"animal\">animal</a>'s <a rel=\"mw:WikiLink\" href=\"/wiki/shelter\" title=\"shelter\">shelter</a> or <a rel=\"mw:WikiLink\" href=\"/wiki/den\" title=\"den\">den</a>, or the shell of an animal such as a <a rel=\"mw:WikiLink\" href=\"/wiki/snail\" title=\"snail\">snail</a>, used for protection. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt150\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">"
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt152\" typeof=\"mw:Transclusion\"></span> One of the twelve divisions of an astrological chart. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt153\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">"
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt156\" typeof=\"mw:Transclusion\"></span> The fourth <a rel=\"mw:WikiLink\" href=\"/wiki/Lenormand\" title=\"Lenormand\">Lenormand</a> card."
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt157\" typeof=\"mw:Transclusion\"></span> A <a rel=\"mw:WikiLink\" href=\"/wiki/square\" title=\"square\">square</a> on a <a rel=\"mw:WikiLink\" href=\"/wiki/chessboard\" title=\"chessboard\">chessboard</a>, regarded as the proper place of a <a rel=\"mw:WikiLink\" href=\"/wiki/piece\" title=\"piece\">piece</a>. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt158\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">"
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt160\" typeof=\"mw:Transclusion\"></span> The four <a rel=\"mw:WikiLink\" href=\"/wiki/concentric\" title=\"concentric\">concentric</a> circles where points are scored on the <a rel=\"mw:WikiLink\" href=\"/wiki/ice\" title=\"ice\">ice</a>. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt161\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">"
+        },
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/lotto\" title=\"lotto\">Lotto</a>; <a rel=\"mw:WikiLink\" href=\"/wiki/bingo\" title=\"bingo\">bingo</a>. <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r90144991\" about=\"#mwt163\" typeof=\"mw:Extension/templatestyles mw:Transclusion\">"
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt165\" typeof=\"mw:Transclusion\"></span> A <a rel=\"mw:WikiLink\" href=\"/wiki/child\" title=\"child\">children</a>'s <a rel=\"mw:WikiLink\" href=\"/wiki/game\" title=\"game\">game</a> in which the players <a rel=\"mw:WikiLink\" href=\"/wiki/pretend\" title=\"pretend\">pretend</a> to be members of a <a rel=\"mw:WikiLink\" href=\"/wiki/household\" title=\"household\">household</a>.",
+          "parsedExamples": [
+            {
+              "example": "As the babysitter, Emma always acted as the mother whenever the kids demanded to play <b>house</b>."
+            }
+          ],
+          "examples": [
+            "As the babysitter, Emma always acted as the mother whenever the kids demanded to play <b>house</b>."
+          ]
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt167\" typeof=\"mw:Transclusion\"></span> A small <a rel=\"mw:WikiLink\" href=\"/wiki/stand\" title=\"stand\">stand</a> of <a rel=\"mw:WikiLink\" href=\"/wiki/tree\" title=\"tree\">trees</a> in a <a rel=\"mw:WikiLink\" href=\"/wiki/swamp\" title=\"swamp\">swamp</a>."
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt168\" typeof=\"mw:Transclusion\"></span> A set of cells in a <a rel=\"mw:WikiLink\" href=\"/wiki/sudoku\" title=\"sudoku\">sudoku</a> puzzle which must contain each digit exactly once, such as a row, column, or 3×3 box."
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt169\" typeof=\"mw:Transclusion\"></span> The <a rel=\"mw:WikiLink\" href=\"/wiki/end_zone\" title=\"end zone\">end zone</a>."
+        }
+      ]
+    },
+    {
+      "partOfSpeech": "Verb",
+      "language": "English",
+      "definitions": [
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt221\" typeof=\"mw:Transclusion\"></span> To <a rel=\"mw:WikiLink\" href=\"/wiki/keep\" title=\"keep\">keep</a> within a structure or container.",
+          "parsedExamples": [{ "example": "The car is <b>housed</b> in the garage." }],
+          "examples": ["The car is <b>housed</b> in the garage."]
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt226\" typeof=\"mw:Transclusion\"></span> To admit to residence; to <a rel=\"mw:WikiLink\" href=\"/wiki/harbor\" title=\"harbor\">harbor</a>."
+        },
+        { "definition": "To take shelter or lodging; to abide; to lodge." },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt230\" typeof=\"mw:Transclusion\"></span> To dwell within one of the twelve astrological houses."
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt232\" typeof=\"mw:Transclusion\"></span> To contain or cover mechanical parts."
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt233\" typeof=\"mw:Transclusion\"></span> To contain one part of an object for the purpose of locating the whole.",
+          "parsedExamples": [
+            { "example": "The joists were <b>housed</b> into the side walls, rather than being hung from them." }
+          ],
+          "examples": ["The joists were <b>housed</b> into the side walls, rather than being hung from them."]
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt235\" typeof=\"mw:Transclusion\"></span> To drive to a shelter."
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt237\" typeof=\"mw:Transclusion\"></span> To deposit and cover, as in the grave."
+        },
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt239\" typeof=\"mw:Transclusion\"></span> To <a rel=\"mw:WikiLink\" href=\"/wiki/stow\" title=\"stow\">stow</a> in a safe place; to take down and make safe.",
+          "parsedExamples": [{ "example": "to <b>house</b> the upper spars" }],
+          "examples": ["to <b>house</b> the upper spars"]
+        },
+        { "definition": "" },
+        {
+          "definition": "<span class=\"usage-label-sense\"></span> To <a rel=\"mw:WikiLink\" href=\"/wiki/eat\" title=\"eat\">eat</a>; especially, to <a rel=\"mw:WikiLink\" href=\"/wiki/scarf_down\" title=\"scarf down\">scarf down</a>."
+        }
+      ]
+    },
+    {
+      "partOfSpeech": "Noun",
+      "language": "English",
+      "definitions": [
+        { "definition": "" },
+        {
+          "definition": "<span class=\"usage-label-sense\"></span> <a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">House music</a>."
+        }
+      ]
+    }
+  ],
+  "zh": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Chinese",
+      "definitions": [
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt427\" typeof=\"mw:Transclusion\"></span> <a rel=\"mw:WikiLink\" href=\"/wiki/mansion\" title=\"mansion\">mansion</a>; large <a rel=\"mw:WikiLink\" href=\"/wiki/house#English\" class=\"mw-selflink-fragment\">house</a> <span style=\"padding-left:15px; font-size:80%\" about=\"#mwt428\" typeof=\"mw:Transclusion\"><span style=\"background:var(--wikt-palette-cyan, #eaffff);color:inherit\">(<i>Classifier</i>: <span class=\"Hant\" lang=\"zh-Hant\"><a rel=\"mw:WikiLink\" href=\"/wiki/間#Chinese\" title=\"間\">間</a></span><span class=\"Hani\" lang=\"zh\">／</span><span class=\"Hans\" lang=\"zh-Hans\"><a rel=\"mw:WikiLink\" href=\"/wiki/间#Chinese\" title=\"间\">间</a></span> <span style=\"border-bottom: 1px dotted var(--wikt-palette-black, #202122); cursor:help\" title=\"Cantonese\"><i>c</i></span>)</span></span><link rel=\"mw:PageProp/Category\" href=\"./Category:Chinese_nouns_classified_by_間/间#HOUSE\" about=\"#mwt428\">"
+        }
+      ]
+    }
+  ],
+  "cs": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Czech",
+      "definitions": [{ "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/gosling\" title=\"gosling\">gosling</a>" }]
+    },
+    {
+      "partOfSpeech": "Noun",
+      "language": "Czech",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a genre of music)"
+        }
+      ]
+    }
+  ],
+  "nl": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Dutch",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a genre of music)"
+        }
+      ]
+    }
+  ],
+  "fi": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Finnish",
+      "definitions": [
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt457\" typeof=\"mw:Transclusion\"></span> <a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house <span class=\"mention-gloss-paren\" about=\"#mwt458\" typeof=\"mw:Transclusion\">(</span><span class=\"mention-gloss\" about=\"#mwt458\">a genre of music</span><span class=\"mention-gloss-paren\" about=\"#mwt458\">)</span>"
+        }
+      ]
+    }
+  ],
+  "fr": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "French",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a genre of music)"
+        }
+      ]
+    }
+  ],
+  "hu": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Hungarian",
+      "definitions": [
+        {
+          "definition": "<span class=\"usage-label-sense\" about=\"#mwt476\" typeof=\"mw:Transclusion\"></span> <a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a type of electronic dance music with an uptempo beat and recurring kickdrum)"
+        }
+      ]
+    }
+  ],
+  "other": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Middle English",
+      "definitions": [
+        {
+          "definition": "<span class=\"form-of-definition use-with-mention\" about=\"#mwt483\" typeof=\"mw:Transclusion\">alternative form of <span class=\"form-of-definition-link\"><i class=\"Latn mention\" lang=\"enm\"><a rel=\"mw:WikiLink\" href=\"/wiki/hous#Middle_English\" title=\"hous\">hous</a></i></span></span>"
+        }
+      ]
+    },
+    {
+      "partOfSpeech": "Verb",
+      "language": "Middle English",
+      "definitions": [
+        {
+          "definition": "<span class=\"form-of-definition use-with-mention\" about=\"#mwt485\" typeof=\"mw:Transclusion\">alternative form of <span class=\"form-of-definition-link\"><i class=\"Latn mention\" lang=\"enm\"><a rel=\"mw:WikiLink\" href=\"/wiki/housen#Middle_English\" title=\"housen\">housen</a></i></span></span>"
+        }
+      ]
+    },
+    {
+      "partOfSpeech": "Noun",
+      "language": "Norwegian Bokmål",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a genre of music)"
+        }
+      ]
+    },
+    {
+      "partOfSpeech": "Noun",
+      "language": "Norwegian Nynorsk",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a genre of music)"
+        }
+      ]
+    }
+  ],
+  "pl": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Polish",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, <span class=\"Latn\" lang=\"en\" about=\"#mwt505\" typeof=\"mw:Transclusion\"><a rel=\"mw:WikiLink\" href=\"/wiki/house#English\" class=\"mw-selflink-fragment\">house</a></span> <span class=\"mention-gloss-paren\" about=\"#mwt506\" typeof=\"mw:Transclusion\">(</span><span class=\"mention-gloss\" about=\"#mwt506\">genre of music</span><span class=\"mention-gloss-paren\" about=\"#mwt506\">)</span>"
+        }
+      ]
+    }
+  ],
+  "pt": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Portuguese",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, <span class=\"Latn\" lang=\"en\" about=\"#mwt516\" typeof=\"mw:Transclusion\"><a rel=\"mw:WikiLink\" href=\"/wiki/house#English\" class=\"mw-selflink-fragment\">house</a></span> <span class=\"mention-gloss-paren\" about=\"#mwt517\" typeof=\"mw:Transclusion\">(</span><span class=\"mention-gloss\" about=\"#mwt517\">a genre of music</span><span class=\"mention-gloss-paren\" about=\"#mwt517\">)</span>"
+        }
+      ]
+    }
+  ],
+  "ro": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Romanian",
+      "definitions": [
+        { "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>" }
+      ]
+    }
+  ],
+  "es": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Spanish",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a genre of music)"
+        }
+      ]
+    }
+  ],
+  "sv": [
+    {
+      "partOfSpeech": "Noun",
+      "language": "Swedish",
+      "definitions": [
+        {
+          "definition": "<a rel=\"mw:WikiLink\" href=\"/wiki/house_music\" title=\"house music\">house music</a>, house (a genre of music)"
+        }
+      ]
+    }
+  ]
+}

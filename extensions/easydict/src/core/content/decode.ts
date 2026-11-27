@@ -22,7 +22,12 @@ export function decodeProviderContent(value: unknown): ProviderContent {
     case "translation":
       return { kind: source.kind, query, paragraphs: strings(source.paragraphs, "content.paragraphs") };
     case "dictionary":
-      return { kind: source.kind, query, sections: array(source.sections, decodeSection, "content.sections") };
+      return {
+        kind: source.kind,
+        query,
+        sourceUrl: optional(source.sourceUrl, text, "content.sourceUrl"),
+        sections: array(source.sections, decodeSection, "content.sections"),
+      };
     default:
       throw invalid("content.kind");
   }
@@ -51,7 +56,11 @@ function decodeSection(value: unknown, path: string): DictionarySection {
       };
     }
     case "definitions":
-      return { kind: source.kind, entries: array(source.entries, decodeDefinition, `${path}.entries`) };
+      return {
+        kind: source.kind,
+        textLanguage: optional(source.textLanguage, text, `${path}.textLanguage`),
+        entries: array(source.entries, decodeDefinition, `${path}.entries`),
+      };
     case "pairs":
       return {
         kind: source.kind,
@@ -130,6 +139,11 @@ function decodeEquivalent(value: unknown, path: string): ContentEquivalent {
     ),
     inflectionNote: optional(source.inflectionNote, text, `${path}.inflectionNote`),
     firstExampleTranslation: optional(source.firstExampleTranslation, text, `${path}.firstExampleTranslation`),
+    examples: optional(
+      source.examples,
+      (value, examplesPath) => array(value, decodeExample, examplesPath),
+      `${path}.examples`,
+    ),
   };
 }
 

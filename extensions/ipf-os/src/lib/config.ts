@@ -15,3 +15,7 @@ export function getWebAppUrl(): string {
 export function ticketWebUrl(ticketId: string): string {
   return `${getWebAppUrl()}/dashboard/ticketing/tickets/${ticketId}`;
 }
+
+export function mealsWebUrl(): string {
+  return `${getWebAppUrl()}/dashboard/meals`;
+}

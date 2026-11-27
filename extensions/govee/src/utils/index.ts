@@ -13,8 +13,13 @@ export async function wait(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-export const execScenario = async (scenario: Scenario, controller: Govee, devices: Device[], WAIT = 100) => {
-  const localDevices = scenario.devices
+// Quickest fade the LAN library allows that still reads as a fade: 10 steps over 0.5 s.
+// Cloud lights have no fadeToColor and just jump to the colour.
+const setColor = (dev: Device, color: ColorInput, fade?: boolean) =>
+  fade && typeof dev.fadeToColor === "function" ? dev.fadeToColor(color, 10, 500) : dev.setColor(color);
+
+export const execScenario = async (scenarioData: Scenario, controller: Govee, devices: Device[], WAIT = 100) => {
+  const localDevices = scenarioData.devices
     .map(({ id, scenario }) => {
       const dev = devices.find((d) => d.id === id);
       return { dev, scenario };
@@ -25,7 +30,7 @@ export const execScenario = async (scenario: Scenario, controller: Govee, device
     return;
   }
 
-  const all = scenario.all;
+  const all = scenarioData.all;
 
   // This is a queue that will run the commands in order
   const queue = new PQueue({ concurrency: 1, autoStart: false, timeout: 5000 });
@@ -46,7 +51,7 @@ export const execScenario = async (scenario: Scenario, controller: Govee, device
         await queue.add(() => wait(WAIT));
       }
       if (all.color !== null && (!scenario || scenario?.color === null)) {
-        await queue.add(() => dev.setColor(all.color as ColorInput));
+        await queue.add(() => setColor(dev, all.color as ColorInput, scenarioData.fade));
         await queue.add(() => wait(WAIT));
       }
     });
@@ -63,7 +68,7 @@ export const execScenario = async (scenario: Scenario, controller: Govee, device
         await queue.add(() => wait(WAIT));
       }
       if (scenario.color !== null) {
-        await queue.add(() => dev.setColor(scenario.color as ColorInput));
+        await queue.add(() => setColor(dev, scenario.color as ColorInput, scenarioData.fade));
         await queue.add(() => wait(WAIT));
       }
     }
