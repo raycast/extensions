@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "send-to-memos",
+  "version": "1.0.0",
+  "title": "Send to Memos",
+  "description": "Capture thoughts, tags, and links in Memos, the open-source, self-hosted note-taking app.",
+  "icon": "icon.png",
+  "author": "jason-a9",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "send-to-memos",
+      "title": "Send to Memos",
+      "description": "Write a memo with tags and an optional link, then send it to Memos.",
+      "mode": "view"
+    },
+    {
+      "name": "open-memos",
+      "title": "Open Memos",
+      "description": "Open your Memos website in the default browser.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Memos URL",
+      "description": "Your Memos website URL, such as https://memos.example.com. Deployments under a subpath are supported.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Create an access token in your Memos settings. Paste the token with or without the Bearer prefix.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultTags",
+      "title": "Default Tags",
+      "description": "Tags to append to new memos, separated by spaces or commas. Leave empty for no default tags.",
+      "type": "textfield",
+      "required": false,
+      "default": "#raycast"
+    },
+    {
+      "name": "defaultVisibility",
+      "title": "Default Visibility",
+      "description": "Who can read new memos. Private is the default.",
+      "type": "dropdown",
+      "required": true,
+      "default": "PRIVATE",
+      "data": [
+        {
+          "title": "Private",
+          "value": "PRIVATE"
+        },
+        {
+          "title": "Instance Members",
+          "value": "PROTECTED"
+        },
+        {
+          "title": "Public",
+          "value": "PUBLIC"
+        }
+      ]
+    },
+    {
+      "name": "openAfterSend",
+      "title": "Open After Sending",
+      "label": "Open the memo in a browser after sending",
+      "description": "Open each memo in your browser after saving. You can also use Send and Open for individual memos.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "apiVersion",
+      "title": "API Version",
+      "description": "Usually detected automatically with read-only requests. Choose an endpoint manually if needed.",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic (Recommended)",
+          "value": "auto"
+        },
+        {
+          "title": "/api/v1/memos",
+          "value": "v1"
+        },
+        {
+          "title": "/api/memos",
+          "value": "current"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "bundle": "ray bundle --output Send-to-Memos.rayext",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm test && npm run build",
+    "lint:code": "eslint src tests && prettier --check src tests package.json tsconfig.json eslint.config.mjs .prettierrc.json README.md CHANGELOG.md",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.0"
+  },
+  "keywords": [
+    "memos",
+    "self-hosted",
+    "open-source",
+    "notes",
+    "capture",
+    "markdown",
+    "bookmark"
+  ],
+  "overrides": {
+    "minimatch": "11.0.1"
+  }
+}
