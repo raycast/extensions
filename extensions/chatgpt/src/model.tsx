@@ -1,5 +1,6 @@
+import { AuthGate } from "./views/auth-required";
 import { Action, ActionPanel, Icon, Keyboard, List, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
@@ -17,6 +18,14 @@ import { CommandManagementActions, RunCommandAction } from "./actions/command";
 import Ask from "./ask";
 
 export default function Model() {
+  return (
+    <AuthGate>
+      <ModelContent />
+    </AuthGate>
+  );
+}
+
+function ModelContent() {
   const models = useModel();
   const commands = useCommand();
   const { catalog } = useModelCatalog();
@@ -132,25 +141,21 @@ export default function Model() {
     );
   };
 
-  const sortedModels = Object.values(models.data).sort(
-    (a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime(),
+  const sortedModels = useMemo(
+    () => Object.values(models.data).sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at)),
+    [models.data],
   );
 
-  const filteredModels = sortedModels
-    .filter((value, index, self) => index === self.findIndex((model) => model.id === value.id))
-    .filter((model) => {
-      if (searchText === "") {
-        return true;
-      }
-      return (
-        model.prompt.toLowerCase().includes(searchText.toLowerCase()) ||
-        model.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        model.temperature.toLocaleString().toLowerCase().includes(searchText.toLowerCase()) ||
-        (model.enableReasoningEffortChange ? model.reasoningEffort.toLowerCase() : "disabled").includes(
-          searchText.toLowerCase(),
-        )
-      );
-    });
+  const query = searchText.toLowerCase();
+  const filteredModels = query
+    ? sortedModels.filter(
+        (model) =>
+          model.prompt.toLowerCase().includes(query) ||
+          model.name.toLowerCase().includes(query) ||
+          model.temperature.toLowerCase().includes(query) ||
+          (model.enableReasoningEffortChange ? model.reasoningEffort.toLowerCase() : "disabled").includes(query),
+      )
+    : sortedModels;
 
   const defaultModelOnly = models.data[DEFAULT_MODEL.id] ?? DEFAULT_MODEL;
 

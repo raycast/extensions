@@ -2,9 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prisma-postgres",
   "title": "Prisma Postgres",
-  "description": "Create a Prisma Postgres database instantly with no setup, and list your databases with connection strings, expiry times and claim URLs.",
+  "description": "Create free Prisma Postgres databases in seconds and view connection strings, expiry times, and claim URLs.",
   "icon": "extension-icon.png",
   "author": "amanvarshney01",
+  "owner": "prisma",
+  "access": "public",
   "contributors": [
     "pernielsentikaer"
   ],
@@ -14,6 +16,15 @@
   ],
   "categories": [
     "Developer Tools"
+  ],
+  "keywords": [
+    "prisma",
+    "postgres",
+    "postgresql",
+    "database",
+    "create-db",
+    "prisma compute",
+    "prisma orm"
   ],
   "license": "MIT",
   "preferences": [

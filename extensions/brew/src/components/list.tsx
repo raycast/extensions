@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import {
-  brewFormatVersion,
+  brewInstalledVersion,
   brewInstalledDate,
   brewIsInstalled,
   brewIsOutdated,
@@ -13,6 +13,7 @@ import {
   preferences,
 } from "../utils";
 import { CaskActionPanel, FormulaActionPanel, PagingSection } from "./actionPanels";
+import { usePackageBusyIcon } from "./busy";
 import { installStateIcon, STATUS_COLOR, UNINSTALLABLE_COLOR, UPDATE_AVAILABLE_COLOR } from "./palette";
 import { FormulaListItemDetail, CaskListItemDetail } from "./listItemDetail";
 import type { MetadataOptions } from "./packageMetadata";
@@ -49,8 +50,6 @@ export interface FormulaListProps {
    * fact about this machine, not a property of the package being searched for.
    */
   showInstalledDate?: boolean;
-  /** Offer Hide Dependencies. Installed-list only — see FormulaActionPanel. */
-  showDependenciesFilter?: boolean;
   /**
    * How many matched in total, before the caller's window narrowed the arrays
    * above. Only Search passes it: Show Installed renders every installed
@@ -126,11 +125,9 @@ export function FormulaList(props: FormulaListProps) {
     paging: props.paging,
     extraActions: props.extraActions,
   };
-  // `CaskListItem` takes no dependency filter, so formula rows get their own object.
-  const formulaRowProps = { ...rowProps, showDependenciesFilter: props.showDependenciesFilter };
   // Pinned Formulae is the one section that has never offered the popularity
   // sort. Kept that way rather than changed silently by the shared spread.
-  const pinnedFormulaRowProps = { ...formulaRowProps, sortByPopularity: undefined, onToggleSort: undefined };
+  const pinnedFormulaRowProps = { ...rowProps, sortByPopularity: undefined, onToggleSort: undefined };
 
   const pageFooter = (kind: "formula" | "cask", shown: number, total: number) =>
     props.paging && hasNextPage(props.paging.page, props.paging.totalPages) && total > shown ? (
@@ -150,7 +147,7 @@ export function FormulaList(props: FormulaListProps) {
           key={`formula-${formula.name}`}
           id={`formula-${formula.name}`}
           formula={formula}
-          {...formulaRowProps}
+          {...rowProps}
         />
       ))}
       {pageFooter("formula", formulae.length, props.totals?.formulae ?? 0)}
@@ -164,7 +161,7 @@ export function FormulaList(props: FormulaListProps) {
           id={`dependency-${formula.name}`}
           formula={formula}
           dependedOn={props.dependedOn}
-          {...formulaRowProps}
+          {...rowProps}
         />
       ))}
     </List.Section>
@@ -269,7 +266,6 @@ export function FormulaListItem(props: {
   showDescription?: boolean;
   onToggleDescription?: () => void;
   showInstalledDate?: boolean;
-  showDependenciesFilter?: boolean;
   /** Passed only by the Dependencies section; drives the "Unused" tag. */
   dependedOn?: ReadonlySet<string>;
 }) {
@@ -280,12 +276,13 @@ export function FormulaListItem(props: {
   const formulaOutdated = brewIsOutdated(formula);
   const installed = brewIsInstalled(formula);
   if (installed) {
-    version = brewFormatVersion(formula);
+    version = brewInstalledVersion(formula) ?? version;
   }
 
   const uninstallable = installed ? undefined : uninstallableReason(formula, brewHost);
 
-  const icon = installStateIcon(installed, formulaOutdated, uninstallable);
+  const busyIcon = usePackageBusyIcon(formula);
+  const icon = busyIcon ?? installStateIcon(installed, formulaOutdated, uninstallable);
   const accessories: List.Item.Accessory[] = [];
   if (installed && formulaOutdated) {
     accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });
@@ -340,7 +337,6 @@ export function FormulaListItem(props: {
           showDescription={props.showDescription}
           onToggleDescription={props.onToggleDescription}
           metadataPanelVisible={showMetadataPanel}
-          showDependenciesFilter={props.showDependenciesFilter}
           paging={props.paging}
           extraActions={props.extraActions}
         />
@@ -375,12 +371,13 @@ export function CaskListItem(props: {
   const caskOutdated = brewIsOutdated(cask);
   const installed = brewIsInstalled(cask);
   if (installed) {
-    version = brewFormatVersion(cask);
+    version = brewInstalledVersion(cask) ?? version;
   }
 
   const uninstallable = installed ? undefined : uninstallableReason(cask, brewHost);
 
-  const icon = installStateIcon(installed, caskOutdated, uninstallable);
+  const busyIcon = usePackageBusyIcon(cask);
+  const icon = busyIcon ?? installStateIcon(installed, caskOutdated, uninstallable);
   const accessories: List.Item.Accessory[] = [];
   if (installed && caskOutdated) {
     accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });

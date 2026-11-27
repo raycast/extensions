@@ -18,6 +18,22 @@
       "title": "Search Amazon",
       "description": "Amazon search with autosuggestions",
       "mode": "view"
+    },
+    {
+      "name": "searchSelectText",
+      "title": "Search Selected Text",
+      "description": "Search Amazon for the selected text",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "useClipboardFallback",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use Clipboard Fallback",
+          "description": "Use clipboard text for the search when no text is selected."
+        }
+      ]
     }
   ],
   "preferences": [
@@ -150,5 +166,8 @@
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "contributors": [
+    "alexi.build"
   ]
 }

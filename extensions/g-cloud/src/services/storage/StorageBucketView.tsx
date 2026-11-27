@@ -29,6 +29,7 @@ import { friendlyErrorMessage } from "../../utils/errorMessages";
 interface StorageBucketViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
 interface Bucket {
@@ -39,7 +40,7 @@ interface Bucket {
   created: string;
 }
 
-export default function StorageBucketView({ projectId, gcloudPath }: StorageBucketViewProps) {
+export default function StorageBucketView({ projectId, gcloudPath, onProjectChange }: StorageBucketViewProps) {
   const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
   const [isLoading, setIsLoading] = useState(true);
   const [buckets, setBuckets] = useState<Bucket[]>([]);
@@ -312,7 +313,14 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       isLoading={isLoading}
       searchBarPlaceholder="Search buckets..."
       navigationTitle={`Cloud Storage Buckets - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="storage" />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="storage"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />

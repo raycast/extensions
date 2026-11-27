@@ -105,10 +105,27 @@ describe("buildEventResource", () => {
     );
     assert.deepEqual(body.attendees, [
       { email: "existing@example.com", responseStatus: "accepted" },
-      { email: "optional@example.com", optional: true, responseStatus: "tentative" },
-      { email: "room@example.com", resource: true, responseStatus: "accepted" },
+      { email: "optional@example.com", optional: false, resource: false, responseStatus: "tentative" },
+      { email: "room@example.com", optional: false, resource: false, responseStatus: "accepted" },
       { email: "new@example.com", optional: false, resource: false },
     ]);
+  });
+
+  it("changes existing attendees between required, optional, and resource categories", () => {
+    const existing = {
+      attendees: [
+        { email: "optional@example.com", optional: true, responseStatus: "tentative" },
+        { email: "resource@example.com", resource: true, responseStatus: "accepted" },
+      ],
+    };
+
+    assert.deepEqual(
+      buildEventResource({ requiredAttendees: "optional@example.com, resource@example.com" }, { existing }).attendees,
+      [
+        { email: "optional@example.com", optional: false, resource: false, responseStatus: "tentative" },
+        { email: "resource@example.com", optional: false, resource: false, responseStatus: "accepted" },
+      ],
+    );
   });
 
   it("validates recurrence and reminder contracts", () => {

@@ -6,7 +6,7 @@ import {
   getPreferenceValues,
 } from '@raycast/api'
 import { useState } from 'react'
-import urlJoin from 'proper-url-join'
+import { urlJoin } from './utils/urlJoin'
 import { useSearch } from './useSearch'
 import { useRecents } from './useRecents'
 import { LinkItem } from './components/LinkItem'

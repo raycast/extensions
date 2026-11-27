@@ -1,5 +1,10 @@
 # Image Modification Changelog
 
+## [Fix ExifTool installation] - 2026-11-25
+
+- Fixed the Strip EXIF Data command always failing with "Checksum verification failed" when installing ExifTool. exiftool.org only hosts the latest version, so the pinned download returned a 404 page. ExifTool 13.55 is now downloaded from CPAN, which keeps past releases, and download errors are reported instead of a checksum failure.
+- ExifTool installed with Homebrew (`/opt/homebrew/bin/exiftool` or `/usr/local/bin/exiftool`) is now detected and used even when it is not on Raycast's PATH, instead of downloading a separate copy.
+
 ## [Fix Output for Files Under a Home Folder on Another Volume] - 2026-10-13
 
 - Fixed commands producing no output for images under `/Volumes/<drive>/Users/<name>` (for example when the home folder is on an external drive). Only a path that starts with `/Users/<name>` is now treated as a home path ([#29413](https://github.com/raycast/extensions/issues/29413)).
