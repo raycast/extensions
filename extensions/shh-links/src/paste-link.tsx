@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { discordSelection, pasteInDiscord } from "./discord";
-import { cleanUrl, countUrls, formatContent, fromSelection, lengthWarning, siteName } from "./format";
+import { cleanUrl, countUrls, formatContent, fromSelection, lengthWarning, maskedText, siteName } from "./format";
 
 // The clipboard as the URL field starts: one URL alone, or text holding several
 function initialUrls(clip: string | undefined): string {
@@ -30,9 +30,11 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       const selection = fromSelection(await discordSelection());
-      const urls = selection.urls || initialUrls(await Clipboard.readText());
-      // A single link starts named after its site; clearing the text leaves a bare <url>
-      setText((typed) => typed || selection.text || siteName(cleanUrl(urls)));
+      const content = selection.urls || (await Clipboard.readText()) || "";
+      const urls = initialUrls(content);
+      // A single link starts with its masked text or its site's name; clearing the text
+      // leaves a bare <url>
+      setText((typed) => typed || selection.text || maskedText(content) || siteName(cleanUrl(urls)));
       setUrl((typed) => typed || urls);
     })().finally(() => setLoading(false));
   }, []);
@@ -48,7 +50,16 @@ export default function Command() {
       setUrlError("Enter a URL starting with http:// or https://");
       return;
     }
-    const result = await pasteInDiscord(link);
+    let result;
+    try {
+      result = await pasteInDiscord(link);
+    } catch (error) {
+      // The window may be closed by now, so a HUD, which shows either way
+      const reason = error instanceof Error ? error.message : String(error);
+      await Clipboard.copy(link).catch(() => undefined);
+      await showHUD(`Could not paste into Discord (${reason}); the link was copied`);
+      return;
+    }
     if (result === "closed") {
       await Clipboard.copy(link);
       await showToast({
@@ -58,7 +69,7 @@ export default function Command() {
       });
     } else if (result === "no focus") {
       await Clipboard.copy(link);
-      await showHUD("Discord did not come to the front; the link was copied");
+      await showHUD("Discord was not in front; the link was copied");
     }
   }
 
@@ -93,7 +104,8 @@ export default function Command() {
         placeholder="https://… (one link, or a list)"
         info="Filled in from the clipboard. With several links, each one becomes [site](<url>)"
         value={url}
-        error={urlError}
+        // The link can come from either field, so the error goes once there is one
+        error={link ? undefined : urlError}
         onChange={(value) => {
           setUrl(value);
           setUrlError(undefined);

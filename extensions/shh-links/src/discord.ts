@@ -63,6 +63,8 @@ export async function pasteInDiscord(content: string): Promise<PasteResult> {
   if (!(await bringToFront(discord))) return "no focus";
   // Lets Discord give focus back to the field it had before the switch
   await sleep(100);
+  // Another app may have come to the front meanwhile, and it would take the paste
+  if ((await discordInFront())?.bundleId !== discord.bundleId) return "no focus";
   // { text }, not the bare string: given a string, Discord received only "<>"
   await Clipboard.paste({ text: content });
   return "pasted";

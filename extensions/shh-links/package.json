@@ -17,6 +17,7 @@
     {
       "name": "paste-link",
       "title": "Paste Link Without Embed",
+      "subtitle": "Discord",
       "description": "Check the text (the site's name, or what you selected in Discord) and the URL taken from the clipboard, then paste the link into Discord without sending it.",
       "mode": "view",
       "keywords": [
@@ -31,6 +32,7 @@
     {
       "name": "paste-clipboard",
       "title": "Paste Clipboard Without Embed",
+      "subtitle": "Discord",
       "description": "Paste the links on the clipboard into Discord as [site](<url>), with no form. Words selected in Discord become the link text.",
       "mode": "no-view",
       "keywords": [
@@ -59,7 +61,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "node --test test/*.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [

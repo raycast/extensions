@@ -15,6 +15,14 @@ export function cleanUrl(value: string | undefined): string {
   return isUrl(s) ? s : "";
 }
 
+// The text of a clipboard value that is one masked link, [docs](url) giving "docs",
+// with the escaping undone so it is not escaped twice. "" for anything else.
+export function maskedText(value: string | undefined): string {
+  const masked = (value ?? "").trim().match(/^\[(.*)\]\((.*)\)$/s);
+  if (!masked || !cleanUrl(value)) return "";
+  return masked[1].replace(/\\([\\[\]*_~`|])/g, "$1");
+}
+
 const URL_IN_TEXT = /https?:\/\/[^\s<>]+/g;
 
 // A URL found in prose ends before trailing punctuation and before a ")" it did not
@@ -29,6 +37,17 @@ function trimUrl(url: string): string {
     end--;
   }
   return url.slice(0, end);
+}
+
+// In [text](url) the URL ends at the ")" that closes the link, so trailing punctuation
+// belongs to it: [a](https://a.com/?q=wow!). undefined when that ")" is missing.
+function maskedEnd(url: string): number | undefined {
+  let depth = 0;
+  for (let i = 0; i < url.length; i++) {
+    if (url[i] === "(") depth++;
+    else if (url[i] === ")" && depth-- === 0) return i;
+  }
+  return undefined;
 }
 
 export function countUrls(content: string): number {
@@ -100,11 +119,12 @@ export function siteName(url: string): string {
 // repeats is numbered (bchagas 1, bchagas 2) so the links can be told apart.
 export function wrapUrls(content: string, { named = false, untrack = false }: FormatOptions = {}): string {
   const found = [...content.matchAll(URL_IN_TEXT)].map((m) => {
-    const trimmed = trimUrl(m[0]);
-    const url = untrack ? stripTracking(trimmed) : trimmed;
     const offset = m.index;
     const wrapped = content[offset - 1] === "<";
     const masked = content.slice(offset - 2, offset) === "](";
+    const end = masked ? maskedEnd(m[0]) : undefined;
+    const trimmed = end === undefined ? trimUrl(m[0]) : m[0].slice(0, end);
+    const url = untrack ? stripTracking(trimmed) : trimmed;
     return { url, rest: m[0].slice(trimmed.length), wrapped, name: named && !wrapped && !masked ? siteName(url) : "" };
   });
 
@@ -124,13 +144,14 @@ export function wrapUrls(content: string, { named = false, untrack = false }: Fo
   });
 }
 
-// What gets pasted: the text applies to a single URL; content with several URLs (a
-// list of links, a message) has each one wrapped and the text ignored.
+// What gets pasted: the text applies to a single URL, which keeps its own text when it
+// is a masked link; content with several URLs (a list of links, a message) has each
+// one wrapped and the text ignored.
 export function formatContent(text: string, content: string, options: FormatOptions = {}): string | undefined {
   let single = cleanUrl(content);
   if (single) {
     if (options.untrack) single = stripTracking(single);
-    return formatLink(text || (options.named ? siteName(single) : ""), single);
+    return formatLink(text || maskedText(content) || (options.named ? siteName(single) : ""), single);
   }
   if (!content.trim()) {
     const typed = text.trim();
