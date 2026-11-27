@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mash",
+  "title": "Mash",
+  "description": "Search your coding agents' chats and the decisions and notes Mash remembers from them, using the Mash command-line tool.",
+  "icon": "mash.png",
+  "platforms": [
+    "macOS"
+  ],
+  "author": "james_ko",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Mash",
+      "subtitle": "Mash",
+      "description": "Find past chats with your coding agents on this machine, as you type.",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "history",
+        "chats",
+        "agents",
+        "claude",
+        "codex",
+        "copilot",
+        "cursor",
+        "opencode",
+        "antigravity"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Words",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "memory",
+      "title": "Search Memory",
+      "subtitle": "Mash",
+      "description": "Find the decisions, preferences and notes Mash remembers from your chats, with the quotes behind them.",
+      "mode": "view",
+      "keywords": [
+        "memory",
+        "decisions",
+        "preferences",
+        "remember",
+        "why"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mashPath",
+      "title": "Mash Executable",
+      "description": "Choose the mash program if it is somewhere unusual. Leave it unset to look in the usual install locations.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "subagentMatches",
+      "title": "Subagent Chats",
+      "label": "Include matches in subagent chats",
+      "description": "Also show search matches in chats your agents started for their own subtasks. They are left out otherwise, and the recent chats list never shows them.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "packageManager": "npm@11.17.0",
+  "dependencies": {
+    "@raycast/api": "2.11.1",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "10.14.0",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
+  }
+}

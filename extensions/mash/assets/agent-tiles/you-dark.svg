@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- The reader's own mark beside their messages: a person on a neutral tile, drawn like the agents' tiles. The person is Phosphor Icons' "user" (fill), MIT; see LICENSE-phosphor-icons. -->
+  <rect width="24" height="24" rx="6" fill="#6b6963"/>
+  <g transform="translate(5.000 5.000) scale(0.0547)" fill="#f3efe6"><path
+    d="M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z"/></g>
+</svg>

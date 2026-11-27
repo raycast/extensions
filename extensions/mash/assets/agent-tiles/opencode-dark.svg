@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- The agent's logo on a tile in its colour, as the Mash dashboard draws it. Generated from assets/agents/opencode.svg. -->
+  <rect width="24" height="24" rx="6" fill="#3e5c76"/>
+  <g transform="translate(5.000 5.000) scale(0.5833)" fill="#ffffff"><path d="M16 6H8v12h8V6zm4 16H4V2h16v20z"></path></g>
+</svg>
