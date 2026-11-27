@@ -3,30 +3,24 @@ import { StationsV2Response, TravelAdvice } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 
 const PREF_NS_API_KEY = "ns-api-key";
-const PREF_SEARCH_RESULT_LIMIT = "result-limit";
 
 const BASE_URL = "https://gateway.apiportal.ns.nl";
 
 /**
- * This function is used to search for stations.
- *
- * @param {string} q - The query string to search for stations.
- *
- * @return {Promise<StationsV2Response>} - A promise that resolves to the response of the station search.
+ * Fetches the full list of plannable stations (~800 entries) in one request.
+ * An empty `q` makes the API return every station and ignore `limit`.
+ * The result is cached by useFetch, so later launches render instantly from
+ * cache and revalidate in the background. Filtering happens locally in the
+ * dropdown, which also works in launchers without live dropdown search.
  */
-export function useStationSearch(q: string) {
-  const limit = getPreferenceValues()[PREF_SEARCH_RESULT_LIMIT];
-  return useFetch<StationsV2Response>(
-    `${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&limit=${limit}&q=${encodeURIComponent(q)}`,
-    {
-      method: "GET",
-      headers: {
-        "Cache-Control": "no-cache",
-        "Ocp-Apim-Subscription-Key": getPreferenceValues()[PREF_NS_API_KEY],
-      },
-      keepPreviousData: true,
+export function useStations() {
+  return useFetch<StationsV2Response>(`${BASE_URL}/nsapp-stations/v2?includeNonPlannableStations=false&q=`, {
+    method: "GET",
+    headers: {
+      "Cache-Control": "no-cache",
+      "Ocp-Apim-Subscription-Key": getPreferenceValues()[PREF_NS_API_KEY],
     },
-  );
+  });
 }
 
 /**

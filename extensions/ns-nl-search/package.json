@@ -1,11 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ns-nl-search",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "title": "Netherlands Railways Train Search",
   "description": "Plan train journeys in the Netherlands with NS (Dutch Railways): search trips, schedules and real-time updates between stations.",
   "icon": "ns.png",
   "author": "flaticols",
+  "contributors": [
+    "pasteley"
+  ],
   "categories": [
     "Other"
   ],
@@ -25,14 +28,6 @@
       "type": "textfield",
       "title": "NS API Key",
       "description": "Your NS API key"
-    },
-    {
-      "name": "result-limit",
-      "default": "7",
-      "type": "textfield",
-      "title": "Search Result Limit",
-      "description": "How many results will be shown in search",
-      "required": true
     },
     {
       "name": "save-last-used",

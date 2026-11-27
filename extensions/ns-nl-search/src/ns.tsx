@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, LocalStorage, useNavigation } from "@raycast/api";
-import { useStationSearch } from "./api/client";
+import { useStations } from "./api/client";
+import { Station } from "./api/types";
 import { Trips } from "./components/Trips";
 
 export type Trip = {
@@ -16,56 +17,39 @@ interface Preferences {
 const STORAGE_KEYS = { FROM: "lastSelectedFrom", TO: "lastSelectedTo" } as const;
 const DEFAULTS = { FROM: "Amsterdam Centraal", TO: "Rotterdam Centraal" } as const;
 
-type StationData = { payload: { UICCode: string; namen?: { lang?: string } }[] } | undefined;
+type Selection = { from: string; to: string };
 
-function findStationCode(stations: StationData, name: string): string | null {
-  return stations?.payload.find((s) => s.namen?.lang === name)?.UICCode || null;
-}
-
-function findStationName(stations: StationData, code: string): string {
-  return stations?.payload.find((s) => s.UICCode === code)?.namen?.lang || code;
+function stationName(station: Station): string {
+  return station.namen?.lang || station.UICCode;
 }
 
 interface StationDropdownProps {
   id: string;
   title: string;
-  isReady: boolean;
   isLoading: boolean;
   defaultValue?: string;
-  stations: StationData;
-  onSearchTextChange: (text: string) => void;
+  stations: Station[];
   onChange: (value: string) => void;
 }
 
-function StationDropdown({
-  id,
-  title,
-  isReady,
-  isLoading,
-  defaultValue,
-  stations,
-  onSearchTextChange,
-  onChange,
-}: StationDropdownProps) {
+function StationDropdown({ id, title, isLoading, defaultValue, stations, onChange }: StationDropdownProps) {
   return (
     <Form.Dropdown
       id={id}
       title={title}
       filtering
-      throttle
-      onSearchTextChange={onSearchTextChange}
-      onChange={onChange}
-      isLoading={!isReady || isLoading}
+      isLoading={isLoading}
       defaultValue={defaultValue}
+      onChange={onChange}
     >
-      {isReady &&
-        (stations?.payload || []).map((station) => (
-          <Form.Dropdown.Item
-            key={station.UICCode}
-            value={station.UICCode}
-            title={station.namen?.lang || station.UICCode}
-          />
-        ))}
+      {stations.map((station) => (
+        <Form.Dropdown.Item
+          key={station.UICCode}
+          value={station.UICCode}
+          title={stationName(station)}
+          keywords={[station.code, ...(station.synoniemen ?? [])].filter((k): k is string => Boolean(k))}
+        />
+      ))}
     </Form.Dropdown>
   );
 }
@@ -74,57 +58,48 @@ export default function Command() {
   const { push } = useNavigation();
   const { "save-last-used": saveLastUsed } = getPreferenceValues<Preferences>();
 
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [queries, setQueries] = useState({ from: "", to: "" });
-  const [defaults, setDefaults] = useState<{ from: string | null; to: string | null } | null>(null);
-  const [selected, setSelected] = useState<{ from: string | null; to: string | null }>({ from: null, to: null });
+  const { data, isLoading } = useStations();
+  const stations = useMemo(() => data?.payload ?? [], [data]);
+
+  const { codeByName, nameByCode } = useMemo(() => {
+    const codeByName = new Map<string, string>();
+    const nameByCode = new Map<string, string>();
+    for (const station of stations) {
+      const name = stationName(station);
+      if (!codeByName.has(name)) codeByName.set(name, station.UICCode);
+      nameByCode.set(station.UICCode, name);
+    }
+    return { codeByName, nameByCode };
+  }, [stations]);
+
+  const [savedNames, setSavedNames] = useState<Selection | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
   const [swapKey, setSwapKey] = useState(0);
 
+  // Load the last used station names (names, not codes: codes may change).
   useEffect(() => {
-    async function initialize() {
-      let fromName: string = DEFAULTS.FROM;
-      let toName: string = DEFAULTS.TO;
-
-      if (saveLastUsed) {
-        [fromName, toName] = await Promise.all([
-          LocalStorage.getItem<string>(STORAGE_KEYS.FROM).then((v) => v || DEFAULTS.FROM),
-          LocalStorage.getItem<string>(STORAGE_KEYS.TO).then((v) => v || DEFAULTS.TO),
-        ]);
-      }
-
-      setQueries({ from: fromName, to: toName });
-      setIsInitialized(true);
+    if (!saveLastUsed) {
+      setSavedNames({ from: DEFAULTS.FROM, to: DEFAULTS.TO });
+      return;
     }
-    initialize();
+    Promise.all([LocalStorage.getItem<string>(STORAGE_KEYS.FROM), LocalStorage.getItem<string>(STORAGE_KEYS.TO)]).then(
+      ([from, to]) => setSavedNames({ from: from || DEFAULTS.FROM, to: to || DEFAULTS.TO }),
+    );
   }, [saveLastUsed]);
 
-  const { data: fromStations, isLoading: fromLoading } = useStationSearch(isInitialized ? queries.from : "");
-  const { data: toStations, isLoading: toLoading } = useStationSearch(isInitialized ? queries.to : "");
-
+  // Once both the station list and the saved names are known, resolve the initial selection.
   useEffect(() => {
-    if (defaults === null && fromStations && toStations) {
-      setDefaults({
-        from: findStationCode(fromStations, queries.from),
-        to: findStationCode(toStations, queries.to),
-      });
-    }
-  }, [fromStations, toStations, defaults, queries]);
-
-  const isReady = isInitialized && defaults !== null;
+    if (selection !== null || savedNames === null || stations.length === 0) return;
+    const resolve = (name: string, fallback: string) =>
+      codeByName.get(name) ?? codeByName.get(fallback) ?? stations[0].UICCode;
+    setSelection({ from: resolve(savedNames.from, DEFAULTS.FROM), to: resolve(savedNames.to, DEFAULTS.TO) });
+  }, [selection, savedNames, stations, codeByName]);
 
   const reverseStations = useCallback(() => {
-    const fromCode = selected.from || defaults?.from;
-    const toCode = selected.to || defaults?.to;
-    if (!fromCode || !toCode) return;
-
-    const fromName = findStationName(fromStations, fromCode);
-    const toName = findStationName(toStations, toCode);
-
-    setQueries({ from: toName, to: fromName });
-    setDefaults({ from: toCode, to: fromCode });
-    setSelected({ from: toCode, to: fromCode });
+    if (!selection) return;
+    setSelection({ from: selection.to, to: selection.from });
     setSwapKey((k) => k + 1);
-  }, [selected, defaults, fromStations, toStations]);
+  }, [selection]);
 
   const searchTrips = useCallback(
     async (val: Form.Values) => {
@@ -132,9 +107,11 @@ export default function Command() {
       const toCode = val["to"];
 
       if (saveLastUsed) {
+        const fromName = nameByCode.get(fromCode);
+        const toName = nameByCode.get(toCode);
         await Promise.all([
-          LocalStorage.setItem(STORAGE_KEYS.FROM, findStationName(fromStations, fromCode)),
-          LocalStorage.setItem(STORAGE_KEYS.TO, findStationName(toStations, toCode)),
+          fromName && LocalStorage.setItem(STORAGE_KEYS.FROM, fromName),
+          toName && LocalStorage.setItem(STORAGE_KEYS.TO, toName),
         ]);
       }
 
@@ -147,13 +124,16 @@ export default function Command() {
         />,
       );
     },
-    [fromStations, toStations, saveLastUsed, push],
+    [nameByCode, saveLastUsed, push],
   );
 
   const now = new Date();
+  // Render items only once the initial selection is resolved, so defaultValue applies on first mount.
+  const visibleStations = selection ? stations : [];
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Search Trips" onSubmit={searchTrips} />
@@ -167,26 +147,22 @@ export default function Command() {
       }
     >
       <StationDropdown
-        key={`from-${swapKey}`}
+        key={`from-${swapKey}-${selection ? "ready" : "loading"}`}
         id="from"
         title="From"
-        isReady={isReady}
-        isLoading={fromLoading}
-        defaultValue={defaults?.from ?? undefined}
-        stations={fromStations}
-        onSearchTextChange={(text) => setQueries((q) => ({ ...q, from: text }))}
-        onChange={(value) => setSelected((s) => ({ ...s, from: value }))}
+        isLoading={!selection}
+        defaultValue={selection?.from}
+        stations={visibleStations}
+        onChange={(value) => setSelection((s) => (s ? { ...s, from: value } : s))}
       />
       <StationDropdown
-        key={`to-${swapKey}`}
+        key={`to-${swapKey}-${selection ? "ready" : "loading"}`}
         id="to"
         title="To"
-        isReady={isReady}
-        isLoading={toLoading}
-        defaultValue={defaults?.to ?? undefined}
-        stations={toStations}
-        onSearchTextChange={(text) => setQueries((q) => ({ ...q, to: text }))}
-        onChange={(value) => setSelected((s) => ({ ...s, to: value }))}
+        isLoading={!selection}
+        defaultValue={selection?.to}
+        stations={visibleStations}
+        onChange={(value) => setSelection((s) => (s ? { ...s, to: value } : s))}
       />
 
       <Form.Separator />
