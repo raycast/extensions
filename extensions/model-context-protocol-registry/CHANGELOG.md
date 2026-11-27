@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add RZLT MCP Server] - {PR_MERGE_DATE}
+## [Add RZLT MCP Server] - 2026-11-27
 
 - Add RZLT to the official registry: services, case studies, a fit check and a free website AI-readiness check from RZLT, an AI-native growth and marketing agency, plus send_message (sends only after the user approves the text). 7 tools. Hosted Streamable HTTP server at https://mcp.rzlt.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
