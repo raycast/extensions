@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "motionvideo",
+    title: "MotionVideo",
+    description:
+      "Search the motionvideo.xyz catalog of AI-made motion videos by keyword, category, model, colour or creator, pull the original prompt behind any entry with the model and settings its creator used, and browse motion tools, agent skills and studios. Catalog tools are read-only and need no account. Hosted Streamable HTTP server at https://mcp.motionvideo.xyz/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no API key. OAuth 2.1 sign-in (dynamic client registration) with a free account adds bookmarks and featured submissions, and a MotionVideo Pro plan adds copy-ready prompts from the Moves library.",
+    icon: "https://motionvideo.xyz/brand/motionvideo-app-icon.png",
+    homepage: "https://motionvideo.xyz",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.motionvideo.xyz/mcp"],
+    },
+    remoteUrl: "https://mcp.motionvideo.xyz/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
