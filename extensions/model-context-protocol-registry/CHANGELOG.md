@@ -1,8 +1,8 @@
 # Model Context Protocol Registry Changelog
 
-## [Add ACE Music MCP Server] - {PR_MERGE_DATE}
+## [Add Ace Data Cloud media and search MCP servers] - {PR_MERGE_DATE}
 
-- Add ACE Music for generating songs, covering and blending tracks, and retrieving results through an Ace Data Cloud account.
+- Add separate install entries for the Ace Data Cloud music, image, video, speech, search and chat services. Choose the server for the task; the entries show account and billing requirements.
 
 ## [Add Klakix MCP Server] - 2026-11-27
 

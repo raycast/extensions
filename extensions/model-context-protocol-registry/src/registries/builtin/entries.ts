@@ -4680,6 +4680,150 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://acemusic.mcp.acedata.cloud/mcp",
   },
   {
+    name: "ace-suno",
+    title: "Suno by Ace Data Cloud",
+    description:
+      "Generate and extend songs, separate stems and retrieve the finished tracks. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/SunoMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://suno.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://suno.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-nano-banana",
+    title: "Nano Banana by Ace Data Cloud",
+    description:
+      "Generate images from text or edit a reference image, then retrieve the result. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/NanoBananaMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://nanobanana.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://nanobanana.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-gpt-image",
+    title: "GPT Image by Ace Data Cloud",
+    description:
+      "Generate and edit images with the image-only profile and retrieve completed results. A connected Ace Data Cloud account is required. Usage is billed to that account. Install uv to run the local image-only server.",
+    homepage: "https://github.com/AceDataCloud/OpenAIMCP",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "mcp-openai-pro==2026.11.24.0", "mcp-openai-pro", "--profile", "gpt-image"],
+      env: { ACEDATACLOUD_API_TOKEN: "YOUR_ACE_APPLICATION_TOKEN" },
+    },
+  },
+  {
+    name: "ace-seedance",
+    title: "Seedance by Ace Data Cloud",
+    description:
+      "Generate a video from text or an image and retrieve the finished clip. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/SeedanceMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://seedance.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://seedance.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-seedream",
+    title: "Seedream by Ace Data Cloud",
+    description:
+      "Create, edit or decompose images and retrieve the generated files. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/SeedreamMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://seedream.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://seedream.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-kling",
+    title: "Kling by Ace Data Cloud",
+    description:
+      "Create or extend videos, build storyboards and check task results. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/KlingMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://kling.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://kling.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-veo",
+    title: "Veo by Ace Data Cloud",
+    description:
+      "Create video from a text prompt or reference image and retrieve the result. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/VeoMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://veo.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://veo.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-hailuo",
+    title: "Hailuo by Ace Data Cloud",
+    description:
+      "Animate an image or generate a video from text and check task progress. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/HailuoMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://hailuo.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://hailuo.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-fish",
+    title: "Fish Audio by Ace Data Cloud",
+    description:
+      "Turn a script into speech and discover the available speech models. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/FishMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://fish.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://fish.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-serp",
+    title: "Google Search by Ace Data Cloud",
+    description:
+      "Find web, image, news, map and video results with location and language options. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/SerpMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://serp.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://serp.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-aichat",
+    title: "AI Chat by Ace Data Cloud",
+    description:
+      "Discover supported models and start or continue a conversation. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/AiChatMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://aichat.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://aichat.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-flux",
+    title: "FLUX by Ace Data Cloud",
+    description:
+      "Generate or edit images from prompts and retrieve completed tasks. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    homepage: "https://github.com/AceDataCloud/FluxMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://flux.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://flux.mcp.acedata.cloud/mcp",
+  },
+  {
     name: "elevenlabs",
     title: "ElevenLabs",
     description:
