@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "micompress",
+  "title": "MiCompress",
+  "description": "Compress images, PDFs, video, audio, documents & archives via micompress.com.",
+  "icon": "icon.png",
+  "author": "th_y_huy_one_champ",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional personal API key from micompress.com/account — accepts files up to 100 MB and adds a monthly allowance.",
+      "type": "password",
+      "required": false,
+      "placeholder": "mc_…"
+    }
+  ],
+  "commands": [
+    {
+      "name": "compress-file",
+      "title": "Compress File",
+      "subtitle": "MiCompress",
+      "description": "Compress image, PDF, video, audio, document or archive files.",
+      "mode": "view",
+      "keywords": [
+        "compress",
+        "optimize",
+        "shrink",
+        "image",
+        "pdf",
+        "video"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
