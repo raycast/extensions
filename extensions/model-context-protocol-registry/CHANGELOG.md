@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Infograph MCP Server] - 2026-11-27
+
+- Add Infograph to the official registry: ask questions about your own business data and build live dashboards from it. Infograph syncs your apps, databases and spreadsheets into one private data lake, and the server lets your AI run read-only SQL across all of it. Hosted Streamable HTTP server at https://app.infograph.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Works with a free Infograph account.
+
 ## [Add GEOboom MCP Server] - 2026-11-27
 
 - Add GEOboom to the official registry: run link building and mention outreach (prospecting, publisher threads, placements and link rechecks) from your AI assistant. Hosted Streamable HTTP server at https://api.geoboom.io/mcp with OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GEOboom account.
