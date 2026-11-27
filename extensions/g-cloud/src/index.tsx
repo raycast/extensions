@@ -9,11 +9,15 @@ import {
   Form,
   useNavigation,
   Color,
+  Keyboard,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { ProjectDropdown } from "./components/ProjectDropdown";
+import { PinnedProjectsView } from "./components/PinnedProjectsView";
 import { CacheManager, RecentResource, ResourceType, ServiceCounts } from "./utils/CacheManager";
 import { authenticateWithBrowser, clearCommandCache, fetchResourceCounts } from "./gcloud";
 import { clearTokenCache } from "./utils/gcpApi";
@@ -21,11 +25,12 @@ import { detectGcloudPath, getInstallInstructions, getPlatform } from "./utils/g
 import DoctorView from "./components/DoctorView";
 
 // Service views
-import { StorageBucketView } from "./services/storage";
+import { StorageBucketView, StorageObjectsView } from "./services/storage";
 import { ComputeInstancesView } from "./services/compute";
 import IAMView from "./services/iam/IAMView";
 import NetworkView from "./services/network/NetworkView";
 import SecretListView from "./services/secrets/SecretListView";
+import SecretDetailView from "./services/secrets/SecretDetailView";
 import { CloudRunView } from "./services/cloudrun";
 import { CloudFunctionsView } from "./services/cloudfunctions";
 import { CloudSqlView } from "./services/cloudsql";
@@ -95,7 +100,8 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
   const [gcloudPath, setGcloudPath] = useState<string>(configuredGcloudPath || "gcloud");
 
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [recentResources, setRecentResources] = useState<RecentResource[]>([]);
+  const [pinnedProjects, setPinnedProjects] = useState<string[]>(() => CacheManager.getPinnedProjects());
+  const [recentResources, setRecentResources] = useState<RecentResource[]>(() => CacheManager.getRecentResources());
   const [serviceCounts, setServiceCounts] = useState<ServiceCounts | null>(null);
   const [isLoadingCounts, setIsLoadingCounts] = useState(false);
 
@@ -112,11 +118,8 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     };
   }, []);
 
-  // Load recent resources
-  useEffect(() => {
-    const recent = CacheManager.getRecentResources();
-    setRecentResources(recent);
-  }, []);
+  // Service views can record resources while the Hub remains mounted in the navigation stack.
+  useEffect(() => CacheManager.subscribeToRecentResources(setRecentResources), []);
 
   // Load service counts when project changes
   useEffect(() => {
@@ -265,6 +268,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         showToast({ style: Toast.Style.Failure, title: "No project selected" });
         return;
       }
+      CacheManager.trackServiceUsage(serviceId);
       push(
         <ServiceViewContainer
           serviceId={serviceId}
@@ -280,6 +284,19 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
   const handleRecentResourceSelect = useCallback(
     (resource: RecentResource) => {
       handleProjectChange(resource.projectId);
+      CacheManager.saveRecentResource(resource);
+      setRecentResources(CacheManager.getRecentResources());
+
+      if (resource.type === "storage") {
+        push(<StorageObjectsView projectId={resource.projectId} gcloudPath={gcloudPath} bucketName={resource.name} />);
+        return;
+      }
+
+      if (resource.type === "secrets") {
+        push(<SecretDetailView secretId={resource.id} projectId={resource.projectId} gcloudPath={gcloudPath} />);
+        return;
+      }
+
       push(
         <ServiceViewContainer
           serviceId={resource.type}
@@ -291,6 +308,63 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     },
     [gcloudPath, push, handleProjectChange],
   );
+
+  const handleRemoveRecentResource = useCallback(async (resource: RecentResource) => {
+    const confirmed = await confirmAlert({
+      title: "Remove from Quick Access",
+      message: `Remove "${resource.name}" from Quick Access?`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    const updated = CacheManager.removeRecentResource(resource.id, resource.type, resource.projectId);
+    setRecentResources(updated);
+    showToast({ style: Toast.Style.Success, title: "Removed from Quick Access", message: resource.name });
+  }, []);
+
+  const handleClearRecentResources = useCallback(async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear Quick Access",
+      message: "Remove all recent resources from Quick Access? This cannot be undone.",
+      primaryAction: {
+        title: "Clear All",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    CacheManager.clearRecentResources();
+    setRecentResources([]);
+    showToast({ style: Toast.Style.Success, title: "Quick Access cleared" });
+  }, []);
+
+  const isSelectedProjectPinned = Boolean(selectedProject && pinnedProjects.includes(selectedProject));
+
+  const handleTogglePinCurrentProject = useCallback(() => {
+    if (!selectedProject) return;
+    const { pinned, pinnedProjects: updated } = CacheManager.togglePinnedProject(selectedProject);
+    setPinnedProjects(updated);
+    showToast({
+      style: Toast.Style.Success,
+      title: pinned ? "Project pinned" : "Project unpinned",
+      message: selectedProject,
+    });
+  }, [selectedProject]);
+
+  const openManagePinnedProjects = useCallback(() => {
+    push(
+      <PinnedProjectsView
+        gcloudPath={gcloudPath}
+        selectedProject={selectedProject}
+        pinnedProjects={pinnedProjects}
+        onPinnedChange={setPinnedProjects}
+        onSelectProject={handleProjectChange}
+      />,
+    );
+  }, [gcloudPath, selectedProject, pinnedProjects, push, handleProjectChange]);
 
   function authenticate() {
     push(
@@ -409,13 +483,32 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
   }
 
   // Main Hub View
+  const projectPinActions = (
+    <ActionPanel.Section title="Projects">
+      {selectedProject && (
+        <Action
+          title={isSelectedProjectPinned ? "Unpin Current Project" : "Pin Current Project"}
+          icon={isSelectedProjectPinned ? Icon.PinDisabled : Icon.Pin}
+          shortcut={Keyboard.Shortcut.Common.Pin}
+          onAction={handleTogglePinCurrentProject}
+        />
+      )}
+      <Action title="Manage Pinned Projects" icon={Icon.List} onAction={openManagePinnedProjects} />
+    </ActionPanel.Section>
+  );
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search services and resources..."
       navigationTitle="Google Cloud"
       searchBarAccessory={
-        <ProjectDropdown gcloudPath={gcloudPath} value={selectedProject} onChange={handleProjectChange} />
+        <ProjectDropdown
+          gcloudPath={gcloudPath}
+          value={selectedProject}
+          onChange={handleProjectChange}
+          pinnedProjects={pinnedProjects}
+        />
       }
       actions={
         <ActionPanel>
@@ -425,6 +518,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={refreshAll}
           />
+          {projectPinActions}
           <Action title="Switch Account" icon={Icon.Person} onAction={loginWithDifferentAccount} />
           {selectedProject && (
             <ActionPanel.Section title="Cloud Shell">
@@ -460,6 +554,23 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     content={resource.name}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
+                  <ActionPanel.Section title="Quick Access">
+                    <Action
+                      title="Remove from Quick Access"
+                      icon={Icon.XMarkCircle}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                      onAction={() => handleRemoveRecentResource(resource)}
+                    />
+                    <Action
+                      title="Clear Quick Access"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                      onAction={handleClearRecentResources}
+                    />
+                  </ActionPanel.Section>
+                  {projectPinActions}
                   {selectedProject && (
                     <ActionPanel.Section title="Cloud Shell">
                       <CloudShellAction projectId={selectedProject} />
@@ -474,7 +585,14 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
       )}
 
       {/* Services Section */}
-      <List.Section title="Services" subtitle={selectedProject ? `Project: ${selectedProject}` : "Select a project"}>
+      <List.Section
+        title="Services"
+        subtitle={
+          selectedProject
+            ? `Project: ${selectedProject}${isSelectedProjectPinned ? " (Pinned)" : ""}`
+            : "Select a project"
+        }
+      >
         {SERVICES.map((service) => {
           // logs service doesn't have a count (it's a query service)
           const count =
@@ -505,6 +623,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={refreshAll}
                   />
+                  {projectPinActions}
                   {selectedProject && (
                     <ActionPanel.Section title="Cloud Shell">
                       <CloudShellAction projectId={selectedProject} />

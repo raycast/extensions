@@ -24,6 +24,7 @@ import {
   CreateCloudRunServiceOptions,
 } from "../../utils/gcpApi";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { LogsView } from "../logs-service";
 import { ApiErrorView } from "../../components/ApiErrorView";
@@ -161,7 +162,21 @@ export default function CloudRunView({ projectId, gcloudPath, onProjectChange }:
     return { location, serviceName, image, minInstances, maxInstances };
   }
 
+  function recordRecentService(service: CloudRunService) {
+    const { location, serviceName } = extractServiceInfo(service);
+    CacheManager.saveRecentResource({
+      id: `${location}/${serviceName}`,
+      type: "cloudrun",
+      name: serviceName,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/run/detail/${location}/${serviceName}?project=${projectId}`,
+      metadata: { location },
+    });
+  }
+
   function viewRevisions(service: CloudRunService) {
+    recordRecentService(service);
     const { location, serviceName } = extractServiceInfo(service);
     push(<RevisionsView projectId={projectId} gcloudPath={gcloudPath} location={location} serviceName={serviceName} />);
   }
@@ -208,6 +223,7 @@ export default function CloudRunView({ projectId, gcloudPath, onProjectChange }:
   }
 
   function viewServiceDetails(service: CloudRunService) {
+    recordRecentService(service);
     const { location, serviceName, image, minInstances, maxInstances } = extractServiceInfo(service);
     const status = getServiceStatus(service);
 

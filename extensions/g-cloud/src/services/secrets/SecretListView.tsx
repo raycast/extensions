@@ -16,6 +16,7 @@ import { SecretManagerService, Secret } from "./SecretManagerService";
 import SecretDetailView from "./SecretDetailView";
 import CreateSecretForm from "./components/CreateSecretForm";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
 import { CloudShellAction } from "../../components/CloudShellAction";
@@ -172,6 +173,14 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
     });
 
     if (confirmed) {
+      CacheManager.saveRecentResource({
+        id: secretId,
+        type: "secrets",
+        name: secretId,
+        projectId,
+        accessedAt: Date.now(),
+        consoleUrl: `https://console.cloud.google.com/security/secret-manager/secret/${secretId}/versions?project=${projectId}`,
+      });
       const loadingToast = showToast({
         style: Toast.Style.Animated,
         title: "Accessing secret...",
@@ -220,6 +229,14 @@ export default function SecretListView({ projectId, gcloudPath, onProjectChange 
 
   const handleViewDetails = (secret: Secret) => {
     const secretId = SecretManagerService.extractSecretId(secret.name);
+    CacheManager.saveRecentResource({
+      id: secretId,
+      type: "secrets",
+      name: secretId,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/security/secret-manager/secret/${secretId}/versions?project=${projectId}`,
+    });
     push(<SecretDetailView secretId={secretId} projectId={projectId} gcloudPath={gcloudPath} />);
   };
 
