@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "corsair",
+    title: "Corsair",
+    description:
+      "Connect your assistant to Gmail, Slack, GitHub, Notion, Linear and 700+ more apps through one URL. Search the data synced from your apps, read and act in them, and set up routines, with your own rules deciding which changes wait for your approval. Built-in issues, CRM, files and memory. Official server run by Corsair. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Corsair account is required and free to start. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://corsair.dev/corsair-logo.png",
+    homepage: "https://corsair.dev/?utm_source=raycast-mcp-registry&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.corsair.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.corsair.dev/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
