@@ -156,7 +156,7 @@ export function parseWorkflow(file: string, defaultZone: string): Omit<FoundWork
     outDir: input("out-dir") ?? "glancecard",
     setup: {
       // In any step: a profile kept apart from the repositories has a step of its own.
-      profile: /^\s*profile:[ \t]*["']?[A-Za-z0-9]/m.test(text),
+      profile: /^\s*profile:[ \t]*["']?[^\s"'#]/m.test(text),
       repos,
       choice: {
         ...choiceOfTheme(input("theme")),

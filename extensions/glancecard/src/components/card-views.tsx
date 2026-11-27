@@ -16,7 +16,8 @@ import {
 } from "@raycast/api";
 import { REPO_SECTIONS } from "glancecard";
 import { STARS } from "glancecard/setup";
-import { execFile, spawn } from "node:child_process";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { spawn } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
@@ -176,11 +177,7 @@ function CardActions({ card, look, options, setOptions, onRefresh, show, onSide 
             try {
               await open(exportFile(card, look, options), await defaultBrowser());
             } catch (error) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Could not open the card",
-                message: error instanceof Error ? error.message : String(error),
-              });
+              await showFailureToast(error, { title: "Could not open the card" });
             }
           }}
         />
@@ -302,14 +299,14 @@ function quickLook(file: string) {
  * The app that opens web links, asked of macOS: Raycast's getDefaultApplication answers for files
  * and folders only. Without an answer, the card opens in whatever opens an SVG.
  */
-function defaultBrowser(): Promise<string | undefined> {
+async function defaultBrowser(): Promise<string | undefined> {
   const script =
     'ObjC.import("AppKit"); $.NSWorkspace.sharedWorkspace.URLForApplicationToOpenURL($.NSURL.URLWithString("https://github.com")).path.js';
-  return new Promise((resolve) =>
-    execFile("osascript", ["-l", "JavaScript", "-e", script], { timeout: 5000 }, (error, stdout) =>
-      resolve(error ? undefined : stdout.trim() || undefined),
-    ),
-  );
+  try {
+    return (await runAppleScript(script, { language: "JavaScript", timeout: 5000 })).trim() || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** `file`, or `file` with " 2", " 3"… before its extension when it is taken: a save never overwrites. */
