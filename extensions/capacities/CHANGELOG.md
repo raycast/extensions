@@ -1,6 +1,6 @@
 # Capacities Changelog
 
-## [Fix README links] - {PR_MERGE_DATE}
+## [Fix README links] - 2026-11-27
 
 - Fix the task-management and FAQ links and the tip block, and link the Capacities docs guide.
 
