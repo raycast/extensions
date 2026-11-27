@@ -1740,6 +1740,7 @@
 /extensions/mac-fan-control                                         @triuzzi
 /extensions/mac-mouse-fix                                           @marcjulianschwarz
 /extensions/mac-network-location-changer                            @rfscouto
+/extensions/mac-performance-monitor                                 @SARRAF-5757
 /extensions/mach-triage                                             @mwhobrey
 /extensions/macos-appearance-changer                                @neo773
 /extensions/macos-tweaks                                            @gfazioli
