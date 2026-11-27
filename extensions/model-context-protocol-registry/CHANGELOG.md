@@ -1,7 +1,7 @@
 # Model Context Protocol Registry Changelog
 
 
-## [Add Valkiria MCP Server] - {PR_MERGE_DATE}
+## [Add Valkiria MCP Server] - 2026-11-27
 
 - Add Valkiria to the official registry: ask about the ad accounts connected to your Valkiria workspace (spend, results, campaign health), draft campaigns and propose changes that wait for your approval in Valkiria. Hosted Streamable HTTP server at https://valkiria.pro/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) through `mcp-remote`.
 ## [Add Ace Data Cloud media and search MCP servers] - 2026-11-27
