@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cleanshotz",
+  "title": "CleanShotZ",
+  "description": "Screenshots, recordings, text recognition and color picking with CleanShotZ, the free and open source screenshot app.",
+  "icon": "icon.png",
+  "author": "houseofmackee",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "CleanShotZ",
+      "description": "Select an area of the screen and capture it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-previous-area",
+      "title": "Capture Previous Area",
+      "subtitle": "CleanShotZ",
+      "description": "Capture the last selected area again.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "CleanShotZ",
+      "description": "Capture the display under the pointer.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "CleanShotZ",
+      "description": "Pick a window and capture it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "self-timer",
+      "title": "Self-Timer",
+      "subtitle": "CleanShotZ",
+      "description": "Select an area, then capture it after a countdown.",
+      "mode": "no-view"
+    },
+    {
+      "name": "scrolling-capture",
+      "title": "Scrolling Capture",
+      "subtitle": "CleanShotZ",
+      "description": "Capture content that scrolls, down or sideways.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-text",
+      "title": "Capture Text",
+      "subtitle": "CleanShotZ",
+      "description": "Select an area and copy its text (or QR code) to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pick-color",
+      "title": "Pick Color",
+      "subtitle": "CleanShotZ",
+      "description": "Click a color on the screen to copy it as hex.",
+      "mode": "no-view"
+    },
+    {
+      "name": "step-capture",
+      "title": "Step Capture",
+      "subtitle": "CleanShotZ",
+      "description": "Capture the window under the pointer at every click, for a step-by-step guide. Run again to finish.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-screen",
+      "title": "Record Screen",
+      "subtitle": "CleanShotZ",
+      "description": "Start a screen recording, or stop the one in progress.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-history",
+      "title": "Open Capture History",
+      "subtitle": "CleanShotZ",
+      "description": "Show recent screenshots and recordings.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-recently-closed",
+      "title": "Restore Recently Closed",
+      "subtitle": "CleanShotZ",
+      "description": "Show the most recently closed Quick Access thumbnail again.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-from-clipboard",
+      "title": "Annotate Clipboard Image",
+      "subtitle": "CleanShotZ",
+      "description": "Open the image on the clipboard in the editor.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-desktop-icons",
+      "title": "Toggle Desktop Icons",
+      "subtitle": "CleanShotZ",
+      "description": "Hide or show desktop icons and widgets.",
+      "mode": "no-view"
+    },
+    {
+      "name": "annotate-selection",
+      "title": "Annotate Selected File",
+      "subtitle": "CleanShotZ",
+      "description": "Open the image selected in Finder in the CleanShotZ editor.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pin-selection",
+      "title": "Pin Selected File",
+      "subtitle": "CleanShotZ",
+      "description": "Pin the image selected in Finder to the screen.",
+      "mode": "no-view"
+    },
+    {
+      "name": "run-pipeline",
+      "title": "Run Pipeline on Selected File",
+      "subtitle": "CleanShotZ",
+      "description": "Run a pipeline from the CleanShotZ settings on the image selected in Finder.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "pipeline",
+          "placeholder": "Pipeline",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

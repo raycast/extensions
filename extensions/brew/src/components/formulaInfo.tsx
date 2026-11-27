@@ -133,7 +133,7 @@ export function FormulaInfo(props: {
           isInstalled={props.isInstalled}
           onAction={(result) => {
             pop();
-            props.onAction(result);
+            return props.onAction(result);
           }}
         />
       }

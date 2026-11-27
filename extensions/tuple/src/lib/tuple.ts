@@ -271,6 +271,23 @@ export function hangUpCall(): Promise<void> {
   return runTupleAction(["call", "leave"]);
 }
 
+/** Ask Tuple to stop sending the webcam on this call. Tuple acknowledges before it acts. */
+export async function stopWebcam(callId: string): Promise<void> {
+  try {
+    await runTupleAction(["webcam", "stop", "--call", callId]);
+  } catch (error) {
+    const tupleError = classifyError(error);
+    if (tupleError.message.startsWith('unknown command "webcam"')) {
+      throw new TupleError(
+        TupleErrorKind.CapabilityUnavailable,
+        "Update Tuple to stop your webcam from Raycast.",
+        tupleError.detail,
+      );
+    }
+    throw tupleError;
+  }
+}
+
 export function startCapture(): Promise<void> {
   return runTupleAction(["capture", "start"]);
 }

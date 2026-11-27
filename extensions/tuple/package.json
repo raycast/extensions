@@ -76,6 +76,12 @@
       "mode": "no-view"
     },
     {
+      "name": "stop-webcam",
+      "title": "Stop Webcam",
+      "description": "Ask Tuple to stop sharing your webcam in the active call.",
+      "mode": "no-view"
+    },
+    {
       "name": "hang-up",
       "title": "End Call",
       "description": "Hang up the active call.",

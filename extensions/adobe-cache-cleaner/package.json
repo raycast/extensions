@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adobe-cache-cleaner",
+  "title": "Adobe Cache Cleaner",
+  "description": "Find and purge Adobe caches like the After Effects disk cache, media cache and Photoshop scratch files, with sizes per app.",
+  "icon": "extension-icon.png",
+  "author": "dimik",
+  "categories": [
+    "System",
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "manage-adobe-caches",
+      "title": "Manage Adobe Caches",
+      "description": "See every Adobe cache with its size and purge them one by one or all at once.",
+      "mode": "view",
+      "keywords": [
+        "after effects",
+        "premiere",
+        "photoshop",
+        "media cache",
+        "disk cache",
+        "purge",
+        "clear",
+        "clean"
+      ]
+    },
+    {
+      "name": "purge-adobe-caches",
+      "title": "Purge All Adobe Caches",
+      "description": "Purge every Adobe cache at once, with confirmation before permanent deletion and warnings about open apps.",
+      "mode": "no-view",
+      "keywords": [
+        "after effects",
+        "premiere",
+        "photoshop",
+        "media cache",
+        "disk cache",
+        "purge",
+        "clear",
+        "clean"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useTrash",
+      "title": "Deletion",
+      "label": "Move to Trash instead of deleting permanently",
+      "description": "Off: cache files are deleted permanently and the space is freed at once. On: they go to the Trash, and the space is only freed after you empty it.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "confirmPermanentDelete",
+      "title": "Confirmation",
+      "label": "Ask before deleting permanently",
+      "description": "Shows a confirmation before cache files are deleted permanently. The warning about open Adobe apps is always shown.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "detectFromAdobePrefs",
+      "title": "Auto-Detect",
+      "label": "Read cache locations from Adobe preferences",
+      "description": "Picks up custom Media Cache and After Effects Disk Cache folders you set inside the Adobe apps (from com.Adobe.Common *.plist and the After Effects Prefs.txt files).",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "customFolders",
+      "title": "Extra Cache Folders",
+      "description": "Semicolon-separated folders whose contents should be purged too. Use the Copy Detected Locations action to grab the paths Adobe's preferences point to. These count as unsafe while any Adobe app is open.",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "placeholder": "/Volumes/Cache SSD/Ae Cache; ~/Movies/Old Previews"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

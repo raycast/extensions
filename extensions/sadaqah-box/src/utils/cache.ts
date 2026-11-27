@@ -1,29 +1,21 @@
 /**
  * Caching utilities using Raycast Cache API
- * Provides caching for API responses to improve performance
+ * Provides TTL-based caching with a persisted key index so prefix invalidation works across command runs
  */
 
 import { Cache } from "@raycast/api";
 
 const cache = new Cache();
+const KEY_INDEX = "__cache_keys__";
 
-// Cache TTL in milliseconds
-const CACHE_TTL = {
+export const CACHE_TTL = {
   BOXES: 5 * 60 * 1000, // 5 minutes
   CURRENCIES: 60 * 60 * 1000, // 1 hour
   STATS: 2 * 60 * 1000, // 2 minutes
-  PRESETS: 30 * 1000, // 30 seconds (presets can change frequently)
   DEFAULT: 5 * 60 * 1000, // 5 minutes default
 } as const;
 
-type CacheKey =
-  | "boxes"
-  | "currencies"
-  | "currency-types"
-  | "stats"
-  | "presets"
-  | `box-${string}`
-  | `collections-${string}`;
+export type CacheKey = string;
 
 interface CacheEntry<T> {
   data: T;
@@ -31,8 +23,34 @@ interface CacheEntry<T> {
   ttl: number;
 }
 
+function readKeyIndex(): Set<string> {
+  try {
+    const raw = cache.get(KEY_INDEX);
+    if (!raw) return new Set();
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? new Set(parsed.filter((k): k is string => typeof k === "string")) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function writeKeyIndex(keys: Set<string>): void {
+  if (keys.size === 0) {
+    cache.remove(KEY_INDEX);
+  } else {
+    cache.set(KEY_INDEX, JSON.stringify(Array.from(keys)));
+  }
+}
+
 /**
- * Get cached data with type safety
+ * Build a cache key scoped to the configured API host
+ */
+export function buildCacheKey(scope: string, ...parts: Array<string | number>): string {
+  return [scope, ...parts].join(":");
+}
+
+/**
+ * Get cached data with type safety and TTL expiration
  */
 export function getCachedData<T>(key: CacheKey): T | null {
   try {
@@ -40,24 +58,20 @@ export function getCachedData<T>(key: CacheKey): T | null {
     if (!cached) return null;
 
     const entry: CacheEntry<T> = JSON.parse(cached);
-    const now = Date.now();
-
-    // Check if cache is still valid
-    if (now - entry.timestamp > entry.ttl) {
-      cache.remove(key);
+    if (Date.now() - entry.timestamp > entry.ttl) {
+      removeCachedData(key);
       return null;
     }
 
     return entry.data;
   } catch {
-    // If parsing fails, remove corrupted cache
-    cache.remove(key);
+    removeCachedData(key);
     return null;
   }
 }
 
 /**
- * Set cached data with TTL
+ * Set cached data with TTL and persist key in the index
  */
 export function setCachedData<T>(key: CacheKey, data: T, ttlMs: number = CACHE_TTL.DEFAULT): void {
   const entry: CacheEntry<T> = {
@@ -66,13 +80,43 @@ export function setCachedData<T>(key: CacheKey, data: T, ttlMs: number = CACHE_T
     ttl: ttlMs,
   };
   cache.set(key, JSON.stringify(entry));
+
+  const keys = readKeyIndex();
+  if (!keys.has(key)) {
+    keys.add(key);
+    writeKeyIndex(keys);
+  }
 }
 
 /**
- * Remove cached data
+ * Remove cached data for a single key
  */
 export function removeCachedData(key: CacheKey): void {
   cache.remove(key);
+  const keys = readKeyIndex();
+  if (keys.delete(key)) {
+    writeKeyIndex(keys);
+  }
+}
+
+/**
+ * Remove all cached entries matching a prefix across command invocations
+ */
+export function invalidateByPrefix(prefix: string): void {
+  const keys = readKeyIndex();
+  let changed = false;
+
+  for (const key of Array.from(keys)) {
+    if (key.startsWith(prefix)) {
+      cache.remove(key);
+      keys.delete(key);
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    writeKeyIndex(keys);
+  }
 }
 
 /**
@@ -90,42 +134,12 @@ export async function withCache<T>(
   fetchFn: () => Promise<T>,
   ttlMs: number = CACHE_TTL.DEFAULT,
 ): Promise<T> {
-  // Try to get from cache first
   const cached = getCachedData<T>(key);
   if (cached !== null) {
     return cached;
   }
 
-  // Fetch fresh data
   const data = await fetchFn();
-
-  // Cache the result
   setCachedData(key, data, ttlMs);
-
   return data;
 }
-
-/**
- * Invalidate cache by key pattern
- */
-export function invalidateCachePattern(): void {
-  // Note: Raycast Cache doesn't support listing keys, so we use specific invalidation
-  // This is a placeholder for future implementation if needed
-}
-
-// Preset-specific cache helpers
-export function invalidatePresetsCache(): void {
-  removeCachedData("presets");
-}
-
-export function invalidateBoxesCache(): void {
-  removeCachedData("boxes");
-  // Also invalidate individual box caches
-  // Note: In a full implementation, we'd track all box IDs
-}
-
-export function invalidateStatsCache(): void {
-  removeCachedData("stats");
-}
-
-export { CACHE_TTL };

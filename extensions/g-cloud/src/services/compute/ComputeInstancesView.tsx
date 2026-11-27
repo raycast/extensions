@@ -18,6 +18,7 @@ import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { friendlyErrorMessage } from "../../utils/errorMessages";
 import { LogsView } from "../logs-service";
 import { CloudShellAction } from "../../components/CloudShellAction";
@@ -34,9 +35,10 @@ import {
 interface ComputeInstancesViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeInstancesViewProps) {
+export default function ComputeInstancesView({ projectId, gcloudPath, onProjectChange }: ComputeInstancesViewProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [instances, setInstances] = useState<ComputeInstance[]>([]);
   const [filteredInstances, setFilteredInstances] = useState<ComputeInstance[]>([]);
@@ -389,6 +391,17 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       return;
     }
 
+    const zone = service.formatZone(instance.zone);
+    CacheManager.saveRecentResource({
+      id: instance.id || instance.name,
+      type: "compute",
+      name: instance.name,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/compute/instancesDetail/zones/${zone}/instances/${instance.name}?project=${projectId}`,
+      metadata: { zone },
+    });
+
     push(
       <ComputeInstanceDetailView
         instance={instance}
@@ -406,6 +419,16 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
     const zone = service.formatZone(instance.zone).split("/").pop() || "";
     const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${projectId}"`;
+
+    CacheManager.saveRecentResource({
+      id: instance.id || instance.name,
+      type: "compute",
+      name: instance.name,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/compute/instancesDetail/zones/${zone}/instances/${instance.name}?project=${projectId}`,
+      metadata: { zone },
+    });
 
     Clipboard.copy(command);
     showToast({
@@ -457,7 +480,14 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       searchText={searchText}
       onSearchTextChange={setSearchText}
       navigationTitle={`VM Instances - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="compute"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Create Vm Instance" icon={{ source: Icon.Plus }} onAction={createVMInstance} />

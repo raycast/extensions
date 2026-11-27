@@ -1,10 +1,22 @@
 import { confirmAlert, showHUD } from "@raycast/api";
-import { execFileSync, execSync } from "node:child_process";
+import { runPowerShellScript } from "@raycast/utils";
+import { execFile, execFileSync } from "node:child_process";
 import { platform } from "node:os";
+import { promisify } from "node:util";
+import { formatErrorHud } from "./errorSummary";
 import { getMacOSCommandsForVersion } from "./macOSCommands";
 import { runWithPrivileges, type PrivilegedCommand } from "./sudoSupport";
+import { createWindowsDnsFlusher } from "./windowsSupport";
 
-const WINDOWS_COMMAND = "ipconfig /flushdns";
+const flushWindowsDns = createWindowsDnsFlusher({
+  systemRoot: process.env.SystemRoot ?? "C:\\Windows",
+  execute: async (executable, args) => {
+    await promisify(execFile)(executable, [...args], { windowsHide: true });
+  },
+  runPowerShell: async (script, timeout) => {
+    await runPowerShellScript(script, { timeout });
+  },
+});
 
 export default async function main() {
   const osPlatform = platform();
@@ -23,13 +35,13 @@ export default async function main() {
       console.log(`🚀 Executing privileged DNS flush commands: ${commandSummary}`);
       await runWithPrivileges(commands);
     } else {
-      console.log(`🚀 Executing DNS flush command: ${WINDOWS_COMMAND}`);
-      execSync(WINDOWS_COMMAND, { stdio: "ignore" });
+      console.log("🚀 Executing DNS flush command: ipconfig /flushdns");
+      await flushWindowsDns();
     }
 
     await showHUD("✅ DNS Cache Flushed Successfully");
   } catch (error) {
-    await handleExecutionError(error, osPlatform);
+    await handleExecutionError(error);
   }
 }
 
@@ -63,21 +75,7 @@ async function getMacOSCommands(): Promise<readonly PrivilegedCommand[] | null> 
   }
 }
 
-async function handleExecutionError(error: unknown, os: string) {
-  let errorMessage = "⚠️ Error flushing DNS cache";
-
-  if (typeof error === "object" && error !== null && "stderr" in error) {
-    const stderr = (error as { stderr?: Buffer | string }).stderr?.toString() || "";
-    if (stderr) {
-      console.error(".Stderr:", stderr);
-      if (os === "win32" && stderr.includes("The requested operation requires elevation")) {
-        errorMessage = "⚠️ Run Raycast as Administrator";
-      } else {
-        errorMessage = stderr.split("\n")[0].substring(0, 64);
-      }
-    }
-  }
-
+async function handleExecutionError(error: unknown) {
   console.error("💥 Execution failed:", error);
-  await showHUD(errorMessage);
+  await showHUD(formatErrorHud(error));
 }
