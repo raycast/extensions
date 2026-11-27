@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { environment, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 export interface SearchResult {
   type: string;
@@ -19,9 +19,8 @@ export class ApiError extends Error {
   }
 }
 
-/** Returns the base URL: the local core while developing the extension, otherwise easyverein.com. */
 export function getBaseUrl(): string {
-  return environment.isDevelopment ? "http://localhost:8000" : "https://easyverein.com";
+  return "https://easyverein.com";
 }
 
 /** Identifies the instance and API key for caches, with a short hash instead of the key itself. */

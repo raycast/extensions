@@ -1326,58 +1326,6 @@
       "dynamicUrl": false
     },
     {
-      "id": "command:toggle-dark-mode",
-      "kind": "command",
-      "command": "toggle-dark-mode",
-      "label": "Dunkles Design umschalten",
-      "icon": "fa-moon",
-      "keywords": ["dark mode", "hell", "theme", "darstellung", "darkmode", "light mode", "helles design"],
-      "group": "actions",
-      "shortcut": null,
-      "hint": null,
-      "module": null,
-      "dynamicUrl": false
-    },
-    {
-      "id": "command:show-shortcuts",
-      "kind": "command",
-      "command": "show-shortcuts",
-      "label": "Tastenkürzel anzeigen",
-      "icon": "fa-keyboard",
-      "keywords": ["shortcuts", "tastatur", "hotkeys"],
-      "group": "actions",
-      "shortcut": null,
-      "hint": "Ctrl+Shift+S",
-      "module": null,
-      "dynamicUrl": false
-    },
-    {
-      "id": "command:start-tutorial",
-      "kind": "command",
-      "command": "start-tutorial",
-      "label": "Tutorial für diese Seite starten",
-      "icon": "fa-graduation-cap",
-      "keywords": ["hilfe", "anleitung", "guide"],
-      "group": "actions",
-      "shortcut": null,
-      "hint": "Ctrl+Shift+T",
-      "module": null,
-      "dynamicUrl": false
-    },
-    {
-      "id": "command:start-support-recording",
-      "kind": "command",
-      "command": "start-support-recording",
-      "label": "Aufzeichnung für den Support starten",
-      "icon": "fa-bug",
-      "keywords": ["support", "fehler", "logger"],
-      "group": "actions",
-      "shortcut": null,
-      "hint": "Ctrl+Shift+E",
-      "module": null,
-      "dynamicUrl": false
-    },
-    {
       "id": "action:app-login",
       "kind": "url",
       "url": "/app/profile/?appLogin=1",
