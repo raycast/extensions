@@ -1,6 +1,6 @@
 # Lancetta for Raycast
 
-> **This extension needs the free Lancetta app for macOS.** It shows in Raycast what Lancetta reads; without the app there is nothing to show.
+> **This extension needs the free Lancetta app for macOS.** Show Quota, Agent Sessions and Token Usage show in Raycast what Lancetta reads, and without the app they have nothing to show. Codex Processes reads the process table itself and works without it; reclaiming the orphaned ones is done in the app.
 >
 > **[Download Lancetta](https://lancetta.app/download)** · free · macOS 15 Sequoia or later · Universal · signed and notarized · [lancetta.app](https://lancetta.app)
 

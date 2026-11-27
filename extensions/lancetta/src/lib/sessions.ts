@@ -1,5 +1,6 @@
 import { constants } from "fs";
-import { access, chmod, mkdir, writeFile } from "fs/promises";
+import { randomBytes } from "crypto";
+import { access, chmod, mkdir, readdir, rm, stat, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import { folderName, loadSnapshot, readSupportFile, supportFile } from "./snapshot";
@@ -154,17 +155,35 @@ async function locate(binary: Opening["binary"]): Promise<string> {
   return binary;
 }
 
+/** Scripts written for an opening, swept once they are this old: a terminal that never ran one leaves it behind. */
+const SCRIPT_TTL_MS = 10 * 60 * 1000;
+
 /**
  * A `.command` script that runs the opening in a login shell, through the binary's full path;
- * when none was found, in an interactive one too, so the PATH `.zshrc` sets finds it.
+ * when none was found, in an interactive one too, so the PATH `.zshrc` sets finds it. One file
+ * per opening, which removes itself as it starts: two quick openings never read each other's.
  * Opened with the chosen terminal app.
  */
 export async function writeOpenScript(supportPath: string, opening: Opening) {
   await mkdir(supportPath, { recursive: true });
-  const file = join(supportPath, "open-session.command");
+  await sweepScripts(supportPath);
+  const file = join(supportPath, `open-session-${Date.now()}-${randomBytes(4).toString("hex")}.command`);
   const binary = await locate(opening.binary);
   const shell = binary === opening.binary ? "#!/bin/zsh -il" : "#!/bin/zsh -l";
-  await writeFile(file, `${shell}\n${commandLine(opening, binary)}\n`, "utf8");
+  await writeFile(file, `${shell}\nrm -f -- "$0"\n${commandLine(opening, binary)}\n`, "utf8");
   await chmod(file, 0o755);
   return file;
+}
+
+async function sweepScripts(supportPath: string) {
+  const now = Date.now();
+  for (const name of await readdir(supportPath)) {
+    if (!/^open-session.*\.command$/.test(name)) continue;
+    const path = join(supportPath, name);
+    try {
+      if (now - (await stat(path)).mtimeMs > SCRIPT_TTL_MS) await rm(path, { force: true });
+    } catch {
+      // gone already
+    }
+  }
 }

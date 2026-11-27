@@ -326,17 +326,24 @@ function windowDetail(agent: Agent, key: WindowKey, window: Window, label: strin
   const stop = key.kind === "model" ? undefined : runOutAdvice(charts.advice, agent.agent, key.kind);
   const stopAt = stop?.at && stop.at > now && stop.at < window.resetsAt ? stop.at : null;
   // the clock draws no readings, so only a week reads the history
-  const points = key.kind === "fiveHour" ? [] : windowSeries(charts.lines, key, opensAt, window.resetsAt, now);
+  // with Lancetta closed past the reset the snapshot still holds the old window: draw it up to its end
+  const drawnTo = Math.min(now, window.resetsAt);
+  const points = key.kind === "fiveHour" ? [] : windowSeries(charts.lines, key, opensAt, window.resetsAt, drawnTo);
   // the pace's reasoning (`basis`) stays in its suggestion: a label cuts it, and under the image
   // it falls behind the metadata
   const markdown =
     key.kind === "fiveHour"
-      ? svgImage(dialSVG({ opensAt, resetsAt: window.resetsAt, now, stopAt, tint, dark }), 190, DIAL_SIZE, DIAL_SIZE)
+      ? svgImage(
+          dialSVG({ opensAt, resetsAt: window.resetsAt, now: drawnTo, stopAt, tint, dark }),
+          190,
+          DIAL_SIZE,
+          DIAL_SIZE,
+        )
       : chartMarkdownImage(
           chartSVG({
             opensAt,
             resetsAt: window.resetsAt,
-            now,
+            now: drawnTo,
             points,
             lastWeek: previousSeries(charts.lines, key, opensAt, span),
             stopAt,
