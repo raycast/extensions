@@ -1,6 +1,6 @@
 # 2Do Changelog
 
-## [Refresh View Tasks] - {PR_MERGE_DATE}
+## [Refresh View Tasks] - 2026-11-27
 
 - Refresh action (⌘R) in View Tasks to reload tasks, lists, and smart lists from 2Do
 
