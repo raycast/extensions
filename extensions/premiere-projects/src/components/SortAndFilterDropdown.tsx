@@ -3,6 +3,20 @@ import { useCallback, useEffect, useState } from "react";
 import { SortOption, ViewMode } from "../types";
 import { getMountedDrives, MountedDrive } from "../utils/drives";
 
+const VALID_SORT_OPTIONS = new Set<string>([
+  "recent",
+  "name-asc",
+  "name-desc",
+  "date-desc",
+  "date-asc",
+  "size-desc",
+  "size-asc",
+]);
+
+function isSortOption(value: string): value is SortOption {
+  return VALID_SORT_OPTIONS.has(value);
+}
+
 interface SortAndFilterDropdownProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
@@ -63,7 +77,9 @@ export function SortAndFilterDropdown({
       }
       return;
     }
-    onSortChange(val as SortOption);
+    if (isSortOption(val)) {
+      onSortChange(val);
+    }
   };
 
   const dropdownValue = selectedLocation && selectedLocation !== "global" ? `loc_${selectedLocation}` : sortBy;

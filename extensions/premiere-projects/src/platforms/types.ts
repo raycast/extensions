@@ -10,7 +10,12 @@ export interface IPlatformAdapter {
   /**
    * Searches for Premiere Pro project files across the system or home folder.
    */
-  searchProjectPaths(searchTerm: string, scope: "home" | "all" | string, limit?: number): Promise<string[]>;
+  searchProjectPaths(
+    searchTerm: string,
+    scope: "home" | "all" | string,
+    limit?: number,
+    signal?: AbortSignal,
+  ): Promise<string[]>;
 
   /**
    * Retrieves the paths to Premiere Pro's media cache and peak file folders.

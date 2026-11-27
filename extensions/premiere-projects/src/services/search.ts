@@ -48,8 +48,10 @@ export async function searchPremiereProjects(
   scope: "home" | "all" | string = "home",
   limit = 100,
   adapter: IPlatformAdapter = currentPlatformAdapter,
+  signal?: AbortSignal,
 ): Promise<PremiereFile[]> {
-  const rawPaths = await adapter.searchProjectPaths(searchTerm, scope, limit);
+  const rawPaths = await adapter.searchProjectPaths(searchTerm, scope, limit, signal);
+  if (signal?.aborted) return [];
   const hydrated = await Promise.all(rawPaths.map((p) => createPremiereFile(p)));
   return hydrated.filter((f): f is PremiereFile => f !== null && f.extension === "prproj");
 }

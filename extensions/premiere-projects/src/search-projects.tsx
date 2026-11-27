@@ -1,6 +1,6 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Icon, List, LocalStorage } from "@raycast/api";
 import { useLocalStorage, usePromise } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { EmptyView } from "./components/EmptyView";
 import { ProjectGridItem } from "./components/ProjectGridItem";
 import { ProjectListItem } from "./components/ProjectListItem";
@@ -48,6 +48,8 @@ export default function SearchProjectsCommand() {
 
   const effectiveScope = selectedLocation || defaultScope;
 
+  const abortable = useRef<AbortController>(undefined);
+
   const {
     data: files = [],
     isLoading,
@@ -56,9 +58,12 @@ export default function SearchProjectsCommand() {
     mutate,
   } = usePromise(
     async (term: string, scope: string) => {
-      return await searchPremiereProjects(term, scope);
+      return await searchPremiereProjects(term, scope, 100, undefined, abortable.current?.signal);
     },
     [searchText, effectiveScope],
+    {
+      abortable,
+    },
   );
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
@@ -155,9 +160,10 @@ export default function SearchProjectsCommand() {
         inset={Grid.Inset.Small}
         isLoading={isLoading}
         searchBarAccessory={accessory}
-        searchBarPlaceholder="Search Premiere Pro projects by name or sequence..."
+        searchBarPlaceholder="Search Premiere Pro projects by name..."
         searchText={searchText}
         onSearchTextChange={setSearchText}
+        filtering={false}
         throttle
       >
         {emptyView}
@@ -182,9 +188,10 @@ export default function SearchProjectsCommand() {
       isLoading={isLoading}
       isShowingDetail
       searchBarAccessory={accessory}
-      searchBarPlaceholder="Search Premiere Pro projects by name or sequence..."
+      searchBarPlaceholder="Search Premiere Pro projects by name..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      filtering={false}
       throttle
     >
       {emptyView}

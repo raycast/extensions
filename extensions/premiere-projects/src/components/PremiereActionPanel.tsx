@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { currentPlatformAdapter } from "../platforms";
 import { clearPremiereMediaCaches } from "../services/cache";
 import { safeTrashProject } from "../services/file-operations";
 import { PremiereFile, ViewMode } from "../types";
@@ -26,11 +27,19 @@ export function PremiereActionPanel({
 }: PremiereActionPanelProps) {
   const hasMediaEncoder = isMediaEncoderInstalled();
 
+  const handleOpenInPremiere = async () => {
+    try {
+      await currentPlatformAdapter.openInPremiere(file.path);
+    } catch (err: unknown) {
+      await showFailureToast(err, { title: "Failed to open in Premiere Pro" });
+    }
+  };
+
   const handleClearCache = async () => {
     const options: Alert.Options = {
       title: "Purge Premiere Pro Media Cache?",
       message:
-        "This will delete temporary conformed audio (.cfa) and waveform peak (.pek) files. Premiere Pro will regenerate them automatically when needed.",
+        "This will delete temporary Media Cache, Media Cache Files, and Peak Files (such as .cfa and .pek). Premiere Pro will regenerate them automatically when needed.",
       primaryAction: {
         title: "Clear Media Cache",
         style: Alert.ActionStyle.Destructive,
@@ -44,15 +53,24 @@ export function PremiereActionPanel({
       });
       try {
         const res = await clearPremiereMediaCaches();
-        if (res.success) {
+        if (res.success && (!res.failedCount || res.failedCount === 0)) {
           toast.style = Toast.Style.Success;
           toast.title = "Media cache cleared";
           toast.message = `Freed ${res.formattedFreedSpace} of disk space`;
           if (onRefresh) onRefresh();
+        } else if (res.totalFreed > 0 && res.failedCount && res.failedCount > 0) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Partially cleared media cache";
+          toast.message = `Freed ${res.formattedFreedSpace}, but ${res.failedCount} file(s) could not be deleted (files may be in use by Premiere Pro)`;
+          if (onRefresh) onRefresh();
         } else {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to clear cache";
-          toast.message = res.error;
+          toast.message =
+            res.error ||
+            (res.failedCount
+              ? `${res.failedCount} file(s) could not be deleted (files may be in use by Premiere Pro)`
+              : "No files were deleted.");
         }
       } catch (err: unknown) {
         await showFailureToast(err, { title: "Failed to purge cache" });
@@ -63,7 +81,7 @@ export function PremiereActionPanel({
   const handleDelete = async () => {
     const options: Alert.Options = {
       title: `Delete "${file.name}"?`,
-      message: "Are you sure you want to delete this Premiere Pro project? This action cannot be undone.",
+      message: "Are you sure you want to move this Premiere Pro project to the Trash?",
       primaryAction: {
         title: "Delete Project",
         style: Alert.ActionStyle.Destructive,
@@ -93,12 +111,7 @@ export function PremiereActionPanel({
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.Open
-          title="Open in Adobe Premiere Pro"
-          target={file.path}
-          application="Adobe Premiere Pro"
-          icon={Icon.Video}
-        />
+        <Action title="Open in Adobe Premiere Pro" icon={Icon.Video} onAction={handleOpenInPremiere} />
         <Action.ShowInFinder title="Reveal in File Manager" path={file.path} />
         {hasMediaEncoder && (
           <Action
@@ -113,28 +126,6 @@ export function PremiereActionPanel({
                 await openInMediaEncoder(file.path);
               } catch (err) {
                 await showFailureToast(err, { title: "Failed to open in Media Encoder" });
-              }
-            }}
-          />
-        )}
-        {process.platform === "darwin" && (
-          <Action
-            title="Export in Media Encoder"
-            icon={Icon.FilmStrip}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "e" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "e" },
-            }}
-            onAction={async () => {
-              try {
-                await openInMediaEncoder(file.path);
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Export Queued in Media Encoder",
-                  message: file.name,
-                });
-              } catch (err) {
-                await showFailureToast(err, { title: "Failed to export in Media Encoder" });
               }
             }}
           />

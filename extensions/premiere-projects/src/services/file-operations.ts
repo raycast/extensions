@@ -59,16 +59,25 @@ export async function safeRenameProject(filePath: string, newTitle: string): Pro
     throw new Error("Project name cannot be empty");
   }
 
-  // Path traversal prevention
+  // Path traversal and cross-platform invalid filename prevention
   if (
     cleanTitle.includes("/") ||
     cleanTitle.includes("\\") ||
     cleanTitle.includes(":") ||
     cleanTitle.includes("\0") ||
     cleanTitle.includes("..") ||
-    cleanTitle === "."
+    cleanTitle === "." ||
+    /[*?"<>|]/.test(cleanTitle) ||
+    /[. ]$/.test(cleanTitle)
   ) {
-    throw new Error("Project name cannot contain slashes, backslashes, colons, null bytes, or relative path segments");
+    throw new Error(
+      "Project name contains invalid characters (slashes, colons, wildcards, quotes, angle brackets, pipes, or trailing dots/spaces)",
+    );
+  }
+
+  const baseDeviceName = cleanTitle.split(".")[0].toUpperCase();
+  if (/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/.test(baseDeviceName)) {
+    throw new Error(`Project name "${cleanTitle}" is a reserved system filename`);
   }
 
   const dir = path.dirname(filePath);

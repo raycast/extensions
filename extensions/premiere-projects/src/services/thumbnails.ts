@@ -1,3 +1,4 @@
+import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -11,16 +12,7 @@ const execFileAsync = promisify(execFile);
 const inFlightGenerations = new Map<string, Promise<string | null>>();
 
 export function getThumbnailCacheDirectory(): string {
-  let supportPath: string | undefined;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const raycastApi = require("@raycast/api");
-    supportPath = raycastApi.environment?.supportPath;
-  } catch {
-    // Standalone or test environment
-  }
-
-  const baseDir = supportPath || path.join(os.homedir(), ".raycast/premiere-projects");
+  const baseDir = environment.supportPath || path.join(os.homedir(), ".raycast/premiere-projects");
   const cacheDir = path.join(baseDir, "thumbnails");
   if (!fs.existsSync(cacheDir)) {
     fs.mkdirSync(cacheDir, { recursive: true });
@@ -152,7 +144,7 @@ export async function getOrGenerateThumbnail(file: PremiereFile): Promise<string
           return finalThumbnailPath;
         }
 
-        const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "prem-thumb-"));
+        const tempDir = await fs.promises.mkdtemp(path.join(cacheDir, "temp-thumb-"));
         try {
           await execFileAsync("/usr/bin/qlmanage", ["-t", "-s", "512", "-o", tempDir, filePath], {
             timeout: 4000,

@@ -19,18 +19,21 @@
     {
       "name": "recent",
       "title": "Recent Projects",
+      "subtitle": "Premiere Pro",
       "description": "Browse and open recently edited Premiere Pro projects and productions",
       "mode": "view"
     },
     {
       "name": "search-projects",
       "title": "Search Projects",
+      "subtitle": "Premiere Pro",
       "description": "Search Premiere Pro projects (.prproj) across your system",
       "mode": "view"
     },
     {
       "name": "clear-cache",
       "title": "Clear Media Cache",
+      "subtitle": "Premiere Pro",
       "description": "Safely clean Premiere Pro temporary Media Cache and Peak files",
       "mode": "no-view"
     }
@@ -97,7 +100,7 @@
           "value": "home"
         },
         {
-          "title": "Entire System (/)",
+          "title": "Entire System",
           "value": "all"
         }
       ]

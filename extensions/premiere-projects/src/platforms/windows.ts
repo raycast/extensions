@@ -73,6 +73,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     searchTerm = "",
     scope: "home" | "all" | string = "home",
     limit = 100,
+    signal?: AbortSignal,
   ): Promise<string[]> {
     const userProfile = process.env.USERPROFILE || os.homedir();
     const systemDriveLetter = (process.env.SystemDrive || "C:").charAt(0).toUpperCase();
@@ -112,7 +113,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const filterClause = cleanTerm.length > 0 ? ` | Where-Object { $_.Name -like '*${cleanTerm}*' }` : "";
     const script = `Get-ChildItem -LiteralPath ${escapedRoots} -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue${filterClause} | Select-Object -ExpandProperty FullName -First ${limit}`;
 
-    const stdout = await runPowerShellScript(script, { timeout: 8000 });
+    const stdout = await runPowerShellScript(script, { timeout: 8000, signal });
 
     return stdout
       .split(/\r?\n/)
@@ -142,8 +143,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     if (appPath) {
       await execFileAsync(appPath, [filePath], { timeout: 5000 });
     } else {
-      // Use explorer / start
-      await execFileAsync("cmd.exe", ["/c", "start", "", filePath], { timeout: 5000 });
+      await execFileAsync("explorer.exe", [path.win32.normalize(filePath)], { timeout: 5000 });
     }
   }
 

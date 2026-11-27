@@ -15,8 +15,7 @@ export function EditDateForm({ file, onUpdated }: EditDateFormProps) {
 
   const handleSubmit = async () => {
     if (!date || isNaN(date.getTime())) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast("Please select a valid date.", {
         title: "Invalid date selected",
       });
       return;

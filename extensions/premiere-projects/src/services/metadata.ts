@@ -125,15 +125,22 @@ export async function readProjectMetadata(filePath: string): Promise<ProjectMeta
     }
 
     // Read the first chunk to inspect header magic bytes
-    const fd = await fs.promises.open(filePath, "r");
     const headerBuf = Buffer.alloc(10);
-    await fd.read(headerBuf, 0, 10, 0);
-    await fd.close();
+    const fd = await fs.promises.open(filePath, "r");
+    try {
+      await fd.read(headerBuf, 0, 10, 0);
+    } finally {
+      await fd.close();
+    }
 
     const isGzip = headerBuf[0] === 0x1f && headerBuf[1] === 0x8b;
+    const stats = await fs.promises.stat(filePath);
 
     let xmlText = "";
     if (isGzip) {
+      if (stats.size > MAX_DECOMPRESS_BYTES) {
+        return metadata;
+      }
       const compressedBuffer = await fs.promises.readFile(filePath);
       try {
         const decompressed = zlib.gunzipSync(compressedBuffer, {
@@ -141,17 +148,19 @@ export async function readProjectMetadata(filePath: string): Promise<ProjectMeta
         });
         xmlText = decompressed.toString("utf8");
       } catch {
-        // If whole file decompression fails, try slice
+        // Decompression failed or exceeded MAX_DECOMPRESS_BYTES
         return metadata;
       }
     } else {
       // Uncompressed XML project
-      const stats = await fs.promises.stat(filePath);
       const readLength = Math.min(stats.size, 5 * 1024 * 1024);
       const buffer = Buffer.alloc(readLength);
       const openedFd = await fs.promises.open(filePath, "r");
-      await openedFd.read(buffer, 0, readLength, 0);
-      await openedFd.close();
+      try {
+        await openedFd.read(buffer, 0, readLength, 0);
+      } finally {
+        await openedFd.close();
+      }
       xmlText = buffer.toString("utf8");
     }
 

@@ -1,29 +1,54 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-export function isMediaEncoderInstalled(): boolean {
+function findMediaEncoderAppPath(): string | null {
+  if (process.platform !== "darwin") return null;
+  const applicationsDir = "/Applications";
   try {
-    if (process.platform === "darwin" && fs.existsSync("/Applications")) {
-      const apps = fs.readdirSync("/Applications");
-      return apps.some((app) => app.toLowerCase().includes("adobe media encoder"));
+    if (!fs.existsSync(applicationsDir)) return null;
+    const entries = fs.readdirSync(applicationsDir);
+    const encoderFolders = entries
+      .filter((entry) => entry.toLowerCase().startsWith("adobe media encoder") && !entry.endsWith(".zip"))
+      .sort()
+      .reverse();
+
+    for (const folder of encoderFolders) {
+      const fullFolder = path.join(applicationsDir, folder);
+      if (folder.endsWith(".app")) {
+        return fullFolder;
+      }
+      try {
+        if (fs.statSync(fullFolder).isDirectory()) {
+          const appBundle = fs.readdirSync(fullFolder).find((item) => item.endsWith(".app"));
+          if (appBundle) {
+            return path.join(fullFolder, appBundle);
+          }
+        }
+      } catch {
+        // Continue checking remaining folders
+      }
     }
   } catch {
     // Graceful fallback
   }
-  return false;
+  return null;
 }
 
-export async function openInPremierePro(filePath: string): Promise<void> {
-  if (process.platform === "darwin") {
-    await execFileAsync("open", ["-a", "Adobe Premiere Pro", filePath]);
-  }
+export function isMediaEncoderInstalled(): boolean {
+  return findMediaEncoderAppPath() !== null;
 }
 
 export async function openInMediaEncoder(filePath: string): Promise<void> {
-  if (process.platform === "darwin") {
-    await execFileAsync("open", ["-a", "Adobe Media Encoder", filePath]);
+  if (process.platform !== "darwin") {
+    throw new Error("Opening in Adobe Media Encoder is only supported on macOS");
   }
+  const appPath = findMediaEncoderAppPath();
+  if (!appPath) {
+    throw new Error("Adobe Media Encoder is not installed in /Applications");
+  }
+  await execFileAsync("/usr/bin/open", ["-a", appPath, filePath], { timeout: 5000 });
 }

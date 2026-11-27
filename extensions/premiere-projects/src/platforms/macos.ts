@@ -74,6 +74,7 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
     searchTerm = "",
     scope: "home" | "all" | string = "home",
     limit = 100,
+    signal?: AbortSignal,
   ): Promise<string[]> {
     let scopeDir: string | undefined;
     if (scope === "home") {
@@ -101,7 +102,7 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
       query = `${baseCondition} && (kMDItemFSName == '*${cleanTerm}*'c || kMDItemDisplayName == '*${cleanTerm}*'c)`;
     }
 
-    let paths = await this.runMdfind(query, scopeDir, limit);
+    let paths = await this.runMdfind(query, scopeDir, limit, signal);
 
     // Isolate results to prevent cross-volume mixing
     if (scope === "system") {
@@ -259,7 +260,7 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
     return this.runMdfind(query, undefined, limit);
   }
 
-  private async runMdfind(query: string, scope?: string, limit = 100): Promise<string[]> {
+  private async runMdfind(query: string, scope?: string, limit = 100, signal?: AbortSignal): Promise<string[]> {
     const args = ["-onlyin", scope || os.homedir(), query];
     if (!scope) {
       args.shift();
@@ -269,6 +270,7 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
     const { stdout } = await execFileAsync("/usr/bin/mdfind", args, {
       timeout: 5000,
       maxBuffer: 4 * 1024 * 1024,
+      signal,
     });
 
     return stdout

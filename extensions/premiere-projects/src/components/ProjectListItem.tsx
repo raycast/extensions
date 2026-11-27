@@ -36,6 +36,10 @@ export function ProjectListItem({
         { text: file.formattedSize },
         { text: formatDate(file.lastModifiedDate) },
       ]}
+      quickLook={{
+        path: thumbnailPath && !thumbnailPath.startsWith("data:") ? thumbnailPath : file.path,
+        name: file.name,
+      }}
       detail={
         <List.Item.Detail
           markdown={`![Project Preview](${preview})`}

@@ -175,6 +175,7 @@ export default function RecentProjectsCommand() {
         searchBarPlaceholder="Filter recent Premiere Pro projects..."
         searchText={searchText}
         onSearchTextChange={setSearchText}
+        filtering={false}
       >
         {emptyView}
         {displayedFiles.map((file) => (
@@ -201,6 +202,7 @@ export default function RecentProjectsCommand() {
       searchBarPlaceholder="Filter recent Premiere Pro projects..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      filtering={false}
     >
       {emptyView}
       {displayedFiles.map((file) => (
