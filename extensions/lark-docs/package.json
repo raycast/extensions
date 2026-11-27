@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lark-docs",
+  "title": "Lark Docs",
+  "description": "Search recent Feishu/Lark documents and create new docs, sheets, or slides.",
+  "icon": "icon.png",
+  "author": "hanyuancheung",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-docs",
+      "title": "Search Documents",
+      "subtitle": "Lark Docs",
+      "description": "Search documents or browse recent files",
+      "keywords": [
+        "lark",
+        "feishu",
+        "docs",
+        "document",
+        "recent"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "create-doc",
+      "title": "Create Document",
+      "subtitle": "Lark Docs",
+      "description": "Create a new document, spreadsheet, or presentation",
+      "keywords": [
+        "lark",
+        "feishu",
+        "create",
+        "new",
+        "docs",
+        "sheet",
+        "slides"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "type",
+      "type": "dropdown",
+      "required": true,
+      "title": "Deployment",
+      "description": "Choose Feishu, Lark, or a self-hosted deployment",
+      "data": [
+        {
+          "title": "Feishu",
+          "value": "feishu"
+        },
+        {
+          "title": "Lark",
+          "value": "lark"
+        },
+        {
+          "title": "Self-hosted",
+          "value": "self-hosted"
+        }
+      ]
+    },
+    {
+      "name": "selfHostedDomain",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-hosted Domain",
+      "description": "For example: company.example.com",
+      "placeholder": "Only required for self-hosted deployments"
+    },
+    {
+      "name": "recentListCount",
+      "type": "textfield",
+      "required": false,
+      "title": "Recent List Count",
+      "description": "How many recent files to load",
+      "placeholder": "15",
+      "default": "15"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "1.19.1",
+    "@tanstack/react-query": "^5.90.12",
+    "dayjs": "^1.11.19",
+    "got": "^12.6.0",
+    "qrcode": "^1.5.3",
+    "tough-cookie": "^6.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  }
+}
