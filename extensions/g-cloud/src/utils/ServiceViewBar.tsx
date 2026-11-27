@@ -12,6 +12,7 @@ import IAMView from "../services/iam/IAMView";
 import NetworkView from "../services/network/NetworkView";
 import SecretListView from "../services/secrets/SecretListView";
 import LogsView from "../services/logs-service/LogsView";
+import ArtifactRegistryView from "../services/artifactregistry/ArtifactRegistryView";
 
 interface ServiceViewBarProps {
   projectId: string;
@@ -59,6 +60,9 @@ export function ServiceViewBar({ projectId, gcloudPath, serviceName, onProjectCh
         return;
       case "secrets":
         push(<SecretListView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
+        return;
+      case "artifactregistry":
+        push(<ArtifactRegistryView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
         return;
       case "logs":
         push(<LogsView projectId={selectedProjectId} gcloudPath={gcloudPath} />);

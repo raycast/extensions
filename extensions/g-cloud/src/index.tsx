@@ -34,14 +34,14 @@ import SecretDetailView from "./services/secrets/SecretDetailView";
 import { CloudRunView } from "./services/cloudrun";
 import { CloudFunctionsView } from "./services/cloudfunctions";
 import { CloudSqlView } from "./services/cloudsql";
+import { ArtifactRegistryView } from "./services/artifactregistry";
 import { LogsView } from "./services/logs-service";
 import { StreamerModeAction } from "./components/StreamerModeAction";
 import { CloudShellAction } from "./components/CloudShellAction";
 
 const execFilePromise = promisify(execFile);
 
-type ViewMode =
-  "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "cloudsql" | "logs";
+type ViewMode = "hub" | ResourceType;
 
 interface ServiceInfo {
   id: ResourceType;
@@ -74,6 +74,13 @@ const SERVICES: ServiceInfo[] = [
     description: "Managed databases",
     icon: Icon.HardDrive,
     color: Color.Magenta,
+  },
+  {
+    id: "artifactregistry",
+    name: "Artifact Registry",
+    description: "Container images & packages",
+    icon: Icon.Box,
+    color: Color.Blue,
   },
   {
     id: "iam",
@@ -475,6 +482,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     return (
       <ServiceViewContainer
         serviceId={initialService}
+        isRoot
         initialProjectId={selectedProject}
         gcloudPath={gcloudPath}
         onProjectChange={handleProjectChange}
@@ -594,9 +602,9 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         }
       >
         {SERVICES.map((service) => {
-          // logs service doesn't have a count (it's a query service)
-          const count =
-            service.id !== "logs" ? serviceCounts?.[service.id as keyof Omit<ServiceCounts, "timestamp">] : undefined;
+          // Logs and Artifact Registry skip eager counts from the Hub.
+          const hasCount = service.id !== "logs" && service.id !== "artifactregistry";
+          const count = hasCount ? serviceCounts?.[service.id] : undefined;
           return (
             <List.Item
               key={service.id}
@@ -604,7 +612,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
               subtitle={service.description}
               icon={{ source: service.icon, tintColor: service.color }}
               accessories={[
-                isLoadingCounts && service.id !== "logs"
+                isLoadingCounts && hasCount
                   ? { icon: Icon.CircleProgress }
                   : count !== undefined
                     ? { text: `${count}`, tooltip: `${count} resources` }
@@ -643,6 +651,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
 // Helper components and functions
 
 interface ServiceViewContainerProps {
+  isRoot?: boolean;
   serviceId: ResourceType;
   initialProjectId: string;
   gcloudPath: string;
@@ -654,7 +663,13 @@ interface ServiceViewContainerProps {
  * (without stacking duplicate views on the navigation stack) while keeping the Hub's
  * selected project in sync when the user presses Esc to go back.
  */
-function ServiceViewContainer({ serviceId, initialProjectId, gcloudPath, onProjectChange }: ServiceViewContainerProps) {
+function ServiceViewContainer({
+  serviceId,
+  initialProjectId,
+  gcloudPath,
+  onProjectChange,
+  isRoot = false,
+}: ServiceViewContainerProps) {
   const [currentProjectId, setCurrentProjectId] = useState(initialProjectId);
 
   const handleProjectChange = useCallback(
@@ -737,6 +752,16 @@ function ServiceViewContainer({ serviceId, initialProjectId, gcloudPath, onProje
           projectId={currentProjectId}
           gcloudPath={gcloudPath}
           onProjectChange={handleProjectChange}
+        />
+      );
+    case "artifactregistry":
+      return (
+        <ArtifactRegistryView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+          isRoot={isRoot}
         />
       );
     case "logs":
