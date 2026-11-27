@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "choco",
   "title": "Chocolatey",
-  "description": "Search, install, upgrade, pin, and uninstall Chocolatey packages on Windows, manage sources, and export package manifests. Requires Chocolatey CLI (choco) installed.",
+  "description": "Search, install, upgrade, and export Chocolatey packages and manage sources on Windows using the required Chocolatey CLI.",
   "icon": "icon.png",
   "author": "user_fb2826b29bbab02dfe18",
   "categories": [
@@ -16,16 +16,15 @@
   "preferences": [
     {
       "name": "chocoPath",
-      "type": "textfield",
+      "type": "file",
       "required": false,
       "title": "Chocolatey Executable Path",
-      "description": "Custom path to choco.exe. Leave empty to auto-detect via ChocolateyInstall or PATH.",
-      "placeholder": "C:\\ProgramData\\chocolatey\\bin\\choco.exe"
+      "description": "Custom path to choco.exe. Leave empty to auto-detect via ChocolateyInstall or PATH."
     },
     {
       "name": "elevationMethod",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "uac",
       "title": "Elevation Method",
       "description": "How administrative Chocolatey commands (install, upgrade, uninstall, pin, sources) are executed.",

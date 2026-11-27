@@ -166,6 +166,13 @@ async function hasExecutable(name: string): Promise<boolean> {
   return res.exitCode === 0 && res.stdout.trim().length > 0;
 }
 
+function writePowerShellScript(
+  scriptPath: string,
+  lines: string[],
+): Promise<void> {
+  return writeFile(scriptPath, `\uFEFF${lines.join("\r\n")}`, "utf8");
+}
+
 function isElevationCanceledMessage(message: string): boolean {
   const lower = message.toLowerCase();
   return (
@@ -189,7 +196,7 @@ async function runWithPowerShellUac(
   const exitPath = path.join(tempDir, `exit-${id}.txt`);
 
   const psArgsArray = args.map(escapePowerShellLiteral).join(", ");
-  const scriptContent = [
+  const scriptLines = [
     "$ErrorActionPreference = 'Continue'",
     "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8",
     `$chocoExe = ${escapePowerShellLiteral(chocoExe)}`,
@@ -201,10 +208,10 @@ async function runWithPowerShellUac(
     "if ($null -eq $code) { $code = 0 }",
     "[System.IO.File]::WriteAllText($logFile, $output, [System.Text.Encoding]::UTF8)",
     "[System.IO.File]::WriteAllText($exitFile, [string]$code, [System.Text.Encoding]::UTF8)",
-  ].join("\r\n");
+  ];
 
   try {
-    await writeFile(scriptPath, scriptContent, "utf8");
+    await writePowerShellScript(scriptPath, scriptLines);
     const quotedScriptArg = escapePowerShellLiteral(`"${scriptPath}"`);
     const launcherCommand = `Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',${quotedScriptArg}) -Verb RunAs -Wait -WindowStyle Hidden`;
     try {
@@ -248,7 +255,7 @@ async function runInTerminal(
   const id = randomUUID();
   const scriptPath = path.join(tempDir, `term-${id}.ps1`);
   const psArgsArray = args.map(escapePowerShellLiteral).join(", ");
-  const scriptContent = [
+  const scriptLines = [
     "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8",
     `$chocoExe = ${escapePowerShellLiteral(chocoExe)}`,
     `$chocoArgs = @(${psArgsArray})`,
@@ -256,9 +263,9 @@ async function runInTerminal(
     "Write-Host ''",
     "Read-Host 'Press Enter to close'",
     `Remove-Item -LiteralPath ${escapePowerShellLiteral(tempDir)} -Recurse -Force -ErrorAction SilentlyContinue`,
-  ].join("\r\n");
+  ];
 
-  await writeFile(scriptPath, scriptContent, "utf8");
+  await writePowerShellScript(scriptPath, scriptLines);
   const quotedScriptArg = escapePowerShellLiteral(`"${scriptPath}"`);
   const hasWt = await hasExecutable("wt.exe");
   const launch = hasWt
