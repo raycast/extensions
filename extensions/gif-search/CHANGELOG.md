@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Find GIFs by description] - {PR_MERGE_DATE}
+
+- GIPHY and Klipy GIF searches now understand descriptions like "when the build finally passes" or "monday morning no coffee", not only literal words. Short searches work as before.
+
 ## [Add stickers, clips, memes and All Sources] - 2026-10-31
 
 - Add GIPHY Stickers as a provider, with favorites, recents, and the Ask AI tool support.
