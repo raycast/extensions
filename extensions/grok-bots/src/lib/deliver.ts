@@ -233,26 +233,32 @@ for (; $waited -lt 50; $waited++) {
 $trace += "front after $($waited / 10)s; "
 if (-not (Test-Front)) { Fail "Grok Bot didn't come to the front | $trace" }
 
+# The focused element and its text without whitespace, or $null when it isn't a readable Grok Bot element.
+function Read-FocusedBox {
+  $element = [System.Windows.Automation.AutomationElement]::FocusedElement
+  if (-not $element -or -not ($grokIds -contains [uint32]$element.Current.ProcessId)) { return $null }
+  $boxText = $null
+  $pattern = $null
+  if ($element.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$pattern)) {
+    $boxText = $pattern.Current.Value
+  } elseif ($element.TryGetCurrentPattern([System.Windows.Automation.TextPattern]::Pattern, [ref]$pattern)) {
+    $boxText = $pattern.DocumentRange.GetText(-1)
+  }
+  if ($null -eq $boxText) { return $null }
+  return @{ Element = $element; Text = [regex]::Replace($boxText, '[\\s\\u200b]', '') }
+}
+
 $isReady = $false
 $wasReadable = $false
 $boxLength = 0
+$matchedBox = $null
 for ($attempt = 1; $attempt -le 60; $attempt++) {
   try {
-    $element = [System.Windows.Automation.AutomationElement]::FocusedElement
-    if ($element -and ($grokIds -contains [uint32]$element.Current.ProcessId)) {
-      $boxText = $null
-      $pattern = $null
-      if ($element.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$pattern)) {
-        $boxText = $pattern.Current.Value
-      } elseif ($element.TryGetCurrentPattern([System.Windows.Automation.TextPattern]::Pattern, [ref]$pattern)) {
-        $boxText = $pattern.DocumentRange.GetText(-1)
-      }
-      if ($null -ne $boxText) {
-        $wasReadable = $true
-        $squeezed = [regex]::Replace($boxText, '[\\s\\u200b]', '')
-        $boxLength = $squeezed.Length
-        if ([string]::Equals($squeezed, $expected, [StringComparison]::Ordinal)) { $isReady = $true; break }
-      }
+    $box = Read-FocusedBox
+    if ($box) {
+      $wasReadable = $true
+      $boxLength = $box.Text.Length
+      if ([string]::Equals($box.Text, $expected, [StringComparison]::Ordinal)) { $isReady = $true; $matchedBox = $box; break }
     }
   } catch {}
   Start-Sleep -Milliseconds 100
@@ -267,6 +273,14 @@ if (-not $isReady) {
 }
 Start-Sleep -Milliseconds 150
 if (-not (Test-Front)) { Fail "Grok Bot lost focus before sending | $trace" }
+# Check again right before pressing Enter: if you switched chats in the meantime, the focused box
+# is a different element or holds other text, and Enter must not send that draft.
+$finalBox = $null
+try { $finalBox = Read-FocusedBox } catch {}
+if (-not $finalBox -or -not [System.Windows.Automation.Automation]::Compare($finalBox.Element, $matchedBox.Element) -or
+    -not [string]::Equals($finalBox.Text, $expected, [StringComparison]::Ordinal)) {
+  Fail "${DRAFT_MISMATCH} | $trace message box changed before sending"
+}
 if ($withCommand) { [System.Windows.Forms.SendKeys]::SendWait('^{ENTER}') } else { [System.Windows.Forms.SendKeys]::SendWait('{ENTER}') }
 Write-Output "$trace pressed $(if ($withCommand) { 'ctrl-enter' } else { 'enter' })"
 `;
