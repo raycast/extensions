@@ -11,10 +11,15 @@ import {
   showToast,
 } from "@raycast/api";
 import { getCalendarClient } from "../lib/google";
+import { canChangeResponseStatus } from "../lib/utils";
 import { showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 
 const preferences = getPreferenceValues();
+const changeResponseShortcut: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd", "shift"], key: "r" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+};
 
 const EventActions = ({
   event,
@@ -28,33 +33,31 @@ const EventActions = ({
   const meetingAction = {
     title: "Open Meeting",
     url: event.conferenceData?.entryPoints?.[0]?.uri,
-    shortcut: { modifiers: ["cmd"], key: "m" } as Keyboard.Shortcut,
+    shortcut: {
+      macOS: { modifiers: ["cmd"], key: "m" },
+      Windows: { modifiers: ["ctrl"], key: "m" },
+    } as Keyboard.Shortcut,
   };
   const eventAction = {
     title: "Open in Google Calendar",
     url: event.htmlLink,
-    shortcut: { modifiers: ["cmd"], key: "o" } as Keyboard.Shortcut,
+    shortcut: Keyboard.Shortcut.Common.Open,
   };
   const openCommandJoinsMeeting = preferences.openCommandJoinsMeeting && meetingAction.url;
   const primaryAction = openCommandJoinsMeeting ? meetingAction : eventAction;
   const secondaryAction = openCommandJoinsMeeting ? eventAction : meetingAction;
+
+  const selfAttendee = event.attendees?.find((attendee) => attendee.self);
+  const showChangeResponseStatus = canChangeResponseStatus(event);
   return (
     <ActionPanel>
-      {primaryAction.url && <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />}
-      {secondaryAction.url && (
-        <Action.OpenInBrowser
-          title={secondaryAction.title}
-          url={secondaryAction.url}
-          shortcut={secondaryAction.shortcut}
-        />
-      )}
       <ActionPanel.Section>
-        {event.id && (
-          <ActionPanel.Submenu
-            icon={Icon.CheckCircle}
-            title="Change Response Status"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          >
+        {primaryAction.url && <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />}
+        {secondaryAction.url && <Action.OpenInBrowser title={secondaryAction.title} url={secondaryAction.url} />}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        {showChangeResponseStatus && (
+          <ActionPanel.Submenu icon={Icon.CheckCircle} title="Change Response Status" shortcut={changeResponseShortcut}>
             {["accepted", "tentative", "declined"].map((status) => {
               const titles = {
                 accepted: "Yes",
@@ -72,8 +75,7 @@ const EventActions = ({
                 declined: Icon.XMarkCircle,
               };
 
-              // Find current user's response status
-              const currentStatus = event.attendees?.find((attendee) => attendee.self)?.responseStatus;
+              const currentStatus = selfAttendee?.responseStatus;
               const isCurrentStatus = status === currentStatus;
 
               return (
@@ -131,7 +133,7 @@ const EventActions = ({
           <Action.CopyToClipboard
             title="Copy Meeting Link"
             content={event.conferenceData.entryPoints[0].uri}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
         )}
       </ActionPanel.Section>
@@ -174,6 +176,14 @@ const EventActions = ({
             }}
           />
         )}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={revalidate}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );

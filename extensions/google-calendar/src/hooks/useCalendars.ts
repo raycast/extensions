@@ -10,11 +10,12 @@ export type UseCalendarsData = {
 export type UseCalendarsResult = {
   data: UseCalendarsData;
   isLoading: boolean;
+  error?: Error;
   revalidate: () => void;
 };
 
 const useCalendars = (): UseCalendarsResult => {
-  const { data: calendars, isLoading, revalidate } = useCalendarsInternal();
+  const { data: calendars, isLoading, error, revalidate } = useCalendarsInternal();
 
   const data = useMemo(() => {
     const sortCalendars = (a: calendar_v3.Schema$CalendarListEntry, b: calendar_v3.Schema$CalendarListEntry) => {
@@ -28,7 +29,7 @@ const useCalendars = (): UseCalendarsResult => {
     return { selected, unselected } as UseCalendarsData;
   }, [calendars]);
 
-  return { data, isLoading, revalidate };
+  return { data, isLoading, error, revalidate };
 };
 
 export default useCalendars;

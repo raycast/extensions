@@ -2,9 +2,11 @@ import { Action, ActionPanel, Icon, Keyboard, launchCommand, type LaunchProps, L
 import { useCachedPromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AUDIT_SINCE, listVulnerabilities } from "./mise/audit";
 import type { MiseLocation } from "./mise/locate";
 import { upgrade } from "./mise/operations";
 import { currentOutdated, listOutdated, outdatedSubtitle, outdatedVersions, type OutdatedTool } from "./mise/outdated";
+import { atLeast } from "./mise/version";
 import { miseCommandLine } from "./terminal/script";
 import { LoadError, loadErrorInView } from "./ui/LoadError";
 import { MiseUpdateListItem } from "./ui/MiseUpdate";
@@ -14,6 +16,7 @@ import { RunInTerminalAction } from "./ui/runInTerminal";
 import { runOperation } from "./ui/runOperation";
 import { useCommandSubtitle } from "./ui/useCommandSubtitle";
 import { useMise } from "./ui/useMise";
+import { VulnerableItem } from "./ui/Vulnerable";
 
 type LaunchContext = { upgrade?: string };
 
@@ -29,12 +32,23 @@ function OutdatedTools({ location, upgradeOnLaunch }: { location: MiseLocation; 
   const [prefs] = useState(readPreferences);
   const outdated = useCachedPromise(listOutdated, [location, outdatedOptions(prefs, location)], loadErrorInView);
   const data = currentOutdated(outdated.data);
+  const auditSupported = atLeast(location.version, AUDIT_SINCE);
+  // The audit only adds a section, so a failure to run it leaves the section off.
+  const audit = useCachedPromise(listVulnerabilities, [location], {
+    execute: auditSupported,
+    onError: () => undefined,
+  });
   const launchHandled = useRef(false);
   useCommandSubtitle(data && outdatedSubtitle(data));
-  const refresh = useCallback(() => {
+  const revalidate = useCallback(() => {
     outdated.revalidate();
+    // revalidate runs even when `execute` is false, so older mise would get a call it can't answer.
+    if (auditSupported) audit.revalidate();
+  }, [outdated.revalidate, audit.revalidate, auditSupported]);
+  const refresh = useCallback(() => {
+    revalidate();
     launchCommand({ name: "outdated-tools", type: LaunchType.Background }).catch(() => undefined);
-  }, [outdated.revalidate]);
+  }, [revalidate]);
 
   useEffect(() => {
     if (!upgradeOnLaunch || launchHandled.current) return;
@@ -45,30 +59,55 @@ function OutdatedTools({ location, upgradeOnLaunch }: { location: MiseLocation; 
 
   const tools = data?.tools ?? [];
   const unchecked = data?.unchecked ?? [];
+  const vulnerable = auditSupported ? (audit.data ?? []) : [];
+  const auditLoading = auditSupported && audit.isLoading;
 
   return (
-    <List isLoading={outdated.isLoading || (!data && !outdated.error)} searchBarPlaceholder="Search outdated tools">
+    <List
+      isLoading={outdated.isLoading || auditLoading || (!data && !outdated.error)}
+      searchBarPlaceholder="Search outdated tools"
+    >
       {outdated.error && !data ? (
         <LoadError error={outdated.error} retry={outdated.revalidate} />
       ) : (
         data &&
         !outdated.isLoading &&
-        unchecked.length === 0 && (
+        !auditLoading &&
+        unchecked.length === 0 &&
+        vulnerable.length === 0 && (
           <List.EmptyView icon={Icon.CheckCircle} title="All tools up to date" description="Nothing to upgrade" />
         )
       )}
       {/* Any item hides the EmptyView, which carries the load error and its Retry. */}
       {!(outdated.error && !data) && <MiseUpdateListItem location={location} />}
-      {tools.map((tool) => (
-        <ToolItem
-          key={tool.name}
-          tool={tool}
-          location={location}
-          prefs={prefs}
-          refresh={refresh}
-          revalidate={outdated.revalidate}
-        />
-      ))}
+      {!(outdated.error && !data) && vulnerable.length > 0 && (
+        <List.Section title="Vulnerable" subtitle={String(vulnerable.length)}>
+          {vulnerable.map((item) => (
+            <VulnerableItem
+              key={`${item.tool}@${item.version}`}
+              vulnerable={item}
+              location={location}
+              prefs={prefs}
+              refresh={refresh}
+              revalidate={revalidate}
+            />
+          ))}
+        </List.Section>
+      )}
+      {tools.length > 0 && (
+        <List.Section title="Outdated" subtitle={String(tools.length)}>
+          {tools.map((tool) => (
+            <ToolItem
+              key={tool.name}
+              tool={tool}
+              location={location}
+              prefs={prefs}
+              refresh={refresh}
+              revalidate={revalidate}
+            />
+          ))}
+        </List.Section>
+      )}
       {unchecked.length > 0 && (
         <List.Section title="Couldn't Check" subtitle={String(unchecked.length)}>
           {unchecked.map((tool) => (

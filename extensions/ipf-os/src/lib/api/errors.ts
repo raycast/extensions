@@ -58,7 +58,12 @@ export function toApiError(status: number, body: unknown, fallbackMessage: strin
     return new ApiError(status, String(status), `${fallbackMessage} (HTTP ${status})`);
   }
 
-  const message = typeof body.message === "string" && body.message.trim().length > 0 ? body.message : fallbackMessage;
+  const message =
+    typeof body.message === "string" && body.message.trim().length > 0
+      ? body.message
+      : typeof body.error === "string" && body.error.trim().length > 0
+        ? body.error
+        : fallbackMessage;
   const code = typeof body.code === "string" ? body.code : String(status);
 
   return new ApiError(status, code, message, readFieldErrors(body));

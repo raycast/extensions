@@ -18,6 +18,8 @@ export type ScenarioData = {
   icon?: keyof typeof Icon;
   all: ScenarioInput | null;
   devices: Array<DeviceScenario>;
+  /** Fade to the colour instead of jumping (LAN lights only; cloud lights jump). */
+  fade?: boolean;
 };
 
 export type Scenario = ScenarioData & { id: string };
@@ -38,6 +40,10 @@ export type GoveeControllerReturn = {
   devices: Device[];
   executeScenario: ({ scenario }: { scenario: Scenario }) => Promise<void>;
   isLoading: boolean;
+  /** The cloud device list is still loading (only with an API key). */
+  cloudLoading: boolean;
   error: Error | null;
+  /** Fetch the cloud device list again (only with an API key). */
+  retryCloud?: () => void;
   controller: Govee | null;
 };

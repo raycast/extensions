@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
-import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, showFailureToast, useCachedState, useForm } from "@raycast/utils";
 
 type ConferenceProvider = {
   name: string;
@@ -16,21 +16,28 @@ function ConferenceProviderForm(props: { provider?: ConferenceProvider }) {
       name: FormValidation.Required,
       link: FormValidation.Required,
     },
-    onSubmit: (values) => {
-      setConferenceProviders((providers) => {
-        const updatedProviders = [...providers];
-        const existingProviderIndex = updatedProviders.findIndex(
-          (provider) => provider.name === values.name && provider.link === values.link,
-        );
+    onSubmit: async (values) => {
+      try {
+        setConferenceProviders((providers) => {
+          const existingProviderIndex = props.provider
+            ? providers.findIndex(
+                (provider) => provider.name === props.provider?.name && provider.link === props.provider?.link,
+              )
+            : -1;
 
-        if (existingProviderIndex !== -1) {
-          updatedProviders[existingProviderIndex] = values; // Edit existing provider
-        } else {
-          updatedProviders.push(values); // Add new provider
-        }
+          if (existingProviderIndex !== -1) {
+            const updatedProviders = [...providers];
+            updatedProviders[existingProviderIndex] = values;
+            return updatedProviders;
+          } else {
+            return [...providers, values];
+          }
+        });
+      } catch (error) {
+        await showFailureToast(error, { title: "Failed to save conference provider" });
+        return;
+      }
 
-        return updatedProviders;
-      });
       pop();
     },
   });
@@ -53,7 +60,19 @@ function ConferencingProviderList() {
   const [conferenceProviders, setConferenceProviders] = useConferenceProviders();
 
   return (
-    <List isLoading={conferenceProviders.length === 0} searchBarPlaceholder="Filter conference providers...">
+    <List searchBarPlaceholder="Filter conference providers...">
+      {conferenceProviders.length === 0 && (
+        <List.EmptyView
+          icon={Icon.Video}
+          title="No Conference Providers"
+          description="Add a provider to use a custom conferencing link."
+          actions={
+            <ActionPanel>
+              <AddConferenceProviderAction />
+            </ActionPanel>
+          }
+        />
+      )}
       {conferenceProviders.map((provider) => (
         <List.Item
           key={`${provider.name}-${provider.link}`}
@@ -63,7 +82,7 @@ function ConferencingProviderList() {
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.Plus}
+                icon={Icon.Pencil}
                 title="Edit Conference Provider"
                 shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<ConferenceProviderForm provider={provider} />}
@@ -91,21 +110,24 @@ export function useConferenceProviders() {
   return useCachedState<ConferenceProvider[]>("conferencing-providers", []);
 }
 
-export function ConferenceProviderActions() {
+export function AddConferenceProviderAction() {
   return (
-    <ActionPanel.Section title="Conferencing">
-      <Action.Push
-        icon={Icon.NewDocument}
-        title="Add Conference Provider"
-        shortcut={Keyboard.Shortcut.Common.New}
-        target={<ConferenceProviderForm />}
-      />
-      <Action.Push
-        icon={Icon.Pencil}
-        title="Edit Conference Providers"
-        shortcut={Keyboard.Shortcut.Common.Edit}
-        target={<ConferencingProviderList />}
-      />
-    </ActionPanel.Section>
+    <Action.Push
+      icon={Icon.NewDocument}
+      title="Add Conference Provider"
+      shortcut={Keyboard.Shortcut.Common.New}
+      target={<ConferenceProviderForm />}
+    />
+  );
+}
+
+export function EditConferenceProvidersAction() {
+  return (
+    <Action.Push
+      icon={Icon.Pencil}
+      title="Edit Conference Providers"
+      shortcut={Keyboard.Shortcut.Common.Edit}
+      target={<ConferencingProviderList />}
+    />
   );
 }

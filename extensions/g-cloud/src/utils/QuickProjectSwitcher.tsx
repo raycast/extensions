@@ -6,15 +6,25 @@ import { getProjects } from "../gcloud";
 
 interface QuickProjectSwitcherProps {
   gcloudPath: string;
+  currentProjectId?: string;
   onProjectSelect?: (projectId: string) => void;
 }
 
-export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProjectSwitcherProps) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const initialSetupDone = useRef(false);
+export function QuickProjectSwitcher({ gcloudPath, currentProjectId, onProjectSelect }: QuickProjectSwitcherProps) {
+  const [projects, setProjects] = useState<Project[]>(() => CacheManager.getProjectsList()?.projects ?? []);
+  const [selectedProject, setSelectedProject] = useState<string>(
+    () => currentProjectId || CacheManager.getSelectedProject()?.projectId || "",
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(() => !CacheManager.getProjectsList());
+  const initialSetupDone = useRef(Boolean(currentProjectId));
   const { push } = useNavigation();
+
+  useEffect(() => {
+    if (currentProjectId) {
+      setSelectedProject(currentProjectId);
+      initialSetupDone.current = true;
+    }
+  }, [currentProjectId]);
 
   useEffect(() => {
     async function loadProjects() {
@@ -23,10 +33,12 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
         setProjects(cachedProjects.projects);
         setIsLoading(false);
 
-        const cachedProject = CacheManager.getSelectedProject();
-        if (cachedProject) {
-          setSelectedProject(cachedProject.projectId);
-          initialSetupDone.current = true;
+        if (!currentProjectId) {
+          const cachedProject = CacheManager.getSelectedProject();
+          if (cachedProject) {
+            setSelectedProject(cachedProject.projectId);
+            initialSetupDone.current = true;
+          }
         }
       } else {
         // No cached projects, fetch them
@@ -63,9 +75,14 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
     }
 
     loadProjects();
-  }, [gcloudPath]);
+  }, [gcloudPath, currentProjectId]);
 
   const handleProjectChange = (projectId: string) => {
+    const activeProject = currentProjectId || selectedProject;
+    if (!projectId || projectId === activeProject) {
+      return;
+    }
+
     setSelectedProject(projectId);
     CacheManager.saveSelectedProject(projectId);
 
@@ -94,7 +111,7 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
       const bIndex = recentlyUsed.indexOf(b.id);
 
       if (aIndex === -1 && bIndex === -1) {
-        return (a.name || "").localeCompare(b.name || "");
+        return (a.name || a.id).localeCompare(b.name || b.id);
       }
 
       if (aIndex === -1) return 1;
@@ -104,15 +121,20 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
     });
   }, [projects]);
 
+  const hasCurrentProject = Boolean(selectedProject && sortedProjects.some((p) => p.id === selectedProject));
+
   return (
     <List.Dropdown
       tooltip="Search and switch projects"
-      value={selectedProject}
+      value={selectedProject || undefined}
       onChange={handleProjectChange}
       isLoading={isLoading}
     >
+      {selectedProject && !hasCurrentProject && (
+        <List.Dropdown.Item key={selectedProject} title={selectedProject} value={selectedProject} />
+      )}
       {sortedProjects.map((project) => (
-        <List.Dropdown.Item key={project.id} title={`${project.name || ""}`} value={project.id} />
+        <List.Dropdown.Item key={project.id} title={project.name || project.id} value={project.id} />
       ))}
     </List.Dropdown>
   );

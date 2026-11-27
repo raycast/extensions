@@ -18,6 +18,7 @@ import {
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
   expandTilde,
+  findSystemExifTool,
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
@@ -36,7 +37,9 @@ export default async function stripEXIF(sourcePaths: string[], exifToolLocation:
   const resultPaths: string[] = [];
 
   const exifCommand =
-    exifToolLocation === ExifToolLocation.ON_PATH ? "exiftool" : `"${environment.supportPath}/exiftool/exiftool"`;
+    exifToolLocation === ExifToolLocation.ON_PATH
+      ? `"${findSystemExifTool() ?? "exiftool"}"`
+      : `"${environment.supportPath}/exiftool/exiftool"`;
 
   // Make sure ExifTool is executable
   if (exifToolLocation === ExifToolLocation.SUPPORT_DIR) {
