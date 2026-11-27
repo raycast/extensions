@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -83,12 +83,21 @@ export default function Command() {
     return () => clearTimeout(id);
   }, [nextStart, scope, revalidateCounts, revalidateTasks]);
 
+  const [refreshEpoch, setRefreshEpoch] = useState(0);
+
   function reload() {
     void tasks.revalidate();
+    void lists.revalidate();
     invalidateSmartLists();
     void smartLists.revalidate();
     void pausedTags.revalidate();
     void counts.revalidate();
+  }
+
+  // Bump so every visible project/checklist revalidates its child counts, not only the focused row.
+  function refresh() {
+    reload();
+    setRefreshEpoch((n) => n + 1);
   }
 
   const shown = scope && tasks.data ? prepareTasks(scope, tasks.data) : undefined;
@@ -145,13 +154,28 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {!tasks.isLoading && <List.EmptyView icon={Icon.CheckCircle} title="No Tasks" />}
+      {!tasks.isLoading && (
+        <List.EmptyView
+          icon={Icon.CheckCircle}
+          title="No Tasks"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {sections.map(
         ([title, sectionTasks]) =>
           sectionTasks.length > 0 && (
             <List.Section key={title || "tasks"} title={title || undefined}>
               {sectionTasks.map((t) => (
-                <TaskItem key={t.task_id} task={t} onChange={reload} />
+                <TaskItem key={t.task_id} task={t} onChange={reload} onRefresh={refresh} refreshEpoch={refreshEpoch} />
               ))}
             </List.Section>
           ),

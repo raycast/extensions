@@ -39,7 +39,7 @@ Either way, the task form opens with the address as the task's Link action, so 2
 
 ### View Tasks
 
-Jump straight to the work that matters: **Now**, **Later Today**, **Today**, **Tomorrow**, **Starred**, **Scheduled**, **Deadlines**, **Done**, any list, or any smart list. Each scope shows how many tasks it has, like **Today (2)**. Paused tags (Someday, Blocked, and the rest) appear as **Paused: {tag}**, so deferred work stays one pick away. Start and due dates show on each row; overdue dues are red. Type to filter by title, notes, tag, or link.
+Jump straight to the work that matters: **Now**, **Later Today**, **Today**, **Tomorrow**, **Starred**, **Scheduled**, **Deadlines**, **Done**, any list, or any smart list. Each scope shows how many tasks it has, like **Today (2)**. Paused tags (Someday, Blocked, and the rest) appear as **Paused: {tag}**, so deferred work stays one pick away. Start and due dates show on each row; overdue dues are red. Type to filter by title, notes, tag, or link. **Refresh** (⌘R) reloads tasks, lists, and smart lists from 2Do.
 
 Projects and checklists show progress at a glance. **Show Items** (⌘I) opens what's inside; **Add Item** (⌘N) adds another. Completing a project or checklist with open items asks first. Repeating tasks show their rule on hover.
 
@@ -55,3 +55,4 @@ Projects and checklists show progress at a glance. **Show Items** (⌘I) opens w
 | Add Item (projects, checklists)     | ⌘N       |
 | Star / Unstar                       | ⌘.       |
 | Open in 2Do                         | ⌘O       |
+| Refresh                             | ⌘R       |

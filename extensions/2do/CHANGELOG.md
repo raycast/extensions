@@ -1,5 +1,9 @@
 # 2Do Changelog
 
+## [Refresh View Tasks] - 2026-11-27
+
+- Refresh action (⌘R) in View Tasks to reload tasks, lists, and smart lists from 2Do
+
 ## [New View Tasks Scopes] - 2026-11-26
 
 - New scopes in View Tasks: Now, Later Today, Tomorrow, and Deadlines (Overdue and Upcoming)
