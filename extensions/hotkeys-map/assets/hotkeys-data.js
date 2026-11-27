@@ -1,4 +1,4 @@
-// Auto-generated from assets/hotkeys.json by scripts/sync.mjs — do not edit directly
+// Default starter shortcuts data for the interactive keyboard viewer
 window.HOTKEYS_DATA = {
   "groups": {
     "core": {

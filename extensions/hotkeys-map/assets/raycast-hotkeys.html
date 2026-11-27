@@ -1505,7 +1505,8 @@ function getCanonicalCombo(item) {
     customHkGroups: "raycast_custom_hk_groups_v1",
     customApps: "raycast_custom_app_layers_v1",
     hiddenApps: "raycast_hidden_app_layers_v1",
-    isStarterData: "raycast_is_starter_data_v1"
+    isStarterData: "raycast_is_starter_data_v1",
+    hasUserHotkeys: "raycast_has_user_hotkeys_v1"
   };
   Object.entries(map).forEach(([k, lsKey]) => {
     if (ps[k] !== undefined) {
@@ -1515,12 +1516,20 @@ function getCanonicalCombo(item) {
 })();
 
 const STARTER_FLAG_KEY = "raycast_is_starter_data_v1";
+const USER_HOTKEYS_FLAG_KEY = "raycast_has_user_hotkeys_v1";
 let isStarterData = (() => {
   try {
     const saved = localStorage.getItem(STARTER_FLAG_KEY);
     if (saved !== null) return JSON.parse(saved) === true;
   } catch {}
   return !localStorage.getItem("raycast_hotkeys_custom_v1");
+})();
+let hasUserHotkeys = (() => {
+  try {
+    const saved = localStorage.getItem(USER_HOTKEYS_FLAG_KEY);
+    if (saved !== null) return JSON.parse(saved) === true;
+  } catch {}
+  return !isStarterData;
 })();
 
 function setStarterData(flag) {
@@ -1529,6 +1538,11 @@ function setStarterData(flag) {
   const banner = document.getElementById("starterBanner");
   if (banner && isStarterData) delete banner.dataset.dismissed;
   updateStarterIndicator();
+}
+
+function setHasUserHotkeys(flag) {
+  hasUserHotkeys = Boolean(flag);
+  try { localStorage.setItem(USER_HOTKEYS_FLAG_KEY, JSON.stringify(hasUserHotkeys)); } catch {}
 }
 
 function updateStarterIndicator() {
@@ -1552,6 +1566,7 @@ function persistUserState() {
     localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(GROUPS));
     localStorage.setItem(IGNORED_CONFLICTS_KEY, JSON.stringify([...ignoredConflicts]));
     localStorage.setItem(STARTER_FLAG_KEY, JSON.stringify(isStarterData));
+    localStorage.setItem(USER_HOTKEYS_FLAG_KEY, JSON.stringify(hasUserHotkeys));
   } catch {}
   if (window.webkit?.messageHandlers?.saveUserState) {
     try {
@@ -1564,12 +1579,13 @@ function persistUserState() {
         customHkGroups: CUSTOM_HK_GROUPS,
         customApps: JSON.parse(localStorage.getItem(CUSTOM_APPS_KEY) || "{}"),
         hiddenApps: JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]"),
-        isStarterData
+        isStarterData,
+        hasUserHotkeys
       };
       window.webkit.messageHandlers.saveUserState.postMessage({ json: JSON.stringify(payload, null, 2) + "\n" });
     } catch {}
   }
-  if (!isStarterData && window.webkit?.messageHandlers?.saveHotkeysJson) {
+  if ((!isStarterData || hasUserHotkeys) && window.webkit?.messageHandlers?.saveHotkeysJson) {
     try {
       window.webkit.messageHandlers.saveHotkeysJson.postMessage({
         json: JSON.stringify({ groups: GROUPS, hotkeys: HOTKEYS, aliases: ALIASES }, null, 2) + "\n"
@@ -2456,6 +2472,7 @@ function applyRebind(idx, { key, mods, combo }) {
   if (state.selectedKey === prevKey) {
     state.selectedKey = key;
   }
+  setHasUserHotkeys(true);
   persistUserState();
   render();
 }
@@ -2466,6 +2483,7 @@ function clearBinding(idx) {
   if (h.draft) {
     HOTKEYS.splice(idx, 1);
     if (state.rebindingIndex === idx) state.rebindingIndex = null;
+    setHasUserHotkeys(true);
     persistUserState();
     render();
     return;
@@ -2481,6 +2499,7 @@ function clearBinding(idx) {
   h.key = "";
   h.mods = [];
   if (state.rebindingIndex === idx) state.rebindingIndex = null;
+  setHasUserHotkeys(true);
   persistUserState();
   render();
 }
@@ -2584,6 +2603,7 @@ function renderHotkeyItem(h, { inInspector = false } = {}) {
       h.group = nextGroup;
       CUSTOM_HK_GROUPS[h.settingId || h.combo] = nextGroup;
       localStorage.setItem(CUSTOM_HK_GROUPS_KEY, JSON.stringify(CUSTOM_HK_GROUPS));
+      setHasUserHotkeys(true);
       persistUserState();
       render();
     };
@@ -2618,6 +2638,7 @@ function renderHotkeyItem(h, { inInspector = false } = {}) {
             delete CUSTOM_TITLES[keyId];
           }
           localStorage.setItem(CUSTOM_TITLES_KEY, JSON.stringify(CUSTOM_TITLES));
+          setHasUserHotkeys(true);
           persistUserState();
         }
         render();
@@ -3041,6 +3062,7 @@ document.getElementById("applyJsonBtn").onclick = () => {
     });
     HOTKEYS = validated;
     setStarterData(false);
+    setHasUserHotkeys(true);
     persistUserState();
     jsonModal.classList.remove("open");
     render();
@@ -3053,6 +3075,7 @@ document.getElementById("applyJsonBtn").onclick = () => {
 document.getElementById("resetJsonBtn").onclick = () => {
   HOTKEYS = structuredClone(DEFAULT_HOTKEYS);
   setStarterData(true);
+  setHasUserHotkeys(false);
   persistUserState();
   jsonTextarea.value = JSON.stringify(HOTKEYS, null, 2);
   modalError.style.display = "none";
@@ -3141,6 +3164,7 @@ document.getElementById("saveDraftBtn").onclick = () => {
   const mods = modListMap[state.modFilter] || ["ctrl","opt","cmd"];
   const combo = document.getElementById("draftComboPreview").textContent;
   HOTKEYS.push({ title, sub: "Planned Draft", group, combo, key: pendingDraftKey, mods, draft: true });
+  setHasUserHotkeys(true);
   persistUserState();
   draftModal.classList.remove("open");
   render();
@@ -3594,6 +3618,7 @@ async function runMcpSync({ silent = false } = {}) {
     statusEl.style.color = "#34d399";
     statusEl.textContent = `✓ Synced ${foundHotkeys.length} live hotkeys & ${foundAliases.length} aliases from Raycast!`;
     setStarterData(false);
+    setHasUserHotkeys(true);
     persistUserState();
     render();
   } catch (err) {
@@ -3763,6 +3788,7 @@ function handleCapturedCombo({ key, ctrl, opt, shift, cmd }) {
       const h = HOTKEYS[state.pinningIndex];
       h.key = key;
       h.combo = h.combo.replace("?", key);
+      setHasUserHotkeys(true);
       persistUserState();
       state.pinningIndex = null;
       render();
