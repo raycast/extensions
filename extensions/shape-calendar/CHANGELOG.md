@@ -1,6 +1,6 @@
 # Shape Calendar Changelog
 
-## [Bundled Shape MCP] - {PR_MERGE_DATE}
+## [Bundled Shape MCP] - 2026-11-27
 
 - Use Shape's hosted MCP server for Raycast AI, with OAuth sign-in managed by Raycast
 - Replace the extension's custom AI tools with tools discovered from Shape
