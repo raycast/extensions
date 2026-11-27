@@ -20,7 +20,7 @@ This extension brings Lancetta into Raycast: your quota with Lancetta's own char
 2. Open it and connect your agents: [Getting started](https://lancetta.app/docs/getting-started), or watch [Install Lancetta and connect your agents](https://www.youtube.com/watch?v=8kRewaOwGLM).
 3. Install this extension and run **Show Quota**.
 
-The extension reads what Lancetta writes on your Mac (`~/Library/Application Support/Lancetta/`) and never asks Claude or Codex itself: no second keychain prompt, no extra requests against your quota. Keep Lancetta running: when it has not written for a quarter of an hour, the extension says so and how old the numbers are.
+**Requires Lancetta 0.70 or later**: the extension reads Lancetta's own exports (`Lancetta history`, `sessions` and `tokens`, and the `usage.json` it writes on your Mac) and never asks Claude or Codex itself: no second keychain prompt, no extra requests against your quota. Token Usage is current without opening the app. Keep Lancetta running: when it has not written for a quarter of an hour, the extension says so and how old the numbers are.
 
 ## Commands
 

@@ -78,7 +78,7 @@ function view(usage: TokenUsage | undefined, count: number, dark: boolean) {
 export default function Command() {
   const { days: daysPreference } = getPreferenceValues<Preferences.TokenUsage>();
   const count = Number(daysPreference) || 30;
-  const { data, isLoading, error, revalidate } = usePromise(loadClaudeTokens, [], ERROR_IN_VIEW);
+  const { data, isLoading, error, revalidate } = usePromise(loadClaudeTokens, [count], ERROR_IN_VIEW);
   const dark = environment.appearance === "dark";
   const v = useMemo(() => view(data, count, dark), [data, count, dark]);
 
@@ -90,7 +90,7 @@ export default function Command() {
         ) : (
           <List.EmptyView
             icon={Icon.ExclamationMark}
-            title="Could Not Read Lancetta's Token Scan"
+            title="Could Not Read Lancetta's Tokens"
             description={error.message}
             actions={
               <ActionPanel>
@@ -134,8 +134,7 @@ export default function Command() {
                     />
                   )}
                   <List.Item.Detail.Metadata.Separator />
-                  <NumberRow title="Counted Up To" value={data?.asOf ? formatDate(data.asOf) : "no scan yet"} />
-                  <List.Item.Detail.Metadata.Label title="Rescanned" text="when Lancetta's Usage opens" />
+                  <NumberRow title="Counted Up To" value={data?.asOf ? formatDate(data.asOf) : "loading"} />
                   <List.Item.Detail.Metadata.Label title="Counted" text="input + output + cache writes" />
                   <List.Item.Detail.Metadata.Label title="Codex" text="in Lancetta's Usage pane" />
                 </List.Item.Detail.Metadata>

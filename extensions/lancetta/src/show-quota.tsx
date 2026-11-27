@@ -17,7 +17,7 @@ import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { ERROR_IN_VIEW, LancettaMissingView, OpenLancettaAction, RefreshAction } from "./lib/actions";
 import { chartMarkdownImage, chartSVG, svgImage } from "./lib/chart";
 import { DIAL_SIZE, dialSVG } from "./lib/dial";
-import { Line, loadHistory, previousSeries, WindowKey, windowSeries } from "./lib/history";
+import { HistoryWindow, loadHistory, previousSeries, WindowKey, windowSeries } from "./lib/history";
 import { lancettaShowsRemaining, statusLine, tintOf, TROUBLESHOOTING_URL } from "./lib/lancetta";
 import { DetailNumberRow, NumberRow } from "./lib/metadata";
 import {
@@ -60,10 +60,7 @@ const WINDOWS = {
 const Compact = createContext(false);
 
 /** What a window's side pane is drawn from: the agent's history and the advice still current. */
-type Charts = { lines: Line[]; advice: Advice[]; now: number; showLeft: boolean };
-
-const loadHistories = (snapshot?: Snapshot) =>
-  loadHistory(Object.fromEntries((snapshot?.agents ?? []).map((a) => [a.agent, a.route])));
+type Charts = { windows: HistoryWindow[]; advice: Advice[]; now: number; showLeft: boolean };
 
 export default function Command() {
   const { display } = getPreferenceValues<Preferences.ShowQuota>();
@@ -72,7 +69,11 @@ export default function Command() {
   const showLeft = display === "left" || (display === "lancetta" && lancettaLeft === true);
   // the side pane stays the way it was left, from one opening of the command to the next
   const [showingCharts, setShowingCharts] = useCachedState("showing-charts", false);
-  const { data: histories } = usePromise(loadHistories, [data], { execute: !!data && showingCharts });
+  // rerun with each new snapshot: the series is the app's, as fresh as its last poll
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { data: histories } = usePromise((_snapshot?: Snapshot) => loadHistory(), [data], {
+    execute: !!data && showingCharts,
+  });
   // one clock per load: the rows and the charts agree, and the charts are not redrawn on every render
   const now = useMemo(nowSeconds, [data, histories]);
   const advice = useMemo(() => (data ? currentAdvice(data, now) : []), [data, now]);
@@ -80,7 +81,7 @@ export default function Command() {
     () =>
       showingCharts
         ? Object.fromEntries(
-            (data?.agents ?? []).map((a) => [a.agent, { lines: histories?.[a.agent] ?? [], advice, now, showLeft }]),
+            (data?.agents ?? []).map((a) => [a.agent, { windows: histories?.[a.agent] ?? [], advice, now, showLeft }]),
           )
         : null,
     [showingCharts, data, histories, advice, now, showLeft],
@@ -328,7 +329,7 @@ function windowDetail(agent: Agent, key: WindowKey, window: Window, label: strin
   // the clock draws no readings, so only a week reads the history
   // with Lancetta closed past the reset the snapshot still holds the old window: draw it up to its end
   const drawnTo = Math.min(now, window.resetsAt);
-  const points = key.kind === "fiveHour" ? [] : windowSeries(charts.lines, key, opensAt, window.resetsAt, drawnTo);
+  const points = key.kind === "fiveHour" ? [] : windowSeries(charts.windows, key, opensAt, drawnTo);
   // the pace's reasoning (`basis`) stays in its suggestion: a label cuts it, and under the image
   // it falls behind the metadata
   const markdown =
@@ -345,7 +346,7 @@ function windowDetail(agent: Agent, key: WindowKey, window: Window, label: strin
             resetsAt: window.resetsAt,
             now: drawnTo,
             points,
-            lastWeek: previousSeries(charts.lines, key, opensAt, span),
+            lastWeek: previousSeries(charts.windows, key),
             stopAt,
             tint,
             dark,

@@ -1,104 +1,56 @@
-import { readFile } from "fs/promises";
-import { supportFile } from "./snapshot";
+import { lancettaExport } from "./lancetta";
 
 /**
- * Lancetta's `history.jsonl` (and the generation rotated into `history.1.jsonl` at 4 MiB):
- * one line per reading. It is the app's internal record, not a promised interface like
- * `usage.json`, so this reads it defensively and only for the charts:
- *
- * - several copies of the app append to it (an installed one, a worktree's), so a line is
- *   kept only for the route the snapshot reports for its agent;
- * - a window is told by its reset, not by the clock: Claude's week can be moved, and Codex's
- *   reset wanders by minutes to hours from one reading to the next, so a line belongs to a
- *   window when its reset is within `RESET_SLACK` of that window's;
- * - a line the app was writing while this read is skipped.
- *
- * TODO: read a series the app exports instead, once `usage.json` carries one.
+ * `Lancetta history --json`: each watched agent's current windows with the readings the app
+ * recorded in each and in the window before it. The app decides what one window is (one
+ * account, one route, a reset that drifts), so the charts draw these as they are and the
+ * extension keeps no rule of its own about the history files.
  */
-const HISTORY_FILES = ["history.1.jsonl", "history.jsonl"].map(supportFile);
-
-/** How far a line's reset may sit from its window's and still be that window. */
-const RESET_SLACK = 3 * 3600;
-
 export type Point = { at: number; used: number };
 
-export type Line = {
-  at: number;
-  agent: string;
-  route?: string;
-  sevenDay?: number;
-  sevenReset?: number;
-  fiveHour?: number;
-  fiveReset?: number;
-  scoped?: Record<string, { used?: number; reset?: number }>;
+type ExportedPoint = { at: number; usedPercent: number };
+
+export type HistoryWindow = {
+  /** `fiveHour`, `sevenDay`, or a model's id as `usage.json`'s `models` gives it. */
+  window: string;
+  /** The span it measures, in seconds. */
+  length: number;
+  resetsAt: number;
+  /** Oldest first; one can sit before the opening, by up to half a window. */
+  readings: ExportedPoint[];
+  previous: { resetsAt: number; readings: ExportedPoint[] } | null;
 };
 
-/** What a window is called in a line: its two fields, or a model's own week inside `scoped`. */
+type HistoryDocument = {
+  schema: number;
+  asOf: number;
+  agents: { agent: string; route: string | null; windows: HistoryWindow[] }[];
+};
+
+/** What a window is called in the export: its two names, or a model's own week by id. */
 export type WindowKey = { kind: "sevenDay" } | { kind: "fiveHour" } | { kind: "model"; id: string };
 
-/**
- * Every agent's lines, oldest first, from one read and one parse of the files: `routes` maps each
- * watched agent to the route its snapshot reports. An older line has no route: it predates the
- * field, and is kept.
- */
-export async function loadHistory(routes: Record<string, string | null>): Promise<Record<string, Line[]>> {
-  const byAgent: Record<string, Line[]> = Object.fromEntries(Object.keys(routes).map((agent) => [agent, []]));
-  const texts = await Promise.all(HISTORY_FILES.map((file) => readFile(file, "utf8").catch(() => "")));
-  for (const text of texts) {
-    for (const raw of text.split("\n")) {
-      if (!raw.trim()) continue;
-      let line: Line;
-      try {
-        line = JSON.parse(raw) as Line;
-      } catch {
-        continue; // a line cut by a write in progress
-      }
-      const lines = byAgent[line.agent];
-      const route = routes[line.agent];
-      if (lines && (!route || !line.route || line.route === route)) lines.push(line);
-    }
-  }
-  for (const lines of Object.values(byAgent)) lines.sort((a, b) => a.at - b.at);
-  return byAgent;
+/** Every watched agent's windows, from one run of the command. */
+export async function loadHistory(): Promise<Record<string, HistoryWindow[]>> {
+  const document = await lancettaExport<HistoryDocument>(["history"]);
+  return Object.fromEntries(document.agents.map((a) => [a.agent, a.windows]));
 }
 
-function reading(line: Line, key: WindowKey): { used: number; reset: number | null } | null {
-  if (key.kind === "model") {
-    const scoped = line.scoped?.[key.id];
-    return typeof scoped?.used === "number" ? { used: scoped.used, reset: scoped.reset ?? null } : null;
-  }
-  const used = line[key.kind];
-  const reset = key.kind === "sevenDay" ? line.sevenReset : line.fiveReset;
-  return typeof used === "number" ? { used, reset: reset ?? null } : null;
+const windowOf = (windows: HistoryWindow[], key: WindowKey) =>
+  windows.find((w) => w.window === (key.kind === "model" ? key.id : key.kind));
+
+/** The readings of the window, from `opensAt` to `now`: the export's can start before the opening. */
+export function windowSeries(windows: HistoryWindow[], key: WindowKey, opensAt: number, now: number): Point[] {
+  return (windowOf(windows, key)?.readings ?? [])
+    .filter((r) => r.at >= opensAt && r.at <= now)
+    .map((r) => ({ at: r.at, used: r.usedPercent }));
 }
 
 /**
- * The readings of the window that resets at `resetsAt`, from `opensAt` to `now`. A line
- * with no reset (an older one) is taken by its time alone.
+ * The window before this one, moved forward by one span so it draws over this one. Empty when
+ * the previous window was not recorded.
  */
-export function windowSeries(lines: Line[], key: WindowKey, opensAt: number, resetsAt: number, now: number): Point[] {
-  const out: Point[] = [];
-  for (const line of lines) {
-    if (line.at < opensAt || line.at > now) continue;
-    const r = reading(line, key);
-    if (!r) continue;
-    if (r.reset !== null && Math.abs(r.reset - resetsAt) > RESET_SLACK) continue;
-    out.push({ at: line.at, used: r.used });
-  }
-  return out;
-}
-
-/**
- * The window before this one: the lines whose reset is this window's opening, moved forward
- * by one span so they draw over this one. Empty when the previous window was not recorded.
- */
-export function previousSeries(lines: Line[], key: WindowKey, opensAt: number, span: number): Point[] {
-  const out: Point[] = [];
-  for (const line of lines) {
-    if (line.at >= opensAt || line.at < opensAt - span - RESET_SLACK) continue;
-    const r = reading(line, key);
-    if (!r || r.reset === null || Math.abs(r.reset - opensAt) > RESET_SLACK) continue;
-    out.push({ at: line.at + span, used: r.used });
-  }
-  return out;
+export function previousSeries(windows: HistoryWindow[], key: WindowKey): Point[] {
+  const window = windowOf(windows, key);
+  return (window?.previous?.readings ?? []).map((r) => ({ at: r.at + window!.length, used: r.usedPercent }));
 }

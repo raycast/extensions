@@ -1,5 +1,5 @@
 import { folderName, formatSpan, isStale, nowSeconds } from "../lib/snapshot";
-import { agentOf, changedAt, loadWall, Note, sessionsIn, titleOf } from "../lib/sessions";
+import { agentOf, changedAt, loadWall, Session, sessionsIn, titleOf } from "../lib/sessions";
 
 type Input = {
   /** Which sessions: "open" (working, or waiting on the user; the default) or "done" (finished with, latest first). */
@@ -20,16 +20,16 @@ export default async function tool(input: Input) {
   const now = nowSeconds();
   // the wall is what Lancetta saw last; with the app quit, sessions may have moved on since
   const lancettaRunning = writtenAt === null ? null : !isStale(writtenAt, now);
-  const describe = (note: Note) => {
+  const describe = (note: Session) => {
     const changed = changedAt(note);
     return {
       name: titleOf(note),
       agent: agentOf(note),
       // the last folder only: the full path names the user's home and its layout
       folder: folderName(note.cwd) ?? null,
-      status: note.status,
+      status: note.status ?? "done",
       inThisStateFor: changed ? formatSpan(now - changed / 1000) : null,
-      worked: note.worked !== undefined ? formatSpan(note.worked) : null,
+      worked: note.worked !== null ? formatSpan(note.worked) : null,
     };
   };
   const freshness =

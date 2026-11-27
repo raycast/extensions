@@ -1,4 +1,4 @@
-import { formatTokens, lastDays, loadClaudeTokens, RESCAN_HINT, usageForDays } from "../lib/tokens";
+import { formatTokens, lastDays, loadClaudeTokens, usageForDays } from "../lib/tokens";
 
 type Input = {
   /** How many days back from today, as a number from 1 to 90, e.g. "7". Defaults to "7". */
@@ -15,16 +15,14 @@ export default async function tool(input: Input) {
   if (!Number.isInteger(count) || count < 1 || count > 90) {
     throw new Error(`"days" is a whole number from 1 to 90, not "${input.days}".`);
   }
-  const usage = await loadClaudeTokens();
+  const usage = await loadClaudeTokens(count);
   const { perDay, total, projects } = usageForDays(usage, lastDays(count));
   return {
     agent: "Claude Code",
     counted: "input + output + cache-creation tokens; cache reads excluded",
-    // Lancetta rescans only when its Usage view loads: today is counted up to this moment
+    // the command scans when asked: today is counted up to this moment
     asOf: usage.asOf ? new Date(usage.asOf * 1000).toISOString() : null,
-    freshness: usage.asOf
-      ? `Counted up to ${new Date(usage.asOf * 1000).toLocaleString()}. ${RESCAN_HINT}`
-      : `Lancetta has not scanned Claude Code's transcripts yet. ${RESCAN_HINT}`,
+    freshness: `Counted up to ${new Date((usage.asOf ?? 0) * 1000).toLocaleString()}.`,
     total: formatTokens(total),
     totalExact: total,
     perDay: perDay.map((d) => ({ day: d.day, tokens: d.tokens, readable: formatTokens(d.tokens) })),

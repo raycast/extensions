@@ -23,7 +23,7 @@ import {
   columnOf,
   commandLine,
   loadWall,
-  Note,
+  Session,
   openCommand,
   sessionsIn,
   titleOf,
@@ -39,7 +39,22 @@ const STATUS: Record<string, { icon: Image.ImageLike; label: string }> = {
   ended: { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, label: "Closed" },
   removed: { icon: { source: Icon.Trash, tintColor: Color.SecondaryText }, label: "Removed" },
 };
-const statusOf = (note: Note) => STATUS[note.status] ?? { icon: Icon.Dot, label: note.status };
+/** A concluded session keeps no status: it says how it was taken down. */
+const DONE_BY: Record<string, string> = { user: "Marked done", removal: "Removed", closed: "Closed" };
+const statusOf = (note: Session) =>
+  note.status
+    ? (STATUS[note.status] ?? { icon: Icon.Dot, label: note.status })
+    : {
+        icon: { source: Icon.CheckCircle, tintColor: Color.SecondaryText },
+        label: DONE_BY[note.doneBy ?? ""] ?? "Done",
+      };
+
+/** Why Lancetta has no command for a session, in the app's own terms (`opensNot`). */
+const OPENS_NOT: Record<string, string> = {
+  working: "\nIt is working: open it once its turn ends.",
+  ownTerminal: "\nIt is open in its own terminal: switch to it there.",
+  notListed: "\nIts background session is gone from Claude Code's list: nothing opens it from here.",
+};
 
 const COLUMNS: { column: Column; title: string }[] = [
   { column: "yourTurn", title: "Your Turn" },
@@ -135,7 +150,7 @@ export default function Command() {
   );
 }
 
-function SessionItem(props: { note: Note; terminal?: { name: string; path: string }; onRefresh: () => void }) {
+function SessionItem(props: { note: Session; terminal?: { name: string; path: string }; onRefresh: () => void }) {
   const { note, terminal, onRefresh } = props;
   const status = statusOf(note);
   const opening = openCommand(note);
@@ -158,7 +173,7 @@ function SessionItem(props: { note: Note; terminal?: { name: string; path: strin
       icon={status.icon}
       title={title}
       subtitle={folder && folder !== title ? folder : undefined}
-      keywords={[folder ?? "", note.cwd ?? "", note.status, agentOf(note)]}
+      keywords={[folder ?? "", note.cwd ?? "", note.status ?? "done", agentOf(note)]}
       accessories={[
         { tag: { value: agentOf(note), color: agentOf(note) === "Codex" ? Color.Green : Color.Orange } },
         ...(changed
@@ -196,17 +211,17 @@ function SessionItem(props: { note: Note; terminal?: { name: string; path: strin
   );
 }
 
-function SessionDetail(props: { note: Note }) {
+function SessionDetail(props: { note: Session }) {
   const { note } = props;
   const status = statusOf(note);
   const opening = openCommand(note);
-  const date = (iso?: string) => (iso && Date.parse(iso) ? formatDate(Date.parse(iso) / 1000) : undefined);
+  const date = (epoch: number | null) => (epoch ? formatDate(epoch) : undefined);
   // dates, spans and ids as tags: Raycast 2 cuts them in a label (see `NumberRow`)
   const rows: [string, string | undefined][] = [
     ["Started", date(note.started)],
     ["In This State Since", date(note.since)],
-    ["Worked", note.worked !== undefined ? formatSpan(note.worked) : undefined],
-    ["Waited on You", note.waited !== undefined ? formatSpan(note.waited) : undefined],
+    ["Worked", note.worked !== null ? formatSpan(note.worked) : undefined],
+    ["Waited on You", note.waited !== null ? formatSpan(note.waited) : undefined],
     ["Done", date(note.doneAt)],
   ];
   const markdown = [
@@ -214,9 +229,7 @@ function SessionDetail(props: { note: Note }) {
     note.cwd ? `\`${note.cwd}\`` : "",
     opening
       ? `\nOpens with:\n\n\`\`\`\n${commandLine(opening)}\n\`\`\``
-      : note.listed && (note.kind === "interactive" || note.agent === "codex")
-        ? "\nIt is open in its own terminal: switch to it there."
-        : "\nNothing opens it from here any more.",
+      : (OPENS_NOT[note.opensNot ?? ""] ?? "\nNothing opens it from here any more."),
   ].join("\n");
   return (
     <Detail
@@ -226,7 +239,7 @@ function SessionDetail(props: { note: Note }) {
         <Detail.Metadata>
           <Detail.Metadata.Label title="Status" text={status.label} icon={status.icon} />
           <Detail.Metadata.Label title="Agent" text={agentOf(note)} />
-          {note.kind && <Detail.Metadata.Label title="Kind" text={note.kind} />}
+          <Detail.Metadata.Label title="Kind" text={note.kind} />
           {rows.map(([title, value]) => value && <DetailNumberRow key={title} title={title} value={value} />)}
           <Detail.Metadata.Separator />
           <DetailNumberRow title="Session" value={note.room ?? note.thread ?? note.conversation ?? note.id} />

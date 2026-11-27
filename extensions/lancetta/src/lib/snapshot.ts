@@ -1,13 +1,13 @@
-import { access, readFile, stat } from "fs/promises";
+import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { basename, join } from "path";
 
 const SUPPORT_DIR = join(homedir(), "Library", "Application Support", "Lancetta");
 
 /**
- * A file in Lancetta's own folder. Only `usage.json` is a promised interface; the others the
- * extension reads (the history, the session wall, the token cache) are the app's internal
- * records, read defensively and only for what the app cannot export yet.
+ * A file in Lancetta's own folder. Only `usage.json` is still read as a file: the history, the
+ * session wall and the tokens come from `Lancetta history|sessions|tokens --json` (`lancettaExport`),
+ * never from the app's internal records.
  */
 export const supportFile = (name: string) => join(SUPPORT_DIR, name);
 
@@ -68,6 +68,8 @@ export type Advice = {
   title: string;
   steps: string[];
   basis: string;
+  /** `fiveHour`, `sevenDay` or null: the window the advice is about (Lancetta 0.70+). */
+  window?: string | null;
   at: number | null;
   first: boolean;
 };
@@ -82,7 +84,7 @@ export type Snapshot = {
 
 export class LancettaUnavailable extends Error {
   constructor(
-    readonly reason: "missing" | "unreadable" | "schema",
+    readonly reason: "missing" | "unreadable" | "schema" | "outdated",
     message: string,
   ) {
     super(message);
@@ -118,29 +120,6 @@ export async function loadSnapshot(): Promise<Snapshot> {
   return snapshot;
 }
 
-/**
- * One of Lancetta's internal files, or null when the app has run but not written it yet (no
- * session seen, no Usage view opened). When `usage.json` is missing too the app has never run
- * here, and that is said rather than shown as an empty list.
- */
-export async function readSupportFile(path: string): Promise<{ text: string; modified: number } | null> {
-  try {
-    const [text, info] = await Promise.all([readFile(path, "utf8"), stat(path)]);
-    return { text, modified: info.mtimeMs };
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  }
-  try {
-    await access(SNAPSHOT_PATH);
-  } catch {
-    throw new LancettaUnavailable(
-      "missing",
-      `Lancetta has not run on this Mac. It is a macOS menu bar app: ${DOWNLOAD_URL}`,
-    );
-  }
-  return null;
-}
-
 export const isMissing = (error?: Error) => error instanceof LancettaUnavailable && error.reason === "missing";
 
 export const nowSeconds = () => Math.floor(Date.now() / 1000);
@@ -161,18 +140,12 @@ export function currentAdvice(snapshot: Snapshot, now = nowSeconds()): Advice[] 
 }
 
 /**
- * The advice whose `at` is when this window runs out at the current pace. `week` is always about
- * the week; `stop` names its window only in the words of its basis ("5 hours: …", "7 days: …"),
- * which Lancetta may reword, so this is the one place that reads them.
- * TODO: match on a `window` field once Lancetta's snapshot carries one.
+ * The advice whose `at` is when this window runs out at the current pace: a `stop` about that
+ * window (its `window` field), or `week` for the week.
  */
 export function runOutAdvice(advice: Advice[], agent: string, window: "fiveHour" | "sevenDay"): Advice | undefined {
-  const basis = window === "fiveHour" ? "5 hours" : "7 days";
   return advice.find(
-    (a) =>
-      a.agent === agent &&
-      a.at !== null &&
-      ((a.kind === "stop" && a.basis.startsWith(basis)) || (window === "sevenDay" && a.kind === "week")),
+    (a) => a.agent === agent && a.at !== null && (a.kind === "stop" || a.kind === "week") && a.window === window,
   );
 }
 

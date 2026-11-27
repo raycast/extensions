@@ -244,7 +244,7 @@
             "agent": "Claude Code",
             "counted": "input + output + cache-creation tokens; cache reads excluded",
             "asOf": "2026-11-26T17:53:13.000Z",
-            "freshness": "Counted up to 26/11/2026, 18:53. Open Lancetta's Usage view to rescan.",
+            "freshness": "Counted up to 26/11/2026, 18:53.",
             "total": "128.3M",
             "totalExact": 128300000,
             "perDay": [
