@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Webstory MCP Server] - {PR_MERGE_DATE}
+## [Add Webstory MCP Server] - 2026-11-27
 
 - Add Webstory to the official registry: work on Webstory stories from an AI assistant. See how stories are doing, edit drafts, bring in photos and videos, make preview and share links, and read comments, chats and orders. Hosted Streamable HTTP server at https://webstoryapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Webstory account.
 
