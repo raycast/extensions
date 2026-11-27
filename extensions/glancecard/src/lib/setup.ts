@@ -17,6 +17,7 @@ import {
 import { fileBases } from "glancecard";
 import { gh, restOrNull, viewerLogin } from "./github";
 import { DEPENDABOT, EMBED, PROMPT, README_VERSION, WORKFLOW } from "./templates";
+import { placeCard } from "./workflow-patch";
 
 export const WORKFLOW_PATH = ".github/workflows/glancecard.yml";
 export const DEPENDABOT_PATH = ".github/dependabot.yml";
@@ -134,14 +135,17 @@ export function parseWorkflow(file: string, defaultZone: string): Omit<FoundWork
     first.match(new RegExp(`^\\s*${name}:\\s*["']?([^"'#\\n]+?)["']?\\s*(?:#.*)?$`, "m"))?.[1].trim() ?? null;
   // `@v0.9.0`, or a SHA with its version in a comment: `@<sha> # v0.9.0`.
   const ref = first.slice("gfazioli/glancecard@".length).match(/^([^\s#"']+)["']?(?:\s*#\s*(v[\d.]+))?/);
-  const reposBlock = first.match(/^\s*repos:\s*\|\s*\n((?:[ \t]+[^\s:#]+\/[^\s:#]+[ \t]*\n?)+)/m)?.[1];
+  // A block (`|`, `|-`, `>`…, a comment after it or after a repository), or one line.
+  const reposBlock = first.match(
+    /^\s*repos:[ \t]*[|>][-+]?[ \t]*(?:#.*)?\n((?:[ \t]+[^\s:#]+\/[^\s:#]+[ \t]*(?:#.*)?\n?)+)/m,
+  )?.[1];
   const reposLine = input("repos");
   const repos = reposBlock
     ? reposBlock
         .split("\n")
-        .map((l) => l.trim())
+        .map((l) => l.replace(/#.*/, "").trim())
         .filter(Boolean)
-    : reposLine && reposLine !== "|"
+    : reposLine && !/^[|>]/.test(reposLine)
       ? reposLine.split(/[\s,]+/).filter(Boolean)
       : [];
   const cron = text.match(/cron:\s*["']([^"']+)["']/)?.[1] ?? "30 5 * * *";
@@ -151,7 +155,8 @@ export function parseWorkflow(file: string, defaultZone: string): Omit<FoundWork
     steps,
     outDir: input("out-dir") ?? "glancecard",
     setup: {
-      profile: Boolean(input("profile")),
+      // In any step: a profile kept apart from the repositories has a step of its own.
+      profile: /^\s*profile:[ \t]*["']?[A-Za-z0-9]/m.test(text),
       repos,
       choice: {
         ...choiceOfTheme(input("theme")),
@@ -223,23 +228,46 @@ export const planOf = (setup: Setup): Plan =>
   plan({
     ...setup.choice,
     refresh: { ...setup.choice.refresh, explicit: true },
-    sections: setup.choice.sections.length ? setup.choice.sections : undefined,
+    // The sections are the repositories' choice: with no repository they say nothing.
+    sections: setup.repos.length && setup.choice.sections.length ? setup.choice.sections : undefined,
   });
 
 const pin = (text: string, version: string) =>
   swap(text, `gfazioli/glancecard@${README_VERSION}`, `gfazioli/glancecard@${version}`);
 
+/**
+ * Whether the profile card needs a step of its own: the Action reads a step's star histories, for
+ * its profile too, only when its sections include the stars, and the form's sections are the
+ * repositories' choice.
+ */
+const profileApart = (setup: Setup) =>
+  setup.profile &&
+  setup.repos.length > 0 &&
+  setup.choice.sections.length > 0 &&
+  !setup.choice.sections.includes("stars");
+
 /** The workflow file for a setup, with the viewer's login and repositories and the latest release pinned. */
 export function buildWorkflow(setup: Setup, login: string, version: string): string {
-  let out = pin(workflow(WORKFLOW, planOf(setup)), version);
-  out = swap(out, "          profile: your-login\n", setup.profile ? `          profile: ${login}\n` : "");
+  const p = planOf(setup);
+  const apart = profileApart(setup);
+  let out = pin(workflow(WORKFLOW, p), version);
+  out = swap(out, "          profile: your-login\n", setup.profile && !apart ? `          profile: ${login}\n` : "");
   const repos = "\n          repos: |\n            your-login/your-repo\n            your-login/another-repo";
   out = swap(
     out,
     repos,
     setup.repos.length ? `\n          repos: |\n${setup.repos.map((r) => `            ${r}`).join("\n")}` : "",
   );
-  return `${out.replace(/^# \.github\/workflows\/glancecard\.yml\n/, "")}\n`;
+  out = `${out.replace(/^# \.github\/workflows\/glancecard\.yml\n/, "")}\n`;
+  if (!apart) return out;
+  // The profile in a second step, drawn the same way with every section, so it keeps its stars.
+  const want = {
+    theme: p.theme ?? "both",
+    calendar: p.calendar ?? "chart",
+    stars: p.stars ?? "steps",
+    sections: "all",
+  };
+  return placeCard(out, { kind: "profile", login }, want).text;
 }
 
 export const dependabotFile = () => `${DEPENDABOT}\n`;
@@ -277,10 +305,16 @@ export const fileBase = (repos: string[], full: string) => fileBases(repos).get(
 export function buildPrompt(setup: Setup, version: string): string {
   const out = pin(prompt(PROMPT, planOf(setup)), version);
   // The README's line lets the agent pick three repositories; the form already chose, none included.
-  return swap(
+  const chosen = swap(
     out,
     "<owner/name, owner/name — or leave this line as it is, and pick my 3 most-starred public repositories that are not forks>",
     setup.repos.length ? setup.repos.join(", ") : "none: only my profile card",
+  );
+  if (!profileApart(setup)) return chosen;
+  return swap(
+    chosen,
+    "\n\nChange nothing else,",
+    "\n\nOne change to the workflow above: the `sections` line leaves out the stars, and in the same step it would leave them out of my profile card too. So put `profile: <login>` in a second gfazioli/glancecard step of its own, with the same inputs but no `repos` and no `sections` lines.\n\nChange nothing else,",
   );
 }
 

@@ -103,6 +103,7 @@ export function readCard(target: Target): Promise<Card> {
  */
 async function fetchCard(target: Target): Promise<Card> {
   const now = new Date();
+  const previous = keptCard(target);
   const viewer = await viewerLogin();
   const stars = starStore({ file: path.join(dir(), "stars.json"), now });
   await stars.load();
@@ -119,10 +120,24 @@ async function fetchCard(target: Target): Promise<Card> {
     await stars.save().catch(() => undefined);
   }
   writeAtomic(dataFile(target), JSON.stringify(card));
-  // The drawings of the last read are named by its instant: none of them is shown again.
-  rmSync(path.join(environment.supportPath, "cards", targetKey(target)), { recursive: true, force: true });
+  // A view opened before this read (the Grid behind a preview read again) still shows the last
+  // read's drawings: only those of the reads before it go.
+  if (previous) dropDrawings(target, new Date(previous.data.fetchedAt).getTime());
   prune();
   return card;
+}
+
+/** Removes a card's drawings made before `since`: a drawing is named by its read's instant, and made after it. */
+function dropDrawings(target: Target, since: number) {
+  const folder = path.join(environment.supportPath, "cards", targetKey(target));
+  for (const name of existsSync(folder) ? readdirSync(folder) : []) {
+    const file = path.join(folder, name);
+    try {
+      if (statSync(file).mtimeMs < since) rmSync(file, { force: true });
+    } catch {
+      // Gone already: another command's read removed it.
+    }
+  }
 }
 
 /** GitHub's errors as a reader can act on them, for the cases glancecard cannot draw. */

@@ -15,7 +15,7 @@ Your profile's card, or any user's by login, in all of glancecard's 25 looks at 
 ![A profile card](media/glancecard-profile-card.png)
 
 - **↵** shows the card at full width; **⌘T** turns it to its other side, a dark look's light one and back.
-- **⌘Y** opens it in Quick Look, as large as your screen; at full width, **⌘O** opens it in your browser.
+- **⌘Y** opens it in Quick Look, as large as your screen, and **⌘O** in your browser.
 - **Copy SVG**, **Copy SVG File** to paste in Finder, Slack or Figma, and **Save to Downloads**.
 - **Year** (a line of daily counts or GitHub's calendar), **Stars** (steps, smooth or bars) and, on a repository, its **Sections**: every view redraws as you choose.
 

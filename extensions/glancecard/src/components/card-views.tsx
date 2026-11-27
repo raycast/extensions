@@ -8,7 +8,6 @@ import {
   Icon,
   Keyboard,
   environment,
-  getDefaultApplication,
   open,
   showHUD,
   showInFinder,
@@ -17,7 +16,7 @@ import {
 } from "@raycast/api";
 import { REPO_SECTIONS } from "glancecard";
 import { STARS } from "glancecard/setup";
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
@@ -169,16 +168,22 @@ function CardActions({ card, look, options, setOptions, onRefresh, show, onSide 
             onAction={() => quickLook(exportFile(card, look, options))}
           />
         ) : null}
-        {onSide ? (
-          <Action
-            title="Open in Browser"
-            icon={Icon.Globe}
-            shortcut={Keyboard.Shortcut.Common.Open}
-            onAction={async () =>
-              open(exportFile(card, look, options), await getDefaultApplication("https://github.com"))
+        <Action
+          title="Open in Browser"
+          icon={Icon.Globe}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={async () => {
+            try {
+              await open(exportFile(card, look, options), await defaultBrowser());
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Could not open the card",
+                message: error instanceof Error ? error.message : String(error),
+              });
             }
-          />
-        ) : null}
+          }}
+        />
         {card.mine ? (
           <Action.Push title="Use on GitHub" icon={Icon.Upload} target={<UseOnGitHub request={request} />} />
         ) : repo ? (
@@ -291,6 +296,20 @@ function CardActions({ card, look, options, setOptions, onRefresh, show, onSide 
  */
 function quickLook(file: string) {
   spawn("qlmanage", ["-p", file], { detached: true, stdio: "ignore" }).unref();
+}
+
+/**
+ * The app that opens web links, asked of macOS: Raycast's getDefaultApplication answers for files
+ * and folders only. Without an answer, the card opens in whatever opens an SVG.
+ */
+function defaultBrowser(): Promise<string | undefined> {
+  const script =
+    'ObjC.import("AppKit"); $.NSWorkspace.sharedWorkspace.URLForApplicationToOpenURL($.NSURL.URLWithString("https://github.com")).path.js';
+  return new Promise((resolve) =>
+    execFile("osascript", ["-l", "JavaScript", "-e", script], { timeout: 5000 }, (error, stdout) =>
+      resolve(error ? undefined : stdout.trim() || undefined),
+    ),
+  );
 }
 
 /** `file`, or `file` with " 2", " 3"… before its extension when it is taken: a save never overwrites. */

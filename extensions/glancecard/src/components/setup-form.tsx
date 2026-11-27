@@ -180,17 +180,18 @@ function SetupFields(props: {
               <Form.Dropdown.Item key={look} value={look} title={lookTitle(look)} />
             ))}
           </Form.Dropdown>
-          {lightOf(values.dark) === values.dark ? (
-            <Form.Description
-              title="Light side"
-              text={`${lookTitle(values.dark)} reads the same on both themes: one file`}
+          {/* A tube or the Workbench is its own light side, one file; Daylight pairs with any look, as on the website. */}
+          <Form.Dropdown title="Light side" {...itemProps.light}>
+            <Form.Dropdown.Item
+              value="own"
+              title={
+                lightOf(values.dark) === values.dark
+                  ? `Its own: ${lookTitle(values.dark)} on both themes, one file`
+                  : `Its own: ${lookTitle(lightOf(values.dark))}`
+              }
             />
-          ) : (
-            <Form.Dropdown title="Light side" {...itemProps.light}>
-              <Form.Dropdown.Item value="own" title={`Its own: ${lookTitle(lightOf(values.dark))}`} />
-              <Form.Dropdown.Item value="daylight" title="Daylight" />
-            </Form.Dropdown>
-          )}
+            <Form.Dropdown.Item value="daylight" title="Daylight" />
+          </Form.Dropdown>
         </>
       ) : (
         <Form.Dropdown title="Look" {...itemProps.look}>
