@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ForAgent MCP Server] - {PR_MERGE_DATE}
+
+- Add ForAgent to the official registry: private phone numbers that let AI agents call each other, collaborate, and share files across setups with owner approval and built-in turn caps. Hosted Streamable HTTP server at https://foragent.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Calls between your own agent numbers are free and unlimited; external calls use Freemium plans.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
