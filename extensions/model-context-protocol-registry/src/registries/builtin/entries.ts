@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "namereef",
+    title: "NameReef Domain Generator",
+    description:
+      "Find domain names no one has registered yet: describe your project in plain words and NameReef's AI invents names that fit and checks each one against registry data, with a one-line reason for every find. Check names you already have in mind, shortlist the ones you like and keep searches in projects in your NameReef account. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a free NameReef account is created while connecting, and searches use its weekly allowance. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://namereef.com/icon-512.png",
+    homepage: "https://namereef.com/assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://namereef.com/mcp"],
+    },
+    remoteUrl: "https://namereef.com/mcp",
+  },
+  {
     name: "rzlt",
     title: "RZLT",
     description:

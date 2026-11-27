@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add NameReef Domain Generator MCP Server] - 2026-11-27
+
+- Add NameReef Domain Generator to the official registry: describe your project in plain words and get domain names no one has registered yet, each checked against registry data with a one-line reason; check names you already have in mind, shortlist the ones you like and keep searches in projects. Hosted Streamable HTTP server at https://namereef.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A free NameReef account is created while connecting.
+
 ## [Add RZLT MCP Server] - 2026-11-27
 
 - Add RZLT to the official registry: services, case studies, a fit check and a free website AI-readiness check from RZLT, an AI-native growth and marketing agency, plus send_message (sends only after the user approves the text). 7 tools. Hosted Streamable HTTP server at https://mcp.rzlt.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
