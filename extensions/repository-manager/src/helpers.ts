@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { getPreferenceValues, open, Cache, Color, Application, closeMainWindow, PopToRootType, LocalStorage, showToast, Toast } from '@raycast/api'
+import { runAppleScript } from '@raycast/utils'
 import { execFile, spawn } from 'child_process'
 import { promisify } from 'util'
 import { commandEnvironment, resolveUserPath, shouldResizeEditorWindow } from './platform'
@@ -72,7 +73,7 @@ export const resizeEditorWindow = async (editorApp: Application): Promise<void> 
     }
 
     try {
-        await execFileAsync('osascript', ['-e', 'on run argv\n tell application (item 1 of argv) to activate\nend run', editorApp.name])
+        await runAppleScript('on run argv\n tell application (item 1 of argv) to activate\nend run', [editorApp.name])
 
         setTimeout(() => {
             open(`${process.env.RAYCAST_SCHEME ?? 'raycast'}://extensions/raycast/window-management/${preferences.windowResizeMode}`).catch(() => {
