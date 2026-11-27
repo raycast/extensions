@@ -1,0 +1,19 @@
+{
+  "display_information": {
+    "name": "Slack Accounts Status",
+    "description": "Set your status, presence, and notification pause from Raycast.",
+    "background_color": "#153c44"
+  },
+  "oauth_config": {
+    "redirect_urls": ["raycast://oauth?package_name=Extension"],
+    "scopes": {
+      "user": ["users.profile:write", "users:write", "dnd:write"]
+    },
+    "pkce_enabled": true
+  },
+  "settings": {
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": true
+  }
+}
