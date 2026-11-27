@@ -1,6 +1,6 @@
 # Save vCards Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Save a contact from highlighted text, a screenshot, the clipboard or a business-card photo to Apple Contacts
 - Results view: what was captured next to what was found, ↵ to save
