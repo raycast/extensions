@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "verwatch",
   "title": "VerWatch",
-  "description": "Search Craft CMS projects, check packages and track or start updates in VerWatch with a team that has API access.",
+  "description": "Search your Craft CMS projects, check their packages and start updates in VerWatch.",
   "icon": "verwatch.png",
   "author": "chrisrowe",
   "platforms": [
@@ -24,7 +24,7 @@
       "name": "recent-updates",
       "title": "Recent Updates",
       "subtitle": "VerWatch",
-      "description": "The latest update runs, who started them and their pull requests",
+      "description": "The latest update runs across your teams, with their status and pull requests",
       "mode": "view"
     }
   ],

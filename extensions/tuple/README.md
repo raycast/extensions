@@ -24,7 +24,7 @@ extension wraps the local `tuple` command-line tool.
   Idle contacts remain online and callable, with an Idle label beside their name.
   Idle machines can be called directly; a machine already in a call stays visible without an invalid call action.
 - **Active Call** — A menu-bar command showing your current call. Mute/unmute, start or stop
-  Capture, add a person, copy an AI context prompt, or leave the call — without leaving the menu bar.
+  Capture, stop your webcam, add a person, copy an AI context prompt, or leave the call — without leaving the menu bar.
 - **Send Reaction** — Search the sound and webcam reactions offered by your installed Tuple CLI,
   then send one to your active call. Bind the picker to a global hotkey. Choices are loaded when
   you open it and checked again before sending, so CLI additions and removals need no extension
@@ -34,6 +34,10 @@ extension wraps the local `tuple` command-line tool.
   and may play a sound or animation for participants. These are user actions, not AI tools.
 - **Toggle Mute** — Mute or unmute your microphone in the active call. Bind it to a global
   hotkey for hands-free control.
+- **Stop Webcam** — Ask Tuple to stop sharing your webcam in the active call, also available from
+  **Active Call**. Bind it to a global hotkey. It only stops; turn your webcam on from Tuple.
+  Raycast confirms that Tuple received the request, not that sharing ended. An open camera picker
+  stays open and keeps previewing. Requires a Tuple version with `tuple webcam stop`.
 - **End Call** — Hang up the active call. Also hotkey-friendly.
 - **Search Calls** — Browse recent calls and full-text-search what was said. From any call
   you can read the complete Capture, **Summarize with AI**, **Generate Title & Summary…**

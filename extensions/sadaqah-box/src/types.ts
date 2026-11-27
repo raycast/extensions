@@ -128,12 +128,19 @@ export interface HealthResponse {
 
 export interface StatsResponse {
   success: boolean;
-  totalBoxes: number;
-  totalSadaqahs: number;
-  totalValue: number;
-  totalValueExtra: Record<string, { total: number; code: string; name: string }> | null;
-  uniqueCurrencies: number;
-  primaryCurrency: Currency | null;
+  stats?: {
+    totalBoxes: number;
+    totalSadaqahs: number;
+    totalValue: number;
+    totalValueExtra?: Record<string, { total: number; code: string; name: string }> | null;
+    uniqueCurrencies: number;
+    primaryCurrency: Currency | null;
+    convertedTotal?: {
+      value: number;
+      currency: Currency;
+      rate: number;
+    } | null;
+  };
 }
 
 export interface ListBoxesResponse {
@@ -166,13 +173,15 @@ export interface EmptyBoxResponse {
 export interface ListCollectionsResponse {
   success: boolean;
   collections: Collection[];
-  pagination: Pagination;
+  total?: number;
+  pagination?: Pagination;
 }
 
 export interface ListSadaqahsResponse {
   success: boolean;
   sadaqahs: Sadaqah[];
-  pagination: Pagination;
+  total?: number;
+  pagination?: Pagination;
 }
 
 export interface AddSadaqahResponse {

@@ -11,9 +11,10 @@ import { friendlyErrorMessage } from "../../utils/errorMessages";
 interface NetworkViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps) {
+export default function NetworkView({ projectId, gcloudPath, onProjectChange }: NetworkViewProps) {
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -51,7 +52,11 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
 
   const handleProjectSwitch = (newProjectId: string) => {
     if (newProjectId !== projectId) {
-      push(<NetworkView projectId={newProjectId} gcloudPath={gcloudPath} />);
+      if (onProjectChange) {
+        onProjectChange(newProjectId);
+      } else {
+        push(<NetworkView projectId={newProjectId} gcloudPath={gcloudPath} />);
+      }
     }
   };
 
@@ -60,7 +65,13 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
       isLoading={isLoading}
       navigationTitle="Manage Networks"
       searchBarPlaceholder="Search network services..."
-      searchBarAccessory={<QuickProjectSwitcher gcloudPath={gcloudPath} onProjectSelect={handleProjectSwitch} />}
+      searchBarAccessory={
+        <QuickProjectSwitcher
+          gcloudPath={gcloudPath}
+          currentProjectId={projectId}
+          onProjectSelect={handleProjectSwitch}
+        />
+      }
     >
       <List.Section title="VPC Networks">
         <List.Item
