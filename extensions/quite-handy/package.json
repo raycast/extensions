@@ -564,12 +564,13 @@
     },
     {
       "name": "pointer-boxer",
-      "title": "Scribble With: The Boxer",
+      "title": "Scribble With: Boxer",
       "subtitle": "Quite Handy",
-      "description": "Start a session with the The Boxer pointer on your first drawing tool.",
+      "description": "Start a session with the Boxer pointer on your first drawing tool.",
       "mode": "no-view",
       "icon": "pointers/boxer.png",
       "keywords": [
+        "Boxer",
         "The Boxer",
         "pointer",
         "hand"
