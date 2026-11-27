@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "trackingtime",
+    title: "TrackingTime",
+    description:
+      "Time tracking software for agencies and professional services, built as an operational back office. Log hours, start and stop timers, and query projects, retainers, invoices, time off and payroll data from your AI assistant. Hosted Streamable HTTP server with OAuth 2.1 sign-in; a TrackingTime account is required (available on all plans, including Free). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://trackingtime.co/wp-content/uploads/2024/09/Tracking-Time-Icon_512x512px-2.png",
+    homepage: "https://trackingtime.co/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.trackingtime.co/mcp"],
+    },
+    remoteUrl: "https://mcp.trackingtime.co/mcp",
+  },
+  {
     name: "valkiria",
     title: "Valkiria",
     description:
