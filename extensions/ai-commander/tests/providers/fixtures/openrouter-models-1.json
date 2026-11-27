@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "id": "deepseek/deepseek-v4.1-flash-1017",
+      "name": "DeepSeek: V4.1 Flash",
+      "pricing": { "prompt": "0.0000003", "completion": "0.0000012" },
+      "context_length": 256000,
+      "top_provider": { "max_completion_tokens": 16000 },
+      "supported_parameters": ["max_tokens", "reasoning", "temperature"]
+    },
+    {
+      "id": "openrouter/auto",
+      "name": "Auto Router",
+      "pricing": { "prompt": "-1", "completion": "-1" },
+      "context_length": null,
+      "top_provider": { "max_completion_tokens": null },
+      "supported_parameters": ["max_tokens"]
+    }
+  ],
+  "total_count": 3,
+  "links": { "next": "https://attacker.example/api/v1/models?offset=2" }
+}
