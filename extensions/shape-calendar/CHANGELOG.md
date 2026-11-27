@@ -1,5 +1,11 @@
 # Shape Calendar Changelog
 
+## [Bundled Shape MCP] - 2026-11-27
+
+- Use Shape's hosted MCP server for Raycast AI, with OAuth sign-in managed by Raycast
+- Replace the extension's custom AI tools with tools discovered from Shape
+- Keep the existing commands and their sign-in flow
+
 ## [Sign In with Shape, Training Status] - 2026-09-21
 
 - Sign in with your Shape Calendar account instead of pasting an API token
