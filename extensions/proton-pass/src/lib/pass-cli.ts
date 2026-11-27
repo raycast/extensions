@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, open } from "@raycast/api";
+import { environment, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
 import { clearCache, getSessionHasLock, setSessionHasLock } from "./cache";
@@ -189,9 +189,9 @@ export const SESSION_CHECK_WAIT_MS = 1_000;
 
 /**
  * How long saved items wait for it at most when the session has a lock code: nothing of a locked session shows, unless
- * pass-cli can't tell for this long, e.g. offline.
+ * pass-cli can't tell for this long, e.g. offline. It took 18 seconds once, after a while unused.
  */
-const LOCK_CHECK_WAIT_MS = 10_000;
+const LOCK_CHECK_WAIT_MS = 30_000;
 
 /** Set once pass-cli says the session has a lock code, before it says whether it's locked: see waitForSessionCheck. */
 let hasLockCode = false;
@@ -207,13 +207,19 @@ function answerWithin<T>(check: Promise<T>, ms: number): Promise<{ answer: T } |
 /**
  * endedSessionError's answer, for saved items to show or not: nothing after SESSION_CHECK_WAIT_MS, for them to show
  * anyway. A session with a lock code, as pass-cli said now or at an earlier opening, is waited for longer: until pass-cli
- * says whether it's locked, which takes a second command.
+ * says whether it's locked, which takes a second command. Meanwhile, a toast says so, as the list shows nothing.
  */
 export async function waitForSessionCheck(check: Promise<PassCliError | undefined>): Promise<PassCliError | undefined> {
   const early = await answerWithin(check, SESSION_CHECK_WAIT_MS);
   if (early) return early.answer;
   if (!hasLockCode && !(await getSessionHasLock())) return undefined;
-  return (await answerWithin(check, LOCK_CHECK_WAIT_MS - SESSION_CHECK_WAIT_MS))?.answer;
+  // Not waited for: the answer mustn't wait for Raycast.
+  const toast = Promise.resolve()
+    .then(() => showToast({ style: Toast.Style.Animated, title: "Checking Session…" }))
+    .catch(() => undefined);
+  const late = await answerWithin(check, LOCK_CHECK_WAIT_MS - SESSION_CHECK_WAIT_MS);
+  void toast.then((shown) => shown?.hide()).catch(() => undefined);
+  return late?.answer;
 }
 
 /**

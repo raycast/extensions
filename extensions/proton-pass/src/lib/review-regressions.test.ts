@@ -5111,6 +5111,7 @@ function passCliWithSessionWaits(savedLockCode: boolean) {
   let answer: (state: { state: string; hasLock: boolean }) => void = () => undefined;
   let toldLockCode: () => void = () => undefined;
   const saved: boolean[] = [];
+  const toasts: { style: string; title: string; hidden: boolean }[] = [];
   const timers: { run: () => void; ms: number }[] = [];
   const api = loadView(
     "pass-cli.ts",
@@ -5118,6 +5119,12 @@ function passCliWithSessionWaits(savedLockCode: boolean) {
       "@raycast/api": {
         environment: { isDevelopment: false, supportPath: "/fixture" },
         getPreferenceValues: () => ({}),
+        showToast: async ({ style, title }: { style: string; title: string }) => {
+          const toast = { style, title, hidden: false };
+          toasts.push(toast);
+          return { hide: async () => void (toast.hidden = true) };
+        },
+        Toast: { Style: { Animated: "animated" } },
       },
       "node:os": { homedir: () => "/fixture" },
       "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
@@ -5165,6 +5172,7 @@ function passCliWithSessionWaits(savedLockCode: boolean) {
     answer: (state: string, hasLock = true) => answer({ state, hasLock }),
     toldLockCode: () => toldLockCode(),
     saved,
+    toasts: () => JSON.stringify(toasts),
     elapse,
   };
 }
@@ -5211,6 +5219,47 @@ test("the saved items of a session with a lock code wait until pass-cli says whe
   await offline.elapse(60_000);
   assert.equal(await settledOf(neverAnswered), true);
   assert.equal(await neverAnswered, undefined);
+});
+
+test("a session with a lock code waits for pass-cli up to 30 seconds, with Checking Session… at the bottom meanwhile", async () => {
+  const checking = (hidden: boolean) => JSON.stringify([{ style: "animated", title: "Checking Session…", hidden }]);
+
+  // E.g. after a while unused, when pass-cli took 18 seconds to answer: nothing shows meanwhile, but the toast.
+  const slow = passCliWithSessionWaits(true);
+  const slowCheck = slow.api.waitForSessionCheck(slow.api.endedSessionError());
+  await slow.elapse(slow.api.SESSION_CHECK_WAIT_MS);
+  assert.equal(slow.toasts(), checking(false));
+  await slow.elapse(18_000);
+  assert.equal(await settledOf(slowCheck), false);
+  slow.answer("locked");
+  assert.equal((await slowCheck)?.type, "session_locked");
+  await new Promise(setImmediate);
+  assert.equal(slow.toasts(), checking(true));
+
+  // Offline: the saved items show after 30 seconds, and the toast goes.
+  const offline = passCliWithSessionWaits(true);
+  const offlineCheck = offline.api.waitForSessionCheck(offline.api.endedSessionError());
+  await offline.elapse(offline.api.SESSION_CHECK_WAIT_MS);
+  await offline.elapse(29_000);
+  assert.equal(await settledOf(offlineCheck), true);
+  assert.equal(await offlineCheck, undefined);
+  await new Promise(setImmediate);
+  assert.equal(offline.toasts(), checking(true));
+
+  // No toast for an answer within the usual wait, nor for a session without a lock code.
+  const quick = passCliWithSessionWaits(true);
+  const quickCheck = quick.api.waitForSessionCheck(quick.api.endedSessionError());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  quick.answer("open");
+  assert.equal(await quickCheck, undefined);
+  assert.equal(quick.toasts(), "[]");
+
+  const plain = passCliWithSessionWaits(false);
+  const plainCheck = plain.api.waitForSessionCheck(plain.api.endedSessionError());
+  await plain.elapse(plain.api.SESSION_CHECK_WAIT_MS);
+  assert.equal(await plainCheck, undefined);
+  assert.equal(plain.toasts(), "[]");
 });
 
 test("a session whose lock code was removed stops waiting for the lock check at its next opening", async () => {
