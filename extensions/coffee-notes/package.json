@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "coffee-notes",
+  "title": "Coffee Notes",
+  "description": "Requires the Coffee app. Search, read and open your Markdown notes in Coffee, start a note, or add to your inbox, without leaving the keyboard.",
+  "icon": "extension-icon.png",
+  "author": "pedro_pt_thomaz",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Coffee",
+      "description": "Find a note by its title or folder, read it, and open it in Coffee.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "new-note",
+      "title": "New Note",
+      "subtitle": "Coffee",
+      "description": "Write a note with a title and open it in Coffee.",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "add-to-inbox",
+      "title": "Add to Inbox",
+      "subtitle": "Coffee",
+      "description": "Add a line to Inbox.md without switching to Coffee.",
+      "icon": "extension-icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "What to Remember",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-today",
+      "title": "Open Today's Note",
+      "subtitle": "Coffee",
+      "description": "Open today's daily note, made from your Daily note template if it isn't there yet.",
+      "icon": "extension-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-in-coffee",
+      "title": "Search in Coffee",
+      "subtitle": "Coffee",
+      "description": "Open Coffee's own search with these words.",
+      "icon": "extension-icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Words",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notesFolder",
+      "title": "Notes Folder",
+      "description": "The folder Coffee keeps your notes in. Left empty, the one Coffee is set to is used.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

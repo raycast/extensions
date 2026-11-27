@@ -1,8 +1,9 @@
 /**
  * Cached API functions
- * Wraps API calls with Raycast Cache for improved performance
+ * Wraps API calls with Raycast Cache using host-scoped, parameterized keys
  */
 
+import { getApiHost } from "./client";
 import {
   getHealth,
   getStats,
@@ -12,7 +13,6 @@ import {
   updateBox,
   deleteBox,
   emptyBox,
-  getBoxCollections,
   listSadaqahs,
   addSadaqah,
   deleteSadaqah,
@@ -27,7 +27,7 @@ import {
   createCurrencyType,
   deleteCurrencyType,
 } from "./index";
-import { withCache, CACHE_TTL, removeCachedData, invalidateBoxesCache, invalidateStatsCache } from "../utils/cache";
+import { withCache, CACHE_TTL, buildCacheKey, invalidateByPrefix } from "../utils/cache";
 import type {
   HealthResponse,
   StatsResponse,
@@ -52,25 +52,47 @@ import type {
   DeleteResponse,
 } from "../types";
 
-// Cached Health Check
+function hostKey(...parts: Array<string | number>): string {
+  return buildCacheKey(getApiHost(), ...parts);
+}
+
+export function invalidateBoxesCache(): void {
+  invalidateByPrefix(hostKey("boxes"));
+}
+
+export function invalidateStatsCache(): void {
+  invalidateByPrefix(hostKey("stats"));
+}
+
+function invalidateBoxMutationCaches(
+  boxId: string,
+  options?: { includeStats?: boolean; includeCollections?: boolean },
+) {
+  invalidateByPrefix(hostKey("box", boxId));
+  invalidateBoxesCache();
+  if (options?.includeStats ?? true) {
+    invalidateStatsCache();
+  }
+  if (options?.includeCollections) {
+    invalidateByPrefix(hostKey("collections", boxId));
+  }
+}
+
 export async function getHealthCached(): Promise<HealthResponse> {
-  return getHealth(); // No caching for health check
+  return getHealth();
 }
 
-// Cached Stats
 export async function getStatsCached(): Promise<StatsResponse> {
-  return withCache("stats", () => getStats(), CACHE_TTL.STATS);
+  return withCache(hostKey("stats"), () => getStats(), CACHE_TTL.STATS);
 }
 
-// Cached Boxes
 export async function listBoxesCached(
   sortBy: "name" | "createdAt" | "count" | "totalValue" = "createdAt",
   sortOrder: "asc" | "desc" = "desc",
 ): Promise<ListBoxesResponse> {
-  return withCache("boxes", () => listBoxes(sortBy, sortOrder), CACHE_TTL.BOXES);
+  return withCache(hostKey("boxes", sortBy, sortOrder), () => listBoxes(sortBy, sortOrder), CACHE_TTL.BOXES);
 }
 
-// Create box - invalidates cache
 export async function createBoxCached(data: CreateBoxRequest): Promise<BoxResponse> {
   const result = await createBox(data);
   invalidateBoxesCache();
@@ -78,47 +100,28 @@ export async function createBoxCached(data: CreateBoxRequest): Promise<BoxRespon
   return result;
 }
 
-// Get single box - cached per box ID
 export async function getBoxCached(boxId: string): Promise<BoxWithStatsResponse> {
-  return withCache(`box-${boxId}`, () => getBox(boxId), CACHE_TTL.BOXES);
+  return withCache(hostKey("box", boxId), () => getBox(boxId), CACHE_TTL.BOXES);
 }
 
-// Update box - invalidates cache
 export async function updateBoxCached(boxId: string, data: UpdateBoxRequest): Promise<BoxResponse> {
   const result = await updateBox(boxId, data);
-  removeCachedData(`box-${boxId}`);
-  invalidateBoxesCache();
+  invalidateBoxMutationCaches(boxId, { includeStats: false });
   return result;
 }
 
-// Delete box - invalidates cache
 export async function deleteBoxCached(boxId: string): Promise<DeleteResponse> {
   const result = await deleteBox(boxId);
-  removeCachedData(`box-${boxId}`);
-  invalidateBoxesCache();
-  invalidateStatsCache();
+  invalidateBoxMutationCaches(boxId, { includeCollections: true });
   return result;
 }
 
-// Empty box - invalidates cache
 export async function emptyBoxCached(boxId: string): Promise<EmptyBoxResponse> {
   const result = await emptyBox(boxId);
-  removeCachedData(`box-${boxId}`);
-  invalidateBoxesCache();
-  invalidateStatsCache();
+  invalidateBoxMutationCaches(boxId, { includeCollections: true });
   return result;
 }
 
-// Get box collections - cached per box
-export async function getBoxCollectionsCached(
-  boxId: string,
-  page: number = 1,
-  limit: number = 20,
-): Promise<ListCollectionsResponse> {
-  return withCache(`collections-${boxId}`, () => getBoxCollections(boxId, page, limit), CACHE_TTL.BOXES);
-}
-
-// Sadaqahs - no caching as they change frequently
 export async function listSadaqahsCached(
   boxId: string,
   page: number = 1,
@@ -127,25 +130,18 @@ export async function listSadaqahsCached(
   return listSadaqahs(boxId, page, limit);
 }
 
-// Add sadaqah - invalidates cache
 export async function addSadaqahCached(boxId: string, data: AddSadaqahRequest): Promise<AddSadaqahResponse> {
   const result = await addSadaqah(boxId, data);
-  removeCachedData(`box-${boxId}`);
-  invalidateBoxesCache();
-  invalidateStatsCache();
+  invalidateBoxMutationCaches(boxId);
   return result;
 }
 
-// Delete sadaqah - invalidates cache
 export async function deleteSadaqahCached(boxId: string, sadaqahId: string): Promise<DeleteSadaqahResponse> {
   const result = await deleteSadaqah(boxId, sadaqahId);
-  removeCachedData(`box-${boxId}`);
-  invalidateBoxesCache();
-  invalidateStatsCache();
+  invalidateBoxMutationCaches(boxId);
   return result;
 }
 
-// Collections - no caching as they change
 export async function listCollectionsCached(
   boxId: string,
   page: number = 1,
@@ -154,58 +150,48 @@ export async function listCollectionsCached(
   return listCollections(boxId, page, limit);
 }
 
-// Currencies - long cache
 export async function listCurrenciesCached(): Promise<ListCurrenciesResponse> {
-  return withCache("currencies", () => listCurrencies(), CACHE_TTL.CURRENCIES);
+  return withCache(hostKey("currencies"), () => listCurrencies(), CACHE_TTL.CURRENCIES);
 }
 
-// Get currency - no individual caching
 export async function getCurrencyCached(currencyId: string): Promise<CurrencyResponse> {
   return getCurrency(currencyId);
 }
 
-// Create currency - invalidates cache
 export async function createCurrencyCached(data: CreateCurrencyRequest): Promise<CurrencyResponse> {
   const result = await createCurrency(data);
-  removeCachedData("currencies");
+  invalidateByPrefix(hostKey("currencies"));
   return result;
 }
 
-// Delete currency - invalidates cache
 export async function deleteCurrencyCached(currencyId: string): Promise<DeleteResponse> {
   const result = await deleteCurrency(currencyId);
-  removeCachedData("currencies");
+  invalidateByPrefix(hostKey("currencies"));
   return result;
 }
 
-// Update gold rates - no caching
 export async function updateGoldRatesCached(): Promise<UpdateGoldRatesResponse> {
-  return updateGoldRates();
+  const result = await updateGoldRates();
+  invalidateByPrefix(hostKey("currencies"));
+  return result;
 }
 
-// Currency types - long cache
 export async function listCurrencyTypesCached(): Promise<ListCurrencyTypesResponse> {
-  return withCache("currency-types", () => listCurrencyTypes(), CACHE_TTL.CURRENCIES);
+  return withCache(hostKey("currency-types"), () => listCurrencyTypes(), CACHE_TTL.CURRENCIES);
 }
 
-// Get currency type - no caching
 export async function getCurrencyTypeCached(currencyTypeId: string): Promise<CurrencyTypeResponse> {
   return getCurrencyType(currencyTypeId);
 }
 
-// Create currency type - invalidates cache
 export async function createCurrencyTypeCached(data: CreateCurrencyTypeRequest): Promise<CurrencyTypeResponse> {
   const result = await createCurrencyType(data);
-  removeCachedData("currency-types");
+  invalidateByPrefix(hostKey("currency-types"));
   return result;
 }
 
-// Delete currency type - invalidates cache
 export async function deleteCurrencyTypeCached(currencyTypeId: string): Promise<DeleteResponse> {
   const result = await deleteCurrencyType(currencyTypeId);
-  removeCachedData("currency-types");
+  invalidateByPrefix(hostKey("currency-types"));
   return result;
 }
-
-// Cache invalidation helpers
-export { invalidateBoxesCache, invalidateStatsCache };

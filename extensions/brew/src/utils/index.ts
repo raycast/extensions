@@ -52,6 +52,7 @@ export {
   isAbortError,
   isBrewLockError,
   isPinnedRefusal,
+  isNotInstalledRefusal,
   upgradeSkipReason,
   isDownloadTimeoutError,
   isStaleProcessError,

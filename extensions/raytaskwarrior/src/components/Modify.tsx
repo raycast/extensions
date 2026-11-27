@@ -1,18 +1,27 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { Priority, Task } from "../types/types";
-import { updateTask } from "../api";
+import { getTasks, updateTask } from "../api";
 import { formatDueDate } from "../utils/dateFormatters";
 
 interface FormValues {
   description?: string;
   project?: string;
+  newProject?: string;
   tags?: string;
   due?: string;
 }
 
 const Modify = (props: { task: Task }) => {
   const { task } = props;
+  const isAdding = !task.uuid;
+  // ponytail: reuse the task export; use a narrower query if it outgrows the export buffer.
+  const { data: tasks = [], isLoading: loadingOptions, error } = usePromise(getTasks, [], { execute: isAdding });
+
+  const projects = Array.from(new Set(tasks.flatMap(({ project }) => (project ? [project] : [])))).sort();
+  const newProjectOption = "new-project";
+  const [selectedProject, setSelectedProject] = useState("");
 
   const formatPriority = (priority?: Priority) => {
     switch (priority) {
@@ -103,7 +112,7 @@ const Modify = (props: { task: Task }) => {
     return isValid;
   };
 
-  const onSubmit = async ({ description, project, tags, due }: FormValues) => {
+  const onSubmit = async ({ description, project, newProject, tags, due }: FormValues) => {
     if (!isFormValid(description, tags)) {
       return;
     }
@@ -112,7 +121,12 @@ const Modify = (props: { task: Task }) => {
     const updatedDueDate = due === initialDueDate ? undefined : due;
     const parsedPriority = parsePriority(selectedPriority);
     try {
-      await updateTask(task.uuid, description, project, tagsArray, updatedDueDate, parsedPriority);
+      const projectName = isAdding
+        ? selectedProject === newProjectOption
+          ? newProject?.trim()
+          : selectedProject.slice(1)
+        : project;
+      await updateTask(task.uuid, description, projectName, tagsArray, updatedDueDate, parsedPriority);
       showToast({
         title: "Modified Task successfully",
         style: Toast.Style.Success,
@@ -133,11 +147,8 @@ const Modify = (props: { task: Task }) => {
 
   return (
     <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm onSubmit={onSubmit} />
-        </ActionPanel>
-      }
+      isLoading={loadingOptions}
+      actions={<ActionPanel>{!loadingOptions && <Action.SubmitForm onSubmit={onSubmit} />}</ActionPanel>}
     >
       <Form.TextField
         id="description"
@@ -155,14 +166,35 @@ const Modify = (props: { task: Task }) => {
           }
         }}
       />
-      <Form.TextField
-        id="project"
-        key="project"
-        title="Project"
-        placeholder="project name"
-        defaultValue={task.project ? task.project : ""}
-        info="leave empty to delete or not add a new project"
-      />
+      {isAdding ? (
+        <>
+          <Form.Dropdown
+            id="project"
+            title="Project"
+            placeholder="Search projects"
+            value={selectedProject}
+            onChange={setSelectedProject}
+            info={error ? "Could not load projects. Choose New Project to enter a name." : undefined}
+          >
+            <Form.Dropdown.Item value="" title="No Project" />
+            <Form.Dropdown.Item value={newProjectOption} title="New Project…" />
+            {projects.map((project) => (
+              <Form.Dropdown.Item key={project} value={`:${project}`} title={project} />
+            ))}
+          </Form.Dropdown>
+          {selectedProject === newProjectOption && (
+            <Form.TextField id="newProject" title="New Project" placeholder="Project name" />
+          )}
+        </>
+      ) : (
+        <Form.TextField
+          id="project"
+          title="Project"
+          placeholder="project name"
+          defaultValue={task.project ? task.project : ""}
+          info="leave empty to delete or not add a new project"
+        />
+      )}
       <Form.TextField
         id="tags"
         title="Tags"

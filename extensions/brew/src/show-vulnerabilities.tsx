@@ -75,10 +75,8 @@ function VulnerabilitiesContent() {
   const firstSection: Section = findings.length > 0 ? "vulnerable" : unscanned.length > 0 ? "unscanned" : "stale";
   const skippedNote = (section: Section) => (skipped > 0 && section === firstSection ? ` · ${skipped} skipped` : "");
   const toggleSidebar = () => setShowDetail((show) => !show);
-  const refreshAll = () => {
-    revalidate();
-    outdated.revalidate();
-  };
+  // Returned, so an upgrade from here stays claimed until both land.
+  const refreshAll = () => Promise.all([revalidate(), outdated.revalidate()]);
 
   return (
     <List isLoading={isLoading} isShowingDetail={hasRows && showDetail} searchBarPlaceholder="Search formulae…">

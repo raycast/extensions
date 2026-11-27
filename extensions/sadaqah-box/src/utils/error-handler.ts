@@ -1,6 +1,6 @@
 /**
  * Centralized error handling
- * Sanitizes errors for user display and provides proper error categorization
+ * Categorizes errors and sanitizes messages for user display
  */
 
 import { ERROR_MESSAGES } from "../constants";
@@ -15,13 +15,87 @@ export interface AppError {
 }
 
 /**
+ * Typed HTTP error thrown by the API client
+ */
+export class ApiError extends Error {
+  readonly status: number;
+  readonly code?: string;
+
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.code = code;
+  }
+}
+
+function categorizeStatus(status: number, message?: string): AppError {
+  switch (status) {
+    case 401:
+    case 403:
+      return {
+        category: "auth",
+        message: ERROR_MESSAGES.UNAUTHORIZED,
+        statusCode: status,
+      };
+    case 404:
+      return {
+        category: "not_found",
+        message: ERROR_MESSAGES.NOT_FOUND,
+        statusCode: status,
+      };
+    case 400:
+    case 422:
+      return {
+        category: "validation",
+        message: message || ERROR_MESSAGES.VALIDATION_ERROR,
+        statusCode: status,
+      };
+    case 429:
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return {
+        category: "server",
+        message: ERROR_MESSAGES.SERVER_ERROR,
+        statusCode: status,
+      };
+    default:
+      return {
+        category: status >= 500 ? "server" : "unknown",
+        message: status >= 500 ? ERROR_MESSAGES.SERVER_ERROR : message || ERROR_MESSAGES.UNKNOWN_ERROR,
+        statusCode: status,
+      };
+  }
+}
+
+/**
  * Categorize and sanitize errors for user display
  */
 export function handleError(error: unknown): AppError {
-  // Handle native Error objects
+  // Check structured HTTP status before generic Error handling
+  if (error instanceof ApiError) {
+    return {
+      ...categorizeStatus(error.status, error.message),
+      originalError: error,
+    };
+  }
+
+  if (typeof error === "object" && error !== null && "status" in error) {
+    const err = error as { status?: unknown; message?: unknown };
+    if (typeof err.status === "number") {
+      return {
+        ...categorizeStatus(err.status, typeof err.message === "string" ? err.message : undefined),
+        originalError: error instanceof Error ? error : undefined,
+      };
+    }
+  }
+
   if (error instanceof Error) {
-    // Timeout errors
-    if (error.name === "AbortError" || error.message.includes("timeout")) {
+    const msg = error.message.toLowerCase();
+
+    if (error.name === "AbortError" || msg.includes("timeout")) {
       return {
         category: "timeout",
         message: ERROR_MESSAGES.TIMEOUT_ERROR,
@@ -29,11 +103,12 @@ export function handleError(error: unknown): AppError {
       };
     }
 
-    // Network errors
     if (
-      error.message.includes("fetch") ||
-      error.message.includes("network") ||
-      error.message.includes("ECONNREFUSED")
+      msg.includes("fetch") ||
+      msg.includes("network") ||
+      msg.includes("econnrefused") ||
+      msg.includes("enotfound") ||
+      msg.includes("econnreset")
     ) {
       return {
         category: "network",
@@ -42,8 +117,7 @@ export function handleError(error: unknown): AppError {
       };
     }
 
-    // Auth errors (from API responses)
-    if (error.message.includes("unauthorized") || error.message.includes("authentication")) {
+    if (msg.includes("unauthorized") || msg.includes("authentication") || msg.includes("api key")) {
       return {
         category: "auth",
         message: ERROR_MESSAGES.UNAUTHORIZED,
@@ -51,7 +125,14 @@ export function handleError(error: unknown): AppError {
       };
     }
 
-    // Default: unknown error with sanitized message
+    if (msg.includes("invalid api host url")) {
+      return {
+        category: "validation",
+        message: error.message,
+        originalError: error,
+      };
+    }
+
     return {
       category: "unknown",
       message: ERROR_MESSAGES.UNKNOWN_ERROR,
@@ -59,44 +140,6 @@ export function handleError(error: unknown): AppError {
     };
   }
 
-  // Handle HTTP response errors
-  if (typeof error === "object" && error !== null) {
-    const err = error as { status?: number; message?: string };
-
-    if (err.status) {
-      switch (err.status) {
-        case 401:
-          return {
-            category: "auth",
-            message: ERROR_MESSAGES.UNAUTHORIZED,
-            statusCode: 401,
-          };
-        case 404:
-          return {
-            category: "not_found",
-            message: ERROR_MESSAGES.NOT_FOUND,
-            statusCode: 404,
-          };
-        case 422:
-          return {
-            category: "validation",
-            message: err.message || ERROR_MESSAGES.VALIDATION_ERROR,
-            statusCode: 422,
-          };
-        case 500:
-        case 502:
-        case 503:
-        case 504:
-          return {
-            category: "server",
-            message: ERROR_MESSAGES.SERVER_ERROR,
-            statusCode: err.status,
-          };
-      }
-    }
-  }
-
-  // Fallback for unknown error types
   return {
     category: "unknown",
     message: ERROR_MESSAGES.UNKNOWN_ERROR,
@@ -111,7 +154,7 @@ export function getErrorMessage(error: unknown): string {
 }
 
 /**
- * Check if error is retryable
+ * Check if error is transient and safe to retry for idempotent requests
  */
 export function isRetryableError(error: AppError): boolean {
   return error.category === "network" || error.category === "timeout" || error.category === "server";

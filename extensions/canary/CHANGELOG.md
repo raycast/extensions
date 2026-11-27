@@ -1,5 +1,12 @@
 # PR Canary Changelog
 
+## [Canary in PR Description] - 2026-11-26
+
+- Read the canary URL from the PR description, where CI may now post it, before falling back to PR comments
+- Recognize markdown links labelled Canary, e.g. `[SaaS Canary](…)`
+- Find the canary's commit file under a path-based canary, e.g. `/pr-123/build-info.json`, by trying each folder of the canary URL
+- Color the canary tag orange when its commit can't be read, instead of green
+
 ## [Red Tag on 403] - 2026-11-22
 
 - Color the canary tag red when the canary refuses the commit check with a 403

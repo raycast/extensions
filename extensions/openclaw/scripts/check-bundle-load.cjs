@@ -25,6 +25,7 @@ const commands = [
   "selected-text",
   "status",
   "open-webchat",
+  "local-gateway",
 ];
 
 const isolatedDirectory = fs.mkdtempSync(
@@ -32,12 +33,11 @@ const isolatedDirectory = fs.mkdtempSync(
 );
 
 try {
+  fs.cpSync(path.join(process.cwd(), "dist"), isolatedDirectory, {
+    recursive: true,
+  });
   for (const command of commands) {
     const bundle = `${command}.js`;
-    fs.copyFileSync(
-      path.join(process.cwd(), "dist", bundle),
-      path.join(isolatedDirectory, bundle),
-    );
     require(path.join(isolatedDirectory, bundle));
   }
 } finally {

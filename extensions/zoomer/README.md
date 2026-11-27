@@ -7,6 +7,7 @@ Requires the **Zoomer desktop app** for macOS. Each command hands off to the Zoo
 ## Commands
 
 - **Capture Area** — capture a selected region (output: default, copy, save, or upload)
+- **Capture Scrolling Area** — select an area, scroll, then run the command again or click Done to finish (output: default, copy, save, or upload)
 - **Capture Full Screen** — capture the current screen
 - **Capture History** — show recent captures for quick access
 - **Start Recording** / **Stop Recording** — control a screen recording

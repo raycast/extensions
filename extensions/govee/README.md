@@ -29,3 +29,19 @@ Control your [Govee](https://govee.com/) Lights using [Raycast](https://raycast.
 - You can create scenarios in the Extension. This will let you control multiple lights at once
 - You can set the action for all selected lights
 - You can individually set the action for each light. Individually set actions will override the action for all lights.
+
+### Govee API key (optional)
+
+Some lights have no LAN Control (for example most bulbs). With a Govee API key the extension can control them through the Govee cloud, and it also unlocks snapshots, music modes, white temperature and app names for your lights. Lights on LAN keep using LAN.
+
+[How to get a key (with screenshots)](https://developer.govee.com/reference/apply-you-govee-api-key). Paste it in the extension's settings.
+
+The Govee cloud allows 10 commands per light per minute, so Subsection Coloring over the cloud is limited to 9 colors and may pause for the limit.
+
+### Subsection Coloring
+
+On strips with segments, tick a few colors and apply them as a Split (equal blocks) or a Gradient. On supported models with LAN Control this is instant; otherwise it goes through the cloud.
+
+### Menu Bar
+
+The optional `Govee Menu Bar` command shows your lights, scenarios and snapshots in the macOS menu bar. Enable it in Raycast's settings.
