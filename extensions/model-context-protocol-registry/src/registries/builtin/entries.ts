@@ -4684,6 +4684,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Suno by Ace Data Cloud",
     description:
       "Generate and extend songs, separate stems and retrieve the finished tracks. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/l3ffw7.jpg",
     homepage: "https://github.com/AceDataCloud/SunoMCP",
     configuration: {
       command: "npx",
@@ -4696,6 +4697,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Nano Banana by Ace Data Cloud",
     description:
       "Generate images from text or edit a reference image, then retrieve the result. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/859plc.jpg",
     homepage: "https://github.com/AceDataCloud/NanoBananaMCP",
     configuration: {
       command: "npx",
@@ -4708,6 +4710,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "GPT Image by Ace Data Cloud",
     description:
       "Generate and edit images with the image-only profile and retrieve completed results. A connected Ace Data Cloud account is required. Usage is billed to that account. Install uv to run the local image-only server.",
+    icon: "https://raw.githubusercontent.com/AceDataCloud/GPTImageDify/main/_assets/icon.png",
     homepage: "https://github.com/AceDataCloud/OpenAIMCP",
     configuration: {
       command: "uvx",
@@ -4720,6 +4723,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Seedance by Ace Data Cloud",
     description:
       "Generate a video from text or an image and retrieve the finished clip. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/9q90dl.png",
     homepage: "https://github.com/AceDataCloud/SeedanceMCP",
     configuration: {
       command: "npx",
@@ -4732,6 +4736,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Seedream by Ace Data Cloud",
     description:
       "Create, edit or decompose images and retrieve the generated files. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/9egrbn.png",
     homepage: "https://github.com/AceDataCloud/SeedreamMCP",
     configuration: {
       command: "npx",
@@ -4744,6 +4749,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Kling by Ace Data Cloud",
     description:
       "Create or extend videos, build storyboards and check task results. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/qpbbbb.jpg",
     homepage: "https://github.com/AceDataCloud/KlingMCP",
     configuration: {
       command: "npx",
@@ -4756,6 +4762,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Veo by Ace Data Cloud",
     description:
       "Create video from a text prompt or reference image and retrieve the result. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/8nxyy9.jpg",
     homepage: "https://github.com/AceDataCloud/VeoMCP",
     configuration: {
       command: "npx",
@@ -4768,6 +4775,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Hailuo by Ace Data Cloud",
     description:
       "Animate an image or generate a video from text and check task progress. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/0qg4gp.png",
     homepage: "https://github.com/AceDataCloud/HailuoMCP",
     configuration: {
       command: "npx",
@@ -4780,6 +4788,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Fish Audio by Ace Data Cloud",
     description:
       "Turn a script into speech and discover the available speech models. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://raw.githubusercontent.com/AceDataCloud/FishAudioDify/main/_assets/icon.png",
     homepage: "https://github.com/AceDataCloud/FishMCP",
     configuration: {
       command: "npx",
@@ -4792,6 +4801,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Google Search by Ace Data Cloud",
     description:
       "Find web, image, news, map and video results with location and language options. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/27e11e555d.png",
     homepage: "https://github.com/AceDataCloud/SerpMCP",
     configuration: {
       command: "npx",
@@ -4804,6 +4814,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "AI Chat by Ace Data Cloud",
     description:
       "Discover supported models and start or continue a conversation. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://avatars.githubusercontent.com/u/156096448?s=192&v=4",
     homepage: "https://github.com/AceDataCloud/AiChatMCP",
     configuration: {
       command: "npx",
@@ -4816,6 +4827,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "FLUX by Ace Data Cloud",
     description:
       "Generate or edit images from prompts and retrieve completed tasks. A connected Ace Data Cloud account is required. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/ogm2oa.png",
     homepage: "https://github.com/AceDataCloud/FluxMCP",
     configuration: {
       command: "npx",
