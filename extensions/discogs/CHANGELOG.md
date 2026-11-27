@@ -1,6 +1,6 @@
 # discogs Changelog
 
-## [Fix Search Query Encoding] - {PR_MERGE_DATE}
+## [Fix Search Query Encoding] - 2026-11-27
 - Encode the search text in Search Discogs, so queries with `&`, `#` or `+` ("Simon & Garfunkel") search for the whole text and keep the token
 
 ## [Search Current Music Track] - 2026-10-22
