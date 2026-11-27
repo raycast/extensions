@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Ace Data Cloud servers and update image-only setup] - {PR_MERGE_DATE}
+
+- Add hosted servers for video, music, images, chat, 3D models, short links and web extraction, plus local Image to Text and Digital Human servers.
+- Update the GPT Image package requirement to a release with its service icon. Local servers can now link to the page where users create the API key used in their configuration.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.

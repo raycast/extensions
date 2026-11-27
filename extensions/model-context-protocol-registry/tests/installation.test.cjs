@@ -149,3 +149,14 @@ test("Scrapewise installs with headerless native HTTP and keeps its Bearer proxy
   assert.match(raycastSetup, /Node\.js is not required in Raycast/);
   assert.match(proxySetup, /Requires \[Node\.js with npm\]/);
 });
+
+test("Image-only setup shows the credential page separately from the installed configuration", () => {
+  const entry = OFFICIAL_ENTRIES.find((item) => item.name === "ace-gpt-image");
+  const server = getRaycastServer(entry);
+  assert.equal(server.transport, "stdio");
+  assert.equal(server.command, "uvx");
+  assert.deepEqual(server.args.slice(-2), ["--profile", "gpt-image"]);
+  assert.ok(server.env.ACEDATACLOUD_API_TOKEN);
+  assert.ok(getSetupMarkdown(entry).includes(`[Get an API key](${entry.apiKeyUrl})`));
+  assert.ok(!JSON.stringify(server).includes(entry.apiKeyUrl));
+});

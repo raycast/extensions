@@ -4748,11 +4748,13 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "GPT Image by Ace Data Cloud",
     description:
       "Generate and edit images with the image-only profile and retrieve completed results. A connected Ace Data Cloud account is required. Usage is billed to that account. Install uv to run the local image-only server.",
-    icon: "https://raw.githubusercontent.com/AceDataCloud/GPTImageDify/main/_assets/icon.png",
+    icon: "https://cdn.acedata.cloud/uploads/plugin-gpt-image-dify-b525d3451af82c229d95.png",
     homepage: "https://github.com/AceDataCloud/OpenAIMCP",
+    apiKeyUrl:
+      "https://platform.acedata.cloud/console/applications?utm_source=raycast&utm_medium=referral&utm_campaign=evergreen",
     configuration: {
       command: "uvx",
-      args: ["--from", "mcp-openai-pro==2026.11.24.0", "mcp-openai-pro", "--profile", "gpt-image"],
+      args: ["--from", "mcp-openai-pro>=2026.11.27.1", "mcp-openai-pro", "--profile", "gpt-image"],
       env: { ACEDATACLOUD_API_TOKEN: "YOUR_ACE_APPLICATION_TOKEN" },
     },
   },
@@ -4826,7 +4828,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Fish Audio by Ace Data Cloud",
     description:
       "Turn a script into speech and discover the available speech models. A connected Ace Data Cloud account is required. Usage is billed to that account.",
-    icon: "https://raw.githubusercontent.com/AceDataCloud/FishAudioDify/main/_assets/icon.png",
+    icon: "https://cdn.acedata.cloud/uploads/plugin-fish-audio-raycast-48efe1dc469487d521b2.png",
     homepage: "https://github.com/AceDataCloud/FishMCP",
     configuration: {
       command: "npx",
@@ -4852,7 +4854,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "AI Chat by Ace Data Cloud",
     description:
       "Discover supported models and start or continue a conversation. A connected Ace Data Cloud account is required. Usage is billed to that account.",
-    icon: "https://raw.githubusercontent.com/AceDataCloud/ModelProviderDify/main/_assets/icon.png",
+    icon: "https://cdn.acedata.cloud/uploads/plugin-aichat-model-provider-3e2c6e2d1a61a549dae2.png",
     homepage: "https://github.com/AceDataCloud/AiChatMCP",
     configuration: {
       command: "npx",
@@ -4872,6 +4874,191 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://flux.mcp.acedata.cloud/mcp"],
     },
     remoteUrl: "https://flux.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-happyhorse",
+    title: "HappyHorse by Ace Data Cloud",
+    description:
+      "Generate and edit videos using prompts, images or reference media, then retrieve the finished clips. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/2841e8c719.png",
+    homepage: "https://github.com/AceDataCloud/HappyHorseMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://happyhorse.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://happyhorse.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-wan",
+    title: "Wan by Ace Data Cloud",
+    description:
+      "Create Wan videos from prompts or images and look up previous generation tasks. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/a033884259.png",
+    homepage: "https://github.com/AceDataCloud/WanMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://wan.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://wan.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-luma",
+    title: "Luma by Ace Data Cloud",
+    description:
+      "Create Luma videos from text or images, extend a clip, and retrieve results. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/ahjfwi.png",
+    homepage: "https://github.com/AceDataCloud/LumaMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://luma.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://luma.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-minimax",
+    title: "MiniMax by Ace Data Cloud",
+    description:
+      "Generate MiniMax videos from text, images or audio and check the status of each task. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/2440b75bb8.png",
+    homepage: "https://github.com/AceDataCloud/MinimaxMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://minimax.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://minimax.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-producer",
+    title: "Producer by Ace Data Cloud",
+    description:
+      "Write lyrics, generate and extend songs, and retrieve audio results from Producer. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/id0mz5.jpg",
+    homepage: "https://github.com/AceDataCloud/ProducerMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://producer.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://producer.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-tripo",
+    title: "Tripo by Ace Data Cloud",
+    description:
+      "Generate and texture 3D models with Tripo, rig a model, and check its task status. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata2.cloud/tripo/catalog/tripo-icon-a80c573eb58a.png",
+    homepage: "https://github.com/AceDataCloud/TripoMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://tripo.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://tripo.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-qwen-image",
+    title: "Qwen Image by Ace Data Cloud",
+    description:
+      "Generate or edit images with Qwen Image and retrieve completed tasks. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/uploads/ecosystem-qwen-image-20a1e4fe844e2007e9fb.png",
+    homepage: "https://github.com/AceDataCloud/QwenImageMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://qwen-image.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://qwen-image.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-grok",
+    title: "Grok by Ace Data Cloud",
+    description:
+      "Chat with Grok or generate videos from text and images. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/p1ge98.png",
+    homepage: "https://github.com/AceDataCloud/GrokMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://grok.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://grok.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-glm",
+    title: "GLM by Ace Data Cloud",
+    description:
+      "List available GLM models and send chat messages. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/uploads/71c11f3e-043a-4974-833d-a346d489a232",
+    homepage: "https://github.com/AceDataCloud/GlmMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://glm.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://glm.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-image-to-text",
+    title: "Image to Text by Ace Data Cloud",
+    description:
+      "Recognize text in images and retrieve earlier recognition results. Install uv and connect an Ace Data Cloud application key. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/uploads/ad333990-ea8e-4889-83c5-67385fc8d7b0",
+    homepage: "https://github.com/AceDataCloud/Image2TextMCP",
+    apiKeyUrl:
+      "https://platform.acedata.cloud/console/applications?utm_source=raycast&utm_medium=referral&utm_campaign=evergreen",
+    configuration: {
+      command: "uvx",
+      args: ["mcp-image2text"],
+      env: { ACEDATACLOUD_API_TOKEN: "YOUR_ACE_APPLICATION_TOKEN" },
+    },
+  },
+  {
+    name: "ace-digital-human",
+    title: "Digital Human by Ace Data Cloud",
+    description:
+      "Create avatar videos from media you have permission to use and retrieve completed video tasks. Install uv and connect an Ace Data Cloud application key. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/uploads/1083534c-b49d-4242-899e-b0d9190dddbc",
+    homepage: "https://github.com/AceDataCloud/DigitalHumanMCP",
+    apiKeyUrl:
+      "https://platform.acedata.cloud/console/applications?utm_source=raycast&utm_medium=referral&utm_campaign=evergreen",
+    configuration: {
+      command: "uvx",
+      args: ["mcp-digitalhuman"],
+      env: { ACEDATACLOUD_API_TOKEN: "YOUR_ACE_APPLICATION_TOKEN" },
+    },
+  },
+  {
+    name: "ace-maestro",
+    title: "Maestro by Ace Data Cloud",
+    description:
+      "Create videos with Maestro, list recent tasks, and retrieve an existing result. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/uploads/c05acf25-8990-4004-9a29-6fa6865ed66f",
+    homepage: "https://github.com/AceDataCloud/MaestroMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://maestro.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://maestro.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-short-url",
+    title: "Short URL by Ace Data Cloud",
+    description: "Create short links for individual URLs or a batch of URLs. Sign in with an Ace Data Cloud account.",
+    icon: "https://cdn.acedata.cloud/uploads/plugin-shorturl-raycast-770511373c58e4d298e4.png",
+    homepage: "https://github.com/AceDataCloud/ShortURLMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://shorturl.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://shorturl.mcp.acedata.cloud/mcp",
+  },
+  {
+    name: "ace-web-extractor",
+    title: "Web Extractor by Ace Data Cloud",
+    description:
+      "Extract content from a web page or render it first, then retrieve the result. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
+    icon: "https://cdn.acedata.cloud/0442b4af2f.png",
+    homepage: "https://github.com/AceDataCloud/WebExtratorMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://webextrator.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://webextrator.mcp.acedata.cloud/mcp",
   },
   {
     name: "elevenlabs",
