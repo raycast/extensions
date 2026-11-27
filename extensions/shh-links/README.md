@@ -12,7 +12,7 @@ Opens a form before pasting:
 - **URL** is filled in from the clipboard. It takes one link or a whole list.
 - **Result** shows exactly what will be pasted.
 
-Press `↵` to paste into Discord, or use **Copy Link** to copy the result instead.
+Press `⌘↵` to paste into Discord, or use **Copy Link** to copy the result instead.
 
 ### Paste Clipboard Without Embed
 

@@ -1,5 +1,5 @@
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
-import { discordSelection, pasteInDiscord } from "./discord";
+import { copyInstead, discordSelection, pasteInDiscord } from "./discord";
 import { formatContent, fromSelection, lengthWarning } from "./format";
 
 // No form: the clipboard links go into Discord as [site](<url>). Words selected in
@@ -17,21 +17,27 @@ export default async function Command() {
     }
 
     const result = await pasteInDiscord(link);
-    // Pasted anyway: the message can still be shortened in Discord before sending
-    const tooLong = lengthWarning(link);
-    if (result === "pasted" && tooLong) await showHUD(tooLong);
-    if (result !== "pasted") {
-      await Clipboard.copy(link);
-      await showHUD(
-        result === "closed"
-          ? "Discord is closed; the link was copied"
-          : "Discord was not in front; the link was copied",
-      );
+    if (result === "pasted") {
+      // Pasted anyway: the message can still be shortened in Discord before sending
+      const tooLong = lengthWarning(link);
+      if (tooLong) await showHUD(tooLong);
+      return;
     }
+    const why = result === "closed" ? "Discord is closed" : "Discord was not in front";
+    await showHUD(
+      (await copyInstead(link)) ? `${why}; the link was copied` : `${why}, and the link could not be copied`,
+    );
   } catch (error) {
-    // Whatever failed, a link already built is copied so it is not lost
     const reason = error instanceof Error ? error.message : String(error);
-    if (link) await Clipboard.copy(link).catch(() => undefined);
-    await showHUD(link ? `Could not paste into Discord (${reason}); the link was copied` : `Failed: ${reason}`);
+    if (!link) {
+      await showHUD(`Failed: ${reason}`);
+      return;
+    }
+    // Whatever failed, a link already built is copied so it is not lost
+    await showHUD(
+      (await copyInstead(link))
+        ? `Could not paste into Discord (${reason}); the link was copied`
+        : `Could not paste into Discord (${reason}) or copy the link`,
+    );
   }
 }

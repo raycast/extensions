@@ -69,3 +69,14 @@ export async function pasteInDiscord(content: string): Promise<PasteResult> {
   await Clipboard.paste({ text: content });
   return "pasted";
 }
+
+// Copies a link that could not be pasted, so it is not lost. False when the copy failed
+// too, so the message never claims the link is on the clipboard when it is not.
+export async function copyInstead(link: string): Promise<boolean> {
+  try {
+    await Clipboard.copy(link);
+    return true;
+  } catch {
+    return false;
+  }
+}

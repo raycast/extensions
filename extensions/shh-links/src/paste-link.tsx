@@ -9,8 +9,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { discordSelection, pasteInDiscord } from "./discord";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { copyInstead, discordSelection, pasteInDiscord } from "./discord";
 import { cleanUrl, countUrls, formatContent, fromSelection, lengthWarning, maskedText, siteName } from "./format";
 
 // The clipboard as the URL field starts: one URL alone, or text holding several
@@ -24,20 +25,25 @@ export default function Command() {
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string>();
-  const [loading, setLoading] = useState(true);
 
   // Selection first: reading it may go through the clipboard
-  useEffect(() => {
-    (async () => {
+  const { isLoading } = usePromise(
+    async () => {
       const selection = fromSelection(await discordSelection());
       const content = selection.urls || (await Clipboard.readText()) || "";
-      const urls = initialUrls(content);
-      // A single link starts with its masked text or its site's name; clearing the text
-      // leaves a bare <url>
-      setText((typed) => typed || selection.text || maskedText(content) || siteName(cleanUrl(urls)));
-      setUrl((typed) => typed || urls);
-    })().finally(() => setLoading(false));
-  }, []);
+      return { selection, content };
+    },
+    [],
+    {
+      onData: ({ selection, content }) => {
+        const urls = initialUrls(content);
+        // A single link starts with its masked text or its site's name; clearing the text
+        // leaves a bare <url>. Whatever was typed while loading is kept.
+        setText((typed) => typed || selection.text || maskedText(content) || siteName(cleanUrl(urls)));
+        setUrl((typed) => typed || urls);
+      },
+    },
+  );
 
   const { untrack } = getPreferenceValues<Preferences>();
   const many = countUrls(url) > 1;
@@ -56,26 +62,32 @@ export default function Command() {
     } catch (error) {
       // The window may be closed by now, so a HUD, which shows either way
       const reason = error instanceof Error ? error.message : String(error);
-      await Clipboard.copy(link).catch(() => undefined);
-      await showHUD(`Could not paste into Discord (${reason}); the link was copied`);
+      await showHUD(
+        (await copyInstead(link))
+          ? `Could not paste into Discord (${reason}); the link was copied`
+          : `Could not paste into Discord (${reason}) or copy the link`,
+      );
       return;
     }
     if (result === "closed") {
-      await Clipboard.copy(link);
+      const copied = await copyInstead(link);
       await showToast({
         style: Toast.Style.Failure,
         title: "Discord is closed",
-        message: "The link was copied instead",
+        message: copied ? "The link was copied instead" : "The link could not be copied either",
       });
     } else if (result === "no focus") {
-      await Clipboard.copy(link);
-      await showHUD("Discord was not in front; the link was copied");
+      await showHUD(
+        (await copyInstead(link))
+          ? "Discord was not in front; the link was copied"
+          : "Discord was not in front, and the link could not be copied",
+      );
     }
   }
 
   return (
     <Form
-      isLoading={loading}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Paste in Discord" icon={Icon.Clipboard} onSubmit={paste} />
