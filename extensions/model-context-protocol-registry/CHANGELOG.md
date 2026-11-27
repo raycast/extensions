@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Ace Data Cloud media and search MCP servers] - {PR_MERGE_DATE}
+## [Add Ace Data Cloud media and search MCP servers] - 2026-11-27
 
 - Add separate install entries for the Ace Data Cloud music, image, video, speech, search and chat services. Choose the server for the task; the entries show account and billing requirements.
 
