@@ -1,0 +1,84 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "quick-math",
+    "title": "Math to PNG",
+    "description": "Render LaTeX or Typst formulas locally, preview them, and copy them to the clipboard as transparent PNGs.",
+    "icon": "circular-integral.png",
+    "author": "Harumaru169",
+    "contributors": [
+        "Noamko",
+        "FariaF22"
+    ],
+    "categories": [
+        "Productivity"
+    ],
+    "license": "MIT",
+    "preferences": [
+        {
+            "name": "renderer",
+            "title": "Rendering Engine",
+            "description": "Choose the syntax and local renderer for your formulas.",
+            "type": "dropdown",
+            "required": false,
+            "default": "latex",
+            "data": [
+                {
+                    "title": "LaTeX",
+                    "value": "latex"
+                },
+                {
+                    "title": "Typst",
+                    "value": "typst"
+                }
+            ]
+        },
+        {
+            "name": "preamble",
+            "title": "Custom Preamble",
+            "description": "LaTeX commands appended after the built-in amsmath and amssymb packages.",
+            "type": "textfield",
+            "required": false,
+            "default": "",
+            "placeholder": "\\usepackage{mathtools,bm,physics}"
+        }
+    ],
+    "commands": [
+        {
+            "name": "quick-math",
+            "title": "Render Formula",
+            "description": "Preview a LaTeX or Typst formula and copy it as a transparent PNG.",
+            "mode": "view",
+            "arguments": [
+                {
+                    "name": "latex",
+                    "type": "text",
+                    "required": false,
+                    "placeholder": "Formula"
+                }
+            ]
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^2.12.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.19.17",
+        "@types/react": "^19.0.10",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "^2.5.1",
+        "typescript": "^5.9.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    },
+    "platforms": [
+        "macOS"
+    ]
+}
