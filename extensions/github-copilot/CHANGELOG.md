@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Improve GitHub Copilot AI model error reporting and refresh] - {PR_MERGE_DATE}
+## [Improve GitHub Copilot AI model error reporting and refresh] - 2026-11-27
 
 - Surface structured HTTP errors (such as `401`, `403`, `429`, and integrator/endpoint rejections) as `APICallError` instead of hiding them behind opaque retries
 - Add a 15-minute TTL and automatic invalidation for cached Copilot API host and model catalog entries, and clear cached model data on re-authentication
