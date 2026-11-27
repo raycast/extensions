@@ -22,12 +22,21 @@ export type DeviceAuthTokenRecord = {
 const IDENTITY_STORAGE_KEY = "openclaw.gateway.device-identity.v1";
 const INSTANCE_ID_STORAGE_KEY = "openclaw.gateway.instance-id.v1";
 
-export async function loadOrCreateInstanceId(): Promise<string> {
-  const stored = await LocalStorage.getItem<string>(INSTANCE_ID_STORAGE_KEY);
+type DeviceProfile = "local-admin";
+
+function profileKey(key: string, profile?: DeviceProfile) {
+  return profile ? `${key}.${profile}` : key;
+}
+
+export async function loadOrCreateInstanceId(
+  profile?: DeviceProfile,
+): Promise<string> {
+  const key = profileKey(INSTANCE_ID_STORAGE_KEY, profile);
+  const stored = await LocalStorage.getItem<string>(key);
   if (stored) return stored;
 
   const instanceId = randomUUID();
-  await LocalStorage.setItem(INSTANCE_ID_STORAGE_KEY, instanceId);
+  await LocalStorage.setItem(key, instanceId);
   return instanceId;
 }
 
@@ -102,8 +111,11 @@ function createDeviceIdentity(): DeviceIdentity {
   };
 }
 
-export async function loadOrCreateDeviceIdentity(): Promise<DeviceIdentity> {
-  const stored = await LocalStorage.getItem<string>(IDENTITY_STORAGE_KEY);
+export async function loadOrCreateDeviceIdentity(
+  profile?: DeviceProfile,
+): Promise<DeviceIdentity> {
+  const key = profileKey(IDENTITY_STORAGE_KEY, profile);
+  const stored = await LocalStorage.getItem<string>(key);
 
   if (stored) {
     try {
@@ -117,7 +129,7 @@ export async function loadOrCreateDeviceIdentity(): Promise<DeviceIdentity> {
   }
 
   const identity = createDeviceIdentity();
-  await LocalStorage.setItem(IDENTITY_STORAGE_KEY, JSON.stringify(identity));
+  await LocalStorage.setItem(key, JSON.stringify(identity));
   return identity;
 }
 
@@ -134,9 +146,10 @@ function deviceTokenStorageKey(gatewayUrl: string, role: string): string {
 export async function loadDeviceAuthToken(
   gatewayUrl: string,
   role: string,
+  profile?: DeviceProfile,
 ): Promise<DeviceAuthTokenRecord | null> {
   const stored = await LocalStorage.getItem<string>(
-    deviceTokenStorageKey(gatewayUrl, role),
+    profileKey(deviceTokenStorageKey(gatewayUrl, role), profile),
   );
   if (!stored) return null;
 
@@ -157,9 +170,10 @@ export async function storeDeviceAuthToken(
   gatewayUrl: string,
   role: string,
   record: DeviceAuthTokenRecord,
+  profile?: DeviceProfile,
 ): Promise<void> {
   await LocalStorage.setItem(
-    deviceTokenStorageKey(gatewayUrl, role),
+    profileKey(deviceTokenStorageKey(gatewayUrl, role), profile),
     JSON.stringify(record),
   );
 }

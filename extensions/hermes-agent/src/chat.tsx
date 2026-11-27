@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { sendMessage } from "./api";
@@ -193,7 +194,10 @@ function ConversationView({
             <Action.CopyToClipboard
               title="Copy Last Response"
               content={lastAssistantMessage.content}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "c" },
+                Windows: { modifiers: ["ctrl"], key: "c" },
+              }}
             />
           )}
         </ActionPanel>
@@ -242,7 +246,10 @@ function ConversationView({
                 <Action.CopyToClipboard
                   title="Copy This Message"
                   content={msg.content}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "c" },
+                    Windows: { modifiers: ["ctrl"], key: "c" },
+                  }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Full Conversation"
@@ -252,7 +259,7 @@ function ConversationView({
                         `${m.role === "user" ? "You" : "Hermes"}: ${m.content}`,
                     )
                     .join("\n\n")}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
               </ActionPanel>
             }
@@ -357,7 +364,10 @@ export default function Command() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => deleteConversation(conv.id)}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "backspace" },
+                      Windows: { modifiers: ["ctrl"], key: "backspace" },
+                    }}
                   />
                 </ActionPanel>
               }

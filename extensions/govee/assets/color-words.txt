@@ -1,0 +1,321 @@
+// Colour words for guessing a snapshot's colour circle from its name.
+// One entry per line: words, then a hex colour. Lines starting with // are ignored.
+// Matching ignores case, and a trailing "s"/"es" ("Violets", "Peaches").
+// Multi-word entries ("hot pink") win over single words. A name can match several colours.
+// Edit freely, then run `npm run dev` again to pick up changes.
+
+// Reds
+red #FF0000
+crimson #DC143C
+scarlet #FF2400
+ruby #E0115F
+cherry #D2042D
+blood #8A0303
+wine #722F37
+burgundy #800020
+maroon #800000
+garnet #733635
+carmine #960018
+vermilion #E34234
+cardinal #C41E3A
+rose #FF007F
+rosewood #65000B
+brick #CB4154
+rust #B7410E
+fire #FF3B1F
+flame #E25822
+lava #CF1020
+inferno #FF4500
+ember #FF5F1F
+blaze #FF6700
+strawberry #FC5A8D
+raspberry #E30B5C
+tomato #FF6347
+chili #C21807
+pepper #C21807
+cranberry #9F000F
+pomegranate #C0392B
+blush #DE5D83
+love #E0115F
+passion #C2185B
+romance #C71585
+heart #E0115F
+valentine #E0115F
+hot red #FF1A1A
+
+// Oranges
+orange #FF8000
+tangerine #F28500
+mandarin #F37A48
+apricot #FBCEB1
+peach #FFB07C
+coral #FF7F50
+salmon #FA8072
+amber #FFBF00
+copper #B87333
+bronze #CD7F32
+pumpkin #FF7518
+carrot #ED9121
+sunset #FA5F2B
+dusk #E96B39
+autumn #D2691E
+fall #D2691E
+halloween #FF6A00
+cinnamon #D2691E
+terracotta #E2725B
+papaya #FFA055
+mango #FFA62B
+citrus #F7A800
+clementine #E96E00
+marigold #EAA221
+saffron #F4C430
+burnt orange #CC5500
+fire orange #FF4F00
+
+// Yellows
+yellow #FFFF00
+gold #FFD700
+golden #FFD700
+lemon #FFF44F
+canary #FFEF00
+sun #FFD300
+sunny #FFD300
+sunshine #FFD300
+sunrise #FFB347
+sunflower #FFDA03
+banana #FFE135
+butter #FFF48F
+honey #EBA937
+mustard #FFDB58
+corn #FBEC5D
+daffodil #FFFF31
+dandelion #F0E130
+straw #E4D96F
+champagne #F7E7CE
+cream #FFFDD0
+vanilla #F3E5AB
+ivory #FFFFF0
+blonde #FAF0BE
+sand #C2B280
+desert #EDC9AF
+beige #F5F5DC
+khaki #C3B091
+candle #FFB46B
+candlelight #FFB46B
+warm #FFB46B
+warm white #FFD6AA
+cozy #FFB46B
+cosy #FFB46B
+fireplace #FF8C3A
+
+// Greens
+green #00FF00
+lime #BFFF00
+acid #B0BF1A
+toxic #A2FF00
+neon green #39FF14
+emerald #50C878
+jade #00A86B
+mint #3EB489
+sage #9CAF88
+olive #808000
+forest #228B22
+jungle #29AB87
+grass #7CFC00
+leaf #5CA904
+moss #8A9A5B
+pine #01796F
+fern #4F7942
+spring #00FF7F
+meadow #7CB342
+garden #4CAF50
+nature #4CAF50
+apple #8DB600
+pear #D1E231
+pistachio #93C572
+avocado #568203
+kiwi #8EE53F
+matcha #ADC178
+chartreuse #7FFF00
+shamrock #009E60
+clover #3EA055
+irish #009A49
+st patrick #009A49
+christmas #C1121F
+xmas #C1121F
+tree #228B22
+seafoam #93E9BE
+sea green #2E8B57
+
+// Cyans and teals
+cyan #00FFFF
+aqua #00FFFF
+teal #008080
+turquoise #40E0D0
+aquamarine #7FFFD4
+lagoon #00B3B3
+tropical #00C2C7
+caribbean #00CCCC
+pool #00BFFF
+glacier #78B1BF
+mint blue #A0E6FF
+ice #D6FFFA
+icy #D6FFFA
+frost #E1F5FE
+frozen #D6FFFA
+arctic #C7E8F3
+polar #E8F4F8
+winter #B3E5FC
+
+// Blues
+blue #0000FF
+navy #000080
+royal #4169E1
+royal blue #4169E1
+cobalt #0047AB
+sapphire #0F52BA
+azure #007FFF
+sky #87CEEB
+sky blue #87CEEB
+baby blue #89CFF0
+cerulean #007BA7
+denim #1560BD
+indigo #4B0082
+ocean #006994
+sea #2E8BC0
+marine #042E4C
+deep sea #003366
+water #3E9BFF
+wave #1E90FF
+rain #6A8EAE
+storm #4F666A
+steel #4682B4
+electric #7DF9FF
+electric blue #7DF9FF
+ultramarine #3F00FF
+midnight #191970
+night #0C1445
+moon #C2C5CC
+moonlight #C2D3F0
+starlight #D6E4FF
+galaxy #2A1B5C
+space #1D2951
+cosmic #2E2A7A
+nebula #6A4C93
+cool #9BD3FF
+cool white #E6F0FF
+calm #7FB3D5
+chill #8EC5E6
+relax #8EC5E6
+focus #CFE8FF
+study #E6F0FF
+reading #FFF1D6
+work #F2F7FF
+daylight #FFF8E7
+
+// Purples and violets
+purple #800080
+violet #8F00FF
+lavender #B57EDC
+lilac #C8A2C8
+plum #8E4585
+grape #6F2DA8
+amethyst #9966CC
+orchid #DA70D6
+mauve #E0B0FF
+iris #5A4FCF
+eggplant #614051
+aubergine #3B0910
+mulberry #C54B8C
+wisteria #C9A0DC
+heather #B7A6C3
+ultraviolet #645394
+uv #645394
+royal purple #7851A9
+dream #9F7AEA
+dreamy #9F7AEA
+mystic #8E44AD
+magic #9B59B6
+fairy #E0B0FF
+unicorn #D5A6E6
+vaporwave #B967FF
+synthwave #F72585
+cyberpunk #F706CF
+retrowave #FF2A6D
+
+// Pinks and magentas
+pink #FFC0CB
+hot pink #FF69B4
+magenta #FF00FF
+fuchsia #FF00FF
+neon pink #FF10F0
+bubblegum #FFC1CC
+flamingo #FC8EAC
+candy #FF6EC7
+cotton candy #FFBCD9
+pastel #FFD1DC
+pastel pink #FFD1DC
+rosy #FF66CC
+punch #EC5578
+watermelon #FC6C85
+blossom #F6BDD1
+sakura #FFB7C5
+peony #E25098
+tulip #FF878D
+cerise #DE3163
+intimate #C71585
+sensual #B3446C
+sexy #C2185B
+party #FF00CC
+disco #FF00CC
+club #E100FF
+rave #FF00FF
+
+// Browns
+brown #8B4513
+chocolate #7B3F00
+coffee #6F4E37
+espresso #4B3621
+mocha #967969
+latte #C5A582
+caramel #C68E17
+toffee #755139
+hazel #8E7618
+chestnut #954535
+walnut #773F1A
+wood #966F33
+wooden #966F33
+oak #806517
+mahogany #C04000
+tan #D2B48C
+sepia #704214
+earth #8B5A2B
+earthy #8B5A2B
+clay #B66A50
+cocoa #875F42
+
+// Whites, greys, blacks
+white #FFFFFF
+snow #FFFAFA
+pearl #EAE0C8
+silver #C0C0C0
+platinum #E5E4E2
+grey #808080
+gray #808080
+ash #B2BEB5
+smoke #738276
+smoky #738276
+charcoal #36454F
+slate #708090
+graphite #383838
+black #1A1A1A
+noir #1A1A1A
+shadow #2B2B2B
+dark #1A1A1A
+cloud #E5ECF2
+cloudy #C9D3DD
+fog #D7DEE2
+mist #C4D3DF
+bright #FFFFFF
+clean #F5F8FF
+pure #FFFFFF

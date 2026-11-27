@@ -87,6 +87,7 @@ const tool = async (input: Input) => {
   const imported = await calendar.events.import(params);
   let event = imported.data as EventWithLabel;
   if (eventLabelId !== undefined) {
+    if (!event.id) throw new Error("Google Calendar did not return an ID for the imported event.");
     const labelBody: EventWithLabel = { eventLabelId };
     const patchParams: calendar_v3.Params$Resource$Events$Patch & EventLabelVersionParams = {
       calendarId,

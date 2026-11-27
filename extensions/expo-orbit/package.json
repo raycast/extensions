@@ -1,0 +1,188 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "expo-orbit",
+  "title": "Expo Orbit",
+  "description": "Launch simulators and emulators, pair Android devices, and open builds, updates, and Snacks with Expo Orbit, which must be installed.",
+  "icon": "extension-icon.png",
+  "author": "michalzuch",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "expo",
+    "react native",
+    "simulator",
+    "emulator",
+    "ios",
+    "android",
+    "eas"
+  ],
+  "commands": [
+    {
+      "name": "manage-devices",
+      "title": "Manage Devices",
+      "subtitle": "Expo Orbit",
+      "description": "See your simulators, emulators, and connected devices, then launch, stop, or open builds on them.",
+      "mode": "view",
+      "keywords": [
+        "simulator",
+        "emulator",
+        "ios",
+        "android",
+        "iphone",
+        "boot",
+        "launch",
+        "stop",
+        "device"
+      ]
+    },
+    {
+      "name": "launch-build",
+      "title": "Launch Build or Update",
+      "subtitle": "Expo Orbit",
+      "description": "Install and launch an EAS build, an app file, an EAS Update, or a Snack on a simulator, emulator, or device.",
+      "mode": "view",
+      "keywords": [
+        "install",
+        "open",
+        "apk",
+        "ipa",
+        "eas",
+        "update",
+        "snack",
+        "expo go",
+        "artifact"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL or Path",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "pair-android-device",
+      "title": "Pair Android Device",
+      "subtitle": "Expo Orbit",
+      "description": "Connect a physical Android device over Wi-Fi with a pairing code or a QR code.",
+      "mode": "view",
+      "keywords": [
+        "wifi",
+        "wi-fi",
+        "wireless",
+        "adb",
+        "qr",
+        "debugging"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "emulatorWithoutAudio",
+      "title": "Android Emulators",
+      "label": "Launch without audio",
+      "description": "Start Android emulators with their audio turned off.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "androidSdkPath",
+      "title": "Android SDK Location",
+      "description": "The folder of your Android SDK. Leave empty to use $ANDROID_HOME or Expo Orbit's setting.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "trustedSources",
+      "title": "Trusted Sources",
+      "description": "Extra sources for builds and updates, separated by commas. Expo Orbit trusts expo.dev by default. These are added to Expo Orbit's trusted sources.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://example.com/*"
+    },
+    {
+      "name": "showIos",
+      "title": "Platforms",
+      "label": "iOS",
+      "description": "Show iOS simulators and connected iPhones and iPads.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showAndroid",
+      "label": "Android",
+      "description": "Show Android emulators and connected Android devices.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showTvos",
+      "label": "tvOS",
+      "description": "Show tvOS simulators.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showWatchos",
+      "label": "watchOS",
+      "description": "Show watchOS simulators.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-devices",
+      "title": "Get Devices",
+      "description": "List the iOS simulators, Android emulators, and connected devices Expo Orbit can use, and whether each one is running."
+    },
+    {
+      "name": "launch-device",
+      "title": "Launch Device",
+      "description": "Boot a simulator or emulator, or bring its window to the front if it's already running."
+    },
+    {
+      "name": "stop-device",
+      "title": "Stop Device",
+      "description": "Shut down a running simulator or emulator, after you confirm."
+    },
+    {
+      "name": "open-on-device",
+      "title": "Open on Device",
+      "description": "Install and launch an EAS build or app file, open an EAS Update, or open a Snack in Expo Go on a device, after you confirm."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.2.7",
+    "qrcode": "^1.5.4",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

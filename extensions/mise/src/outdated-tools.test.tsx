@@ -6,8 +6,10 @@ import { homebrewMise } from "../test/homebrewMise";
 import { defaultPreferences, Icon, MenuBarExtra, mocks } from "../test/raycast-api";
 import { runAppleScript, showFailureToast, useCachedPromiseFixtures } from "../test/raycast-utils";
 import { flush, render } from "../test/render";
+import { listVulnerabilities, parseAudit } from "./mise/audit";
 import { listOutdated, parseOutdated } from "./mise/outdated";
 import * as version from "./mise/version";
+import auditFixture from "./mise/fixtures/audit.json";
 import outdatedFixture from "./mise/fixtures/outdated.json";
 import notInstalledFixture from "./mise/fixtures/outdated-not-installed.json";
 import Command from "./outdated-tools";
@@ -174,5 +176,53 @@ describe("Tools Menu Bar mise update", () => {
     const { root } = await render(<Command />);
     expect(updateItem(root)).toBeUndefined();
     expect(root.findAllByType(MenuBarExtra.Section).map((n) => n.props.title)).toEqual(["Outdated", undefined]);
+  });
+});
+
+describe("Tools Menu Bar vulnerabilities", () => {
+  it("lists each vulnerable tool version with its severity, keeps the outdated count and opens Show Outdated Tools", async () => {
+    vi.spyOn(version, "readVersion").mockResolvedValue({ version: "2026.11.12" });
+    useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));
+    useCachedPromiseFixtures.set(listVulnerabilities, parseAudit(auditFixture));
+    const { root } = await render(<Command />);
+    const menu = root.findByType(MenuBarExtra);
+    expect(menu.props).toMatchObject({ title: "4", tooltip: "mise: 4 outdated tools, 2 vulnerable" });
+
+    const section = menu.findAllByType(MenuBarExtra.Section).find((n) => n.props.title === "Vulnerable");
+    const items = section?.findAllByType(MenuBarExtra.Item) ?? [];
+    expect(items.map((n) => [n.props.title, n.props.subtitle, n.props.icon])).toEqual([
+      ["npm:lodash", "4.17.15 · high", { source: "Warning", tintColor: "Red" }],
+      ["jq", "1.8.1 · unknown", { source: "Warning", tintColor: "Yellow" }],
+    ]);
+    const titles = menu.findAllByType(MenuBarExtra.Section).map((n) => n.props.title);
+    expect(titles.indexOf("Vulnerable")).toBeLessThan(titles.indexOf("Outdated"));
+    await flush(() => items[0].props.onAction());
+    expect(mocks.launchCommand).toHaveBeenCalledWith({
+      name: "show-outdated",
+      type: "userInitiated",
+      context: undefined,
+    });
+  });
+
+  it("stays loading until the audit finishes, so a background refresh isn't unloaded early", async () => {
+    vi.spyOn(version, "readVersion").mockResolvedValue({ version: "2026.11.12" });
+    useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));
+    useCachedPromiseFixtures.pending(listVulnerabilities);
+    const { root } = await render(<Command />);
+    expect(root.findByType(MenuBarExtra).props.isLoading).toBe(true);
+
+    useCachedPromiseFixtures.set(listVulnerabilities, parseAudit(auditFixture));
+    const done = await render(<Command />);
+    expect(done.root.findByType(MenuBarExtra).props.isLoading).toBe(false);
+  });
+
+  it("shows no vulnerable section on mise before 2026.11.12", async () => {
+    vi.spyOn(version, "readVersion").mockResolvedValue({ version: "2026.11.11" });
+    useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));
+    useCachedPromiseFixtures.set(listVulnerabilities, parseAudit(auditFixture));
+    const { root } = await render(<Command />);
+    const menu = root.findByType(MenuBarExtra);
+    expect(menu.props.tooltip).toBe("mise: 4 outdated tools");
+    expect(menu.findAllByType(MenuBarExtra.Section).map((n) => n.props.title)).not.toContain("Vulnerable");
   });
 });

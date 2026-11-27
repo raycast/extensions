@@ -20,23 +20,18 @@ instructions: |
   - This is best for straightforward queries needing quick answers
   - You'll receive search results containing URLs, titles and descriptions
 
-  To get general information from a webpage:
-  - Use the `scrape` tool when you need the full content
+  To get information from a webpage, whether the full content or a specific detail:
+  - Use the `scrape` tool, then answer from the returned content
+  - Important: If unsure about the exact URL, ask the user first
   - You'll receive:
     - The page content in markdown format
     - The page URL
     - The page title
 
-  For specific information or more detailed information from webpages:
-  - Use the `extract` tool
-  - Important: If unsure about the exact URL, ask the user first
-  - Tip: Add /* to URLs to search the entire website if needed
-  - You'll receive the specific data requested
-
   Remember these key rules:
   1. Use `deep-research` for queries needing extensive context and analysis
   2. Use `search-web` for quick, factual queries
-  3. Use `scrape` or `extract` when working with specific URLs
+  3. Use `scrape` when working with specific URLs
   4. Always cite sources in your summaries using: ([<host>](<full url>))
 
 evals:
@@ -85,15 +80,15 @@ evals:
         url: "https://docs.firecrawl.dev/features"
         title: "Firecrawl Features Documentation"
 
-  # Structured data extraction
-  - input: "Tell me if the website https://stripe.com is SOC2 compliant"
+  # Specific detail from a known webpage
+  - input: "@firecrawl Tell me if the website https://stripe.com is SOC2 compliant"
     expected:
       - callsTool:
-          name: extract
+          name: scrape
           arguments:
-            urls: ["https://stripe.com"]
-            userPrompt: "Tell me if the website is SOC2 compliant"
+            url: "https://stripe.com"
     mocks:
-      extract:
-        data:
-          SOC2Compliant: true
+      scrape:
+        content: "# Stripe\n\n## Security\nStripe is audited by an independent auditor and is certified as SOC 1 and SOC 2 Type II compliant."
+        url: "https://stripe.com"
+        title: "Stripe | Financial Infrastructure to Grow Your Revenue"
