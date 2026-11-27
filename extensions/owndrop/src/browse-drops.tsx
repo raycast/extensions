@@ -169,7 +169,7 @@ function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploade
     try {
       await launchCommand({ name: "drop-clipboard", type: LaunchType.UserInitiated });
     } catch (err) {
-      await showFailureToast(err, { title: "Failed to launch Drop" });
+      await showFailureToast(err, { title: "Failed to launch Drop Clipboard" });
     }
   };
   const selectedItem = visibleItems.find((item) => item.id === selectedId) ?? visibleItems[0];
@@ -275,7 +275,7 @@ function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploade
         <List.EmptyView
           icon={Icon.Tray}
           title={isLoading || query !== remoteQuery ? "Searching Drops…" : "No Drops"}
-          description="Run Drop to send clipboard content. Browse refreshes every 10 seconds."
+          description="Run Drop Clipboard to send clipboard content. Browse Drops refreshes every 10 seconds."
         />
       ) : (
         <List.Section title={error ? "Cached Results" : undefined}>
