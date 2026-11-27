@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { detailMarkdown, Explanation, explainUrl, parseExplainPage, plainHelp, Token } from "./parse";
@@ -26,7 +26,7 @@ export default function Command() {
     return () => clearTimeout(timer);
   }, [searchText]);
 
-  const { data, isLoading, error } = useFetch<Explanation>(explainUrl(command), {
+  const { data, isLoading, error, revalidate } = useFetch<Explanation>(explainUrl(command), {
     execute: command.length > 0,
     keepPreviousData: true,
     parseResponse: async (response) => {
@@ -51,7 +51,16 @@ export default function Command() {
       {!command ? (
         <List.EmptyView icon={Icon.Terminal} title="Type a shell command" />
       ) : error ? (
-        <List.EmptyView icon={Icon.WifiDisabled} title="Could not load the explanation" description={error.message} />
+        <List.EmptyView
+          icon={Icon.WifiDisabled}
+          title="Could not load the explanation"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       ) : data && "error" in data ? (
         <List.EmptyView icon={Icon.Warning} title={data.error} description={data.detail} />
       ) : (
@@ -63,13 +72,7 @@ export default function Command() {
             detail={<List.Item.Detail markdown={detailMarkdown(data?.command ?? command, tokens, token, tokenColor)} />}
             actions={
               <ActionPanel>
-                {token.help && (
-                  <Action.CopyToClipboard
-                    title="Copy Help Text"
-                    content={plainHelp(token.help)}
-                    shortcut={Keyboard.Shortcut.Common.Copy}
-                  />
-                )}
+                {token.help && <Action.CopyToClipboard title="Copy Help Text" content={plainHelp(token.help)} />}
                 <Action.OpenInBrowser url={explainUrl(data?.command ?? command)} />
               </ActionPanel>
             }
