@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Search and filter local Kero panes, focus a pane, and copy its directory or ID.
 - Create and open local shell sessions with New Kero Session, including project selection, directory validation, and safe focus recovery.
