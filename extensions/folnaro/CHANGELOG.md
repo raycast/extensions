@@ -1,6 +1,6 @@
 # Folnaro Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Search invoices, quotes, customers, expenses and projects with status, amount, due date and details
 - Open records in Folnaro, copy numbers, amounts and links, preview invoice PDFs in Quick Look
