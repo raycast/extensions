@@ -7,7 +7,7 @@ export default function Command() {
   }
 
   return (
-    <List navigationTitle="Configure SlideTab">
+    <List searchBarPlaceholder="Search SlideTab scopes and gestures...">
       <List.Section title="Switching Scope">
         <List.Item
           icon={Icon.AppWindowGrid3x3}
