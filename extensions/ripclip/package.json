@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ripclip",
+  "title": "RipClip",
+  "description": "Import video links, browse and download clips, and open videos in the editor with a RipClip account.",
+  "icon": "icon.png",
+  "author": "ripclip.org",
+  "access": "public",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "keywords": [
+    "clips",
+    "shorts",
+    "twitch",
+    "kick",
+    "vod",
+    "tiktok",
+    "video editor"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "import-link",
+      "title": "Import Video Link",
+      "subtitle": "RipClip",
+      "description": "Send a stream, VOD, podcast or video link to RipClip.",
+      "mode": "view"
+    },
+    {
+      "name": "latest-clips",
+      "title": "Browse Latest Clips",
+      "subtitle": "RipClip",
+      "description": "Browse your newest RipClip clips, open them in the editor or download them.",
+      "mode": "view"
+    },
+    {
+      "name": "open-in-editor",
+      "title": "Open in Editor",
+      "subtitle": "RipClip",
+      "description": "Open one of your RipClip videos in the editor.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
