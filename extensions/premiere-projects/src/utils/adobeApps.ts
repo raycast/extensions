@@ -1,9 +1,6 @@
-import { execFile } from "node:child_process";
+import { open } from "@raycast/api";
 import fs from "node:fs";
 import path from "node:path";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
 
 function findMediaEncoderAppPath(): string | null {
   if (process.platform !== "darwin") return null;
@@ -50,5 +47,5 @@ export async function openInMediaEncoder(filePath: string): Promise<void> {
   if (!appPath) {
     throw new Error("Adobe Media Encoder is not installed in /Applications");
   }
-  await execFileAsync("/usr/bin/open", ["-a", appPath, filePath], { timeout: 5000 });
+  await open(filePath, appPath);
 }

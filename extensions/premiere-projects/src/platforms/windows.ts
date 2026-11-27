@@ -1,3 +1,4 @@
+import { open } from "@raycast/api";
 import { runPowerShellScript } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
@@ -141,9 +142,9 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
 
     const appPath = await this.getAppInstallationPath();
     if (appPath) {
-      await execFileAsync(appPath, [filePath], { timeout: 5000 });
+      await open(filePath, appPath);
     } else {
-      await execFileAsync("explorer.exe", [path.win32.normalize(filePath)], { timeout: 5000 });
+      await open(filePath);
     }
   }
 

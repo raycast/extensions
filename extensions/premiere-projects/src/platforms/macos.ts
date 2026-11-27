@@ -1,3 +1,4 @@
+import { open } from "@raycast/api";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -134,9 +135,9 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
 
     const appPath = await this.getAppInstallationPath();
     if (appPath) {
-      await execFileAsync("/usr/bin/open", ["-a", appPath, filePath], { timeout: 5000 });
+      await open(filePath, appPath);
     } else {
-      await execFileAsync("/usr/bin/open", [filePath], { timeout: 5000 });
+      await open(filePath);
     }
   }
 
