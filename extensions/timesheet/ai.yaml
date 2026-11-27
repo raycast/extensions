@@ -1,0 +1,240 @@
+instructions: >
+  Timesheet tracks work time. A "task" is one time entry; the "timer" is the single
+  task currently being tracked, which is either running, paused, or stopped.
+
+  Only one timer runs at a time. Starting a timer while another one is running closes
+  the first task, so resolve which project the user means before calling start-timer.
+
+  The timer and time-logging tools need a project ID, never a project name. Call
+  list-projects first to turn a name the user said into an ID.
+
+  Report durations in hours and minutes the way a person would say them, for example
+  "2h 15m", not in raw minutes. Format dates and times in the user's locale rather
+  than echoing ISO 8601 timestamps back at them.
+
+  Times you pass to start-timer, stop-timer and log-time are the user's local wall-clock
+  time with its UTC offset, for example "9am" is "2026-09-11T09:00:00+02:00" in Central
+  Europe in summer. Never send a time with "Z" unless the user asked for UTC. Times are
+  whole minutes; seconds are dropped.
+
+  Link to records as markdown links when you mention them:
+  projects as [title](https://my.timesheet.io/projects/show/:id) and
+  todos as [name](https://my.timesheet.io/todos/show/:id).
+
+  A project or todo the user mentions from the @ menu arrives with its ID. Use that ID
+  directly rather than looking the record up again.
+
+  The extension also connects to the Timesheet MCP server, whose tools cover the whole
+  Timesheet API. For the timer, time entries, projects, todos, team status and absences,
+  use this extension's own tools (get-timer-status, start-timer, stop-timer, pause-timer,
+  resume-timer, list-tasks, log-time, list-projects, list-todos, close-todo,
+  get-team-status, list-absences), which ask before they change anything. Use the MCP
+  tools for everything else, such as expenses, notes, breaks, tags, rates, contracts,
+  exports, reports and statistics.
+
+mcp:
+  url: https://mcp.timesheet.io
+
+evals:
+  - input: "@timesheet what am I working on right now?"
+    mocks:
+      get-timer-status:
+        status: running
+        project: Website Redesign
+        projectId: 7f3c1a90-2d4b-4c11-9e88-2b6a5f0c1d33
+        description: Navigation rewrite
+        startedAt: "2026-09-11T09:12:00Z"
+        currentDurationMinutes: 74
+        trackedTodayMinutes: 74
+        tasksToday: 1
+    expected:
+      - callsTool: get-timer-status
+      - includes: "Website Redesign"
+
+  - input: "@timesheet how much have I tracked today?"
+    mocks:
+      get-timer-status:
+        status: stopped
+        trackedTodayMinutes: 322
+        tasksToday: 4
+    expected:
+      - callsTool: get-timer-status
+      - meetsCriteria: "States that about 5 hours and 22 minutes were tracked today"
+
+  - input: "@timesheet start tracking time on Website Redesign"
+    mocks:
+      list-projects:
+        - id: 7f3c1a90-2d4b-4c11-9e88-2b6a5f0c1d33
+          title: Website Redesign
+          client: Northwind
+          archived: false
+        - id: b1d9e402-77a5-4f6e-8c25-90fa3e1b77aa
+          title: Internal Tooling
+          archived: false
+      start-timer:
+        status: running
+        project: Website Redesign
+        startedAt: "2026-09-11T14:02:00Z"
+    expected:
+      - callsTool: list-projects
+      - callsTool:
+          name: start-timer
+          arguments:
+            projectId: 7f3c1a90-2d4b-4c11-9e88-2b6a5f0c1d33
+
+  - input: "@timesheet stop my timer"
+    mocks:
+      stop-timer:
+        status: stopped
+        project: Website Redesign
+        startedAt: "2026-09-11T09:12:00Z"
+        endedAt: "2026-09-11T11:42:00Z"
+        durationMinutes: 150
+    expected:
+      - callsTool: stop-timer
+      - meetsCriteria: "Confirms the timer stopped and reports about 2 hours 30 minutes on Website Redesign"
+
+  - input: "@timesheet log 2 hours on Website Redesign starting at 9am today"
+    mocks:
+      list-projects:
+        - id: 7f3c1a90-2d4b-4c11-9e88-2b6a5f0c1d33
+          title: Website Redesign
+          archived: false
+      log-time:
+        id: 4a2f77b0-1c33-4e59-bb0d-55c1e9a4f200
+        project: Website Redesign
+        startDateTime: "2026-09-11T09:00:00Z"
+        endDateTime: "2026-09-11T11:00:00Z"
+        durationMinutes: 120
+    expected:
+      - callsTool: list-projects
+      - callsTool:
+          name: log-time
+          arguments:
+            projectId: 7f3c1a90-2d4b-4c11-9e88-2b6a5f0c1d33
+
+  - input: "@timesheet what are my open todos?"
+    mocks:
+      list-todos:
+        - id: 9c04ab11-6f2e-4d77-8a31-1e5c0b9d6f42
+          name: Ship the navigation rewrite
+          project: Website Redesign
+          dueDate: "2026-09-15"
+          closed: false
+        - id: 2e77cd54-8b10-4a6f-9d02-77ab3f1c8e90
+          name: Review Q3 invoices
+          project: Internal Tooling
+          closed: false
+    expected:
+      - callsTool: list-todos
+      - includes: "navigation rewrite"
+
+  - input: "@timesheet who on my team is working right now?"
+    mocks:
+      get-team-status:
+        teams:
+          - Design
+          - Development
+        members:
+          - name: Lena Hofer
+            email: lena@example.com
+            tracking: true
+            project: Website Redesign
+            since: "2026-09-11T08:30:00Z"
+            teams:
+              - Design
+              - Development
+          - name: Tomas Ruiz
+            email: tomas@example.com
+            tracking: false
+            teams:
+              - Development
+    expected:
+      - callsTool: get-team-status
+      - meetsCriteria: "Says Lena Hofer is tracking Website Redesign and Tomas Ruiz is not tracking"
+
+  - input: "@timesheet is anyone off next week?"
+    mocks:
+      list-absences:
+        organizationId: 8f22ab01-4d76-4c15-9b3e-6a1f0c7d2e58
+        absences:
+          - id: c3e1f9a7-2b40-4d88-91ce-44a7b0e2f166
+            member: Tomas Ruiz
+            type: Vacation
+            startDateTime: "2026-09-14T00:00:00Z"
+            endDateTime: "2026-09-18T00:00:00Z"
+            fullDay: true
+            totalDays: "5"
+            status: approved
+    expected:
+      - callsTool: list-absences
+      - includes: "Tomas Ruiz"
+
+  - input: "@timesheet pause my timer"
+    mocks:
+      pause-timer:
+        status: paused
+        project: Website Redesign
+        pausedAt: "2026-09-11T12:05:00Z"
+    expected:
+      - callsTool: pause-timer
+      - includes: "Website Redesign"
+
+  - input: "@timesheet resume my timer"
+    mocks:
+      resume-timer:
+        status: running
+        project: Website Redesign
+    expected:
+      - callsTool: resume-timer
+      - includes: "Website Redesign"
+
+  - input: "@timesheet show my time entries for 2026-09-10"
+    mocks:
+      list-tasks:
+        startDate: "2026-09-10"
+        endDate: "2026-09-10"
+        totalMinutes: 225
+        tasks:
+          - id: 1b2c3d4e-0001-4a5b-8c6d-7e8f9a0b1c2d
+            project: Website Redesign
+            description: Navigation rewrite
+            startDateTime: "2026-09-10T08:00:00Z"
+            endDateTime: "2026-09-10T10:30:00Z"
+            durationMinutes: 150
+            billable: true
+            running: false
+          - id: 1b2c3d4e-0002-4a5b-8c6d-7e8f9a0b1c2d
+            project: Internal Tooling
+            description: Code review
+            startDateTime: "2026-09-10T11:00:00Z"
+            endDateTime: "2026-09-10T12:15:00Z"
+            durationMinutes: 75
+            billable: false
+            running: false
+    expected:
+      - callsTool:
+          name: list-tasks
+          arguments:
+            startDate: "2026-09-10"
+      - meetsCriteria: "Lists both entries and a total of about 3 hours 45 minutes"
+
+  - input: "@timesheet mark my todo 'Ship the navigation rewrite' as done"
+    mocks:
+      list-todos:
+        - id: 9c04ab11-6f2e-4d77-8a31-1e5c0b9d6f42
+          name: Ship the navigation rewrite
+          project: Website Redesign
+          dueDate: "2026-09-15"
+          closed: false
+      close-todo:
+        id: 9c04ab11-6f2e-4d77-8a31-1e5c0b9d6f42
+        name: Ship the navigation rewrite
+        project: Website Redesign
+        closed: true
+    expected:
+      - callsTool: list-todos
+      - callsTool:
+          name: close-todo
+          arguments:
+            todoId: 9c04ab11-6f2e-4d77-8a31-1e5c0b9d6f42
