@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "geoboom",
+    title: "GEOboom",
+    description:
+      "Run link building and mention outreach in GEOboom from your AI assistant: find pages to approach by keywords, AI-question prompts or competitor domains, decide which prospects fit, read and reply to publisher threads, record placements and recheck that links are live. Official server run by GEOboom. Hosted Streamable HTTP server with OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration); a GEOboom account is required. Sending email and spending credits are off by default and need an account owner to grant them. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://github.com/user-attachments/assets/f0be6980-d6f6-40c0-9022-ea628bbf1310",
+    homepage: "https://www.geoboom.io/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.geoboom.io/mcp"],
+    },
+    remoteUrl: "https://api.geoboom.io/mcp",
+  },
+  {
     name: "cleanedweb",
     title: "CleanedWeb",
     description:

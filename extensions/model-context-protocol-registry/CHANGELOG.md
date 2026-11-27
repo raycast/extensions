@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add GEOboom MCP Server] - 2026-11-27
+
+- Add GEOboom to the official registry: run link building and mention outreach (prospecting, publisher threads, placements and link rechecks) from your AI assistant. Hosted Streamable HTTP server at https://api.geoboom.io/mcp with OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GEOboom account.
+
 ## [Add CleanedWeb MCP Server] - 2026-11-27
 
 - Add CleanedWeb to the official registry: find and run maintained REST APIs that return structured records from public websites (job boards, marketplaces, app stores, package registries, research databases). Hosted Streamable HTTP server at https://api.cleanedweb.com/mcp?profile=catalog with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Searching is free; runs are paid per accepted record.
