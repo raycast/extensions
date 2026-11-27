@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gridpin",
   "title": "GridPin Offline Geocoder",
-  "description": "Turn an address into a point and a point into an address on your Mac, without a network or an API key.",
+  "description": "Geocode addresses and find the nearest addresses to a point offline on your Mac, using the separately installed GridPin command-line program.",
   "icon": "extension-icon.png",
   "author": "gridpin-reserve",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"

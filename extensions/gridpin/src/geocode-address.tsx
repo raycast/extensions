@@ -1,17 +1,24 @@
 import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { CountryDropdown, HitItem, NoSheetItems, SetupView, useSetup } from "./common";
-import { geocode } from "./gridpin";
+import { useRef, useState } from "react";
+import { CountryDropdown, HitItem, NoSheetItems, QueryErrorView, SetupView, useSetup } from "./common";
+import { geocode, run } from "./gridpin";
 
 export default function Command() {
   const { setup, setCountry } = useSetup();
   const [text, setText] = useState("");
   const ready = setup.kind === "ready" ? setup : undefined;
-  const { data: hits, isLoading } = usePromise(
+  const abortable = useRef<AbortController>(null);
+  const {
+    data: hits,
+    error,
+    isLoading,
+    revalidate,
+  } = usePromise(
     async (q: string, bin?: string, sheet?: string, env?: NodeJS.ProcessEnv) =>
-      bin && sheet && env ? geocode(bin, sheet, q, env) : [],
+      bin && sheet && env ? geocode(bin, sheet, q, env, run, abortable.current?.signal) : [],
     [text, ready?.bin, ready?.sheet.path, ready?.env],
+    { abortable },
   );
   const empty = SetupView({ setup });
   return (
@@ -31,6 +38,8 @@ export default function Command() {
           title="Type an address"
           description={`Answers come from the ${ready.sheet.name} sheet on this Mac.`}
         />
+      ) : error ? (
+        <QueryErrorView error={error} retry={revalidate} />
       ) : hits && hits.length ? (
         hits.map((h, i) => <HitItem key={`${h.lat},${h.lon},${i}`} hit={h} index={i} />)
       ) : (

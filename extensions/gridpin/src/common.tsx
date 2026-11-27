@@ -19,8 +19,6 @@ import {
   subtitle,
 } from "./gridpin";
 
-type Preferences = { gridpinPath?: string; sheetsFolder?: string; country?: string };
-
 export type Setup =
   | { kind: "loading" }
   | { kind: "no-program" }
@@ -52,6 +50,22 @@ export function CountryDropdown({ setup, onChange }: { setup: Setup; onChange: (
           <List.Dropdown.Item key={s.code} title={s.name} value={s.code} />
         ))}
     </List.Dropdown>
+  );
+}
+
+/** A query that failed (an unreadable sheet, a timeout) is said to have failed, never shown as "No answer". */
+export function QueryErrorView({ error, retry }: { error: Error; retry: () => void }) {
+  return (
+    <List.EmptyView
+      icon={Icon.Warning}
+      title="GridPin did not answer"
+      description={error.message}
+      actions={
+        <ActionPanel>
+          <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={retry} />
+        </ActionPanel>
+      }
+    />
   );
 }
 

@@ -1,17 +1,24 @@
 import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { CountryDropdown, HitItem, NoSheetItems, SetupView, useSetup } from "./common";
-import { parsePoint, reverse } from "./gridpin";
+import { useRef, useState } from "react";
+import { CountryDropdown, HitItem, NoSheetItems, QueryErrorView, SetupView, useSetup } from "./common";
+import { parsePoint, reverse, run } from "./gridpin";
 
 export default function Command() {
   const { setup, setCountry } = useSetup();
   const [text, setText] = useState("");
   const ready = setup.kind === "ready" ? setup : undefined;
-  const { data: hits, isLoading } = usePromise(
+  const abortable = useRef<AbortController>(null);
+  const {
+    data: hits,
+    error,
+    isLoading,
+    revalidate,
+  } = usePromise(
     async (q: string, bin?: string, sheet?: string, env?: NodeJS.ProcessEnv) =>
-      bin && sheet && env ? reverse(bin, sheet, q, env) : [],
+      bin && sheet && env ? reverse(bin, sheet, q, env, run, abortable.current?.signal) : [],
     [text, ready?.bin, ready?.sheet.path, ready?.env],
+    { abortable },
   );
   const empty = SetupView({ setup });
   const valid = parsePoint(text) !== undefined;
@@ -32,6 +39,8 @@ export default function Command() {
           title={text.trim() ? "Not a point" : "Type a point"}
           description="Latitude and longitude in degrees, separated by a comma: 48.8685, 2.3303"
         />
+      ) : error ? (
+        <QueryErrorView error={error} retry={revalidate} />
       ) : hits && hits.length ? (
         hits.map((h, i) => <HitItem key={`${h.lat},${h.lon},${i}`} hit={h} index={i} />)
       ) : (

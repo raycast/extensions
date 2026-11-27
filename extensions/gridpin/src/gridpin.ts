@@ -22,13 +22,14 @@ export function findGridpin(preferred?: string, exists: (p: string) => boolean =
   return candidates().find(exists);
 }
 
-export type Run = (bin: string, args: string[], env: NodeJS.ProcessEnv) => Promise<string>;
+export type Run = (bin: string, args: string[], env: NodeJS.ProcessEnv, signal?: AbortSignal) => Promise<string>;
 
 export class GridpinError extends Error {}
 
-export const run: Run = (bin, args, env) =>
+// A search replaced by a newer one is stopped through its signal: the program is killed, not left to finish.
+export const run: Run = (bin, args, env, signal) =>
   new Promise((resolve, reject) => {
-    execFile(bin, args, { env, timeout: 30000, maxBuffer: 16 * 1024 * 1024 }, (err, stdout, stderr) => {
+    execFile(bin, args, { env, signal, timeout: 30000, maxBuffer: 16 * 1024 * 1024 }, (err, stdout, stderr) => {
       if (err) reject(new GridpinError(String(stderr || err.message).trim()));
       else resolve(String(stdout));
     });
@@ -127,10 +128,17 @@ export function parseHits(stdout: string): Hit[] {
 
 export const LIMIT = 5;
 
-export async function geocode(bin: string, sheet: string, address: string, env: NodeJS.ProcessEnv, exec: Run = run) {
+export async function geocode(
+  bin: string,
+  sheet: string,
+  address: string,
+  env: NodeJS.ProcessEnv,
+  exec: Run = run,
+  signal?: AbortSignal,
+) {
   const q = address.trim();
   if (!q) return [];
-  return parseHits(await exec(bin, ["query", sheet, q, "-k", String(LIMIT)], env)).slice(0, LIMIT);
+  return parseHits(await exec(bin, ["query", sheet, q, "-k", String(LIMIT)], env, signal)).slice(0, LIMIT);
 }
 
 /** "lat, lon", "lat lon" or "lat;lon" in degrees; undefined unless both are numbers in range. */
@@ -143,13 +151,19 @@ export function parsePoint(text: string): { lat: number; lon: number } | undefin
   return { lat, lon };
 }
 
-export async function reverse(bin: string, sheet: string, text: string, env: NodeJS.ProcessEnv, exec: Run = run) {
+export async function reverse(
+  bin: string,
+  sheet: string,
+  text: string,
+  env: NodeJS.ProcessEnv,
+  exec: Run = run,
+  signal?: AbortSignal,
+) {
   const p = parsePoint(text);
   if (!p) return [];
-  return parseHits(await exec(bin, ["reverse", sheet, String(p.lat), String(p.lon), "-k", String(LIMIT)], env)).slice(
-    0,
-    LIMIT,
-  );
+  return parseHits(
+    await exec(bin, ["reverse", sheet, String(p.lat), String(p.lon), "-k", String(LIMIT)], env, signal),
+  ).slice(0, LIMIT);
 }
 
 export function address(h: Hit): string {
