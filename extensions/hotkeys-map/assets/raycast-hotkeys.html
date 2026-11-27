@@ -1187,6 +1187,11 @@
     </div>
   </header>
 
+  <div id="starterBanner" class="live-banner" style="background:rgba(59,130,246,0.12);border-color:rgba(59,130,246,0.35)">
+    <span><strong>Example Starter Dataset</strong> — showing sample shortcuts. Connect <strong>Tools → MCP Sync</strong> (Pro), import JSON, or edit keys to replace with your own.</span>
+    <button id="dismissStarterBannerBtn" class="link-btn" style="color:var(--text-muted)">Dismiss</button>
+  </div>
+
   <div id="liveBanner" class="live-banner">
     <span><strong>Live Keyboard Test active</strong> — press any key or modifier combo on your keyboard to inspect matching Raycast hotkeys.</span>
     <span id="liveReadout" class="kbd-combo">Waiting for key…</span>
@@ -1499,8 +1504,7 @@ function getCanonicalCombo(item) {
     customTitles: "raycast_custom_titles_v1",
     customHkGroups: "raycast_custom_hk_groups_v1",
     customApps: "raycast_custom_app_layers_v1",
-    hiddenApps: "raycast_hidden_app_layers_v1",
-    mcpCfg: "raycast_mcp_cfg_v1"
+    hiddenApps: "raycast_hidden_app_layers_v1"
   };
   Object.entries(map).forEach(([k, lsKey]) => {
     if (ps[k] !== undefined) {
@@ -1509,7 +1513,24 @@ function getCanonicalCombo(item) {
   });
 })();
 
+let isStarterData = !localStorage.getItem("raycast_hotkeys_custom_v1");
+
+function updateStarterIndicator() {
+  const banner = document.getElementById("starterBanner");
+  const sub = document.querySelector(".brand .subtitle");
+  if (banner && banner.dataset.dismissed !== "1") {
+    banner.classList.toggle("show", isStarterData);
+  }
+  if (sub) {
+    sub.textContent = isStarterData
+      ? "Interactive macOS keyboard layout (showing example starter shortcuts)"
+      : "Interactive macOS keyboard layout for your configured Raycast shortcuts";
+  }
+}
+
 function persistUserState() {
+  isStarterData = false;
+  updateStarterIndicator();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(HOTKEYS));
     localStorage.setItem(ALIASES_STORAGE_KEY, JSON.stringify(ALIASES));
@@ -1526,8 +1547,7 @@ function persistUserState() {
         customTitles: CUSTOM_TITLES,
         customHkGroups: CUSTOM_HK_GROUPS,
         customApps: JSON.parse(localStorage.getItem(CUSTOM_APPS_KEY) || "{}"),
-        hiddenApps: JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]"),
-        mcpCfg: JSON.parse(localStorage.getItem(MCP_CFG_KEY) || "{}")
+        hiddenApps: JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]")
       };
       window.webkit.messageHandlers.saveUserState.postMessage({ json: JSON.stringify(payload, null, 2) + "\n" });
     } catch {}
@@ -3085,7 +3105,7 @@ function openDraftModal(keyId) {
   document.getElementById("draftComboPreview").textContent = `${prefix}${keyId}`;
   document.getElementById("draftTitleInput").value = "";
   const sel = document.getElementById("draftGroupSelect");
-  sel.innerHTML = Object.entries(GROUPS).map(([id, g]) => `<option value="${id}">${g.name}</option>`).join("");
+  sel.innerHTML = Object.entries(GROUPS).map(([id, g]) => `<option value="${escHtml(id)}">${escHtml(g.name)}</option>`).join("");
   draftModal.classList.add("open");
   document.getElementById("draftTitleInput").focus();
 }
@@ -3894,7 +3914,7 @@ const customAppModal = document.getElementById("customAppModal");
 window.__onRunningApps = apps => {
   const sel = document.getElementById("runningAppSelect");
   sel.innerHTML = `<option value="">Select a running macOS app…</option>` +
-    apps.map(a => `<option value="${a.pid}" data-name="${a.name.replace(/"/g, '&quot;')}">${a.name}</option>`).join("");
+    apps.map(a => `<option value="${escHtml(a.pid)}" data-name="${escHtml(a.name)}">${escHtml(a.name)}</option>`).join("");
 };
 window.__onScannedShortcuts = res => {
   const st = document.getElementById("scanAppStatus");
@@ -4199,6 +4219,12 @@ document.getElementById("sideBtn").textContent = SIDE_LABELS[state.modSide];
 document.getElementById("sideBtn").classList.toggle("active", state.modSide !== "any");
 document.getElementById("hyperModeBtn").textContent = state.hyperIncludeShift ? "Hyper: ⌃⌥⇧⌘" : "Hyper: ⌃⌥⌘";
 document.getElementById("themeBtn").textContent = state.theme === "dark" ? "Light Mode" : "Dark Mode";
+document.getElementById("dismissStarterBannerBtn").onclick = () => {
+  const b = document.getElementById("starterBanner");
+  b.dataset.dismissed = "1";
+  b.classList.remove("show");
+};
+updateStarterIndicator();
 render();
 </script>
 </body>

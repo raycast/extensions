@@ -24,3 +24,7 @@ If you have **Raycast Pro**, you can optionally connect to Raycast's local **MCP
 ## Native macOS Window
 
 **Open Hotkeys Map** launches a lightweight native macOS `WKWebView` window built via Raycast's official Swift package integration (`swift/HotkeysViewer`), with single-instance focus, remembered window position/size, native Print/PDF, native Save dialogs for JSON/SVG exports, and native macOS menu bar & system shortcut scanning.
+
+## Accessibility Permission
+
+Scanning a running app's menu bar shortcuts (**+ Add App → Scan Menu Bar**) uses macOS Accessibility APIs. When prompted, grant Accessibility access to **Raycast** under **System Settings → Privacy & Security → Accessibility**, then click **Scan Menu Bar** again. All other features work without Accessibility permission.

@@ -345,7 +345,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     nonisolated static func scanMenus(pid: pid_t) -> [String: Any] {
         let opts = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         if !AXIsProcessTrustedWithOptions(opts) {
-            return ["error": "Accessibility permission required. Enable HotkeysViewer in System Settings → Privacy & Security → Accessibility, then click Scan again."]
+            return ["error": "Accessibility permission required. Enable Raycast in System Settings → Privacy & Security → Accessibility, then click Scan again."]
         }
         let appEl = AXUIElementCreateApplication(pid)
         var menuBarRef: CFTypeRef?

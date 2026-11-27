@@ -4,8 +4,8 @@ import {
   environment,
   launchCommand,
   LaunchType,
+  showHUD,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -26,7 +26,7 @@ interface HotkeysData {
   aliases: { alias: string; title: string; group: string }[];
 }
 
-function loadHotkeysData(): HotkeysData {
+function loadSavedHotkeysData(): HotkeysData | null {
   const userJsonPath = path.join(
     os.homedir(),
     "Library",
@@ -34,16 +34,36 @@ function loadHotkeysData(): HotkeysData {
     "RaycastHotkeysMap",
     "hotkeys.json",
   );
-  const bundledJsonPath = path.join(environment.assetsPath, "hotkeys.json");
-  const jsonPath = fs.existsSync(userJsonPath) ? userJsonPath : bundledJsonPath;
-  const raw = fs.readFileSync(jsonPath, "utf8");
-  return JSON.parse(raw) as HotkeysData;
+  if (!fs.existsSync(userJsonPath)) {
+    return null;
+  }
+  try {
+    const raw = fs.readFileSync(userJsonPath, "utf8");
+    const parsed = JSON.parse(raw) as Partial<HotkeysData>;
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      !parsed.groups ||
+      !Array.isArray(parsed.hotkeys)
+    ) {
+      return null;
+    }
+    return {
+      groups: parsed.groups,
+      hotkeys: parsed.hotkeys,
+      aliases: Array.isArray(parsed.aliases) ? parsed.aliases : [],
+    };
+  } catch {
+    return null;
+  }
 }
 
 export default function Command() {
   const iconPath = path.join(environment.assetsPath, "app-icon.png");
-  const data = loadHotkeysData();
-  const activeHotkeys = data.hotkeys.filter((h) => !h.cleared && h.key);
+  const data = loadSavedHotkeysData();
+  const activeHotkeys = data
+    ? data.hotkeys.filter((h) => !h.cleared && h.key)
+    : [];
 
   async function openMap() {
     try {
@@ -51,56 +71,68 @@ export default function Command() {
         name: "open-hotkeys-map",
         type: LaunchType.UserInitiated,
       });
-    } catch (error) {
-      await showFailureToast(error, { title: "Failed to open Hotkeys Map" });
+    } catch {
+      await showHUD("Failed to open Hotkeys Map");
     }
   }
 
   return (
     <MenuBarExtra icon={{ source: iconPath }} tooltip="Raycast Hotkeys Map">
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title={`Open Hotkeys Map (${activeHotkeys.length})`}
-          icon={Icon.AppWindow}
-          onAction={openMap}
-        />
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Section>
-        {Object.entries(data.groups).map(([groupId, group]) => {
-          const items = activeHotkeys.filter((h) => h.group === groupId);
-          if (items.length === 0) return null;
-          return (
-            <MenuBarExtra.Submenu
-              key={groupId}
-              title={`${group.name} (${items.length})`}
-              icon={Icon.Keyboard}
-            >
-              {items.map((item) => (
-                <MenuBarExtra.Item
-                  key={`${item.title}-${item.combo}`}
-                  title={`${item.title}  —  ${item.combo}`}
-                  onAction={openMap}
-                />
-              ))}
-            </MenuBarExtra.Submenu>
-          );
-        })}
-      </MenuBarExtra.Section>
-      {data.aliases.length > 0 && (
+      {!data ? (
         <MenuBarExtra.Section>
-          <MenuBarExtra.Submenu
-            title={`Aliases (${data.aliases.length})`}
-            icon={Icon.Terminal}
-          >
-            {data.aliases.map((a) => (
-              <MenuBarExtra.Item
-                key={a.alias}
-                title={`${a.alias}  →  ${a.title}`}
-                onAction={openMap}
-              />
-            ))}
-          </MenuBarExtra.Submenu>
+          <MenuBarExtra.Item
+            title="Open Hotkeys Map to sync your hotkeys"
+            icon={Icon.AppWindow}
+            onAction={openMap}
+          />
         </MenuBarExtra.Section>
+      ) : (
+        <>
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item
+              title={`Open Hotkeys Map (${activeHotkeys.length})`}
+              icon={Icon.AppWindow}
+              onAction={openMap}
+            />
+          </MenuBarExtra.Section>
+          <MenuBarExtra.Section>
+            {Object.entries(data.groups).map(([groupId, group]) => {
+              const items = activeHotkeys.filter((h) => h.group === groupId);
+              if (items.length === 0) return null;
+              return (
+                <MenuBarExtra.Submenu
+                  key={groupId}
+                  title={`${group.name} (${items.length})`}
+                  icon={Icon.Keyboard}
+                >
+                  {items.map((item) => (
+                    <MenuBarExtra.Item
+                      key={`${item.title}-${item.combo}`}
+                      title={`${item.title}  —  ${item.combo}`}
+                      onAction={openMap}
+                    />
+                  ))}
+                </MenuBarExtra.Submenu>
+              );
+            })}
+          </MenuBarExtra.Section>
+          {data.aliases.length > 0 && (
+            <MenuBarExtra.Section>
+              <MenuBarExtra.Submenu
+                title={`Aliases (${data.aliases.length})`}
+                icon={Icon.Terminal}
+              >
+                {data.aliases.map((a) => (
+                  <MenuBarExtra.Item
+                    key={a.alias}
+                    title={`${a.alias}  →  ${a.title}`}
+                    onAction={openMap}
+                  />
+                ))}
+              </MenuBarExtra.Submenu>
+            </MenuBarExtra.Section>
+          )}
+        </>
       )}
     </MenuBarExtra>
   );
