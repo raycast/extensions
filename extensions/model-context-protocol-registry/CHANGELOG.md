@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add StableDomains MCP Server] - 2026-11-27
+
+- Add StableDomains to the official registry: search domain availability, live price quotes, name suggestions, drop radar, valuation, WHOIS/RDAP, DNS and email checks, and domain history. 11 public domain tools, no purchases. Authless hosted Streamable HTTP server at https://stabledomains.net/api/mcp/discover, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
