@@ -61,7 +61,7 @@ test('Git operations work in a repository path with spaces and special character
     await runCommand('git', ['config', 'user.email', 'test@example.com'], { cwd })
     await writeFile(path.join(cwd, 'README.md'), 'fixture\n')
     await runCommand('git', ['add', '.'], { cwd })
-    await runCommand('git', ['commit', '-m', 'Initial fixture'], { cwd })
+    await runCommand('git', ['commit', '--no-gpg-sign', '-m', 'test: initialize Git fixture'], { cwd })
     assert.equal((await runCommand('git', ['rev-list', '--all', '--count'], { cwd })).stdout.trim(), '1')
     assert.equal((await runCommand('git', ['status', '--porcelain=v2', '--branch'], { cwd })).stdout.includes('# branch.head main'), true)
     await writeFile(path.join(cwd, 'README.md'), 'modified\n')
@@ -96,4 +96,15 @@ test('installed tokei reports its version and generates statistics', { skip: pro
     await writeFile(path.join(cwd, 'fixture.ts'), 'const answer = 42\n')
     assert.match((await runCommand('tokei', ['--version'], { cwd })).stdout, /tokei/)
     assert.match((await runCommand('tokei', ['.', '--compact'], { cwd })).stdout, /TypeScript/)
+})
+
+test('a cancelled signal is rejected before trying to spawn', async (t) => {
+    const cwd = await fixture(t)
+    await assert.rejects(runCommand('repository-manager-missing-command-783491', [], { cwd, signal: AbortSignal.abort() }), { name: 'AbortError' })
+})
+
+test('timeout settles while a descendant holds the output pipe', { timeout: 2500 }, async (t) => {
+    const cwd = await fixture(t)
+    const script = 'require("node:child_process").spawn(process.execPath, ["-e", "setTimeout(() => {}, 3000)"], { stdio: ["ignore", process.stdout, process.stderr] }).unref(); setInterval(() => {}, 1000)'
+    await assert.rejects(runCommand(process.execPath, ['-e', script], { cwd, timeout: 500 }), /timed out/)
 })
