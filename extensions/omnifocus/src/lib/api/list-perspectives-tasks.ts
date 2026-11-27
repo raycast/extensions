@@ -6,12 +6,13 @@ export async function listPerspectiveTasks(perspectiveName?: string): Promise<Om
   if (!perspectiveName) {
     return [];
   }
-  const result = await executeScript<string>(`
+  const result = await executeScript<string>(
+    `
 const omnifocus = Application("OmniFocus");
 const document = omnifocus.defaultDocument();
 const window = document.documentWindows[0];
 
-window.perspectiveName = \`${perspectiveName}\`;
+window.perspectiveName = args.perspectiveName;
 
 function safeString(value) {
   return value !== undefined ? value.toString() : null;
@@ -58,7 +59,9 @@ const leaves = window
 
 const validLeaves = leaves.filter(Boolean);
 return JSON.stringify(validLeaves);
-`);
+`,
+    { perspectiveName },
+  );
 
   // Parse the JSON string back into an array of tasks
   try {

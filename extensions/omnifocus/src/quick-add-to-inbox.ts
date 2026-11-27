@@ -1,4 +1,5 @@
-import { LaunchProps, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { addTask } from "./lib/api/add-task";
 import { checkOmniFocusInstalled, showNotInstalledErrorFeedback } from "./lib/utils/ensure-installed";
 import { showNotProUserErrorFeedback, isProUser } from "./lib/utils/is-pro-user";
@@ -16,16 +17,10 @@ export default async function AddTodoCommand(props: LaunchProps<{ arguments: Arg
     return;
   }
 
-  const { error } = await addTask({ name: todo, tags: [] });
-  if (!error) {
-    await showToast({
-      title: "Task created!",
-      style: Toast.Style.Success,
-    });
-  } else {
-    await showToast({
-      title: "An error occurred",
-      style: Toast.Style.Failure,
-    });
+  try {
+    await addTask({ name: todo, tags: [] });
+    await showHUD("Task added to your OmniFocus inbox");
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't add the task" });
   }
 }

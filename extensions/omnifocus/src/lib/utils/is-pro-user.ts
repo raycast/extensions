@@ -1,4 +1,4 @@
-import { showToast, Toast, Keyboard } from "@raycast/api";
+import { showToast, Toast, Keyboard, open } from "@raycast/api";
 import { executeScript } from "./executeScript";
 
 export async function isProUser(): Promise<boolean> {

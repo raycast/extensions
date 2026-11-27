@@ -19,6 +19,6 @@ export type CreateOmniFocusTaskOptions = {
   deferDate?: Date | null;
   plannedDate?: Date | null;
   dueDate?: Date | null;
-  projectName?: string;
+  projectId?: string;
   tags: string[];
 };
