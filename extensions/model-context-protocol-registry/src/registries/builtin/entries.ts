@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "rzlt",
+    title: "RZLT",
+    description:
+      "Ask RZLT, an AI-native growth and marketing agency, about its services, case studies and writing, check whether a company is a fit, and run a free AI-readiness check on any website (a score out of 100 and the top 3 fixes). send_message sends RZLT a message only after you approve the exact text. 7 tools, 6 read-only. Hosted Streamable HTTP server with no sign-in and no API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/therzlt/rzlt-mcp/main/assets/rzlt-512.png",
+    homepage: "https://mcp.rzlt.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rzlt.io/mcp"],
+    },
+    remoteUrl: "https://mcp.rzlt.io/mcp",
+  },
+  {
     name: "webstory",
     title: "Webstory",
     description:
