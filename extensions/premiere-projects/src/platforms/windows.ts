@@ -107,12 +107,15 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
       searchRoots = [scope];
     }
 
-    const cleanTerm = searchTerm.trim().replace(/['"\r\n`$]/g, "");
-    const escapedRoots = searchRoots.map((r) => `'${r.replace(/'/g, "''")}'`).join(", ");
+    const base64Roots = Buffer.from(JSON.stringify(searchRoots), "utf8").toString("base64");
+    const base64Term = Buffer.from(searchTerm.trim(), "utf8").toString("base64");
 
-    // Use PowerShell Get-ChildItem with -LiteralPath and escaped path to prevent injection
-    const filterClause = cleanTerm.length > 0 ? ` | Where-Object { $_.Name -like '*${cleanTerm}*' }` : "";
-    const script = `Get-ChildItem -LiteralPath ${escapedRoots} -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue${filterClause} | Select-Object -ExpandProperty FullName -First ${limit}`;
+    // Pass inputs as Base64-encoded UTF-8 literals to eliminate shell command/string injection
+    const script = [
+      `$roots = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${base64Roots}')) | ConvertFrom-Json;`,
+      `$term = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${base64Term}'));`,
+      `Get-ChildItem -LiteralPath $roots -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Where-Object { [string]::IsNullOrEmpty($term) -or $_.Name.IndexOf($term, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 } | Select-Object -ExpandProperty FullName -First ${limit}`,
+    ].join(" ");
 
     const stdout = await runPowerShellScript(script, { timeout: 8000, signal });
 
@@ -236,8 +239,12 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const recentDir = path.join(appData, "Microsoft/Windows/Recent");
     if (!fs.existsSync(recentDir)) return [];
 
-    const escapedRecentDir = recentDir.replace(/'/g, "''");
-    const script = `$sh = New-Object -ComObject WScript.Shell; Get-ChildItem -LiteralPath '${escapedRecentDir}' -Filter '*.lnk' -ErrorAction SilentlyContinue | ForEach-Object { try { $target = $sh.CreateShortcut($_.FullName).TargetPath; if ($target -and $target.EndsWith('.prproj', [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $target)) { $target } } catch {} }`;
+    const base64RecentDir = Buffer.from(recentDir, "utf8").toString("base64");
+    const script = [
+      `$recentDir = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${base64RecentDir}'));`,
+      `$sh = New-Object -ComObject WScript.Shell;`,
+      `Get-ChildItem -LiteralPath $recentDir -Filter '*.lnk' -ErrorAction SilentlyContinue | ForEach-Object { try { $target = $sh.CreateShortcut($_.FullName).TargetPath; if ($target -and $target.EndsWith('.prproj', [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $target)) { $target } } catch {} }`,
+    ].join(" ");
 
     const stdout = await runPowerShellScript(script, { timeout: 6000 });
 
