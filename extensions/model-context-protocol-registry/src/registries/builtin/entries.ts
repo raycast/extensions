@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "sandscale",
+    title: "Sandscale",
+    description:
+      "Give your agent a sandbox of its own: create a Firecracker microVM sandbox from a template, run commands in it and read the output, write and read files, and throw it away, with every tool call recorded in the Sandscale audit log. Official server run by Sandscale. Hosted Streamable HTTP server at https://mcp.sandscale.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Sandscale account is required; there is a free plan.",
+    icon: "https://sandscale.dev/apple-touch-icon.png",
+    homepage: "https://sandscale.dev/sandboxes/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sandscale.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.sandscale.dev/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
