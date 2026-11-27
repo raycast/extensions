@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Corsair MCP Server] - 2026-11-27
+## [Add Corsair MCP Server] - {PR_MERGE_DATE}
 
 - Add Corsair to the official registry: one URL for Gmail, Slack, GitHub, Notion and 700+ more apps, with search across synced data, actions that follow your approval rules, and routines. Hosted Streamable HTTP server at https://mcp.corsair.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free to start.
 
