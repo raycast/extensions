@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "custom-ai-chat",
+  "title": "Custom AI Chat",
+  "description": "Chat with any OpenAI-compatible model using your own API key or local gateway, keeping each conversation and its context separate.",
+  "icon": "extension-icon.png",
+  "author": "FTSzw",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "description": "Ask a question and continue it in its own conversation, with streaming answers from your own AI model or gateway.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Ask a Question (Optional)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "configPath",
+      "title": "Custom Configuration File",
+      "description": "Optional. Select a providers.yaml file. Takes priority over the path below.",
+      "type": "file",
+      "required": false
+    },
+    {
+    "name": "defaultConfigPath",
+    "title": "Configuration File Path",
+    "description": "Path to providers.yaml, used when no custom file is selected above.",
+    "placeholder": "~/.config/raycast/ai/providers.yaml",
+    "type": "textfield",
+      "required": false,
+      "default": "~/.config/raycast/ai/providers.yaml"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.2.7",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
