@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "strict-time-converter",
+  "title": "Strict Time Converter",
+  "description": "Convert Unix timestamps and Chinese/English dates with explicit ambiguity and daylight-saving checks.",
+  "icon": "icon.png",
+  "author": "leau_chou",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "timestamp",
+    "unix",
+    "epoch",
+    "时间戳",
+    "时间",
+    "日期",
+    "shijianchuo",
+    "10",
+    "13"
+  ],
+  "commands": [
+    {
+      "name": "convert-time",
+      "title": "Convert Time",
+      "description": "Convert timestamps, ISO/RFC strings, and Chinese/English dates locally. Reject ambiguous or invalid inputs.",
+      "mode": "view",
+      "keywords": [
+        "timestamp",
+        "unix",
+        "epoch",
+        "时间戳",
+        "shijianchuo"
+      ],
+      "arguments": [
+        {
+          "name": "input",
+          "type": "text",
+          "placeholder": "Timestamp or Date (Optional)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timezone",
+      "type": "dropdown",
+      "title": "Default Time Zone",
+      "description": "Time zone for displaying results and parsing dates without an offset. Unix timestamps are independent of time zones.",
+      "required": false,
+      "default": "local",
+      "data": [
+        {
+          "title": "Beijing Time · Asia/Shanghai",
+          "value": "Asia/Shanghai"
+        },
+        {
+          "title": "System Local Time Zone",
+          "value": "local"
+        },
+        {
+          "title": "UTC",
+          "value": "UTC"
+        }
+      ]
+    },
+    {
+      "name": "dateOrder",
+      "type": "dropdown",
+      "title": "Date Order",
+      "description": "Interpret year-last dates such as 03/04/2026. The us: and eu: prefixes override this preference.",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic · Reject Ambiguous Dates",
+          "value": "auto"
+        },
+        {
+          "title": "US · Month/Day/Year",
+          "value": "MDY"
+        },
+        {
+          "title": "European · Day/Month/Year",
+          "value": "DMY"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "bundle": "ray bundle",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write src package.json tsconfig.json eslint.config.js README.md",
+    "format:check": "prettier --check src package.json tsconfig.json eslint.config.js README.md",
+    "lint:source": "eslint src --max-warnings=0",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.13.1",
+    "luxon": "3.7.2",
+    "react": "^19.0.0",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.3"
+  }
+}
