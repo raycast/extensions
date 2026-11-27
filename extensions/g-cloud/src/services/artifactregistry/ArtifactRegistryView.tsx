@@ -22,9 +22,15 @@ interface ArtifactRegistryViewProps {
   gcloudPath: string;
   /** When true, omits `navigationTitle` to avoid overriding the root command's title. */
   isRoot?: boolean;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function ArtifactRegistryView({ projectId, gcloudPath, isRoot = false }: ArtifactRegistryViewProps) {
+export default function ArtifactRegistryView({
+  projectId,
+  gcloudPath,
+  isRoot = false,
+  onProjectChange,
+}: ArtifactRegistryViewProps) {
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -92,7 +98,12 @@ export default function ArtifactRegistryView({ projectId, gcloudPath, isRoot = f
         isLoading={isLoading}
         navigationTitle={navigationTitle}
         searchBarAccessory={
-          <ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="artifactregistry" />
+          <ServiceViewBar
+            projectId={projectId}
+            gcloudPath={gcloudPath}
+            serviceName="artifactregistry"
+            onProjectChange={onProjectChange}
+          />
         }
       >
         <ApiErrorView error={error.message} projectId={projectId} apiName="artifactregistry" onRetry={revalidate} />
@@ -106,7 +117,12 @@ export default function ArtifactRegistryView({ projectId, gcloudPath, isRoot = f
       searchBarPlaceholder="Search Artifact Registry repositories..."
       navigationTitle={navigationTitle}
       searchBarAccessory={
-        <ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="artifactregistry" />
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="artifactregistry"
+          onProjectChange={onProjectChange}
+        />
       }
       actions={
         <ActionPanel>

@@ -442,6 +442,27 @@ export function isPinnedRefusal(error: unknown): boolean {
 }
 
 /**
+ * How brew's uninstall says the package is already gone: `NoSuchKegError`
+ * (`exceptions.rb`), `CaskNotInstalledError` (`cask/exceptions.rb`), and
+ * `FormulaOrCaskUnavailableError`, which brew's named-args resolution
+ * (`cli/named_args.rb`) raises when a name has no keg and no cask. Anchored
+ * on "Error: " so a message that merely contains "is not installed"
+ * elsewhere does not match.
+ */
+const NOT_INSTALLED_PATTERN =
+  /Error: (No such keg: |Cask '[^']+' is not installed\.|No available formula or cask with the name )/;
+
+/**
+ * Whether brew refused an uninstall because the package is not installed,
+ * read from stderr as well as the message.
+ */
+export function isNotInstalledRefusal(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const stderr = (error as { stderr?: unknown }).stderr;
+  return NOT_INSTALLED_PATTERN.test(`${typeof stderr === "string" ? stderr : ""}\n${error.message}`);
+}
+
+/**
  * Pattern to detect disabled/discontinued packages.
  * Matches: "Error: Cask 'name' has been disabled because it is discontinued upstream! It was disabled on 2024-12-16."
  * Or: "Error: Formula 'name' has been disabled because ..."

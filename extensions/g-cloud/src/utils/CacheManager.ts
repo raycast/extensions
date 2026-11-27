@@ -16,6 +16,7 @@ export const CACHE_KEYS = {
   RECENT_RESOURCES: "recent-resources",
   SERVICE_COUNTS: "service-counts",
   SERVICE_USAGE: "service-usage",
+  PINNED_PROJECTS: "pinned-projects",
 };
 
 export const CACHE_TTL = {
@@ -254,6 +255,13 @@ export class CacheManager {
     cache.remove(CACHE_KEYS.SELECTED_PROJECT);
     cache.remove(CACHE_KEYS.PROJECT_TIMESTAMP);
     cache.remove(CACHE_KEYS.RECENTLY_USED_PROJECTS);
+    try {
+      if (fs.existsSync(PREFS_FILE_PATH)) {
+        fs.unlinkSync(PREFS_FILE_PATH);
+      }
+    } catch (error) {
+      console.error("Failed to remove project preferences file:", error);
+    }
   }
 
   static saveProjectsList(projects: Project[]): void {
@@ -489,8 +497,65 @@ export class CacheManager {
     }
   }
 
+  static subscribeToRecentResources(onChange: (resources: RecentResource[]) => void): () => void {
+    return cache.subscribe((key) => {
+      if (key === undefined || key === CACHE_KEYS.RECENT_RESOURCES) {
+        onChange(CacheManager.getRecentResources());
+      }
+    });
+  }
+
+  static removeRecentResource(id: string, type: ResourceType, projectId: string): RecentResource[] {
+    const resources = CacheManager.getRecentResources();
+    const updated = resources.filter((r) => !(r.id === id && r.type === type && r.projectId === projectId));
+    cache.set(CACHE_KEYS.RECENT_RESOURCES, JSON.stringify(updated));
+    return updated;
+  }
+
   static clearRecentResources(): void {
     cache.remove(CACHE_KEYS.RECENT_RESOURCES);
+  }
+
+  // Pinned Projects Methods (stored in settingsCache so clearing API cache preserves pins)
+  static getPinnedProjects(): string[] {
+    const pinnedStr = settingsCache.get(CACHE_KEYS.PINNED_PROJECTS);
+    if (!pinnedStr) {
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(pinnedStr);
+      return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string" && id.length > 0) : [];
+    } catch (error) {
+      console.error("Failed to parse pinned projects:", error);
+      return [];
+    }
+  }
+
+  static isProjectPinned(projectId: string): boolean {
+    return CacheManager.getPinnedProjects().includes(projectId);
+  }
+
+  static pinProject(projectId: string): string[] {
+    if (!projectId || typeof projectId !== "string") {
+      return CacheManager.getPinnedProjects();
+    }
+    const existing = CacheManager.getPinnedProjects().filter((id) => id !== projectId);
+    const updated = [projectId, ...existing];
+    settingsCache.set(CACHE_KEYS.PINNED_PROJECTS, JSON.stringify(updated));
+    return updated;
+  }
+
+  static unpinProject(projectId: string): string[] {
+    const updated = CacheManager.getPinnedProjects().filter((id) => id !== projectId);
+    settingsCache.set(CACHE_KEYS.PINNED_PROJECTS, JSON.stringify(updated));
+    return updated;
+  }
+
+  static togglePinnedProject(projectId: string): { pinned: boolean; pinnedProjects: string[] } {
+    if (CacheManager.isProjectPinned(projectId)) {
+      return { pinned: false, pinnedProjects: CacheManager.unpinProject(projectId) };
+    }
+    return { pinned: true, pinnedProjects: CacheManager.pinProject(projectId) };
   }
 
   // Service Counts Methods

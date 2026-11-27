@@ -85,18 +85,14 @@ type Input = {
   eventType?: "default" | "birthday" | "focusTime" | "outOfOffice" | "workingLocation";
   /** Focus-time invitation handling. */
   focusTimeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   /** Chat status during focus time. */
   focusTimeChatStatus?: "available" | "doNotDisturb";
   /** Auto-decline message for focus time. */
   focusTimeDeclineMessage?: string;
   /** Out-of-office invitation handling. */
   outOfOfficeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   /** Auto-decline message for out-of-office. */
   outOfOfficeDeclineMessage?: string;
   /** Working-location kind. */

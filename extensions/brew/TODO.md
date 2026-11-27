@@ -57,6 +57,10 @@ Not yet known is whether brew or Raycast causes the double run. Ruled out: the i
 - **Find out which,** with a temporary dev-build trace that logs `FormulaListItemDetail` mounts and unmounts alongside the `undici:request:create` diagnostics channel.
 - **If it is brew,** fix it there. **If it is Raycast,** report it with the trace, and leave the code alone.
 
+### Keep bulk upgrades and Remove Tap out of a busy package's way
+
+Install, Upgrade and Uninstall claim a package so a second brew for it can't start (`AGENTS.md`, "One brew operation per package"). The bulk paths don't consult those claims yet: Show Upgrades' Upgrade Selected / Upgrade All (`useBrewUpgrade`), the whole-machine preview's Upgrade All and its `brew upgrade` in Terminal, and Remove Tap's uninstalls (`untapSteps` in `src/manage-taps.tsx`). Start a single upgrade, then run one of these, and brew can fail on the lock partway through. Skip claimed packages (reporting them as skipped), or wait for them, rather than racing them.
+
 ## Not planned
 
 - Replace sliding-window search with Raycast `List` pagination. Native pagination retains every previous page and exceeds the command memory limit; the window deliberately drops the prior page.

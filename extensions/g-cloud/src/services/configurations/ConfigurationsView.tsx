@@ -52,7 +52,7 @@ export function ConfigurationsView({ gcloudPath, onSwitchAccount, onClearCache, 
     if (config.is_active) return;
     const toast = await showToast({ style: Toast.Style.Animated, title: `Activating ${config.name}...` });
     try {
-      await activateConfiguration(gcloudPath, config.name);
+      await activateConfiguration(gcloudPath, config.name, config.properties?.core?.project);
       toast.style = Toast.Style.Success;
       toast.title = `Activated ${config.name}`;
       await loadConfigs();

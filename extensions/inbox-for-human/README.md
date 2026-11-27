@@ -1,6 +1,6 @@
 # Inbox for Human
 
-When Claude Code or Codex needs you to review a plan, a report, or a draft, it adds the file to your inbox with a note on what it needs from you. Open Review Inbox for Human from anywhere to see everything waiting on you, open each file, and archive it when you're done.
+When Claude Code or Codex needs you to review a plan, a report, or a draft, it adds the file to your inbox with a note on what it needs from you. Open Review Inbox for Human from anywhere to see everything waiting on you, open each file, and archive it when you're done. See it at [jasoneric.com/inbox-for-human](https://jasoneric.com/inbox-for-human/).
 
 ## Set up
 

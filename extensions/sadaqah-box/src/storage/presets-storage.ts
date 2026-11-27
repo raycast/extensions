@@ -1,14 +1,22 @@
 /**
- * Presets Storage with secure ID generation
+ * Presets Storage with runtime validation and normalized ordering
  */
 
 import { LocalStorage } from "@raycast/api";
-import { Preset } from "./types";
-import { STORAGE_KEYS } from "./constants";
-import { generateSecureId } from "./utils/security";
+import { Preset } from "../types";
+import { STORAGE_KEYS } from "../constants";
+import { generateSecureId } from "../utils/security";
+import { isPreset } from "../utils/type-guards";
+
+function normalizeOrder(presets: Preset[]): Preset[] {
+  return presets.map((preset, index) => ({
+    ...preset,
+    order: index + 1,
+  }));
+}
 
 /**
- * Get all presets from LocalStorage, sorted by order
+ * Get all presets from LocalStorage, validated and sorted by order
  */
 export async function getPresets(): Promise<Preset[]> {
   try {
@@ -16,10 +24,12 @@ export async function getPresets(): Promise<Preset[]> {
     if (!stored) {
       return [];
     }
-    const parsed = JSON.parse(stored);
-    const presets = Array.isArray(parsed) ? parsed : [];
-    // Sort by order field if available, otherwise keep original order
-    return presets.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
+    const parsed: unknown = JSON.parse(stored);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    const validPresets = parsed.filter(isPreset);
+    return validPresets.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
   } catch {
     return [];
   }
@@ -66,9 +76,7 @@ export async function deletePreset(presetId: string): Promise<boolean> {
     return false;
   }
 
-  // Reorder remaining presets
-  const reordered = filtered.map((p, index) => ({ ...p, order: index + 1 }));
-  await savePresets(reordered);
+  await savePresets(normalizeOrder(filtered));
   return true;
 }
 
@@ -93,13 +101,10 @@ export async function updatePreset(
 }
 
 /**
- * Set a preset as the default preset
- * This will unset any existing default and set the new one
+ * Set a preset as the default preset, unsetting any previous default
  */
 export async function setDefaultPreset(presetId: string): Promise<boolean> {
   const presets = await getPresets();
-
-  // Unset any existing default
   const updatedPresets = presets.map((p) => ({
     ...p,
     isDefault: p.id === presetId,
@@ -114,7 +119,6 @@ export async function setDefaultPreset(presetId: string): Promise<boolean> {
  */
 export async function unsetDefaultPreset(): Promise<boolean> {
   const presets = await getPresets();
-
   const updatedPresets = presets.map((p) => ({
     ...p,
     isDefault: false,
@@ -132,42 +136,33 @@ export async function getDefaultPreset(): Promise<Preset | null> {
   return presets.find((p) => p.isDefault) || null;
 }
 
-/**
- * Move a preset up in the order
- */
-export async function movePresetUp(presetId: string): Promise<boolean> {
-  const presets = await getPresets();
+async function movePreset(presetId: string, direction: -1 | 1): Promise<boolean> {
+  const presets = normalizeOrder(await getPresets());
   const index = presets.findIndex((p) => p.id === presetId);
+  const targetIndex = index + direction;
 
-  if (index <= 0) {
+  if (index === -1 || targetIndex < 0 || targetIndex >= presets.length) {
     return false;
   }
 
-  // Swap orders
-  const temp = presets[index].order;
-  presets[index].order = presets[index - 1].order;
-  presets[index - 1].order = temp;
+  const currentOrder = presets[index].order;
+  presets[index].order = presets[targetIndex].order;
+  presets[targetIndex].order = currentOrder;
 
   await savePresets(presets);
   return true;
 }
 
 /**
+ * Move a preset up in the order
+ */
+export async function movePresetUp(presetId: string): Promise<boolean> {
+  return movePreset(presetId, -1);
+}
+
+/**
  * Move a preset down in the order
  */
 export async function movePresetDown(presetId: string): Promise<boolean> {
-  const presets = await getPresets();
-  const index = presets.findIndex((p) => p.id === presetId);
-
-  if (index === -1 || index >= presets.length - 1) {
-    return false;
-  }
-
-  // Swap orders
-  const temp = presets[index].order;
-  presets[index].order = presets[index + 1].order;
-  presets[index + 1].order = temp;
-
-  await savePresets(presets);
-  return true;
+  return movePreset(presetId, 1);
 }

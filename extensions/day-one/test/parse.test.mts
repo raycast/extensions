@@ -3,6 +3,11 @@ import { describe, it } from "node:test";
 import {
   canSignOut,
   classifyCliError,
+  cliModelCacheDir,
+  pathsOverlap,
+  indexGap,
+  gapIsSkippedEntries,
+  buildDoctorReport,
   cleanBody,
   compareVersions,
   entryTitle,
@@ -29,6 +34,97 @@ describe("parseCliVersion", () => {
     const legacy =
       "Day One CLI\nVersion: 2026.19\nLoaded From: /Applications/Day One.app/Contents/Frameworks/CLIKit.framework";
     assert.equal(parseCliVersion(legacy), null);
+  });
+});
+
+describe("cliModelCacheDir", () => {
+  const home = "/Users/someone";
+  it("resolves a relative override against the folder the CLI runs in", () => {
+    assert.equal(
+      cliModelCacheDir({ FASTEMBED_CACHE_DIR: "search-model" }, "darwin", home, "/support"),
+      "/support/search-model",
+    );
+  });
+  it("uses HF_HOME first, then FASTEMBED_CACHE_DIR, as the CLI does", () => {
+    assert.equal(cliModelCacheDir({ HF_HOME: "/hf", FASTEMBED_CACHE_DIR: "/fe" }, "darwin", home), "/hf");
+    assert.equal(cliModelCacheDir({ FASTEMBED_CACHE_DIR: "/fe" }, "darwin", home), "/fe");
+  });
+  it("falls back to the platform's per-user cache folder", () => {
+    assert.equal(cliModelCacheDir({}, "darwin", home), "/Users/someone/Library/Caches/dayone-cli/models");
+    assert.equal(cliModelCacheDir({}, "linux", home), "/Users/someone/.cache/dayone-cli/models");
+    assert.equal(cliModelCacheDir({ XDG_CACHE_HOME: "/xdg" }, "linux", home), "/xdg/dayone-cli/models");
+  });
+  it("ignores empty variables", () => {
+    assert.equal(
+      cliModelCacheDir({ HF_HOME: "", FASTEMBED_CACHE_DIR: "" }, "darwin", home),
+      "/Users/someone/Library/Caches/dayone-cli/models",
+    );
+  });
+});
+
+describe("pathsOverlap", () => {
+  it("is true for the same folder, or one inside the other", () => {
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model/"), true);
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model/hf"), true);
+    assert.equal(pathsOverlap("/a", "/a/search-model"), true);
+  });
+  it("is false for siblings that only share a prefix", () => {
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model-2"), false);
+    assert.equal(pathsOverlap("/a/search-model", "/Users/someone/Library/Caches/dayone-cli/models"), false);
+  });
+});
+
+describe("indexGap", () => {
+  it("counts missing and stale embeddings from the CLI's embedding_index check", () => {
+    assert.equal(indexGap({ missing_embeddings: 1, stale_embeddings: 2, inspection_complete: true }), 3);
+    assert.equal(indexGap({ missing_embeddings: 0, stale_embeddings: 0, inspection_complete: true }), 0);
+  });
+  it("is null when the CLI didn't inspect the index or reported no numbers", () => {
+    assert.equal(indexGap(undefined), null);
+    assert.equal(indexGap({ missing_embeddings: 1, inspection_complete: false }), null);
+    assert.equal(indexGap({ inspection_complete: true }), null);
+  });
+});
+
+describe("gapIsSkippedEntries", () => {
+  const rebuild = { finishedAt: 1_000_000, skipped: 1 };
+  it("is true when the last rebuild skipped at least as many entries as are missing, with no sync since", () => {
+    assert.equal(gapIsSkippedEntries(1, rebuild, 900_000), true);
+    assert.equal(gapIsSkippedEntries(1, rebuild, null), true);
+  });
+  it("is false when more are missing than the rebuild skipped", () => {
+    assert.equal(gapIsSkippedEntries(2, rebuild, 900_000), false);
+  });
+  it("is false after a sync since the rebuild, which can bring entries the rebuild never saw", () => {
+    assert.equal(gapIsSkippedEntries(1, rebuild, 1_100_000), false);
+  });
+  it("is false with no finished rebuild", () => {
+    assert.equal(gapIsSkippedEntries(1, null, null), false);
+  });
+});
+
+describe("buildDoctorReport", () => {
+  const home = "/Users/someone";
+  it("keeps the CLI's report as it is and adds the extension's own checks", () => {
+    const cli = { status: "attention", checks: [{ check: "config", status: "pass" }] };
+    const report = buildDoctorReport(cli, { search: { model_downloaded: true } }, home) as Record<string, unknown>;
+    assert.equal(report.status, "attention");
+    assert.deepEqual(report.checks, cli.checks);
+    assert.deepEqual(report.raycast_extension, { search: { model_downloaded: true } });
+  });
+  it("shows the home folder as ~ in every string, including nested ones", () => {
+    const report = buildDoctorReport(
+      undefined,
+      { cli: { path: "/Users/someone/.nvm/bin/dayone" }, problems: ["failed at /Users/someone/x"] },
+      home,
+    ) as { raycast_extension: { cli: { path: string }; problems: string[] } };
+    assert.equal(report.raycast_extension.cli.path, "~/.nvm/bin/dayone");
+    assert.deepEqual(report.raycast_extension.problems, ["failed at ~/x"]);
+  });
+  it("still reports the extension when the CLI's doctor didn't run", () => {
+    const report = buildDoctorReport(undefined, { a: 1 }, home) as Record<string, unknown>;
+    assert.equal(report.cli_doctor, "unavailable");
+    assert.deepEqual(report.raycast_extension, { a: 1 });
   });
 });
 

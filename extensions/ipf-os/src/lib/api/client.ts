@@ -76,6 +76,10 @@ export async function requestOne<T>(options: RequestOptions): Promise<T> {
   return unwrap<T>(await send(options));
 }
 
+export async function requestParsed<T>(options: RequestOptions, parse: (body: unknown) => T): Promise<T> {
+  return parse(await send(options));
+}
+
 export async function requestPage<T>(options: RequestOptions): Promise<Page<T>> {
   return unwrapPage<T>(await send(options));
 }

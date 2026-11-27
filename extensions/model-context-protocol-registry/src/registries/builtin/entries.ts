@@ -7,6 +7,58 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "cleanedweb",
+    title: "CleanedWeb",
+    description:
+      "Find and run maintained REST APIs that return structured records from public websites: job boards, marketplaces, app stores, package registries, research databases and more. Search the catalog, read an API's inputs and record fields, run it with a record limit, and read past results; ask for a site that is not in the catalog yet. Each API has a fixed input contract and output schema, and CleanedWeb keeps it working when the site changes. Searching the catalog is free; runs are paid per accepted record, and new accounts get free credits. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); the account is created at first sign-in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://cleanedweb.com/assets/logo.png",
+    homepage: "https://cleanedweb.com/docs/mcp/?utm_source=raycast&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.cleanedweb.com/mcp?profile=catalog"],
+    },
+    remoteUrl: "https://api.cleanedweb.com/mcp?profile=catalog",
+  },
+  {
+    name: "namereef",
+    title: "NameReef Domain Generator",
+    description:
+      "Find domain names no one has registered yet: describe your project in plain words and NameReef's AI invents names that fit and checks each one against registry data, with a one-line reason for every find. Check names you already have in mind, shortlist the ones you like and keep searches in projects in your NameReef account. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a free NameReef account is created while connecting, and searches use its weekly allowance. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://namereef.com/icon-512.png",
+    homepage: "https://namereef.com/assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://namereef.com/mcp"],
+    },
+    remoteUrl: "https://namereef.com/mcp",
+  },
+  {
+    name: "rzlt",
+    title: "RZLT",
+    description:
+      "Ask RZLT, an AI-native growth and marketing agency, about its services, case studies and writing, check whether a company is a fit, and run a free AI-readiness check on any website (a score out of 100 and the top 3 fixes). send_message sends RZLT a message only after you approve the exact text. 7 tools, 6 read-only. Hosted Streamable HTTP server with no sign-in and no API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/therzlt/rzlt-mcp/main/assets/rzlt-512.png",
+    homepage: "https://mcp.rzlt.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rzlt.io/mcp"],
+    },
+    remoteUrl: "https://mcp.rzlt.io/mcp",
+  },
+  {
+    name: "webstory",
+    title: "Webstory",
+    description:
+      "Work on your Webstory stories from your AI assistant. Webstory makes story websites for brands and shops: full-screen reels of video, photos and designs that open like a social story on any phone. See your stories and how each one is doing (visitors, visits, how far people watched, button taps), make draft stories, add reels, change captions, titles and buttons, find and replace words, bring in photos and videos, make preview and share links, and read comments, chats and orders. Edits go to drafts: a story doesn't go live without a person's OK in Webstory. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Webstory account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/WebStory-App/webstory-mcp/main/assets/logo.png",
+    homepage: "https://docs.webstoryapp.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://webstoryapp.com/mcp"],
+    },
+    remoteUrl: "https://webstoryapp.com/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:

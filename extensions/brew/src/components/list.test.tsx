@@ -12,6 +12,8 @@ vi.mock("./actionPanels", () => ({
   FormulaActionPanel: () => null,
   PagingSection: () => null,
 }));
+// The busy hooks need a React render; these tests call the row as a function.
+vi.mock("./busy", () => ({ usePackageBusyIcon: () => undefined }));
 vi.mock("./listItemDetail", () => ({
   CaskListItemDetail: () => null,
   FormulaListItemDetail: () => null,
