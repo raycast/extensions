@@ -1,5 +1,8 @@
-import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api'
-import { useExec } from '@raycast/utils'
+import { projectShortcut, commandEnvironment } from '../platform'
+import { Keyboard, Action, ActionPanel, Detail, Icon, List } from '@raycast/api'
+import { usePromise } from '@raycast/utils'
+import { useRef } from 'react'
+import { CommandError, runCommand } from '../commands'
 import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { Project } from '../project'
@@ -133,7 +136,8 @@ function getCommandText(script: ProjectScript): string {
 }
 
 function ScriptRunnerDetail({ project, script }: ScriptRunnerDetailProps) {
-    const { isLoading, data, error } = useExec(script.command, script.args, { cwd: project.fullPath })
+    const abortable = useRef<AbortController | undefined>(undefined)
+    const { isLoading, data, error } = usePromise((command: string, args: string[], cwd: string) => runCommand(command, args, { cwd, env: commandEnvironment, signal: abortable.current?.signal }), [script.command, script.args, project.fullPath], { abortable })
     const commandText = getCommandText(script)
 
     const markdown = `
@@ -144,7 +148,8 @@ function ScriptRunnerDetail({ project, script }: ScriptRunnerDetailProps) {
 ## Output
 
 \`\`\`bash
-${data || (isLoading ? 'Running...' : '')}
+${data?.stdout || (error instanceof CommandError ? error.stdout : '') || (isLoading ? 'Running...' : '')}
+${data?.stderr || ''}
 ${error ? error.message : ''}
 \`\`\`
 `
@@ -158,7 +163,7 @@ ${error ? error.message : ''}
                     <Action.CopyToClipboard
                         title="Copy Command"
                         content={commandText}
-                        shortcut={{ modifiers: ['cmd'], key: 'c' }}
+                        shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     <OpenInTerminal project={project} />
                     <OpenInEditor project={project} />
@@ -204,7 +209,7 @@ function ProjectScriptsList({ project }: ProjectScriptsProps) {
                                     <Action.Push
                                         title="Run Script"
                                         icon={Icon.Play}
-                                        shortcut={index === 0 ? { modifiers: ['cmd'], key: 'enter' } : undefined}
+                                        shortcut={index === 0 ? projectShortcut('enter') : undefined}
                                         target={
                                             <ScriptRunnerDetail
                                                 project={project}
@@ -216,7 +221,7 @@ function ProjectScriptsList({ project }: ProjectScriptsProps) {
                                         title="Copy Command"
                                         content={getCommandText(script)}
                                         icon={Icon.Clipboard}
-                                        shortcut={{ modifiers: ['cmd'], key: 'c' }}
+                                        shortcut={Keyboard.Shortcut.Common.Copy}
                                     />
                                 </ActionPanel>
                             }
@@ -233,7 +238,7 @@ export default function ProjectScripts({ project }: ProjectScriptsProps) {
         <Action.Push
             title="Project Scripts"
             icon={Icon.Terminal}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+            shortcut={projectShortcut('r', ['shift'])}
             target={<ProjectScriptsList project={project} />}
         />
     )
