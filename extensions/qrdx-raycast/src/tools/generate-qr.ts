@@ -4,7 +4,7 @@ import { join } from "node:path";
 import type { Tool } from "@raycast/api";
 import { FRAME_TEXT_MAX_LENGTH } from "qrdx";
 import { describeFrames, type FrameChoice, frameName, frameTextLength, IMPLIED_FRAME, resolveFrame } from "../frames";
-import { buildPNGBuffer, buildQRProps } from "../qr-engine";
+import { buildPNGBuffer, buildQRProps, withLogoData } from "../qr-engine";
 import { DEFAULT_SETTINGS, type Settings } from "../types";
 
 /**
@@ -102,7 +102,7 @@ export const confirmation: Tool.Confirmation<Input> = (input) => {
   });
 };
 
-export default function generateQR(input: Input): string {
+export default async function generateQR(input: Input): Promise<string> {
   const checked = frameOf(input);
   if (checked.error !== undefined) return checked.error;
   const { frame } = checked;
@@ -123,7 +123,8 @@ export default function generateQR(input: Input): string {
   };
 
   const qrProps = buildQRProps(input.url, settings);
-  const buf = buildPNGBuffer(qrProps);
+  // A logo given by its address is loaded first; one that can't be loaded throws, saying why.
+  const buf = buildPNGBuffer(await withLogoData(qrProps));
   const filename = `qrdx-${Date.now()}.png`;
   const outPath = join(homedir(), "Downloads", filename);
   writeFileSync(outPath, buf);

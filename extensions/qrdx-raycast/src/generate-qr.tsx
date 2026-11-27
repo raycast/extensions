@@ -1,27 +1,13 @@
-import { writeFileSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
-import { join } from "node:path";
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Detail,
-  Form,
-  Grid,
-  Icon,
-  Keyboard,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Grid, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { FRAME_TEXT_MAX_LENGTH } from "qrdx";
 import { useState } from "react";
+import { copyPNG, copySVG, savePNG, saveSVG } from "./code-exports";
 import { capFrameText, FRAME_CHOICES, type FrameChoice, frameDefaultColors, frameKeywords, frameName } from "./frames";
 import { type PreviewKind, usePreviews } from "./pattern-previews";
 import { playgroundLink } from "./playground-link";
 import { previewMarkdown } from "./preview-files";
-import { buildPNGBuffer, buildQRProps, buildSVGString, type QRRenderProps } from "./qr-engine";
+import { buildQRProps, type QRRenderProps, withLogoData, withoutRemoteLogo } from "./qr-engine";
 import { QRMetadata } from "./qr-metadata";
 import { generateSavedPreview, saveQR } from "./storage";
 import {
@@ -202,57 +188,12 @@ export function QRPreview({
   savedName?: string;
   onEdit?: () => void;
 }) {
-  const svgString = buildSVGString(qrProps);
-  const downloadsDir = join(homedir(), "Downloads");
-
-  async function copyPNG() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Generating PNG…",
-    });
-    try {
-      const buf = buildPNGBuffer(qrProps);
-      const tmpPath = join(tmpdir(), `qrdx-${Date.now()}.png`);
-      writeFileSync(tmpPath, buf);
-      await Clipboard.copy({ file: tmpPath } as Parameters<typeof Clipboard.copy>[0]);
-      toast.style = Toast.Style.Success;
-      toast.title = "PNG copied to clipboard";
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to copy PNG";
-      toast.message = e instanceof Error ? e.message : String(e);
-    }
-  }
-
-  async function copySVG() {
-    await Clipboard.copy(svgString);
-    await showHUD("SVG copied to clipboard");
-  }
-
-  async function savePNG() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Saving PNG…",
-    });
-    try {
-      const buf = buildPNGBuffer(qrProps);
-      const outPath = join(downloadsDir, `qrdx-${Date.now()}.png`);
-      writeFileSync(outPath, buf);
-      toast.style = Toast.Style.Success;
-      toast.title = "PNG saved";
-      toast.message = outPath;
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to save PNG";
-      toast.message = e instanceof Error ? e.message : String(e);
-    }
-  }
-
-  async function saveSVG() {
-    const outPath = join(downloadsDir, `qrdx-${Date.now()}.svg`);
-    writeFileSync(outPath, `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`, "utf-8");
-    await showHUD(`SVG saved → ${outPath}`);
-  }
+  // A logo given by its address is loaded before the code is drawn; one that
+  // can't be loaded is left out of the preview, and the toast says why.
+  const { data: drawable, isLoading } = usePromise(withLogoData, [qrProps], {
+    failureToastOptions: { title: "Couldn't load the logo" },
+  });
+  const markdown = drawable ? previewMarkdown(drawable) : isLoading ? "" : previewMarkdown(withoutRemoteLogo(qrProps));
 
   return (
     <Detail
@@ -261,13 +202,13 @@ export function QRPreview({
           <ActionPanel.Section title="Copy">
             <Action
               icon={Icon.Clipboard}
-              onAction={copyPNG}
+              onAction={() => copyPNG(qrProps)}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
               title="Copy PNG to Clipboard"
             />
             <Action
               icon={Icon.Clipboard}
-              onAction={copySVG}
+              onAction={() => copySVG(qrProps)}
               shortcut={Keyboard.Shortcut.Common.Copy}
               title="Copy SVG to Clipboard"
             />
@@ -289,13 +230,13 @@ export function QRPreview({
             />
             <Action
               icon={Icon.Download}
-              onAction={savePNG}
+              onAction={() => savePNG(qrProps)}
               shortcut={SAVE_PNG_SHORTCUT}
               title="Save PNG to Downloads"
             />
             <Action
               icon={Icon.Download}
-              onAction={saveSVG}
+              onAction={() => saveSVG(qrProps)}
               shortcut={SAVE_SVG_SHORTCUT}
               title="Save SVG to Downloads"
             />
@@ -315,7 +256,8 @@ export function QRPreview({
           )}
         </ActionPanel>
       }
-      markdown={previewMarkdown(qrProps)}
+      isLoading={isLoading}
+      markdown={markdown}
       metadata={<QRMetadata Metadata={Detail.Metadata} qrProps={qrProps} />}
       navigationTitle={savedName ?? "QR Code — Preview"}
     />

@@ -1,25 +1,11 @@
-import { existsSync, writeFileSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
-import { join } from "node:path";
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Clipboard,
-  confirmAlert,
-  Icon,
-  Keyboard,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { existsSync } from "node:fs";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showHUD } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
+import { copyPNG, copySVG, savePNG, saveSVG } from "./code-exports";
 import { QREditor, QRPreview, SAVE_PNG_SHORTCUT, SAVE_SVG_SHORTCUT } from "./generate-qr";
 import { playgroundLink } from "./playground-link";
 import { imageMarkdown } from "./preview-files";
-import { buildPNGBuffer, buildSVGString } from "./qr-engine";
 import { QRMetadata } from "./qr-metadata";
 import { deleteQR, drawMissingPreviews, loadSavedQRs, type SavedQR, savedPreviewPath, savedToQRProps } from "./storage";
 
@@ -30,58 +16,7 @@ const DETAIL_PREVIEW_POINTS = 150;
 // ─── Saved QR Item Actions ────────────────────────────────────────────────────
 
 function SavedQRActions({ saved, onRefresh }: { saved: SavedQR; onRefresh: () => void }) {
-  const downloadsDir = join(homedir(), "Downloads");
   const qrProps = savedToQRProps(saved);
-  const svgString = buildSVGString(qrProps);
-
-  async function copyPNG() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Generating PNG…",
-    });
-    try {
-      const buf = buildPNGBuffer(qrProps);
-      const tmpPath = join(tmpdir(), `qrdx-${Date.now()}.png`);
-      writeFileSync(tmpPath, buf);
-      await Clipboard.copy({ file: tmpPath } as Parameters<typeof Clipboard.copy>[0]);
-      toast.style = Toast.Style.Success;
-      toast.title = "PNG copied to clipboard";
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to copy PNG";
-      toast.message = e instanceof Error ? e.message : String(e);
-    }
-  }
-
-  async function copySVG() {
-    await Clipboard.copy(svgString);
-    await showHUD("SVG copied to clipboard");
-  }
-
-  async function savePNG() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Saving PNG…",
-    });
-    try {
-      const buf = buildPNGBuffer(qrProps);
-      const outPath = join(downloadsDir, `qrdx-${Date.now()}.png`);
-      writeFileSync(outPath, buf);
-      toast.style = Toast.Style.Success;
-      toast.title = "PNG saved";
-      toast.message = outPath;
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to save PNG";
-      toast.message = e instanceof Error ? e.message : String(e);
-    }
-  }
-
-  async function saveSVG() {
-    const outPath = join(downloadsDir, `qrdx-${Date.now()}.svg`);
-    writeFileSync(outPath, `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`, "utf-8");
-    await showHUD(`SVG saved → ${outPath}`);
-  }
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
@@ -131,20 +66,30 @@ function SavedQRActions({ saved, onRefresh }: { saved: SavedQR; onRefresh: () =>
       <ActionPanel.Section title="Copy">
         <Action
           icon={Icon.Clipboard}
-          onAction={copyPNG}
+          onAction={() => copyPNG(qrProps)}
           shortcut={{ modifiers: ["cmd"], key: "c" }}
           title="Copy PNG to Clipboard"
         />
         <Action
           icon={Icon.Clipboard}
-          onAction={copySVG}
+          onAction={() => copySVG(qrProps)}
           shortcut={Keyboard.Shortcut.Common.Copy}
           title="Copy SVG to Clipboard"
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Export">
-        <Action icon={Icon.Download} onAction={savePNG} shortcut={SAVE_PNG_SHORTCUT} title="Save PNG to Downloads" />
-        <Action icon={Icon.Download} onAction={saveSVG} shortcut={SAVE_SVG_SHORTCUT} title="Save SVG to Downloads" />
+        <Action
+          icon={Icon.Download}
+          onAction={() => savePNG(qrProps)}
+          shortcut={SAVE_PNG_SHORTCUT}
+          title="Save PNG to Downloads"
+        />
+        <Action
+          icon={Icon.Download}
+          onAction={() => saveSVG(qrProps)}
+          shortcut={SAVE_SVG_SHORTCUT}
+          title="Save SVG to Downloads"
+        />
       </ActionPanel.Section>
       <ActionPanel.Section title="QRdx">
         <Action.OpenInBrowser

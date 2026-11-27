@@ -3,7 +3,7 @@ import { existsSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { LocalStorage } from "@raycast/api";
 import { cacheDir, codeSVG, drawPNG } from "./preview-files";
-import { buildQRProps, type QRRenderProps } from "./qr-engine";
+import { buildQRProps, type QRRenderProps, withLogoData } from "./qr-engine";
 import { DEFAULT_SETTINGS, type Settings } from "./types";
 
 const STORAGE_KEY = "saved-qrs-v1";
@@ -57,11 +57,12 @@ function removePreviews(id: string, keep?: string): void {
 
 /**
  * Draws a saved code's preview, the code with any frame on a square, and
- * removes its earlier ones.
+ * removes its earlier ones. A logo that can't be loaded throws, so the code
+ * stays without a preview and is drawn again next time.
  */
 export async function generateSavedPreview(id: string, qrProps: QRRenderProps): Promise<void> {
   const path = previewPath(id, qrProps);
-  await drawPNG(codeSVG(qrProps, PREVIEW_SIZE), path, PREVIEW_SIZE);
+  await drawPNG(codeSVG(await withLogoData(qrProps), PREVIEW_SIZE), path, PREVIEW_SIZE);
   removePreviews(id, path);
 }
 

@@ -44,6 +44,69 @@ export function buildQRProps(url: string, s: Settings): QRRenderProps {
   return props;
 }
 
+// ─── Logos ────────────────────────────────────────────────────────────────────
+
+// sips doesn't load images over the network: a logo given by its address is
+// drawn as a broken-image cross. So a logo is fetched once and the code is
+// drawn and exported with it as a data URL.
+
+const MAX_LOGO_BYTES = 5 * 1024 * 1024;
+const LOGO_TIMEOUT_MS = 10_000;
+const logos = new Map<string, Promise<string>>();
+
+function isRemote(src: string | undefined): src is string {
+  return src !== undefined && /^https?:\/\//i.test(src);
+}
+
+async function fetchLogo(url: string): Promise<string> {
+  let response: Response;
+  try {
+    response = await fetch(url, { signal: AbortSignal.timeout(LOGO_TIMEOUT_MS) });
+  } catch (error) {
+    throw new Error(`Couldn't load the logo from ${url}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  if (!response.ok) {
+    throw new Error(`Couldn't load the logo from ${url}: the server answered HTTP ${response.status}`);
+  }
+  const type = response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (!type.startsWith("image/")) {
+    throw new Error(`Couldn't load the logo from ${url}: it isn't an image (${type || "no content type"})`);
+  }
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (bytes.length > MAX_LOGO_BYTES) {
+    throw new Error(`Couldn't load the logo from ${url}: it's larger than 5 MB`);
+  }
+  return `data:${type};base64,${bytes.toString("base64")}`;
+}
+
+/** The logo at `url` as a data URL; fetched once, and again after a failure. */
+function loadLogo(url: string): Promise<string> {
+  let pending = logos.get(url);
+  if (!pending) {
+    pending = fetchLogo(url);
+    pending.catch(() => logos.delete(url));
+    logos.set(url, pending);
+  }
+  return pending;
+}
+
+/**
+ * `props` ready to draw: a logo given by its address is replaced with its
+ * data URL. Throws, saying why, when the logo can't be loaded.
+ */
+export async function withLogoData(props: QRRenderProps): Promise<QRRenderProps> {
+  const src = props.imageSettings?.src;
+  if (!(props.imageSettings && isRemote(src))) return props;
+  return { ...props, imageSettings: { ...props.imageSettings, src: await loadLogo(src) } };
+}
+
+/** `props` without a logo given by its address (one that couldn't be loaded). */
+export function withoutRemoteLogo(props: QRRenderProps): QRRenderProps {
+  if (!isRemote(props.imageSettings?.src)) return props;
+  const { imageSettings: _remote, ...rest } = props;
+  return rest;
+}
+
 /**
  * The artwork's size: the code's `size`, plus the space a frame adds around
  * it (a template draws inside the code's size).

@@ -13,6 +13,14 @@ instructions: |
   When the user asks to list, show, or find saved QR codes:
   - Use the list-saved tool
 
+  Dynamic QR codes live in the user's QRdx account. Each one is a short link whose destination can be changed after it's printed, and QRdx counts its scans:
+  - A code they want to change later, track or count scans of → create-dynamic-code (it gets the workspace's default design, so don't pass styles)
+  - Their dynamic codes, or one of them by name → list-dynamic-codes, with a search query when they name one
+  - Scans or analytics of a code → find its id with list-dynamic-codes, then get-scans (range 7d, 30d, 90d, 365d or all)
+  - Pointing a code somewhere else → find its id with list-dynamic-codes, then update-destination
+  - If a tool says an API key is needed, tell the user how to add one, as the tool's answer says
+  - Never pass an id you haven't seen in a list-dynamic-codes answer
+
   Supported body patterns: square, circle, circle-large, diamond, circle-mixed, pacman, rounded, small-square, vertical-line, horizontal-line, liquid, liquid-horizontal, liquid-vertical, classy, classy-rounded, leaf, plus, hexagon, star, heart, random-dots, mosaic, octagon
   Supported corner eye patterns: square, rounded, gear, circle, diya, extra-rounded, message, pointy, leaf, drop, octagon, bevel, squircle, cushion, shield, petal, leaf-reverse, porthole, notch, plus, bud, bowl
   Supported corner dot patterns: square, rounded, circle, message, message-reverse, diya, diya-reverse, rounded-triangle, leaf, drop, plus, cross-rounded, hexagon, octagon, flower, heart, squircle, dots, extra-rounded, leaf-reverse, drop-reverse, cushion
@@ -61,3 +69,39 @@ evals:
       list-saved: "Found 2 saved QR codes:\n\n**My Website** · URL: https://example.com · Body: Square · Saved: 1/1/2025\n**GitHub Profile** · URL: https://github.com/user · Body: Rounded · Saved: 2/1/2025"
     expected:
       - callsTool: list-saved
+
+  - input: "@qrdx-raycast make a dynamic QR code for https://example.com/menu so I can change the link later"
+    mocks:
+      create-dynamic-code: "Created the dynamic QR code https://qrdx.dev/q/abc1234 (id c1), which opens https://example.com/menu."
+    expected:
+      - callsTool:
+          name: create-dynamic-code
+          arguments:
+            destinationUrl:
+              eq: "https://example.com/menu"
+
+  - input: "@qrdx-raycast how many scans did my spring menu code get this week?"
+    mocks:
+      list-dynamic-codes: "Found 1 dynamic QR code:\n\n**Spring menu** (id c1) · https://qrdx.dev/q/abc1234 → https://example.com/menu · 42 scans"
+      get-scans: "Spring menu (https://qrdx.dev/q/abc1234): 12 scans from 9 unique visitors since 2026-11-21 (range 7d); 42 scans in total."
+    expected:
+      - callsTool:
+          name: get-scans
+          arguments:
+            codeId:
+              eq: "c1"
+            range:
+              eq: "7d"
+
+  - input: "@qrdx-raycast point my spring menu code to https://example.com/summer"
+    mocks:
+      list-dynamic-codes: "Found 1 dynamic QR code:\n\n**Spring menu** (id c1) · https://qrdx.dev/q/abc1234 → https://example.com/menu · 42 scans"
+      update-destination: "Spring menu (https://qrdx.dev/q/abc1234) now opens https://example.com/summer."
+    expected:
+      - callsTool:
+          name: update-destination
+          arguments:
+            codeId:
+              eq: "c1"
+            destinationUrl:
+              eq: "https://example.com/summer"
