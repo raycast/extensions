@@ -55,40 +55,22 @@ export function OpenInEditor({ project }: OpenProps) {
 }
 
 export function OpenInTerminal({ project }: OpenProps) {
+    const terminal = preferences.terminalApp
+
     async function handleOpenInTerminal() {
         try {
-            if (!preferences.terminalApp?.name || !preferences.terminalApp?.path) {
-                throw new Error('Terminal app not configured')
-            }
-
             await openProjectInTerminal(project.fullPath)
             await markProjectOpened(project)
-            await showSuccessToast(`Opening project in ${preferences.terminalApp.name}`)
+            await showSuccessToast(`Opening project in ${terminal?.name || 'terminal'}`)
         } catch (error) {
-            if (error instanceof Error && error.message === 'Terminal app not configured') {
-                await showErrorToast('Please configure your preferred terminal in preferences')
-            } else {
-                await showErrorToast(`Failed to open project in ${preferences.terminalApp?.name || 'terminal'}`, error instanceof Error ? error.message : undefined)
-            }
+            await showErrorToast(`Failed to open project in ${terminal?.name || 'terminal'}`, error instanceof Error ? error.message : undefined)
         }
-    }
-
-    if (!preferences.terminalApp?.name || !preferences.terminalApp?.path) {
-        return (
-            <Action
-                title="Open in Terminal"
-                icon={Icon.Terminal}
-                shortcut={projectShortcut('t')}
-                onAction={() => showErrorToast('Please configure your preferred terminal in preferences')}
-            />
-        )
     }
 
     return (
         <Action
-            title={`Open in ${preferences.terminalApp.name}`}
-            key={`open-${preferences.terminalApp.name}`}
-            icon={{ fileIcon: preferences.terminalApp.path }}
+            title={terminal?.name ? `Open in ${terminal.name}` : 'Open in Terminal'}
+            icon={terminal?.path ? { fileIcon: terminal.path } : Icon.Terminal}
             shortcut={projectShortcut('t')}
             onAction={handleOpenInTerminal}
         />
