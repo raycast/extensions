@@ -14,8 +14,11 @@ import { errorMessage, expandHome, OutputFormat, transcribeFileTo } from "./lib/
 
 /** Files modified less than this long ago may still be recording or downloading. */
 const SETTLE_MS = 60_000;
-/** A run holding the lock longer than this is assumed to have crashed. */
-const STALE_LOCK_MS = 2 * 60 * 60 * 1000;
+/**
+ * A run holding the lock longer than this is assumed to have crashed or been terminated by Raycast,
+ * which ends background runs after a timeout tied to the command's interval (10m in package.json).
+ */
+const STALE_LOCK_MS = 10 * 60 * 1000;
 const MAX_REMEMBERED = 1000;
 
 type State = {
@@ -110,15 +113,16 @@ async function watchOnce(folder: string, format: OutputFormat, userInitiated: bo
   let failure: string | undefined;
   try {
     for (const path of await newRecordings(folder, state, format)) {
+      // Remember the file before transcribing: if the run fails or Raycast terminates it,
+      // the same recording is not retried (and killed again) every interval.
+      state.done.push(path);
+      await saveState(state);
       try {
         await transcribeFileTo(path, sidecarPath(path, format), { format });
         transcribed++;
       } catch (error) {
         failure = `${basename(path)}: ${errorMessage(error)}`;
       }
-      // Remember failures too, so a broken file is not retried every interval.
-      state.done.push(path);
-      await saveState(state);
     }
   } finally {
     await LocalStorage.removeItem(LOCK_KEY);
