@@ -88,6 +88,9 @@ function isQueueEntry(value: unknown): value is QueueEntry {
  * Without this, externally-added entries don't surface until the command is
  * cold-relaunched, because Raycast keeps the command instance (and its
  * mount-time read) warm between re-opens.
+ *
+ * The one catch-up call picks up a write that lands after the mount read but
+ * before `watchFile` takes its baseline.
  */
 export function watchQueue(queuePath: string, onChange: () => void, intervalMs = 1000): () => void {
   const listener = (curr: Stats, prev: Stats): void => {
@@ -95,7 +98,11 @@ export function watchQueue(queuePath: string, onChange: () => void, intervalMs =
     if (curr.mtimeMs !== prev.mtimeMs) onChange();
   };
   watchFile(queuePath, { interval: intervalMs }, listener);
-  return () => unwatchFile(queuePath, listener);
+  const catchUp = setTimeout(onChange, intervalMs);
+  return () => {
+    clearTimeout(catchUp);
+    unwatchFile(queuePath, listener);
+  };
 }
 
 /**

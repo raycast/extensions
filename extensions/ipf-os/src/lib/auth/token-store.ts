@@ -1,4 +1,6 @@
-import { LocalStorage } from "@raycast/api";
+import { Cache, LocalStorage } from "@raycast/api";
+
+import { clearMealDrafts } from "../meals/drafts";
 
 import type { AuthSession } from "./provider";
 
@@ -23,6 +25,8 @@ export async function writeSession(session: AuthSession): Promise<void> {
 
 export async function clearSession(): Promise<void> {
   await LocalStorage.removeItem(SESSION_KEY);
+  await clearMealDrafts();
+  new Cache().clear();
 }
 
 const isPast = (isoTimestamp: string): boolean => {

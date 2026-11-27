@@ -76,11 +76,13 @@ export const UP_TO_DATE_ICON = { source: Icon.CheckCircle, tintColor: STATUS_COL
 /** Something brew refused or that failed outright. */
 export const ERROR_ICON = { source: Icon.XMarkCircle, tintColor: STATUS_COLOR.error };
 
+/** A ring `fraction` full, in the in-progress color. */
+export function progressIcon(fraction: number) {
+  return { source: getProgressIcon(fraction, STATUS_COLOR.inProgress), tintColor: STATUS_COLOR.inProgress };
+}
+
 /** Work in flight — a half-filled ring rather than a static glyph. */
-export const IN_PROGRESS_ICON = {
-  source: getProgressIcon(0.5, STATUS_COLOR.inProgress),
-  tintColor: STATUS_COLOR.inProgress,
-};
+export const IN_PROGRESS_ICON = progressIcon(0.5);
 
 /** A package that is simply not installed. */
 const NOT_INSTALLED_ICON = { source: Icon.Circle, tintColor: notInstalledColor };

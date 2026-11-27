@@ -13,7 +13,11 @@ Run any command and sign in with your Shape Calendar account when prompted. You 
 - **Training Status** — Readiness, training load, and health metrics, with a preview right in the command row
 - **Today's Workout** — Pin to root search to always see today's workout
 
-## AI Extension
+## Shape MCP
+
+The extension bundles [Shape's MCP server](https://shapecalendar.com/mcp) for Raycast AI. Raycast connects to the server and discovers its tools, so training features stay in sync with Shape without separate tool implementations in the extension.
+
+Open **Ask Shape Calendar** or mention `@shape-calendar` in AI Chat. Sign in with your Shape account when Raycast prompts you. You can also manage the connection in **Manage MCP Servers**. MCP sign-in is separate from the sign-in used by the regular commands; existing command sign-ins continue to work.
 
 Ask Shape Calendar questions like:
 

@@ -1,6 +1,7 @@
 import { OAuth } from "@raycast/api";
 
 import { getWebAppUrl } from "../config";
+import { refreshMealsStatus } from "../meals/status";
 import type { AuthProvider, AuthSession } from "./provider";
 import { postForTokens } from "./token-client";
 import {
@@ -38,6 +39,7 @@ export class BrowserHandoffAuthProvider implements AuthProvider {
   async signOut(): Promise<void> {
     this.inFlight = undefined;
     await Promise.all([clearSession(), client.removeTokens()]);
+    await refreshMealsStatus();
   }
 
   async getCachedSession(): Promise<AuthSession | undefined> {

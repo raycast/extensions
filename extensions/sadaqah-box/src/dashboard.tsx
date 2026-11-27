@@ -1,35 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  useNavigation,
-  Icon,
-  Color,
-  confirmAlert,
-  Alert,
-  Image,
-} from "@raycast/api";
-import {
-  listBoxesCached,
-  deleteBoxCached,
-  emptyBoxCached,
-  getStatsCached,
-  addSadaqahCached,
-  listCurrenciesCached,
-} from "./api/cached";
+import { List, ActionPanel, Action, showToast, Toast, useNavigation, Icon, Color, Image, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { listBoxesCached, getStatsCached, addSadaqahCached, listCurrenciesCached } from "./api/cached";
+import { confirmAndCollectBox, confirmAndDeleteBox } from "./hooks/useBoxActions";
 import { Box, StatsResponse, Preset, Currency } from "./types";
 import { getErrorMessage } from "./utils/error-handler";
-import { SUCCESS_MESSAGES } from "./constants";
-import BoxDetail from "./box-detail";
-import CollectionDetail from "./collection-detail";
-import CreateBoxCommand from "./create-box";
-import EditBoxCommand from "./edit-box";
-import AddSadaqahCommand from "./add-sadaqah";
+import { formatCurrency, formatDate, formatNumber } from "./utils/format";
+import { calculateTotalValue } from "./validation/schemas";
+import BoxDetail from "./views/BoxDetail";
+import CollectionDetail from "./views/CollectionDetail";
+import CreateBoxForm from "./views/CreateBoxForm";
+import EditBoxForm from "./views/EditBoxForm";
+import AddSadaqahForm from "./views/AddSadaqahForm";
 import ManagePresetsCommand from "./manage-presets";
-import { getPresets, getDefaultPreset } from "./presets-storage";
+import { getPresets, getDefaultPreset } from "./storage/presets-storage";
 
 export default function DashboardCommand() {
   const { push } = useNavigation();
@@ -43,6 +27,7 @@ export default function DashboardCommand() {
 
   const selectedBoxIdRef = useRef<string | undefined>(selectedBoxId);
   selectedBoxIdRef.current = selectedBoxId;
+  const hasSetInitialSelection = useRef(false);
 
   const fetchData = useCallback(async (preserveSelection = false) => {
     try {
@@ -55,27 +40,28 @@ export default function DashboardCommand() {
         listCurrenciesCached(),
       ]);
 
-      setBoxes((prevBoxes) => {
-        // Preserve selection if requested and we have boxes
-        const currentSelection = selectedBoxIdRef.current;
-        if (preserveSelection && currentSelection && prevBoxes.length > 0) {
-          const stillExists = boxesResponse.boxes.some((b: Box) => b.id === currentSelection);
-          if (!stillExists && boxesResponse.boxes.length > 0) {
-            // If selected box was deleted, select first available
-            setSelectedBoxId(boxesResponse.boxes[0].id);
-          }
-        }
-        return boxesResponse.boxes;
-      });
+      const fetchedBoxes = boxesResponse.boxes;
+      setBoxes(fetchedBoxes);
       setStats(statsResponse);
       setPresets(loadedPresets);
       setDefaultPreset(loadedDefaultPreset);
       setCurrencies(currenciesResponse.currencies);
+
+      if (fetchedBoxes.length > 0) {
+        const currentSelection = selectedBoxIdRef.current;
+        if (preserveSelection && currentSelection) {
+          const stillExists = fetchedBoxes.some((b: Box) => b.id === currentSelection);
+          if (!stillExists) {
+            setSelectedBoxId(fetchedBoxes[0].id);
+          }
+        } else if (!hasSetInitialSelection.current) {
+          hasSetInitialSelection.current = true;
+          setSelectedBoxId(fetchedBoxes[0].id);
+        }
+      }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(getErrorMessage(error)), {
         title: "Failed to load data",
-        message: getErrorMessage(error),
       });
     } finally {
       setIsLoading(false);
@@ -83,110 +69,37 @@ export default function DashboardCommand() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    fetchData(false);
   }, [fetchData]);
 
-  // Update selected box when boxes are loaded initially
-  // Use a ref to prevent resetting selection on subsequent updates
-  const hasSetInitialSelection = useRef(false);
-  useEffect(() => {
-    if (!isLoading && boxes.length > 0 && !hasSetInitialSelection.current) {
-      hasSetInitialSelection.current = true;
-      setSelectedBoxId(boxes[0].id);
-    }
-  }, [isLoading, boxes]);
-
   async function handleDeleteBox(box: Box) {
-    const confirmed = await confirmAlert({
-      title: "Delete Box",
-      message: `Are you sure you want to delete "${box.name}"? This will also delete all ${box.count} sadaqahs in this box.`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
+    await confirmAndDeleteBox(box, {
+      onDeleted: () => fetchData(true),
     });
-
-    if (confirmed) {
-      try {
-        await deleteBoxCached(box.id);
-
-        showToast({
-          style: Toast.Style.Success,
-          title: SUCCESS_MESSAGES.BOX_DELETED,
-        });
-
-        await fetchData(true);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to delete box",
-          message: getErrorMessage(error),
-        });
-      }
-    }
   }
 
   async function handleCollectBox(box: Box) {
-    if (box.count === 0) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Box is already empty",
-      });
-      return;
-    }
-
-    const confirmed = await confirmAlert({
-      title: "Collect Box",
-      message: `Are you sure you want to collect "${box.name}"? This will collect all ${box.count} sadaqahs (${formatCurrency(box.totalValue, box.baseCurrency)}).`,
-      primaryAction: {
-        title: "Collect Box",
-        style: Alert.ActionStyle.Default,
+    await confirmAndCollectBox(box, {
+      onCollected: async (response) => {
+        if (response.collection) {
+          push(<CollectionDetail collection={response.collection} box={response.box || box} />);
+        }
+        await fetchData(true);
       },
     });
-
-    if (confirmed) {
-      try {
-        const response = await emptyBoxCached(box.id);
-
-        showToast({
-          style: Toast.Style.Success,
-          title: "Box collected successfully",
-        });
-
-        // Navigate to collection detail view for the new collection
-        if (response.collection) {
-          push(<CollectionDetail collection={response.collection} box={box} />);
-        }
-
-        await fetchData(true);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to collect box",
-          message: getErrorMessage(error),
-        });
-      }
-    }
   }
 
   async function handleAddPresetSadaqah(box: Box, preset: Preset) {
     const amount = preset.amount || 1;
-    const totalValue = preset.value * amount;
+    const totalValue = calculateTotalValue(preset.value, amount);
 
-    // Get currency info for display
     const currency = currencies.find((c: Currency) => c.id === preset.currencyId);
     const currencyDisplay = currency ? `${currency.name} (${currency.code})` : preset.currencyId;
-
-    // Format numbers to max 5 decimal places
-    const formatNumber = (num: number): string => {
-      return num.toLocaleString(undefined, { maximumFractionDigits: 5 });
-    };
 
     try {
       await addSadaqahCached(box.id, {
         value: totalValue,
         currencyId: preset.currencyId,
-        amount: amount,
       });
 
       showToast({
@@ -197,44 +110,26 @@ export default function DashboardCommand() {
 
       await fetchData(true);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(getErrorMessage(error)), {
         title: "Failed to add sadaqah",
-        message: getErrorMessage(error),
       });
     }
   }
 
-  function formatCurrency(value: number | undefined | null, currency?: { code?: string; symbol?: string }): string {
-    const symbol = currency?.symbol || "";
-    const code = currency?.code || "";
-    const numericValue = value ?? 0;
+  const refreshAfterMutation = () => fetchData(true);
 
-    // Use 5 decimal places for small values (e.g., gold XAU), otherwise use locale default
-    const formattedValue = numericValue < 0.01 ? numericValue.toFixed(5) : numericValue.toLocaleString();
-
-    // Avoid showing duplicate when symbol equals code (e.g., "XAU0 XAU")
-    if (symbol && code && symbol === code) {
-      return `${formattedValue} ${code}`;
-    }
-
-    return `${symbol}${formattedValue} ${code}`.trim();
-  }
-
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
-
-  // Calculate totals from boxes array (more reliable than stats API)
-  const totalBoxes = boxes.length;
-  const totalSadaqahs = boxes.reduce((sum, box) => sum + (box.count ?? 0), 0);
-  const totalValue = boxes.reduce((sum, box) => sum + (box.totalValue ?? 0), 0);
-  // Get primary currency from first box with a currency, or from stats
-  const primaryCurrency = boxes.find((b) => b.baseCurrency)?.baseCurrency || stats?.primaryCurrency || undefined;
+  const statsData = stats?.stats;
+  const totalBoxes = statsData?.totalBoxes ?? boxes.length;
+  const totalSadaqahs = statsData?.totalSadaqahs ?? boxes.reduce((sum, box) => sum + (box.count ?? 0), 0);
+  const totalValue =
+    statsData?.convertedTotal?.value ??
+    statsData?.totalValue ??
+    boxes.reduce((sum, box) => sum + (box.totalValue ?? 0), 0);
+  const primaryCurrency =
+    statsData?.convertedTotal?.currency ??
+    statsData?.primaryCurrency ??
+    boxes.find((b) => b.baseCurrency)?.baseCurrency ??
+    undefined;
 
   return (
     <List
@@ -254,7 +149,7 @@ export default function DashboardCommand() {
                 <Action
                   title="Create Box"
                   icon={Icon.Plus}
-                  onAction={() => push(<CreateBoxCommand onCreate={fetchData} />)}
+                  onAction={() => push(<CreateBoxForm onCreate={refreshAfterMutation} />)}
                 />
               </ActionPanel>
             }
@@ -288,13 +183,19 @@ export default function DashboardCommand() {
                           title="Open Box"
                           icon={Icon.ArrowRight}
                           onAction={() =>
-                            push(<BoxDetail boxId={box.id} onBoxDeleted={fetchData} onSadaqahDeleted={fetchData} />)
+                            push(
+                              <BoxDetail
+                                boxId={box.id}
+                                onBoxDeleted={refreshAfterMutation}
+                                onSadaqahDeleted={refreshAfterMutation}
+                              />,
+                            )
                           }
                         />
                         <Action
                           title="Add Sadaqah"
                           icon={{ source: Icon.Plus, tintColor: Color.Green }}
-                          onAction={() => push(<AddSadaqahCommand box={box} onAdd={fetchData} />)}
+                          onAction={() => push(<AddSadaqahForm box={box} onAdd={refreshAfterMutation} />)}
                         />
                       </ActionPanel.Section>
                     ) : (
@@ -303,36 +204,48 @@ export default function DashboardCommand() {
                           title="Open Box"
                           icon={Icon.ArrowRight}
                           onAction={() =>
-                            push(<BoxDetail boxId={box.id} onBoxDeleted={fetchData} onSadaqahDeleted={fetchData} />)
+                            push(
+                              <BoxDetail
+                                boxId={box.id}
+                                onBoxDeleted={refreshAfterMutation}
+                                onSadaqahDeleted={refreshAfterMutation}
+                              />,
+                            )
                           }
                         />
                         <Action
                           title="Add Sadaqah"
                           icon={{ source: Icon.Plus, tintColor: Color.Green }}
-                          onAction={() => push(<AddSadaqahCommand box={box} onAdd={fetchData} />)}
+                          onAction={() => push(<AddSadaqahForm box={box} onAdd={refreshAfterMutation} />)}
                         />
                       </ActionPanel.Section>
                     )}
 
                     {presets.length > 0 && (
                       <ActionPanel.Section title="Presets">
-                        {presets.slice(0, 9).map((preset, index) => (
-                          <Action
-                            key={preset.id}
-                            title={`Add ${preset.name}`}
-                            icon={{ source: Icon.Star, tintColor: Color.Yellow }}
-                            onAction={() => handleAddPresetSadaqah(box, preset)}
-                            shortcut={
-                              index < 5
-                                ? { modifiers: ["cmd", "shift"], key: String(index + 1) as "1" | "2" | "3" | "4" | "5" }
-                                : undefined
-                            }
-                          />
-                        ))}
+                        {presets.slice(0, 9).map((preset, index) => {
+                          const key = String(index + 1) as "1" | "2" | "3" | "4" | "5";
+                          return (
+                            <Action
+                              key={preset.id}
+                              title={`Add ${preset.name}`}
+                              icon={{ source: Icon.Star, tintColor: Color.Yellow }}
+                              onAction={() => handleAddPresetSadaqah(box, preset)}
+                              shortcut={
+                                index < 5
+                                  ? {
+                                      macOS: { modifiers: ["cmd", "shift"], key },
+                                      Windows: { modifiers: ["ctrl", "shift"], key },
+                                    }
+                                  : undefined
+                              }
+                            />
+                          );
+                        })}
                         <Action
                           title="Manage Presets…"
                           icon={Icon.Gear}
-                          onAction={() => push(<ManagePresetsCommand onPresetsChanged={fetchData} />)}
+                          onAction={() => push(<ManagePresetsCommand onPresetsChanged={refreshAfterMutation} />)}
                         />
                       </ActionPanel.Section>
                     )}
@@ -341,15 +254,15 @@ export default function DashboardCommand() {
                       <Action
                         title="Edit Box"
                         icon={Icon.Pencil}
-                        onAction={() => push(<EditBoxCommand box={box} onUpdate={fetchData} />)}
-                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        onAction={() => push(<EditBoxForm box={box} onUpdate={refreshAfterMutation} />)}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                       />
                       {box.count > 0 && (
                         <Action
                           title="Collect Box"
                           icon={{ source: Icon.ArrowDownCircle, tintColor: Color.Blue }}
                           onAction={() => handleCollectBox(box)}
-                          shortcut={{ modifiers: ["cmd"], key: "o" }}
+                          shortcut={Keyboard.Shortcut.Common.Open}
                         />
                       )}
                     </ActionPanel.Section>
@@ -360,7 +273,10 @@ export default function DashboardCommand() {
                         icon={{ source: Icon.Trash, tintColor: Color.Red }}
                         style={Action.Style.Destructive}
                         onAction={() => handleDeleteBox(box)}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                        }}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -410,7 +326,7 @@ export default function DashboardCommand() {
           icon={{ source: Icon.Plus, tintColor: Color.Green }}
           actions={
             <ActionPanel>
-              <Action title="Create Box" onAction={() => push(<CreateBoxCommand onCreate={fetchData} />)} />
+              <Action title="Create Box" onAction={() => push(<CreateBoxForm onCreate={refreshAfterMutation} />)} />
             </ActionPanel>
           }
         />
@@ -422,7 +338,7 @@ export default function DashboardCommand() {
             <ActionPanel>
               <Action
                 title="Manage Presets"
-                onAction={() => push(<ManagePresetsCommand onPresetsChanged={fetchData} />)}
+                onAction={() => push(<ManagePresetsCommand onPresetsChanged={refreshAfterMutation} />)}
               />
             </ActionPanel>
           }

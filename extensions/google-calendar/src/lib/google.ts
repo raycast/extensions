@@ -44,7 +44,6 @@ export function getPeopleClient() {
   return people;
 }
 
-// Keyed by a hash of the access token, so a new sign-in or a token refresh looks the account up once.
 const getAccountIdForToken = withCache(async (tokenHash: string) => {
   void tokenHash;
   const response = await getPeopleClient().people.get({ resourceName: "people/me", personFields: "metadata" });
@@ -82,7 +81,7 @@ export function useGoogleAPIs() {
 export async function searchContacts(query?: string) {
   const peopleClient = getPeopleClient();
 
-  const [contactsResponse, otherContactsResponse] = await Promise.all([
+  const [contactsResponse, otherContactsResponse] = await Promise.allSettled([
     peopleClient.people.searchContacts({
       query: query ?? "",
       readMask: "names,emailAddresses,photos",
@@ -93,12 +92,22 @@ export async function searchContacts(query?: string) {
       query: query ?? "",
     }),
   ]);
-  const contacts = contactsResponse.data.results
-    ?.map((contact) => contact.person)
-    .filter(Boolean) as people_v1.Schema$Person[];
-  const otherContacts = otherContactsResponse.data.results
-    ?.map((contact) => contact.person)
-    .filter(Boolean) as people_v1.Schema$Person[];
+  const contacts =
+    contactsResponse.status === "fulfilled"
+      ? (contactsResponse.value.data.results
+          ?.map((contact) => contact.person)
+          .filter(Boolean) as people_v1.Schema$Person[])
+      : [];
+  const otherContacts =
+    otherContactsResponse.status === "fulfilled"
+      ? (otherContactsResponse.value.data.results
+          ?.map((contact) => contact.person)
+          .filter(Boolean) as people_v1.Schema$Person[])
+      : [];
+
+  if (contactsResponse.status === "rejected" && otherContactsResponse.status === "rejected") {
+    throw contactsResponse.reason;
+  }
 
   return [...(contacts ?? []), ...(otherContacts ?? [])];
 }
@@ -173,7 +182,6 @@ export function useEvents(calendarId?: string | null) {
           showBirthdays: !!showBirthdays,
         });
 
-        // Get recurring events and expanded instances in parallel
         const [recurringResponse, instancesResponse] = await Promise.all([
           calendar.events.list({
             calendarId: resolvedCalendarId,
@@ -194,7 +202,6 @@ export function useEvents(calendarId?: string | null) {
           }),
         ]);
 
-        // Create a map of recurring event rules
         const recurringRules = new Map(
           recurringResponse.data.items?.map((event) => [
             event.id,
@@ -212,7 +219,7 @@ export function useEvents(calendarId?: string | null) {
 
           return {
             ...event,
-            recurrence: recurringInfo?.recurrence, // RRULE string
+            recurrence: recurringInfo?.recurrence,
             isRecurring: !!recurringInfo,
           };
         });

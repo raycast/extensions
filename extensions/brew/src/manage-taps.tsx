@@ -38,6 +38,8 @@ import {
 } from "./utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { InstallFromTapAction } from "./components/actions";
+import { useBusyIcon } from "./components/busy";
+import { inFlightKey, useInFlight } from "./utils/inFlight";
 import { CaskListItem, FormulaListItem } from "./components/list";
 import { RefreshAction, ToggleSidebarAction } from "./components/actionPanels";
 import { STATUS_COLOR, WARNING_ICON } from "./components/palette";
@@ -273,11 +275,12 @@ function UntrustedItem(props: {
   const { tap, fullName, cask } = props;
   const name = fullName.split("/").pop() ?? fullName;
   const kind = cask ? "cask" : "formula";
+  const busyIcon = useBusyIcon(useInFlight(inFlightKey(cask, fullName)) !== undefined);
   return (
     <List.Item
       id={`untrusted:${kind}:${fullName}`}
       title={name}
-      icon={WARNING_ICON}
+      icon={busyIcon ?? WARNING_ICON}
       accessories={[{ tag: { value: "Not Trusted", color: STATUS_COLOR.attention } }]}
       detail={
         <List.Item.Detail
@@ -412,10 +415,8 @@ function ManageTapsContent(props: { initialTap?: string }) {
   const { major } = useBrewMajorVersion();
   const trustSupported = major !== undefined && major >= HOMEBREW_7;
 
-  const onChange = () => {
-    revalidate();
-    revalidateInstalled();
-  };
+  // Returned, so an install or uninstall stays claimed until both land.
+  const onChange = () => Promise.all([revalidate(), revalidateInstalled()]);
   const onToggleSidebar = () => setShowMetadataPanel((current) => !current);
 
   const taps = data?.taps ?? [];
@@ -513,7 +514,7 @@ function ManageTapsContent(props: { initialTap?: string }) {
           trustSupported={trustSupported}
           onAdded={(tap) => {
             setSearchText(tap);
-            onChange();
+            return onChange();
           }}
           onInstalled={onChange}
           installed={installed}

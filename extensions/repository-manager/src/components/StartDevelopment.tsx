@@ -1,6 +1,9 @@
-import { Action, Icon, open } from '@raycast/api'
+import { Action, Icon } from '@raycast/api'
 import { Project, getProjectUrl } from '../project'
-import { markProjectOpened, openUrl, preferences, resizeEditorWindow } from '../helpers'
+import { markProjectOpened, openUrl } from '../helpers'
+
+import { openProjectInEditor, openProjectInTerminal } from '../launch'
+import { showErrorToast } from '../ui/toast'
 
 type StartDevelopmentProps = {
     project: Project
@@ -9,58 +12,6 @@ type StartDevelopmentProps = {
 export enum DevelopmentCommandApp {
     Editor = 'editor',
     Terminal = 'terminal',
-}
-
-type DevelopmentCommandAppConfig = {
-    type: DevelopmentCommandApp
-    appPath: string
-    argument: string
-}
-
-function getDevelopmentCommandApps(project: Project): (DevelopmentCommandAppConfig | null)[] | undefined {
-    // by default developmentCommand opens the project in the editor and in the browser (if localUrlTemplate is set in preferences or in the project config (urls.local))
-    if (!project.config.developmentCommand) {
-        // Check if editorApp is configured before using it
-        if (preferences.editorApp && preferences.editorApp.path) {
-            return [
-                {
-                    type: DevelopmentCommandApp.Editor,
-                    appPath: preferences.editorApp.path,
-                    argument: project.fullPath,
-                },
-            ]
-        }
-        return []
-    }
-
-    const appsToOpen = project.config.developmentCommand?.apps?.map((app: string) => {
-        switch (app) {
-            case DevelopmentCommandApp.Editor:
-                // Check if editorApp is configured before using it
-                if (preferences.editorApp && preferences.editorApp.path) {
-                    return {
-                        type: DevelopmentCommandApp.Editor,
-                        appPath: preferences.editorApp.path,
-                        argument: project.fullPath,
-                    }
-                }
-                return null
-            case DevelopmentCommandApp.Terminal:
-                // Check if terminalApp is configured before using it
-                if (preferences.terminalApp && preferences.terminalApp.path) {
-                    return {
-                        type: DevelopmentCommandApp.Terminal,
-                        appPath: preferences.terminalApp.path,
-                        argument: project.fullPath,
-                    }
-                }
-                return null
-            default:
-                return null
-        }
-    })
-
-    return appsToOpen?.filter((app: DevelopmentCommandAppConfig | null) => app !== null)
 }
 
 function getDevelopmentCommandUrls(project: Project): (string | null)[] | undefined {
@@ -86,43 +37,24 @@ export default function StartDevelopment({ project }: StartDevelopmentProps) {
             title="Start Development"
             key="start-development"
             icon={Icon.Hammer}
-            onAction={() => {
-                markProjectOpened(project)
-                const appsToOpen = getDevelopmentCommandApps(project)
-                const urlsToOpen = getDevelopmentCommandUrls(project)
+            onAction={async () => {
+                const apps = project.config.developmentCommand ? project.config.developmentCommand.apps || [] : [DevelopmentCommandApp.Editor]
+                const urls = getDevelopmentCommandUrls(project) || []
+                const failures: string[] = []
+                let opened = false
 
-                // make sure editor is the last one to be opened to properly resize the window if enabled in preferences
-                appsToOpen?.sort((a, b) => {
-                    if (a?.type === DevelopmentCommandApp.Editor) {
-                        return 1
+                // Open the editor last so macOS window resizing targets the editor.
+                const launches = [...(apps.includes(DevelopmentCommandApp.Terminal) ? [() => openProjectInTerminal(project.fullPath)] : []), ...urls.filter((url): url is string => Boolean(url)).map((url) => () => openUrl(url)), ...(apps.includes(DevelopmentCommandApp.Editor) ? [() => openProjectInEditor(project.fullPath)] : [])]
+                for (const launch of launches) {
+                    try {
+                        await launch()
+                        opened = true
+                    } catch (error) {
+                        failures.push(error instanceof Error ? error.message : String(error))
                     }
-
-                    if (b?.type === DevelopmentCommandApp.Editor) {
-                        return -1
-                    }
-
-                    return 0
-                })
-
-                appsToOpen?.forEach((config: DevelopmentCommandAppConfig | null) => {
-                    if (!config) {
-                        return
-                    }
-
-                    open(config.argument, config.appPath)
-
-                    if (config.type === DevelopmentCommandApp.Editor && preferences.editorApp) {
-                        resizeEditorWindow(preferences.editorApp)
-                    }
-                })
-
-                urlsToOpen?.forEach(async (url: string | null) => {
-                    if (!url) {
-                        return
-                    }
-
-                    await openUrl(url)
-                })
+                }
+                if (opened) await markProjectOpened(project)
+                if (failures.length) await showErrorToast('Could not open all development apps', failures.join('; '))
             }}
         />
     )

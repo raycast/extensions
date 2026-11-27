@@ -1,5 +1,12 @@
 # Brew Changelog
 
+## [One action at a time per package] - 2026-11-26
+
+- Fixed: pressing Install, Upgrade or Uninstall again while it runs no longer starts a second Homebrew and fails with "Brew is Busy". The package's icon spins, Install and Upgrade read "Installing…" or "Upgrading…", and Uninstall is hidden until the list shows the result
+- Improved: the "Installing…" toast appears as soon as you press Install, instead of after the trust check for a package from a third-party tap
+- Improved: uninstalling a package that was already removed, from the Terminal or another command, says it was already uninstalled instead of reporting an error
+- Changed: when Uninstall refuses a pinned package, its toast offers Force Uninstall and Unpin as two separate actions, as its message says, instead of one action that did both
+
 ## [Show Installed filters, and the version in use] - 2026-11-24
 
 - Changed: Show Installed's filter now offers Installed by You and Dependencies beside All, Formulae and Casks. It replaces Hide Dependencies (⌘D), which could leave dependencies hidden with nothing on screen saying so
