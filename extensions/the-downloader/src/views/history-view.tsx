@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -138,6 +138,9 @@ export function DownloadHistory() {
   const [filter, setFilter] = useState<HistoryFilter>("all");
   const [showingDetail, setShowingDetail] = useState(true);
   const [searchText, setSearchText] = useState("");
+  // Whether each entry's file is still there. Files can be moved or deleted
+  // after the download, so this is re-checked on every read, not only when the list changes.
+  const [exists, setExists] = useState<Map<string, boolean | undefined>>(() => new Map());
 
   // Bumped by every local change (Remove, Clear): a read that started before
   // it is older than what's on screen and must not be shown.
@@ -157,11 +160,17 @@ export function DownloadHistory() {
       const changesAtStart = localChanges.current;
       try {
         const list = await loadHistory();
-        const serialized = JSON.stringify(list);
+        const presence = new Map(list.map((e) => [e.id, e.filePath ? fs.existsSync(e.filePath) : undefined]));
+        const serialized = JSON.stringify(list) + JSON.stringify([...presence]);
         if (active && changesAtStart === localChanges.current && serialized !== last) {
           last = serialized;
           setEntries(list);
+          setExists(presence);
         }
+      } catch (error) {
+        // An unreadable store must not leave the list loading forever; the next tick tries again.
+        console.error("Could not load the download history", error);
+        if (active) setEntries((current) => current ?? []);
       } finally {
         reading = false;
       }
@@ -173,12 +182,6 @@ export function DownloadHistory() {
       clearInterval(timer);
     };
   }, []);
-
-  // Files can be moved or deleted after the download; check once per load.
-  const exists = useMemo(
-    () => new Map((entries ?? []).map((e) => [e.id, e.filePath ? fs.existsSync(e.filePath) : undefined])),
-    [entries],
-  );
 
   const visible = (entries ?? []).filter((e) => matchesFilter(e, filter));
   const groups = groupByDay(visible);

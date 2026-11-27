@@ -55,6 +55,16 @@ const PLAYLIST_URL = /(?:\/|:)playlist(?:\/|:)/i;
  * config file `writeSpotdlConfig` wrote and `--config` loads it, so the secret
  * never appears in the process table.
  */
+/**
+ * The folder spotDL runs in when its destination can't be part of the
+ * template: spotDL reads `{` and `}` as placeholders, so a folder named
+ * `{Mixes}` would be rewritten or rejected. Then spotDL runs inside the folder
+ * and the template is relative to it. Undefined for any other folder.
+ */
+export function spotdlWorkingDir(destination: string): string | undefined {
+  return /[{}]/.test(destination) ? destination : undefined;
+}
+
 export function buildSpotdlArgs(o: SpotdlDownloadOptions, privateHome = false): string[] {
   const isPlaylist = PLAYLIST_URL.test(o.url);
   const template = isPlaylist ? "{list-name}/{artists} - {title}.{output-ext}" : "{artists} - {title}.{output-ext}";
@@ -64,7 +74,8 @@ export function buildSpotdlArgs(o: SpotdlDownloadOptions, privateHome = false): 
   // so a destination like `C:\Users\me\Music` followed by `/{list-name}/...`
   // works on both platforms.
   const dest = o.destination.replace(/[/\\]+$/, "");
-  const args = ["download", o.url, "--output", `${dest}/${template}`, "--format", o.format, "--ffmpeg", o.ffmpegPath];
+  const output = spotdlWorkingDir(dest) ? template : `${dest}/${template}`;
+  const args = ["download", o.url, "--output", output, "--format", o.format, "--ffmpeg", o.ffmpegPath];
   const id = o.clientId?.trim();
   const secret = o.clientSecret?.trim();
   if (id && secret) {
@@ -288,8 +299,11 @@ export async function runSpotdlDownload(
       onProgress({ tracks });
     }
   };
+  const cwd = spotdlWorkingDir(options.destination);
+  if (cwd) fs.mkdirSync(cwd, { recursive: true });
   const { code, stdout, stderr } = await runWithWatchdog(binaryPath, buildSpotdlArgs(options, !!privateHome), {
     idleMs,
+    cwd,
     // spotDL finds its folder through the home directory (USERPROFILE on Windows).
     env: privateHome ? { ...process.env, HOME: privateHome, USERPROFILE: privateHome } : undefined,
     onStdoutLine: handleStdoutLine,

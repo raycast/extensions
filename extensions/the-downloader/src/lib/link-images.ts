@@ -26,14 +26,29 @@ export function imageQuestion(count: number): string {
   return count === 1 ? "Let the AI look at this post's image?" : `Let the AI look at this post's ${count} images?`;
 }
 
-const EXTENSIONS: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/heic": "heic",
-  "image/avif": "avif",
-};
+/**
+ * The image's format from its first bytes, as a file extension, or undefined
+ * for anything the vision engines can't read (SVG, which is text, an HTML
+ * error page sent as `image/jpeg`, a truncated file). Servers label images
+ * loosely (`image/jpg`, `image/pjpeg`, `application/octet-stream`), and the
+ * engines go by the file's extension, so the bytes decide, not the header.
+ */
+export function imageExtension(body: Uint8Array): string | undefined {
+  const ascii = (from: number, to: number) => String.fromCharCode(...body.subarray(from, to));
+  if (body.length < 12) return undefined;
+  if (body[0] === 0xff && body[1] === 0xd8 && body[2] === 0xff) return "jpg";
+  if (ascii(0, 8) === "\x89PNG\r\n\x1a\n") return "png";
+  if (ascii(0, 6) === "GIF87a" || ascii(0, 6) === "GIF89a") return "gif";
+  if (ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") return "webp";
+  if (ascii(0, 2) === "BM") return "bmp";
+  if (ascii(0, 4) === "II*\x00" || ascii(0, 4) === "MM\x00*") return "tiff";
+  if (ascii(4, 8) === "ftyp") {
+    const brand = ascii(8, 12);
+    if (brand === "avif" || brand === "avis") return "avif";
+    if (["heic", "heix", "hevc", "heim", "heis", "mif1", "msf1"].includes(brand)) return "heic";
+  }
+  return undefined;
+}
 
 /**
  * Download up to `max` images into `dir` through safeFetch (never the local
@@ -52,8 +67,12 @@ export async function fetchImages(
     if (options.signal?.aborted) throw abortError();
     try {
       const response = await safeFetch(url, { signal: options.signal, accept: ["image/"], maxBytes: MAX_IMAGE_BYTES });
-      const type = response.contentType.split(";")[0].trim().toLowerCase();
-      const file = path.join(dir, `image-${saved.length + 1}.${EXTENSIONS[type] ?? "img"}`);
+      const extension = imageExtension(response.body);
+      if (!extension) {
+        console.error("Skipped an image the AI can't read", response.contentType, url);
+        continue;
+      }
+      const file = path.join(dir, `image-${saved.length + 1}.${extension}`);
       fs.writeFileSync(file, response.body);
       saved.push(file);
     } catch (error) {

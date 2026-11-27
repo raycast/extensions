@@ -3,7 +3,7 @@ import path from "node:path";
 import { execa } from "execa";
 import { Video } from "../types.js";
 import { PROGRESS_TEMPLATE, YtdlpEvent, parseYtdlpLine } from "./progress.js";
-import { AbortError, DEFAULT_IDLE_MS, RunResult, runWithWatchdog } from "./run.js";
+import { AbortError, DEFAULT_IDLE_MS, MAX_TIMER_MS, RunResult, killProcessTree, runWithWatchdog } from "./run.js";
 
 /**
  * Pull the first JSON object out of yt-dlp's stdout. yt-dlp can emit `[debug]`
@@ -18,8 +18,24 @@ export function extractDumpJson(stdout: string): Video {
   if (jsonStart === -1) {
     throw new Error("yt-dlp produced no JSON metadata. Try updating yt-dlp via the Update Libraries action.");
   }
-  const json = lines.slice(jsonStart).join("\n");
-  return JSON.parse(json) as Video;
+  // `--dump-json` prints one object per line. A playlist prints one per entry:
+  // the first is the one the form describes.
+  try {
+    return JSON.parse(lines[jsonStart]) as Video;
+  } catch {
+    // Not a single line (a wrapped or pretty-printed dump): parse to the end.
+    return JSON.parse(lines.slice(jsonStart).join("\n")) as Video;
+  }
+}
+
+/**
+ * The `-o` template for a download into `folder`. A `%` in the folder's own
+ * name is doubled so yt-dlp doesn't read it as a field (`100% Legal`), and the
+ * title is cut to 180 bytes: file names top out at 255 bytes, which a long
+ * CJK or Cyrillic title plus `.f137.mp4.part` would pass.
+ */
+export function outputTemplateIn(folder: string, name = "%(title).180B (%(id)s).%(ext)s"): string {
+  return path.join(folder.replace(/%/g, "%%"), name);
 }
 
 /**
@@ -33,28 +49,58 @@ export async function fetchVideoInfo(
   url: string,
   forceIpv4: boolean,
   denoPath?: string,
-  opts?: { signal?: AbortSignal; timeoutMs?: number; knownSitesOnly?: boolean },
+  opts?: { signal?: AbortSignal; timeoutMs?: number; knownSitesOnly?: boolean; cookiesFromBrowser?: string },
 ): Promise<Video> {
-  const result = await execa(
-    ytdlPath,
-    [
-      forceIpv4 ? "--force-ipv4" : "",
-      denoPath ? "--js-runtimes" : "",
-      denoPath ? `deno:${denoPath}` : "",
-      "--no-playlist",
-      ...(opts?.knownSitesOnly ? KNOWN_SITES_ONLY : []),
-      "--no-warnings",
-      "--quiet",
-      "--dump-json",
-      url,
-    ].filter(Boolean),
-    {
-      env: { ...process.env, PYTHONUNBUFFERED: "1" },
-      cancelSignal: opts?.signal,
-      timeout: opts?.timeoutMs ?? 0,
-    },
-  );
-  return extractDumpJson(result.stdout);
+  const args = [
+    forceIpv4 ? "--force-ipv4" : "",
+    denoPath ? "--js-runtimes" : "",
+    denoPath ? `deno:${denoPath}` : "",
+    "--no-playlist",
+    // A playlist or channel link would otherwise be read entry by entry before answering.
+    "--playlist-items",
+    "1",
+    ...(opts?.knownSitesOnly ? KNOWN_SITES_ONLY : []),
+    ...cookieArgs(opts?.cookiesFromBrowser),
+    "--no-warnings",
+    "--quiet",
+    "--dump-json",
+    url,
+  ].filter(Boolean);
+  if (opts?.signal?.aborted) throw new AbortError();
+  // Cancel and time out by ending the whole process tree: execa's own
+  // cancelSignal and timeout kill only yt-dlp itself, which leaves its deno
+  // (and on Windows the Python behind the yt-dlp.exe launcher) running.
+  const subprocess = execa(ytdlPath, args, {
+    env: { ...process.env, PYTHONUNBUFFERED: "1", PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8" },
+    stdin: "ignore",
+    windowsHide: true,
+    detached: process.platform !== "win32",
+  });
+  let timedOut = false;
+  const stop = () => killProcessTree(subprocess);
+  const timer =
+    opts?.timeoutMs && opts.timeoutMs > 0
+      ? setTimeout(
+          () => {
+            timedOut = true;
+            stop();
+          },
+          Math.min(opts.timeoutMs, MAX_TIMER_MS),
+        )
+      : undefined;
+  opts?.signal?.addEventListener("abort", stop, { once: true });
+  try {
+    const result = await subprocess;
+    return extractDumpJson(result.stdout);
+  } catch (error) {
+    if (opts?.signal?.aborted) throw new AbortError();
+    if (timedOut)
+      throw new Error(`yt-dlp didn't answer within ${Math.max(1, Math.round((opts?.timeoutMs ?? 0) / 1000))}s.`);
+    throw error;
+  } finally {
+    if (timer) clearTimeout(timer);
+    opts?.signal?.removeEventListener("abort", stop);
+  }
 }
 
 const LIVE_STATUSES = new Set(["is_live", "is_upcoming", "post_live"]);
@@ -83,6 +129,14 @@ export class LiveStreamError extends Error {
  */
 const KNOWN_SITES_ONLY = ["--use-extractors", "default,-generic"];
 
+/** `--cookies-from-browser <spec>` for a resolved browser spec; nothing when none is set. */
+function cookieArgs(spec: string | undefined): string[] {
+  return spec ? ["--cookies-from-browser", spec] : [];
+}
+
+/** Files yt-dlp can embed a cover image into (`--embed-thumbnail` fails the download for any other). */
+const THUMBNAIL_TARGETS = new Set(["mp3", "m4a", "opus", "flac", "mp4", "mkv", "mka", "ogg", "m4v", "mov"]);
+
 export type VideoDownloadArgs = {
   url: string;
   format: string;
@@ -95,6 +149,14 @@ export type VideoDownloadArgs = {
   abortSignal?: AbortSignal;
   /** Leave out yt-dlp's generic page reader (see `KNOWN_SITES_ONLY`). */
   knownSitesOnly?: boolean;
+  /** A browser spec whose logins yt-dlp uses (age-restricted, private or members-only videos). */
+  cookiesFromBrowser?: string;
+  /** Write the title, artist, date and chapters into the file, and the thumbnail as its cover where the format has one. */
+  embedMetadata?: boolean;
+  /** Cut sponsor segments out with SponsorBlock's community data (YouTube only; yt-dlp asks sponsor.ajay.app). */
+  removeSponsors?: boolean;
+  /** The Force IPv4 preference: the download must use it too, not only the metadata fetch. */
+  forceIpv4?: boolean;
 };
 
 /**
@@ -150,11 +212,19 @@ export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
     "--match-filter",
     "!is_live",
     ...(a.knownSitesOnly ? KNOWN_SITES_ONLY : []),
+    ...cookieArgs(a.cookiesFromBrowser),
+    ...(a.forceIpv4 ? ["--force-ipv4"] : []),
   ];
   if (a.denoPath) {
     args.push("--js-runtimes", `deno:${a.denoPath}`);
   }
   const [downloadFormat, target] = a.format.split("#");
+  if (a.embedMetadata) {
+    args.push("--embed-metadata");
+    // WebM and WAV have no cover image; asking for one there fails the whole download.
+    if (THUMBNAIL_TARGETS.has(target)) args.push("--embed-thumbnail");
+  }
+  if (a.removeSponsors) args.push("--sponsorblock-remove", "sponsor");
   if (downloadFormat === "bestaudio") {
     // Without an explicit selector yt-dlp would download its default best
     // video+audio and then strip the audio — many times the bytes needed.
@@ -180,17 +250,35 @@ export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
 
 export type VideoDownloadResult = { filePath: string };
 
+/** How much longer than a download ffmpeg's silent merge, conversion or cut may take. */
+const POSTPROCESS_IDLE_SCALE = 10;
+
 /** `[download] Destination: …` — the file yt-dlp is writing a stream to. */
 const DESTINATION_RE = /^\[download\] Destination:\s*(.+)$/;
+/** `[Merger] Merging formats into "…"` — the file the streams are being joined into. */
+const MERGE_TARGET_RE = /^\[Merger\] Merging formats into "(.+)"$/;
+/** A stream yt-dlp downloaded to merge or convert: `Title (id).f137.mp4`. Never the name of a finished file. */
+const INTERMEDIATE_RE = /\.f[0-9A-Za-z_-]+\.[0-9A-Za-z]+$/;
 
 /**
  * After Stop, remove what yt-dlp leaves of the streams it was writing: the
- * `.part` file, its `.ytdl` resume note and any `.part-Frag…` pieces. Only the
- * named streams' leftovers go — never a finished file.
+ * `.part` file, its `.ytdl` resume note and any `.part-Frag…` pieces — and,
+ * when Stop came during the merge, the downloaded streams themselves
+ * (`….f137.mp4`, which only exist to be merged) and the half-written
+ * `….temp.mp4` of each `mergeTargets` file. Never a finished file.
  */
-export function removePartialDownloads(destinations: string[]): void {
+export function removePartialDownloads(destinations: string[], mergeTargets: string[] = []): void {
+  for (const target of mergeTargets) {
+    const ext = path.extname(target);
+    try {
+      fs.rmSync(`${target.slice(0, target.length - ext.length)}.temp${ext}`, { force: true });
+    } catch {
+      /* still locked or already gone */
+    }
+  }
   for (const destination of destinations) {
     const leftovers = [`${destination}.part`, `${destination}.ytdl`];
+    if (INTERMEDIATE_RE.test(destination)) leftovers.push(destination);
     const fragmentPrefix = `${path.basename(destination)}.part-Frag`;
     try {
       for (const name of fs.readdirSync(path.dirname(destination))) {
@@ -226,14 +314,22 @@ export async function runVideoDownload(
   let filePath = "";
   let skippedLive = false;
   const destinations: string[] = [];
+  const mergeTargets: string[] = [];
+  // ffmpeg prints nothing while it merges, converts or cuts, which on a long
+  // video takes longer than the idle window allows a download to be silent.
+  let postProcessing = false;
   // Line-buffered (via onStdoutLine) so a tagged filepath split across two
   // stream chunks is still matched whole.
   const handleLine = (line: string) => {
     if (/does not pass filter \(!is_live\)/.test(line)) skippedLive = true;
     const destination = DESTINATION_RE.exec(line.trim());
     if (destination) destinations.push(destination[1].trim());
+    const mergeTarget = MERGE_TARGET_RE.exec(line.trim());
+    if (mergeTarget) mergeTargets.push(mergeTarget[1]);
     const event = parseYtdlpLine(line);
     if (event) {
+      if (event.type === "postprocess") postProcessing = true;
+      else if (event.type === "progress" || event.type === "stream-start") postProcessing = false;
       if (event.type === "progress" && event.progress.percent !== undefined) onProgress(event.progress.percent);
       onEvent?.(event);
       return;
@@ -247,13 +343,14 @@ export async function runVideoDownload(
   try {
     result = await runWithWatchdog(binaryPath, buildVideoDownloadArgs(options), {
       idleMs: options.idleMs ?? DEFAULT_IDLE_MS,
+      idleScale: () => (postProcessing ? POSTPROCESS_IDLE_SCALE : 1),
       env: { ...process.env, PYTHONUNBUFFERED: "1" },
       onStdoutLine: handleLine,
       abortSignal: options.abortSignal,
     });
   } catch (error) {
     // The whole process tree has exited by now, so nothing holds the files open.
-    if (error instanceof AbortError) removePartialDownloads(destinations);
+    if (error instanceof AbortError) removePartialDownloads(destinations, mergeTargets);
     throw error;
   }
   const { code, stderr } = result;
@@ -271,6 +368,9 @@ export type ThumbnailDownloadArgs = {
   idleMs?: number;
   /** Aborting cancels the download mid-flight. */
   abortSignal?: AbortSignal;
+  /** A browser spec whose logins yt-dlp uses. */
+  cookiesFromBrowser?: string;
+  forceIpv4?: boolean;
 };
 
 /** Build yt-dlp CLI args to fetch only a URL's thumbnail image; the video itself is skipped. */
@@ -279,6 +379,8 @@ export function buildThumbnailArgs(a: ThumbnailDownloadArgs): string[] {
     "--write-thumbnail",
     "--skip-download",
     "--no-playlist",
+    ...cookieArgs(a.cookiesFromBrowser),
+    ...(a.forceIpv4 ? ["--force-ipv4"] : []),
     ...(a.denoPath ? ["--js-runtimes", `deno:${a.denoPath}`] : []),
     "-o",
     a.outputTemplate,

@@ -25,7 +25,7 @@ const SITE_NAMES: Record<string, string> = {
 
 const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "heic"]);
 const MAX_IMAGES = 20;
-const COOKIES_HINT = "Set Gallery: Cookies from Browser in preferences.";
+const COOKIES_HINT = "Set Cookies from Browser in preferences.";
 
 type Meta = Record<string, unknown>;
 

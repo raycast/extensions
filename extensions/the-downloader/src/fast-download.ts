@@ -14,17 +14,19 @@ import {
   showToast,
 } from "@raycast/api";
 import { detectSource } from "./lib/detect.js";
-import { getConfig } from "./lib/config.js";
+import { getConfig, getVideoExtras } from "./lib/config.js";
 import { composeVideoFormat } from "./lib/video-format.js";
-import { LiveStreamError, runVideoDownload } from "./lib/ytdlp.js";
+import { LiveStreamError, outputTemplateIn, runVideoDownload } from "./lib/ytdlp.js";
 import { ensureFreshTools, hintOutdatedTool } from "./lib/tool-updates.js";
-import { isLoginRequiredError, runGalleryDownload } from "./lib/gallerydl.js";
+import { GalleryDownloadError, isLoginRequiredError, runGalleryDownload } from "./lib/gallerydl.js";
 import { resolveBrowser } from "./lib/browsers.js";
-import { AbortError } from "./lib/run.js";
+import { AbortError, errorSummary } from "./lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
 import { SPOTDL_SETUP_GUIDE_URL } from "./lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "./lib/monolith.js";
+import { savePageAsMarkdown } from "./lib/page-markdown.js";
+import { isMarkdownMode, saveModeLabel } from "./lib/filetype.js";
 import { progressMessage } from "./lib/format.js";
 import { DownloadKind, DownloadSession } from "./lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "./lib/history.js";
@@ -65,6 +67,15 @@ function handOff(tool: string, url: string): Promise<Toast> {
 /** Turn a thrown value into a human-readable message. */
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
+}
+
+/** What the failure toast shows: the error itself, not the pages of warnings a tool can print before it. */
+function toastError(error: unknown): string {
+  const saved =
+    error instanceof GalleryDownloadError && error.files > 0
+      ? `${error.files} file${error.files === 1 ? "" : "s"} saved before the failure. `
+      : "";
+  return saved + errorSummary(errorMessage(error));
 }
 
 /** True when the error came from the user pressing Stop on the toast. Lets the caller paint a neutral "Cancelled" instead of a red error. */
@@ -128,7 +139,8 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
 
 /** Run the download; resolves with the toast left on screen, whose actions may still be used. */
 async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }>): Promise<Toast | undefined> {
-  const { url: rawUrl } = props.arguments;
+  // Trimmed: a pasted link often ends with a space or a newline.
+  const rawUrl = (props.arguments.url ?? "").trim();
 
   if (!isValidUrl(rawUrl)) {
     await showToast({ style: Toast.Style.Failure, title: "Invalid URL", message: rawUrl });
@@ -204,13 +216,13 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
         toast.title = "Login Required";
         toast.message = browser.label
           ? `Sign in to the site in ${browser.label}, or change the browser in preferences.`
-          : "Set Gallery: Cookies from Browser in preferences to use your browser's session.";
+          : "Set Cookies from Browser in preferences to use your browser's session.";
         toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
         toast.secondaryAction = undefined;
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Download Failed";
-        toast.message = errorMessage(error);
+        toast.message = toastError(error);
         toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
         toast.secondaryAction = undefined;
         await hintOutdatedTool(toast, "gallery-dl");
@@ -317,7 +329,7 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Download Failed";
-        toast.message = errorMessage(error);
+        toast.message = toastError(error);
         toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
         toast.secondaryAction = undefined;
         await hintOutdatedTool(toast, "spotdl");
@@ -328,26 +340,28 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
   }
 
   if (type === "webpage") {
+    // The Markdown mode reads the page itself; only the HTML modes need monolith.
+    const markdown = isMarkdownMode(webpageSaveMode);
     const monolithPath = getMonolithPath();
-    if (!fs.existsSync(monolithPath)) return handOff("monolith", url);
-    await ensureFreshTools(["monolith"]);
+    if (!markdown) {
+      if (!fs.existsSync(monolithPath)) return handOff("monolith", url);
+      await ensureFreshTools(["monolith"]);
+    }
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving Webpage" });
     const { signal } = attachStop(toast);
-    const session = track(
-      "website",
-      url,
-      webpageSaveMode === "lightweight" ? "Lightweight (no JavaScript)" : "Complete",
-    );
+    const session = track("website", url, saveModeLabel(webpageSaveMode));
     let outcome: { filePath?: string; error?: unknown } = {};
     try {
-      const { filePath } = await runMonolithSave(monolithPath, {
-        url,
-        outputPath: reserveWebpagePath(downloadPath, url),
-        noJavaScript: webpageSaveMode === "lightweight",
-        idleMs: getIdleTimeoutMs(),
-        abortSignal: signal,
-      });
+      const { filePath } = markdown
+        ? await savePageAsMarkdown(url, downloadPath, { signal })
+        : await runMonolithSave(monolithPath, {
+            url,
+            outputPath: reserveWebpagePath(downloadPath, url),
+            noJavaScript: webpageSaveMode === "lightweight",
+            idleMs: getIdleTimeoutMs(),
+            abortSignal: signal,
+          });
       outcome = { filePath };
       toast.style = Toast.Style.Success;
       toast.title = "Saved";
@@ -361,10 +375,10 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Save Failed";
-        toast.message = errorMessage(error);
+        toast.message = toastError(error);
         toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
         toast.secondaryAction = undefined;
-        await hintOutdatedTool(toast, "monolith");
+        if (!markdown) await hintOutdatedTool(toast, "monolith");
       }
     }
     await settle(session, toast, outcome);
@@ -395,7 +409,16 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
     container: config.videoContainer,
     audioFormat: config.audioFormat,
   });
-  const outputTemplate = path.join(downloadPath, "%(title)s (%(id)s).%(ext)s");
+  const outputTemplate = outputTemplateIn(downloadPath);
+  const extras = getVideoExtras();
+  if (extras.cookieWarning) {
+    return showToast({
+      style: Toast.Style.Failure,
+      title: "Cookies from Browser",
+      message: extras.cookieWarning,
+      primaryAction: { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() },
+    });
+  }
 
   const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Video", message: "0%" });
   const { signal } = attachStop(toast);
@@ -410,7 +433,19 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
   try {
     const { filePath } = await runVideoDownload(
       ytdlPath,
-      { url, format, outputTemplate, ffmpegPath, denoPath: deno, idleMs: getIdleTimeoutMs(), abortSignal: signal },
+      {
+        url,
+        format,
+        outputTemplate,
+        ffmpegPath,
+        denoPath: deno,
+        idleMs: getIdleTimeoutMs(),
+        abortSignal: signal,
+        cookiesFromBrowser: extras.cookiesFromBrowser,
+        embedMetadata: extras.embedMetadata,
+        removeSponsors: extras.removeSponsors,
+        forceIpv4: extras.forceIpv4,
+      },
       () => undefined,
       (event) => {
         session.ytdlp(event);
@@ -437,7 +472,7 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
     } else {
       toast.style = Toast.Style.Failure;
       toast.title = "Download Failed";
-      toast.message = errorMessage(error);
+      toast.message = toastError(error);
       toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
       toast.secondaryAction = undefined;
       // A live stream isn't a tool problem, so no "update yt-dlp" hint for it.

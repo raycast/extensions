@@ -8,7 +8,7 @@ The Downloader started as a fork of [Video Downloader](https://www.raycast.com/v
 
 ## Commands
 
-- **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download. A live view follows the download: a progress ring, speed, time left and size, a download-speed chart, and the steps (prepare → video → audio → merge → saved), with the title, channel, format and folder alongside. Press Esc to go back to the form; the download keeps running and its toast keeps reporting progress.
+- **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download. A webpage is saved as one self-contained `.html` file, or as **Markdown** — the article's text, links and images in a `.md` file with its title, source and date on top. A live view follows the download: a progress ring, speed, time left and size, a download-speed chart, and the steps (prepare → video → audio → merge → saved), with the title, channel, format and folder alongside. Press Esc to go back to the form; the download keeps running and its toast keeps reporting progress.
 - **Fast Download** — pass a URL as a command argument and download it instantly using your saved defaults — no form.
 - **Download History** — everything you've downloaded, grouped by day, with thumbnails, search, type filters, and one-keystroke Open, Show in Finder and Download Again.
 - **Chat About Link** — paste a link and ask anything about it: a video (YouTube, TikTok, X, Vimeo…), a social post (Instagram, Reddit, Pinterest…) or any article. The Downloader loads its details and statistics and its text — a video's transcript with timestamps, a post's caption, an article's text — then answers, with clickable timestamps for videos. Suggested questions fit each kind of link. Chats are saved, so you can continue them later. Also available from the Download form, the preview, the live view and the history (⌘⇧A). Articles are read without ever touching your local network (routers, `.local` and private addresses are refused), and in the page's own text encoding. When a page blocks apps, is gone or needs JavaScript, you can read the Internet Archive's saved copy instead (not for pages behind a login, a paywall or a legal block).
@@ -51,6 +51,15 @@ brew install yt-dlp ffmpeg gallery-dl deno monolith
 ```
 
 spotDL isn't installed with the others: the first time you use the Spotify feature, the extension downloads its prebuilt binary from [spotDL's official GitHub Releases](https://github.com/spotDL/spotify-downloader/releases) over HTTPS, checks it against the SHA-256 published with the release, and ad-hoc codesigns it on macOS. The prebuilt binary is x86_64-only, so Apple Silicon Macs need Rosetta 2 (`softwareupdate --install-rosetta --agree-to-license`); alternatively, install spotDL via `brew install spotdl` for a native Apple-Silicon Python build.
+
+## Video options
+
+In the extension's preferences:
+
+- **Video: Audio Format** — MP3, M4A, Opus, FLAC or WAV.
+- **Video: Metadata** — write the title, channel, date and chapters into the file, with the thumbnail as cover art.
+- **Video: SponsorBlock** — cut sponsored segments out of YouTube downloads, using [SponsorBlock](https://sponsor.ajay.app)'s community data (yt-dlp asks its server about the video).
+- **Video: Browser Cookies** — use your browser's login for age-restricted, private or members-only videos. See [BROWSER_COOKIES.md](BROWSER_COOKIES.md).
 
 ## Supported sites
 

@@ -1,9 +1,35 @@
 # The Downloader Changelog
 
-## [Recent Links in AI Chat] - {PR_MERGE_DATE}
+## [Markdown Pages, Recent Links and More Video Options] - {PR_MERGE_DATE}
 
+- **Webpages as Markdown** — a third Save Mode next to Complete and Lightweight: the article's text, links, images, lists, code and tables as one `.md` file, with the title, source, author and dates on top for notes apps such as Obsidian. It needs no monolith, and when monolith is missing the set-up screen offers it.
 - **Recent Links** — type `@` in Raycast AI Chat and choose Recent Links to mention a link you downloaded or chatted about. Its transcript, caption or article is attached to the message, from the same cache Chat About Link and `read-link` use.
+- **Video: Metadata** — optionally write the title, channel, date and chapters into the file, with the thumbnail as cover art.
+- **Video: SponsorBlock** — optionally cut sponsored segments out of YouTube downloads.
+- **Video: Browser Cookies** — optionally give yt-dlp the browser chosen under Cookies from Browser, for age-restricted, private or members-only videos. The Custom Browser Spec takes a Firefox container (`firefox::Work`).
+- **FLAC and WAV** audio for videos, next to MP3, M4A and Opus.
 - **Raycast AI Model** — GPT-6.2 Sol joins the list.
+- **Fixes**
+  - Force IPv4 now applies to the download, the thumbnail and the transcript, not only to the preview.
+  - A download folder with `%` in its name works, and very long titles no longer exceed the file-name limit.
+  - A playlist or channel link shows its first video's details right away instead of reading every entry first.
+  - Stop during the merge step also removes the downloaded streams and the half-written file.
+  - A long conversion to MP3 or a big merge is no longer stopped as "stuck"; a huge Network Idle Timeout no longer stops every download at once.
+  - A failed download's toast shows the error itself instead of pages of warnings; a gallery that failed part-way says how many files were saved.
+  - A link pasted or copied with a trailing space or line break is accepted in Download, Fast Download and the clipboard auto-load.
+  - Pressing Download while one is running returns to its live view instead of covering its Stop button.
+  - Chat About Link: a question asked while the saved chat was loading can't replace it; an older load can't overwrite a newer one; an X post without a video is read as a post; nested lists keep their parent items; Chinese, Japanese and Thai questions find the matching passages; Wikipedia pages get their real title.
+  - Ollama: an address typed without `http://` works, and an embedding model is no longer picked as the default.
+  - On Windows, tool output is read as UTF-8 and no console window flashes up for each tool run.
+  - Stopping or timing out a video's details ends everything yt-dlp started (its deno; on Windows the Python behind `yt-dlp.exe`), not only yt-dlp itself.
+  - Chat About Link asks before it stops a running download: it opens in place of the Download command.
+  - A summary of a very long video on a small model (Apple Intelligence) merges its notes first instead of cutting each to a few words; an empty model answer shows as an error instead of an empty reply.
+  - Images for the AI are recognized by their content, so a JPEG served as `image/jpg` is read and an SVG or an error page is skipped.
+  - Pages made mostly of scripts, or with an endless feed, are read in a fraction of the time.
+  - Download History notices a file moved or deleted while it's open.
+  - Spotify downloads work into a folder with `{` or `}` in its name.
+  - A tool path preference set to the folder instead of the program uses the program inside it.
+  - An error from a tool too old for an option says to update it; a failed update isn't offered again before every download.
 - gallery-dl's links point to Codeberg, where its development moved.
 - Updated to Raycast API 2.14 (the Node.js 26 runtime), execa 10 and TypeScript 6.
 

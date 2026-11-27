@@ -106,6 +106,13 @@ const PART_INSTRUCTIONS: Record<LinkKind, string> = {
   page: "You take notes on one part of an article. Write 4–8 concise bullet points covering what it says. Keep names, numbers and claims exact. No introduction.",
 };
 
+const MERGE_INSTRUCTIONS: Record<LinkKind, string> = {
+  video:
+    "You merge notes on consecutive parts of a video transcript into one shorter set of notes. Write 5–10 concise bullet points with the most important points, each starting with its timestamp in square brackets, e.g. [12:34]. Keep names, numbers and claims exact. No introduction.",
+  post: "You merge notes on consecutive parts of a long post into one shorter set of notes. Write 5–10 concise bullet points with the most important points. Keep names, numbers and claims exact. No introduction.",
+  page: "You merge notes on consecutive parts of an article into one shorter set of notes. Write 5–10 concise bullet points with the most important points. Keep names, numbers and claims exact. No introduction.",
+};
+
 const HISTORY_TURNS = 6;
 const HISTORY_ANSWER_CHARS = 1_200;
 
@@ -174,6 +181,19 @@ function budgetFor(engine: Engine, options: AnswerOptions): number {
   return engine.contextBudget - engine.imageTokens * (options.images?.length ?? 0);
 }
 
+/** Thrown when the model finishes without writing anything; an empty answer isn't kept as one. */
+export class EmptyAnswerError extends Error {
+  constructor() {
+    super("The model finished without an answer. Ask again, or choose another model in Chat About Link's preferences.");
+    this.name = "EmptyAnswerError";
+  }
+}
+
+function requireText(answer: string): string {
+  if (!answer.trim()) throw new EmptyAnswerError();
+  return answer;
+}
+
 /** Answer `question` about the link with `engine`, streaming the text through `onData`. */
 export async function answerQuestion(
   engine: Engine,
@@ -186,12 +206,14 @@ export async function answerQuestion(
   if (plan.mode === "excerpts" && isOverviewRequest(question)) {
     return answerFromNotes(engine, ctx, question, options, history);
   }
-  return engine.complete(chatInstructions(ctx.kind, options.answer), plan.prompt, {
-    signal: options.signal,
-    onData: options.onData,
-    onStatus: options.onStatus,
-    images: options.images,
-  });
+  return requireText(
+    await engine.complete(chatInstructions(ctx.kind, options.answer), plan.prompt, {
+      signal: options.signal,
+      onData: options.onData,
+      onStatus: options.onStatus,
+      images: options.images,
+    }),
+  );
 }
 
 /** Facts without the long description, for the part-by-part pass. */
@@ -207,14 +229,14 @@ function shortDossier(ctx: LinkContext): string {
 export const NOTE_CHAR_LIMIT = 2_500;
 
 /** One part's notes, cut off at `NOTE_CHAR_LIMIT`. Stopping the answer (`signal`) still stops it. */
-async function takeNote(engine: Engine, kind: LinkKind, prompt: string, signal?: AbortSignal): Promise<string> {
+async function takeNote(engine: Engine, instructions: string, prompt: string, signal?: AbortSignal): Promise<string> {
   const part = new AbortController();
   const stop = () => part.abort();
   if (signal?.aborted) part.abort();
   signal?.addEventListener("abort", stop);
   let text = "";
   try {
-    const note = await engine.complete(PART_INSTRUCTIONS[kind], prompt, {
+    const note = await engine.complete(instructions, prompt, {
       signal: part.signal,
       onData: (sofar) => {
         text = sofar;
@@ -233,6 +255,79 @@ async function takeNote(engine: Engine, kind: LinkKind, prompt: string, signal?:
 
 function partRange(ctx: LinkContext, start: number, end: number): string {
   return ctx.body.type === "segments" ? ` (${formatTimestamp(start)}–${formatTimestamp(end)})` : "";
+}
+
+/** Notes on one part, or on a run of parts merged together. */
+type Note = { first: number; last: number; start: number; end: number; text: string };
+
+function noteHeading(ctx: LinkContext, note: Note): string {
+  const parts = note.first === note.last ? `Part ${note.first}` : `Parts ${note.first}–${note.last}`;
+  return `### ${parts}${partRange(ctx, note.start, note.end)}`;
+}
+
+const noteMarkdown = (ctx: LinkContext, note: Note) => `${noteHeading(ctx, note)}\n${note.text}`;
+
+/** Below this, a note per part is cut to a line or two and the answer misses most of the body. */
+export const MIN_NOTE_TOKENS = 200;
+/** At most this many merge rounds: each costs a request per group. */
+const MERGE_ROUNDS = 3;
+
+/**
+ * Merge neighbouring notes until each can keep `MIN_NOTE_TOKENS` in the final
+ * request: a long video on a small model (Apple's on-device one) yields more
+ * parts than its context window has room for, and cutting every note to a few
+ * words left the summary nearly empty. Each group holds at least two notes and
+ * no more than `readBudget` tokens, the size the model reads at once.
+ */
+export async function mergeNotes(
+  engine: Engine,
+  ctx: LinkContext,
+  notes: Note[],
+  noteBudget: number,
+  readBudget: number,
+  options: Pick<AnswerOptions, "signal" | "onStatus"> = {},
+): Promise<Note[]> {
+  let current = notes;
+  for (let round = 0; round < MERGE_ROUNDS; round++) {
+    if (current.length <= 1 || noteBudget / current.length >= MIN_NOTE_TOKENS) break;
+    const groups: Note[][] = [];
+    let group: Note[] = [];
+    let size = 0;
+    for (const note of current) {
+      const tokens = estimateTokens(noteMarkdown(ctx, note));
+      if (group.length >= 2 && size + tokens > readBudget) {
+        groups.push(group);
+        group = [];
+        size = 0;
+      }
+      group.push(note);
+      size += tokens;
+    }
+    // A lone last note joins the group before it, so every request merges something.
+    if (group.length === 1 && groups.length > 0) groups[groups.length - 1].push(group[0]);
+    else if (group.length) groups.push(group);
+
+    const merged: Note[] = [];
+    for (const [i, members] of groups.entries()) {
+      options.onStatus?.(`Combining notes ${i + 1} of ${groups.length}…`);
+      const perMember = Math.floor(readBudget / members.length);
+      const text = members.map((n) => truncateToTokens(noteMarkdown(ctx, n), perMember)).join("\n\n");
+      const note = await takeNote(engine, MERGE_INSTRUCTIONS[ctx.kind], text, options.signal);
+      const first = members[0];
+      const last = members[members.length - 1];
+      merged.push({
+        first: first.first,
+        last: last.last,
+        start: first.start,
+        end: last.end,
+        // A merge that wrote nothing keeps its notes, cut to size, rather than losing them.
+        text: note.trim() || truncateToTokens(text, Math.floor(noteBudget / groups.length)),
+      });
+    }
+    if (merged.length >= current.length) break;
+    current = merged;
+  }
+  return current;
 }
 
 /**
@@ -256,35 +351,38 @@ export async function answerFromNotes(
   const parts = chunkBody(ctx.body, partBudget);
 
   if (parts.length === 1) {
-    return engine.complete(
-      chatInstructions(ctx.kind, options.answer),
-      `${facts}\n\n## ${names.full}\n${parts[0].text}\n\n${tail}`,
-      {
-        signal: options.signal,
-        onData: options.onData,
-        onStatus: options.onStatus,
-        images: options.images,
-      },
+    return requireText(
+      await engine.complete(
+        chatInstructions(ctx.kind, options.answer),
+        `${facts}\n\n## ${names.full}\n${parts[0].text}\n\n${tail}`,
+        {
+          signal: options.signal,
+          onData: options.onData,
+          onStatus: options.onStatus,
+          images: options.images,
+        },
+      ),
     );
   }
 
-  const notes: string[] = [];
+  const notes: Note[] = [];
   for (const [i, part] of parts.entries()) {
     options.onStatus?.(`Reading part ${i + 1} of ${parts.length}…`);
     const range = partRange(ctx, part.start, part.end);
     const note = await takeNote(
       engine,
-      ctx.kind,
+      PART_INSTRUCTIONS[ctx.kind],
       `${facts}\n\n## ${names.full} part ${i + 1} of ${parts.length}${range}\n${part.text}`,
       options.signal,
     );
-    notes.push(`### Part ${i + 1}${range}\n${note.trim()}`);
+    notes.push({ first: i + 1, last: i + 1, start: part.start, end: part.end, text: note.trim() });
   }
 
-  // Keep the notes inside the budget for the final request.
+  // Keep the notes inside the budget for the final request, merging them first when there are too many.
   const noteBudget = Math.max(600, finalBudget - estimateTokens(facts) - estimateTokens(tail) - 300);
-  const perNote = Math.floor(noteBudget / Math.max(notes.length, 1));
-  const fitted = notes.map((n) => truncateToTokens(n, perNote)).join("\n\n");
+  const kept = await mergeNotes(engine, ctx, notes, noteBudget, partBudget, options);
+  const perNote = Math.floor(noteBudget / Math.max(kept.length, 1));
+  const fitted = kept.map((n) => truncateToTokens(noteMarkdown(ctx, n), perNote)).join("\n\n");
 
   options.onStatus?.("Writing the answer…");
   const answer = await engine.complete(
@@ -293,7 +391,7 @@ export async function answerFromNotes(
     { signal: options.signal, onData: options.onData, images: options.images },
   );
   options.onStatus?.(undefined);
-  return answer;
+  return requireText(answer);
 }
 
 // ---------------------------------------------------------------------------

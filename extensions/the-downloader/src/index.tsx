@@ -19,12 +19,17 @@ export default function Command(props: LaunchProps) {
       if (contextUrl && isValidUrl(contextUrl)) loaded = contextUrl;
 
       if (!loaded && autoLoadUrlFromClipboard) {
-        const text = await Clipboard.readText();
-        if (text && isValidUrl(text)) loaded = text;
+        try {
+          // Trimmed: a copied link often ends with a space or a newline.
+          const text = (await Clipboard.readText())?.trim();
+          if (text && isValidUrl(text)) loaded = text;
+        } catch {
+          /* clipboard unavailable — the form opens empty */
+        }
       }
       if (!loaded && autoLoadUrlFromSelectedText) {
         try {
-          const text = await getSelectedText();
+          const text = (await getSelectedText()).trim();
           if (text && isValidUrl(text)) loaded = text;
         } catch {
           /* no selection */

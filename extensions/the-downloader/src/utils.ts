@@ -6,7 +6,7 @@ import { Format, Video } from "./types.js";
 import { execSync } from "child_process";
 import { findHomebrewPath, resolveBinary, isWindows, isMac } from "./lib/binary.js";
 import { windowsWingetPath } from "./lib/platform-paths.js";
-import { DEFAULT_IDLE_MS } from "./lib/run.js";
+import { DEFAULT_IDLE_MS, MAX_TIMER_MS } from "./lib/run.js";
 import { isValidUrl, normalizeUrl } from "./lib/url.js";
 
 export { isWindows, isMac, isValidUrl, normalizeUrl };
@@ -57,7 +57,9 @@ export const downloadPath = expandTilde(prefs.downloadPath);
  */
 export function getIdleTimeoutMs(): number {
   const parsed = Number(networkIdleTimeoutSec);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 1000) : DEFAULT_IDLE_MS;
+  // Capped: a timer set past 2^31-1 ms fires at once, so a huge value meant to
+  // switch the timeout off would stop every download immediately.
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.round(parsed * 1000), MAX_TIMER_MS) : DEFAULT_IDLE_MS;
 }
 
 /**

@@ -457,8 +457,13 @@ export function LinkChat({ url, initialQuestion, root }: { url: string; initialQ
         force,
         archived: fromArchive,
       });
+      // A newer load (Reload, Read Archived Copy) has started: its result is the one to show.
+      if (controller.signal.aborted) return undefined;
+      // The saved chat is read before the link is shown, so a question asked
+      // right away can't be saved over a conversation that wasn't restored yet.
+      const stored = await findChat(chatKey(context)).catch(() => undefined);
+      if (controller.signal.aborted) return undefined;
       setCtx(context);
-      const stored = await findChat(chatKey(context));
       if (stored) {
         // Restore whenever the list is empty — also after Try Again on a failed first
         // load, or the next answer would save over the stored conversation.

@@ -15,11 +15,15 @@ export const isMac = process.platform === "darwin";
 
 function whichWindows(name: string): string {
   try {
-    return execFileSync("where", [name])
+    const found = execFileSync("where", [name], { windowsHide: true, timeout: 5_000 })
       .toString()
       .split("\n")[0]
       .replace(/[\r\n]/g, "")
       .trim();
+    // `where` answers in the console's code page: a non-ASCII profile path
+    // (C:\Users\Vojtěch\…) can come back garbled, and a path that doesn't
+    // exist is worse than none — the folder search below still finds the tool.
+    return found && fs.existsSync(found) ? found : "";
   } catch {
     return "";
   }
@@ -135,10 +139,23 @@ function findWindowsBinary(name: string, env: NodeJS.ProcessEnv): string {
  * the current platform; else a stable fallback so the Installer view has a
  * path to surface in its "not installed" error.
  */
+function isDirectory(p: string): boolean {
+  try {
+    return fs.statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 export function resolveBinary(name: string, preferencePath?: string, managedDir?: string): string {
   const platform = process.platform;
   const pref = platform === "win32" ? preferencePath?.replace(/[\r\n]/g, "").trim() : preferencePath;
-  if (pref && fs.existsSync(pref)) return pref;
+  if (pref && fs.existsSync(pref)) {
+    // A folder picked instead of the program in it (`/opt/homebrew/bin`): use the program inside.
+    if (!isDirectory(pref)) return pref;
+    const inside = path.join(pref, platform === "win32" ? `${name}.exe` : name);
+    if (fs.existsSync(inside) && !isDirectory(inside)) return inside;
+  }
   // `path.posix.join` keeps test output deterministic across host platforms
   // (a Mac-mocking test running on Windows would otherwise see `\` separators).
   // Node accepts forward slashes in paths on Windows, so this also works in

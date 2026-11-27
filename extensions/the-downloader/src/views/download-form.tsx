@@ -26,22 +26,33 @@ import {
   defaultFiletype,
   filetypeGuidance,
   installedAlternatives,
+  isMarkdownMode,
   requiredTools,
   resolveTool,
+  saveModeLabel,
   supportedFiletypes,
 } from "../lib/filetype.js";
 import { composeVideoFormat } from "../lib/video-format.js";
-import { LiveStreamError, fetchVideoInfo, isLiveStream, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
+import {
+  LiveStreamError,
+  fetchVideoInfo,
+  isLiveStream,
+  outputTemplateIn,
+  runThumbnailDownload,
+  runVideoDownload,
+} from "../lib/ytdlp.js";
+import { getVideoExtras } from "../lib/config.js";
 import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
-import { isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
+import { GalleryDownloadError, isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
-import { AbortError } from "../lib/run.js";
+import { AbortError, errorSummary } from "../lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { ABOUT_URL, SPOTDL_SETUP_GUIDE_URL, SUPPORTED_SITES_URL } from "../lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "../lib/monolith.js";
-import { DownloadInit, DownloadSession } from "../lib/download-session.js";
+import { savePageAsMarkdown } from "../lib/page-markdown.js";
+import { DownloadInit, DownloadSession, trackRunningDownload } from "../lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "../lib/history.js";
 import { QUALITY_VALUES, QualityValue, estimateQuality, maxHeight, qualityTitle } from "../lib/estimate.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
@@ -117,6 +128,7 @@ const FORMAT_TITLE: Record<string, string> = {
   m4a: "M4A",
   opus: "Opus",
   flac: "FLAC",
+  wav: "WAV",
 };
 
 const formatTitle = (value: string) => FORMAT_TITLE[value] ?? value.toUpperCase();
@@ -179,9 +191,15 @@ function failToast(toast: Toast, error: unknown): boolean {
     return false;
   }
   const message = error instanceof Error ? error.message : "Unknown error";
+  // gallery-dl fails the whole run when only some items do: say what was saved.
+  const saved =
+    error instanceof GalleryDownloadError && error.files > 0
+      ? `${error.files} file${error.files === 1 ? "" : "s"} saved before the failure. `
+      : "";
   toast.style = Toast.Style.Failure;
   toast.title = "Download Failed";
-  toast.message = message;
+  // The toast shows the error itself; Copy Error keeps everything the tool printed.
+  toast.message = saved + errorSummary(message);
   toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(message) };
   return true;
 }
@@ -199,6 +217,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const [filetypeTouched, setFiletypeTouched] = useState(false);
   // Controlled so the Quality size estimates follow the chosen container.
   const [container, setContainer] = useState<string>(prefs.videoContainer);
+  // Controlled because the Markdown mode needs no monolith: the tool check follows it.
+  const [saveMode, setSaveMode] = useState<string>(prefs.webpageSaveMode);
   const [refresh, setRefresh] = useState(0);
   // Ref (not state) so a rapid second submit sees the flag synchronously — a
   // re-render would race with the click. Refs update inside the same event
@@ -209,6 +229,9 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   // does not leave zombie yt-dlp / gallery-dl / monolith / spotdl children
   // attached to the user's Raycast process.
   const activeAbort = useRef<AbortController | null>(null);
+  // The running download's live view, so a second submit can bring it back
+  // (with its Stop action) instead of covering its toast with an error.
+  const activeSession = useRef<DownloadSession | null>(null);
   // Controller for the metadata (--dump-json) fetch. usePromise replaces this on
   // every re-run and aborts the prior one, so editing the URL or dismissing the
   // form kills the in-flight yt-dlp metadata child instead of orphaning it.
@@ -229,11 +252,13 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   function startAbortable(toast: Toast, session?: DownloadSession): { signal: AbortSignal; done: () => void } {
     const controller = new AbortController();
     activeAbort.current = controller;
+    const untrack = trackRunningDownload(controller);
     toast.primaryAction = { title: "Stop Download", onAction: () => controller.abort() };
     session?.onStop(() => controller.abort());
     return {
       signal: controller.signal,
       done: () => {
+        untrack();
         if (activeAbort.current === controller) activeAbort.current = null;
       },
     };
@@ -256,8 +281,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   // The required tools must all exist; otherwise the form is replaced by the Installer.
   const missingTool = useMemo(
     () =>
-      validUrl ? requiredTools(source, filetype, url).find((name) => !fs.existsSync(TOOL_PATH[name]())) : undefined,
-    [source, filetype, url, validUrl, refresh],
+      validUrl
+        ? requiredTools(source, filetype, url, saveMode).find((name) => !fs.existsSync(TOOL_PATH[name]()))
+        : undefined,
+    [source, filetype, url, validUrl, saveMode, refresh],
   );
 
   // yt-dlp metadata — fetched only for a yt-dlp-bound selection with its tools present.
@@ -279,6 +306,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         {
           signal: metaAbortable.current?.signal,
           timeoutMs: getIdleTimeoutMs(),
+          cookiesFromBrowser: getVideoExtras().cookiesFromBrowser,
         },
       );
       return { ...data, title: sanitizeVideoTitle(data.title) };
@@ -293,14 +321,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const checkedTools = useRef(new Set<string>());
   useEffect(() => {
     if (!validUrl || missingTool) return;
-    const tools = requiredTools(source, filetype, url);
+    const tools = requiredTools(source, filetype, url, saveMode);
     const key = tools.join(",");
-    if (checkedTools.current.has(key)) return;
+    if (tools.length === 0 || checkedTools.current.has(key)) return;
     checkedTools.current.add(key);
     void ensureFreshTools(tools).then((outcome) => {
       if (outcome === "updated") refetchMeta();
     });
-  }, [validUrl, missingTool, source, filetype, url, refetchMeta]);
+  }, [validUrl, missingTool, source, filetype, url, saveMode, refetchMeta]);
 
   // Only the current URL's metadata counts: while a new one loads, `video` is the
   // previous link's. A live link submitted before its probe ends is still refused
@@ -323,6 +351,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           }
         : undefined,
     });
+    activeSession.current = session;
     push(<DownloadView session={session} />);
     return session;
   }
@@ -331,13 +360,23 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     // Other types that work with what's installed, so a missing tool doesn't trap
     // the user — e.g. an unknown site defaults to Website, but Video may work.
     const alternatives = installedAlternatives(source, filetype, url, (tool) => fs.existsSync(TOOL_PATH[tool]()));
+    // A webpage can always be saved as Markdown: that mode needs no monolith.
+    const markdownInstead = filetype === "website" && !isMarkdownMode(saveMode);
     return (
       <Installer
         executable={missingTool}
         onRefresh={() => setRefresh((r) => r + 1)}
         alternatives={
-          alternatives.length > 0
-            ? alternatives.map((ft) => (
+          alternatives.length > 0 || markdownInstead ? (
+            <>
+              {markdownInstead && (
+                <Action
+                  title="Save as Markdown Instead"
+                  icon={Icon.Document}
+                  onAction={() => setSaveMode("markdown")}
+                />
+              )}
+              {alternatives.map((ft) => (
                 <Action
                   key={ft}
                   title={`Download as ${FILETYPE_TITLE[ft]} Instead`}
@@ -347,8 +386,9 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
                     setFiletype(ft);
                   }}
                 />
-              ))
-            : undefined
+              ))}
+            </>
+          ) : undefined
         }
       />
     );
@@ -404,11 +444,15 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     // of ⌘⏎ would otherwise fire two downloads to the same output template,
     // racing for the same file and corrupting both.
     if (submitInFlight.current) {
-      await showToast({ style: Toast.Style.Failure, title: "A download is already running" });
+      // Back to the running download's live view: a new toast here would replace
+      // its progress toast, the only Stop control left once the view was closed.
+      if (activeSession.current) push(<DownloadView session={activeSession.current} />);
+      else await showToast({ style: Toast.Style.Failure, title: "A download is already running" });
       return;
     }
     const rawUrl = String(values.url ?? "").trim();
-    if (!isValidUrl(rawUrl)) {
+    // No Filetype means the form judged the link invalid and hid its fields.
+    if (!isValidUrl(rawUrl) || !values.filetype) {
       await showToast({ style: Toast.Style.Failure, title: "Enter a valid URL" });
       return;
     }
@@ -429,6 +473,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       await runSubmit(submitUrl, ft, src, folder, values);
     } finally {
       submitInFlight.current = false;
+      activeSession.current = null;
     }
   }
 
@@ -440,26 +485,22 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     values: Form.Values,
   ) {
     if (ft === "website") {
+      const mode = String(values.saveMode ?? prefs.webpageSaveMode);
+      const markdown = isMarkdownMode(mode);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Saving Webpage" });
-      const session = openSession(
-        {
-          kind: "website",
-          url: submitUrl,
-          folder,
-          format: values.saveMode === "lightweight" ? "Lightweight (no JavaScript)" : "Complete",
-        },
-        false,
-      );
+      const session = openSession({ kind: "website", url: submitUrl, folder, format: saveModeLabel(mode) }, false);
       const { signal, done } = startAbortable(toast, session);
       session.working();
       try {
-        const { filePath } = await runMonolithSave(getMonolithPath(), {
-          url: submitUrl,
-          outputPath: reserveWebpagePath(folder, submitUrl),
-          noJavaScript: values.saveMode === "lightweight",
-          idleMs: getIdleTimeoutMs(),
-          abortSignal: signal,
-        });
+        const { filePath } = markdown
+          ? await savePageAsMarkdown(submitUrl, folder, { signal })
+          : await runMonolithSave(getMonolithPath(), {
+              url: submitUrl,
+              outputPath: reserveWebpagePath(folder, submitUrl),
+              noJavaScript: mode === "lightweight",
+              idleMs: getIdleTimeoutMs(),
+              abortSignal: signal,
+            });
         toast.style = Toast.Style.Success;
         toast.title = "Webpage Saved";
         toast.message = path.basename(filePath);
@@ -467,7 +508,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.secondaryAction = { title: "Open File", onAction: () => open(filePath) };
         succeedSession(session, toast, filePath);
       } catch (error) {
-        if (failToast(toast, error)) await hintOutdatedTool(toast, "monolith");
+        // The Markdown mode runs no tool, so there's none to suggest updating.
+        if (failToast(toast, error) && !markdown) await hintOutdatedTool(toast, "monolith");
         failSession(session, toast, error);
       } finally {
         done();
@@ -557,7 +599,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           toast.title = "Login Required";
           toast.message = browser.label
             ? `Sign in to the site in ${browser.label}, or change the browser in preferences.`
-            : "Set Gallery: Cookies from Browser in preferences to use your browser's session.";
+            : "Set Cookies from Browser in preferences to use your browser's session.";
           toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
           toast.secondaryAction = undefined;
         } else {
@@ -577,9 +619,12 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       session.working();
       try {
         const denoPath = getDenoPath();
+        const extras = getVideoExtras();
         const { filePath } = await runThumbnailDownload(getytdlPath(), {
           url: submitUrl,
-          outputTemplate: path.join(folder, "%(title)s (%(id)s).%(ext)s"),
+          outputTemplate: outputTemplateIn(folder),
+          cookiesFromBrowser: extras.cookiesFromBrowser,
+          forceIpv4: extras.forceIpv4,
           denoPath: fs.existsSync(denoPath) ? denoPath : undefined,
           idleMs: getIdleTimeoutMs(),
           abortSignal: signal,
@@ -710,6 +755,16 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               audioFormat: prefs.audioFormat,
             });
     const denoPath = getDenoPath();
+    const extras = getVideoExtras();
+    if (extras.cookieWarning) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cookies from Browser",
+        message: extras.cookieWarning,
+        primaryAction: { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() },
+      });
+      return;
+    }
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: ft === "audio" ? "Downloading Audio" : "Downloading Video",
@@ -733,11 +788,15 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         {
           url: submitUrl,
           format,
-          outputTemplate: path.join(folder, "%(title)s (%(id)s).%(ext)s"),
+          outputTemplate: outputTemplateIn(folder),
           ffmpegPath: getffmpegPath(),
           denoPath: fs.existsSync(denoPath) ? denoPath : undefined,
           idleMs: getIdleTimeoutMs(),
           abortSignal: signal,
+          cookiesFromBrowser: extras.cookiesFromBrowser,
+          embedMetadata: extras.embedMetadata,
+          removeSponsors: extras.removeSponsors,
+          forceIpv4: extras.forceIpv4,
         },
         () => undefined,
         (event) => {
@@ -828,7 +887,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         autoFocus
         value={url}
         error={urlError}
-        onChange={setUrl}
+        // Trimmed, so a pasted link's trailing space or newline doesn't make it invalid.
+        onChange={(value) => setUrl(value.trim())}
         placeholder="https://www.youtube.com/watch?v=ykaj0pS4A1A"
       />
       {validUrl && (
@@ -905,20 +965,28 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               info={
                 source === "spotify"
                   ? undefined
-                  : "MP3 plays everywhere but is re-encoded. M4A and Opus keep the site's original audio when it already comes in that format."
+                  : "MP3 plays everywhere but is re-encoded. M4A and Opus keep the site's original audio when it already comes in that format. FLAC and WAV are for editing: bigger files, never better sound than the site's own audio."
               }
             >
               <Form.Dropdown.Item value="mp3" title="MP3" />
               <Form.Dropdown.Item value="m4a" title="M4A" />
               <Form.Dropdown.Item value="opus" title="Opus" />
-              {source === "spotify" && <Form.Dropdown.Item value="flac" title="FLAC" />}
+              <Form.Dropdown.Item value="flac" title="FLAC" />
+              {source !== "spotify" && <Form.Dropdown.Item value="wav" title="WAV" />}
             </Form.Dropdown>
           )}
 
           {filetype === "website" && (
-            <Form.Dropdown id="saveMode" title="Save Mode" defaultValue={prefs.webpageSaveMode}>
+            <Form.Dropdown
+              id="saveMode"
+              title="Save Mode"
+              value={saveMode}
+              onChange={setSaveMode}
+              info="Complete and Lightweight keep the page as one .html file. Markdown keeps the article's text, links and images as a .md file — for notes apps such as Obsidian."
+            >
               <Form.Dropdown.Item value="complete" title="Complete (embed everything)" />
               <Form.Dropdown.Item value="lightweight" title="Lightweight (no JavaScript)" />
+              <Form.Dropdown.Item value="markdown" title="Markdown (article text)" />
             </Form.Dropdown>
           )}
 

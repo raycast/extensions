@@ -31,6 +31,17 @@ export function isLoginRequiredError(error: unknown): boolean {
 
 export type GalleryProgress = { files: number };
 
+/** gallery-dl failed after saving `files` files — it exits non-zero when only some of a gallery's items fail. */
+export class GalleryDownloadError extends Error {
+  constructor(
+    message: string,
+    readonly files: number,
+  ) {
+    super(message);
+    this.name = "GalleryDownloadError";
+  }
+}
+
 /** Run gallery-dl; onProgress fires as files land. Resolves with the count or rejects with stderr or a watchdog kill. */
 export async function runGalleryDownload(
   binaryPath: string,
@@ -56,5 +67,5 @@ export async function runGalleryDownload(
     abortSignal: options.abortSignal,
   });
   if (code === 0) return { files };
-  throw new Error(stderr.trim() || `gallery-dl exited with code ${code}`);
+  throw new GalleryDownloadError(stderr.trim() || `gallery-dl exited with code ${code}`, files);
 }

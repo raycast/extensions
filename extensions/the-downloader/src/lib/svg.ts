@@ -38,10 +38,16 @@ export function markdownImage(markup: string, alt: string, width: number): strin
 
 /** Escape text for SVG content and attribute values. */
 export function xml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+  return (
+    text
+      // Characters XML 1.0 doesn't allow at all (an ESC from a tool's colored
+      // output, say) would make the whole image invalid.
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/g, "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;")
+  );
 }

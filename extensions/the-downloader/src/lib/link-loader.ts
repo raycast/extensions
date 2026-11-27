@@ -6,6 +6,7 @@ import { loadArchivedPage } from "./sources/archive.js";
 import { loadPageLink } from "./sources/page.js";
 import { loadPostLink } from "./sources/post.js";
 import { loadVideoLink } from "./sources/video.js";
+import { errorSummary } from "./run.js";
 import { isValidUrl, normalizeUrl } from "./url.js";
 
 // The one way into a link for the chat and the AI tools: validate the URL,
@@ -55,6 +56,36 @@ async function readPage(url: string, signal: AbortSignal | undefined, fallback: 
   return loadArchivedPage(url, { signal }).catch(() => live);
 }
 
+/** Hosts whose links are often a text or image post rather than a video. */
+const POST_OR_VIDEO = ["x.com", "twitter.com"];
+
+/**
+ * A video link's context. On X, a post without a video isn't one yt-dlp can
+ * read: gallery-dl reads it as a post instead. Any other failure is cut down
+ * to the tool's own error line, without the command line around it.
+ */
+async function readVideo(
+  url: string,
+  options: { signal?: AbortSignal; language: string; cookiesFromBrowser?: string },
+): Promise<LinkContext> {
+  try {
+    return await loadVideoLink(url, options);
+  } catch (error) {
+    if (options.signal?.aborted || error instanceof LinkLoadError || !(error instanceof Error)) throw error;
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    if (POST_OR_VIDEO.some((d) => host === d || host.endsWith(`.${d}`)) && /no video/i.test(error.message)) {
+      try {
+        return await loadPostLink(url, { signal: options.signal, cookiesFromBrowser: options.cookiesFromBrowser });
+      } catch {
+        /* not readable as a post either — report the video error below */
+      }
+    }
+    const summary = errorSummary(error.message);
+    if (summary === error.message) throw error;
+    throw Object.assign(new Error(summary), { name: error.name, cause: error });
+  }
+}
+
 /**
  * Everything the chat can know about `url`. Rejects anything that isn't an
  * http(s) link before a tool or a request sees it, so a value such as
@@ -72,11 +103,17 @@ export async function loadLinkContext(
     archiveFallback?: boolean;
   } = {},
 ): Promise<LinkContext> {
-  const trimmed = raw.trim();
+  // The AI tools pass whatever the model sent: anything but text is refused the same way.
+  const trimmed = typeof raw === "string" ? raw.trim() : "";
   if (!trimmed || !isValidUrl(trimmed)) throw new Error("Invalid URL — provide an http(s) link.");
   // The standard parsed form: what every reader gets, so no tool parses the raw text its own way.
-  const url = new URL(normalizeUrl(trimmed)).href;
-  const kind = linkKindOf(url);
+  const parsed = new URL(normalizeUrl(trimmed));
+  const kind = linkKindOf(parsed.href);
+  // A page's `#fragment` never reaches the server: with it, the Internet
+  // Archive is asked about an address it doesn't know, and every fragment
+  // of one page gets its own cache entry.
+  if (kind === "page") parsed.hash = "";
+  const url = parsed.href;
   if (kind === "spotify") {
     throw new LinkLoadError("Spotify links aren't supported in chat yet. You can still download them.", "download");
   }
@@ -98,7 +135,7 @@ export async function loadLinkContext(
 
   const ctx =
     kind === "video"
-      ? await loadVideoLink(url, { signal: options.signal, language })
+      ? await readVideo(url, { signal: options.signal, language, cookiesFromBrowser: cookiesFromBrowser() })
       : kind === "post"
         ? await loadPostLink(url, { signal: options.signal, cookiesFromBrowser: cookiesFromBrowser() })
         : archived

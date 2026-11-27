@@ -4,7 +4,7 @@ import path from "path";
 import crypto from "node:crypto";
 import { environment } from "@raycast/api";
 import { forceIpv4, getDenoPath, getffmpegPath, getIdleTimeoutMs, getytdlPath, sanitizeVideoTitle } from "./utils.js";
-import { LiveStreamError, fetchVideoInfo, isLiveStream } from "./lib/ytdlp.js";
+import { LiveStreamError, fetchVideoInfo, isLiveStream, outputTemplateIn } from "./lib/ytdlp.js";
 import { runWithWatchdog } from "./lib/run.js";
 import SRTParser from "srt-parser-2";
 import { Video } from "./types.js";
@@ -171,12 +171,15 @@ export function buildTranscriptArgs(o: {
   ffmpegPath: string;
   outputTemplate: string;
   denoPath?: string;
+  forceIpv4?: boolean;
 }): string[] {
   return [
     "--write-sub", // Uploaded captions
     "--write-auto-sub", // Automatic captions
     "--skip-download", // Captions only, no media
     "--no-playlist", // A watch?v=…&list=… URL must not fetch the whole playlist's subs
+    "--playlist-items", // …and a playlist or channel link reads its first video, like the metadata fetch
+    "1",
     // yt-dlp otherwise raises on the first caption track that fails (e.g. HTTP
     // 429 on an automatic variant) and never tries the others.
     "--ignore-errors",
@@ -187,6 +190,7 @@ export function buildTranscriptArgs(o: {
     "--ffmpeg-location",
     o.ffmpegPath,
     ...(o.denoPath ? ["--js-runtimes", `deno:${o.denoPath}`] : []),
+    ...(o.forceIpv4 ? ["--force-ipv4"] : []),
     "-o",
     o.outputTemplate,
     o.url,
@@ -258,7 +262,8 @@ export async function fetchSubtitles(
       track,
       ffmpegPath,
       denoPath: deno,
-      outputTemplate: path.join(tmpDir, "%(id)s.%(ext)s"),
+      forceIpv4,
+      outputTemplate: outputTemplateIn(tmpDir, "%(id)s.%(ext)s"),
     });
     const { code, stderr } = await runWithWatchdog(ytdlPath, args, { idleMs: getIdleTimeoutMs(), abortSignal: signal });
 

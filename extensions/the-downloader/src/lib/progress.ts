@@ -48,10 +48,10 @@ function num(value: string | undefined): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-const LEGACY_PROGRESS_RE = /\[download\]\s+(\d+(?:\.\d+)?)%/;
+const LEGACY_PROGRESS_RE = /^\s*\[download\]\s+(\d+(?:\.\d+)?)%/;
 const FORMATS_RE = /^\[info\] .*: Downloading \d+ format\(s\): (\S+)/;
 const POSTPROCESSORS =
-  /^\[(Merger|ExtractAudio|VideoRemuxer|VideoConvertor|FixupM3u8|FixupM4a|FixupStretched|FixupDuplicateMoov|FixupTimestamp|EmbedThumbnail|Metadata|MoveFiles)\]/;
+  /^\[(Merger|ExtractAudio|VideoRemuxer|VideoConvertor|FixupM3u8|FixupM4a|FixupStretched|FixupDuplicateMoov|FixupTimestamp|EmbedThumbnail|Metadata|MoveFiles|SponsorBlock|ModifyChapters|ThumbnailsConvertor)\]/;
 
 /** Parse one line of yt-dlp stdout. Returns `undefined` for lines that carry nothing the UI needs. */
 export function parseYtdlpLine(raw: string): YtdlpEvent | undefined {

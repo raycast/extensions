@@ -496,7 +496,7 @@
     {
       "name": "audioFormat",
       "title": "Video: Audio Format",
-      "description": "Default audio format when Media Type is Audio Only.",
+      "description": "Default audio format when Media Type is Audio Only. FLAC and WAV are for editing: bigger files, never better sound than the site's own audio.",
       "type": "dropdown",
       "default": "mp3",
       "required": false,
@@ -512,13 +512,48 @@
         {
           "title": "Opus",
           "value": "opus"
+        },
+        {
+          "title": "FLAC",
+          "value": "flac"
+        },
+        {
+          "title": "WAV",
+          "value": "wav"
         }
       ]
     },
     {
+      "name": "videoEmbedMetadata",
+      "title": "Video: Metadata",
+      "label": "Embed Metadata and Cover",
+      "description": "Write the title, channel, date and chapters into downloaded video and audio files, with the thumbnail as cover art (MP3, M4A, Opus, FLAC, MP4, MKV).",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "videoSponsorBlock",
+      "title": "Video: SponsorBlock",
+      "label": "Remove Sponsor Segments",
+      "description": "Cut sponsored segments out of YouTube downloads, using SponsorBlock's community data. yt-dlp asks sponsor.ajay.app about the video.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "videoCookies",
+      "title": "Video: Browser Cookies",
+      "label": "Use Cookies from Browser for Videos",
+      "description": "Give yt-dlp the browser chosen under Cookies from Browser too, for age-restricted, private or members-only videos. Off by default: a site can limit an account that downloads a lot.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "cookiesFromBrowser",
-      "title": "Gallery: Cookies from Browser",
-      "description": "Use this browser's logins for Instagram, Reddit and other sites that need one (Download and Chat).",
+      "title": "Cookies from Browser",
+      "description": "Use this browser's logins for Instagram, Reddit and other sites that need one (Download and Chat) — and for videos too when Video: Browser Cookies is on.",
       "type": "dropdown",
       "default": "",
       "required": false,
@@ -583,8 +618,8 @@
     },
     {
       "name": "cookiesFromBrowserCustom",
-      "title": "Gallery: Custom Browser Spec",
-      "description": "Only for Custom: a gallery-dl browser spec, e.g. `firefox:/path/to/profile` or `chromium:C:\\…\\Default`.",
+      "title": "Custom Browser Spec",
+      "description": "Only for Custom: a gallery-dl / yt-dlp browser spec, e.g. `firefox:/path/to/profile`, `chromium:C:\\…\\Default`, or `firefox::Work` for a Firefox container.",
       "placeholder": "firefox:/path/to/profile",
       "type": "textfield",
       "default": "",
@@ -646,7 +681,7 @@
     {
       "name": "webpageSaveMode",
       "title": "Webpage: Save Mode",
-      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript.",
+      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript; Markdown keeps the article's text, links and images as a .md file (no monolith needed).",
       "type": "dropdown",
       "default": "complete",
       "required": false,
@@ -658,6 +693,10 @@
         {
           "title": "Lightweight (no JavaScript)",
           "value": "lightweight"
+        },
+        {
+          "title": "Markdown (Article Text)",
+          "value": "markdown"
         }
       ]
     },

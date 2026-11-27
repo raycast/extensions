@@ -26,6 +26,19 @@ export function defaultFiletype(source: SourceType, audioPreferred: boolean): Fi
   }
 }
 
+/** The webpage save modes (the `webpageSaveMode` preference): two monolith ones and Markdown. */
+export type WebpageSaveMode = "complete" | "lightweight" | "markdown";
+
+/** True for the save mode that writes the article as Markdown, without monolith. */
+export function isMarkdownMode(mode: string | undefined): boolean {
+  return mode === "markdown";
+}
+
+/** What a save mode is called in the download view and the history. */
+export function saveModeLabel(mode: string | undefined): string {
+  return isMarkdownMode(mode) ? "Markdown" : mode === "lightweight" ? "Lightweight (no JavaScript)" : "Complete";
+}
+
 /** The tool a (source, filetype) selection runs. */
 export function resolveTool(source: SourceType, filetype: Filetype): ToolId {
   if (filetype === "website") return "monolith";
@@ -83,11 +96,13 @@ export function filetypeGuidance(source: SourceType): string {
 /**
  * Every executable that must exist for a (source, filetype) selection. Deno is
  * required only for YouTube (see `needsJsRuntime`); elsewhere it's optional,
- * so a missing Deno doesn't block Vimeo, Twitch and the like.
+ * so a missing Deno doesn't block Vimeo, Twitch and the like. `webpageMode` is
+ * the chosen save mode when the filetype is a website.
  */
-export function requiredTools(source: SourceType, filetype: Filetype, url = ""): string[] {
+export function requiredTools(source: SourceType, filetype: Filetype, url = "", webpageMode = ""): string[] {
   const tool = resolveTool(source, filetype);
-  if (tool === "monolith") return ["monolith"];
+  // The Markdown save mode reads the page itself; only the HTML modes run monolith.
+  if (tool === "monolith") return isMarkdownMode(webpageMode) ? [] : ["monolith"];
   if (tool === "spotdl") return ["spotdl", "ffmpeg"];
   if (tool === "gallery-dl") return ["gallery-dl"];
   // tool === "yt-dlp". Transcripts skip ffprobe but still need YouTube's

@@ -117,6 +117,12 @@ export const BROWSERS: Browser[] = [
   }),
 ];
 
+const LIBREWOLF_PROFILES: PlatformPaths = {
+  win: "AppData/Roaming/librewolf/Profiles",
+  mac: "Library/Application Support/librewolf/Profiles",
+  linux: ".librewolf",
+};
+
 export type ResolvedBrowser = {
   spec: string;
   label: string;
@@ -152,4 +158,26 @@ export function resolveBrowser(id: string, customSpec?: string, ctx: ResolveCont
     label: entry.label,
     warning: `No ${entry.label} profile with cookies was found. Make sure ${entry.label} is installed and has been opened at least once, or use a Custom Browser Spec.`,
   };
+}
+
+/**
+ * The same selection for yt-dlp. Its `--cookies-from-browser` takes the same
+ * specs as gallery-dl's, except that it doesn't know LibreWolf by name: that
+ * one is given as a Firefox profile path.
+ */
+export function resolveVideoBrowser(
+  id: string,
+  customSpec?: string,
+  ctx: ResolveContext = defaultCtx(),
+): ResolvedBrowser {
+  if (id !== "librewolf") return resolveBrowser(id, customSpec, ctx);
+  const profile = findFirefoxProfile(LIBREWOLF_PROFILES, ctx);
+  return profile
+    ? { spec: `firefox:${profile}`, label: "Librewolf" }
+    : {
+        spec: "",
+        label: "Librewolf",
+        warning:
+          "No Librewolf profile with cookies was found. Make sure Librewolf has been opened at least once, or use a Custom Browser Spec.",
+      };
 }

@@ -304,3 +304,21 @@ export class DownloadSession {
 export function useDownloadSession(session: DownloadSession): DownloadSnapshot {
   return useSyncExternalStore(session.subscribe, session.getSnapshot);
 }
+
+/** Downloads this command is running, so an action that would close it can say so first. */
+const running = new Set<AbortController>();
+
+/** Count `controller`'s download as running until it's aborted or the returned function is called. */
+export function trackRunningDownload(controller: AbortController): () => void {
+  running.add(controller);
+  const untrack = () => {
+    running.delete(controller);
+  };
+  controller.signal.addEventListener("abort", untrack, { once: true });
+  return untrack;
+}
+
+/** True while this command runs a download (one the form started; Fast Download has no view to leave). */
+export function isDownloadRunning(): boolean {
+  return running.size > 0;
+}
