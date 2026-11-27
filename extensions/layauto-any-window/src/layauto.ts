@@ -49,10 +49,13 @@ function runningApplicationPaths(): Promise<string[]> {
   });
 }
 
-/** The LayAuto 4 app that bundles the `layauto` tool: the chosen app, a running copy, a standard location, then any installed copy. */
+/** The LayAuto 4 app that bundles the `layauto` tool. A chosen preference must contain it. Otherwise a running copy, a standard location, then any installed copy. */
 export function findApplication(): Promise<string | undefined> {
   resolvedApplicationPath ??= (async () => {
     const { application } = getPreferenceValues<Preferences.SearchWindows>();
+    if (application?.path && !existsSync(toolPath(application.path))) {
+      throw new Error("The LayAuto 4 app chosen in preferences was not found.");
+    }
     const candidates = [application?.path, ...(await runningApplicationPaths()), ...applicationPaths].filter(
       (path): path is string => !!path,
     );
