@@ -6,9 +6,8 @@ import {
   getSelectedFinderItems,
   getSelectedText,
   showHUD,
-  showToast,
-  Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { containsSetupCredential, dropFileFromPath, dropText, normalizeLocalPath } from "./api";
 import { copySelectedFiles, copySelectedExplorerFiles } from "./selection-clipboard";
 
@@ -57,10 +56,8 @@ export default async function Command() {
         }
       }
       if (failures.length) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(new Error(failures.join("\n")), {
           title: `Copied locally · Dropped ${files.length - failures.length} of ${files.length}`,
-          message: failures.join("\n"),
         });
       } else {
         await showHUD(`Copied and dropped ${files.length} ${files.length === 1 ? "file" : "files"}`);
@@ -88,11 +85,7 @@ export default async function Command() {
       return;
     }
     if (copied) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Copied locally · Drop failed",
-        message: uploadErrorMessage(error),
-      });
+      await showFailureToast(new Error(uploadErrorMessage(error)), { title: "Copied locally · Drop failed" });
     } else {
       await showHUD("Could not copy selection · Nothing dropped");
     }
