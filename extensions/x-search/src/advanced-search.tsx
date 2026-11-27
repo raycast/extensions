@@ -62,7 +62,6 @@ export default function AdvancedSearchCommand(props: LaunchProps<{ draftValues: 
   return (
     <Form
       enableDrafts
-      navigationTitle="Advanced Search"
       actions={
         <SearchActions query={query} searchLink={searchLink} preferredTab={preferredTab} onSearch={searchIfValid} />
       }

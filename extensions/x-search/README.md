@@ -22,5 +22,5 @@ To open another results tab (Top, Latest, People, Media, or Lists), choose it un
 
 ## Preferences
 
-- Preferred tab: Top or Latest. Searches open in this tab unless you pick another in Advanced Search.
-- Preferred browser: the browser that opens your searches. Leave it empty to use your system browser.
+- Preferred Tab: Top or Latest. Searches open in this tab unless you pick another in Advanced Search.
+- Preferred Browser: the browser that opens your searches. Leave it empty to use your system browser.

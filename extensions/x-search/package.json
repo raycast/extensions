@@ -52,7 +52,7 @@
         {
           "name": "query",
           "type": "text",
-          "placeholder": "Search query",
+          "placeholder": "Search Query",
           "required": true
         }
       ]
@@ -61,7 +61,7 @@
   "preferences": [
     {
       "name": "resultsTab",
-      "title": "Preferred tab",
+      "title": "Preferred Tab",
       "description": "The results tab a search opens unless you choose another.",
       "type": "dropdown",
       "required": false,
@@ -79,7 +79,7 @@
     },
     {
       "name": "browser",
-      "title": "Preferred browser",
+      "title": "Preferred Browser",
       "description": "Choose a web browser. Every installed application is listed, and one that cannot open the search link does not open it. Leave this empty to use your system browser.",
       "placeholder": "System browser",
       "type": "appPicker",
