@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { BrowserItemActions } from "./components/BrowserItemActions";
 import { FallbackSearchItem } from "./components/FallbackSearchItem";
 import { NotInstalledView } from "./components/NotInstalledView";
@@ -12,7 +12,7 @@ export default function SearchBookmarksCommand() {
   const [selectedFolder, setSelectedFolder] = useState("all");
 
   const { data: installed, isLoading: checkingInstall } = useSearchInstalled();
-  const { data, isLoading, revalidate } = useBookmarks();
+  const { data, error, isLoading, revalidate } = useBookmarks();
 
   const folders = useMemo(() => {
     const unique = new Set<string>();
@@ -61,32 +61,47 @@ export default function SearchBookmarksCommand() {
         ) : undefined
       }
     >
-      {grouped.map(([folderLabel, items]) => (
-        <List.Section key={folderLabel} title={folderLabel} subtitle={`${items.length}`}>
-          {items.map((bm) => (
-            <List.Item
-              key={bm.id}
-              icon={getSiteIcon(bm.url)}
-              title={bm.title}
-              subtitle={getDomain(bm.url)}
-              actions={<BrowserItemActions title={bm.title} url={bm.url} onRefresh={revalidate} />}
-            />
-          ))}
-        </List.Section>
-      ))}
-
-      {searchText.trim() && (
-        <List.Section title={filtered.length > 0 ? "Web" : "Search Web"}>
-          <FallbackSearchItem query={searchText} browserSettings={data?.settings} />
-        </List.Section>
-      )}
-
-      {filtered.length === 0 && !searchText.trim() && !isLoading && (
+      {error ? (
         <List.EmptyView
-          icon={Icon.Bookmark}
-          title="No Bookmarks Found"
-          description="Press ⌘⇧B in Search Browser to bookmark the current page."
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Failed to Read Bookmarks"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
         />
+      ) : (
+        <>
+          {grouped.map(([folderLabel, items]) => (
+            <List.Section key={folderLabel} title={folderLabel} subtitle={`${items.length}`}>
+              {items.map((bm) => (
+                <List.Item
+                  key={bm.id}
+                  icon={getSiteIcon(bm.url)}
+                  title={bm.title}
+                  subtitle={getDomain(bm.url)}
+                  actions={<BrowserItemActions title={bm.title} url={bm.url} onRefresh={revalidate} />}
+                />
+              ))}
+            </List.Section>
+          ))}
+
+          {searchText.trim() && (
+            <List.Section title={filtered.length > 0 ? "Web" : "Search Web"}>
+              <FallbackSearchItem query={searchText} browserSettings={data?.settings} />
+            </List.Section>
+          )}
+
+          {filtered.length === 0 && !searchText.trim() && !isLoading && (
+            <List.EmptyView
+              icon={Icon.Bookmark}
+              title="No Bookmarks Found"
+              description="Press ⌘⇧B in Search Browser to bookmark the current page."
+            />
+          )}
+        </>
       )}
     </List>
   );

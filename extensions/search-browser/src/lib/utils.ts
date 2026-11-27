@@ -43,16 +43,16 @@ export function looksLikeUrl(input: string): boolean {
   if (/^(https?|file|mailto):\/\//i.test(trimmed) || /^mailto:/i.test(trimmed)) {
     return true;
   }
-  if (/^localhost(:\d+)?(\/.*)?$/i.test(trimmed)) {
+  if (/^localhost(:\d+)?([/?#].*)?$/i.test(trimmed)) {
     return true;
   }
-  if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?(\/.*)?$/.test(trimmed)) {
+  if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?([/?#].*)?$/.test(trimmed)) {
     return true;
   }
-  // Domain with a valid-looking TLD (at least 2 letters) and optional port/path
+  // Domain with a valid-looking TLD (at least 2 letters) and optional port, path, query, or fragment
   return (
-    /^[a-z0-9-]+(\.[a-z0-9-]+)+(\.[a-z]{2,}|:\d+)(\/.*)?$/i.test(trimmed) ||
-    /^[a-z0-9-]+\.[a-z]{2,}(:\d+)?(\/.*)?$/i.test(trimmed)
+    /^[a-z0-9-]+(\.[a-z0-9-]+)+(\.[a-z]{2,}|:\d+)([/?#].*)?$/i.test(trimmed) ||
+    /^[a-z0-9-]+\.[a-z]{2,}(:\d+)?([/?#].*)?$/i.test(trimmed)
   );
 }
 
@@ -184,14 +184,15 @@ export function decodeBase64Json<T>(encoded: unknown): T | null {
 }
 
 /**
- * Normalize a URL for deduplication (strip trailing slash differences on root).
+ * Normalize a URL for deduplication while preserving fragments and non-root path slashes
+ * so distinct routes (e.g. SPA hash routes or `/dir` vs `/dir/`) never collide.
  */
 export function normalizeUrlKey(url: string): string {
   try {
     const u = new URL(url);
-    const normalizedPath = u.pathname === "/" ? "" : u.pathname.replace(/\/+$/, "");
-    return `${u.protocol}//${u.host.toLowerCase()}${normalizedPath}${u.search}`;
+    const pathname = u.pathname || "/";
+    return `${u.protocol.toLowerCase()}//${u.host.toLowerCase()}${pathname}${u.search}${u.hash}`;
   } catch {
-    return url.trim().toLowerCase();
+    return url.trim();
   }
 }

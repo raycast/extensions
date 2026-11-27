@@ -8,6 +8,7 @@ import {
   readLocalBrowserSnapshot,
   readTabsLocalSnapshot,
 } from "../lib/data";
+import { BookmarkItem, BrowserSettingsSnapshot, HistoryEntry } from "../lib/types";
 
 export function useSearchInstalled() {
   return useCachedPromise(isSearchBrowserInstalled, [], {
@@ -16,7 +17,6 @@ export function useSearchInstalled() {
 }
 
 export function useOpenTabs() {
-  // Read only spaces, pins, remote tabs, and settings (skips parsing history.json and bookmarks.json)
   const [localSnapshot, setLocalSnapshot] = useState(() => readTabsLocalSnapshot());
   const { data: liveData, isLoading, revalidate: revalidateLive } = usePromise(getOpenTabsWithFallback, []);
 
@@ -35,45 +35,75 @@ export function useOpenTabs() {
       remoteDevices: localSnapshot.remoteDevices,
       settings: localSnapshot.settings,
     },
+    error: localSnapshot.error,
     isLoading,
     revalidate,
   };
 }
 
+function loadBookmarksState(): {
+  data: { bookmarks: BookmarkItem[]; settings: BrowserSettingsSnapshot | null };
+  error: Error | null;
+} {
+  try {
+    const bookmarks = readBookmarks();
+    let settings: BrowserSettingsSnapshot | null = null;
+    try {
+      settings = readBrowserSettings();
+    } catch {
+      settings = null;
+    }
+    return { data: { bookmarks, settings }, error: null };
+  } catch (err) {
+    return {
+      data: { bookmarks: [], settings: null },
+      error: err instanceof Error ? err : new Error(String(err)),
+    };
+  }
+}
+
 export function useBookmarks() {
-  const [data, setData] = useState(() => ({
-    bookmarks: readBookmarks(),
-    settings: readBrowserSettings(),
-  }));
+  const [state, setState] = useState(loadBookmarksState);
 
   const revalidate = useCallback(() => {
-    setData({
-      bookmarks: readBookmarks(),
-      settings: readBrowserSettings(),
-    });
+    setState(loadBookmarksState());
   }, []);
 
-  return { data, isLoading: false, revalidate };
+  return { data: state.data, error: state.error, isLoading: false, revalidate };
+}
+
+function loadHistoryState(): {
+  data: { history: HistoryEntry[]; settings: BrowserSettingsSnapshot | null };
+  error: Error | null;
+} {
+  try {
+    const history = readHistory();
+    let settings: BrowserSettingsSnapshot | null = null;
+    try {
+      settings = readBrowserSettings();
+    } catch {
+      settings = null;
+    }
+    return { data: { history, settings }, error: null };
+  } catch (err) {
+    return {
+      data: { history: [], settings: null },
+      error: err instanceof Error ? err : new Error(String(err)),
+    };
+  }
 }
 
 export function useHistory() {
-  const [data, setData] = useState(() => ({
-    history: readHistory(),
-    settings: readBrowserSettings(),
-  }));
+  const [state, setState] = useState(loadHistoryState);
 
   const revalidate = useCallback(() => {
-    setData({
-      history: readHistory(),
-      settings: readBrowserSettings(),
-    });
+    setState(loadHistoryState());
   }, []);
 
-  return { data, isLoading: false, revalidate };
+  return { data: state.data, error: state.error, isLoading: false, revalidate };
 }
 
 export function useUnifiedSearchData() {
-  // Render local history, bookmarks, pins, and iCloud tabs on frame 1 (<5ms) while live tabs load via single osascript
   const [localSnapshot, setLocalSnapshot] = useState(() => readLocalBrowserSnapshot());
   const { data: liveData, isLoading, revalidate: revalidateLive } = usePromise(getOpenTabsWithFallback, []);
 
@@ -94,6 +124,7 @@ export function useUnifiedSearchData() {
       history: localSnapshot.history,
       settings: localSnapshot.settings,
     },
+    error: localSnapshot.error,
     isLoading,
     revalidate,
   };

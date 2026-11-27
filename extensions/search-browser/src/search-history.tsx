@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { BrowserItemActions } from "./components/BrowserItemActions";
 import { FallbackSearchItem } from "./components/FallbackSearchItem";
 import { NotInstalledView } from "./components/NotInstalledView";
@@ -13,7 +13,7 @@ export default function SearchHistoryCommand() {
   const [searchText, setSearchText] = useState("");
 
   const { data: installed, isLoading: checkingInstall } = useSearchInstalled();
-  const { data, isLoading, revalidate } = useHistory();
+  const { data, error, isLoading, revalidate } = useHistory();
 
   const grouped = useMemo(() => {
     const matching = (data?.history ?? [])
@@ -49,38 +49,53 @@ export default function SearchHistoryCommand() {
       filtering={false}
       throttle
     >
-      {grouped.map(([sectionTitle, entries]) => (
-        <List.Section key={sectionTitle} title={sectionTitle} subtitle={`${entries.length}`}>
-          {entries.map((entry) => (
-            <List.Item
-              key={entry.id}
-              icon={getSiteIcon(entry.url)}
-              title={entry.title}
-              subtitle={getDomain(entry.url)}
-              accessories={[
-                ...(entry.visitCount > 1
-                  ? [{ text: `${entry.visitCount}×`, tooltip: `${entry.visitCount} visits` }]
-                  : []),
-                { text: formatVisitTime(entry.lastVisited), tooltip: entry.lastVisited.toLocaleString() },
-              ]}
-              actions={<BrowserItemActions title={entry.title} url={entry.url} onRefresh={revalidate} />}
-            />
-          ))}
-        </List.Section>
-      ))}
-
-      {searchText.trim() && (
-        <List.Section title={totalShown > 0 ? "Web" : "Search Web"}>
-          <FallbackSearchItem query={searchText} browserSettings={data?.settings} />
-        </List.Section>
-      )}
-
-      {totalShown === 0 && !searchText.trim() && !isLoading && (
+      {error ? (
         <List.EmptyView
-          icon={Icon.Clock}
-          title="No History Entries"
-          description="Sites you visit in Search Browser will appear here."
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Failed to Read History"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
         />
+      ) : (
+        <>
+          {grouped.map(([sectionTitle, entries]) => (
+            <List.Section key={sectionTitle} title={sectionTitle} subtitle={`${entries.length}`}>
+              {entries.map((entry) => (
+                <List.Item
+                  key={entry.id}
+                  icon={getSiteIcon(entry.url)}
+                  title={entry.title}
+                  subtitle={getDomain(entry.url)}
+                  accessories={[
+                    ...(entry.visitCount > 1
+                      ? [{ text: `${entry.visitCount}×`, tooltip: `${entry.visitCount} visits` }]
+                      : []),
+                    { text: formatVisitTime(entry.lastVisited), tooltip: entry.lastVisited.toLocaleString() },
+                  ]}
+                  actions={<BrowserItemActions title={entry.title} url={entry.url} onRefresh={revalidate} />}
+                />
+              ))}
+            </List.Section>
+          ))}
+
+          {searchText.trim() && (
+            <List.Section title={totalShown > 0 ? "Web" : "Search Web"}>
+              <FallbackSearchItem query={searchText} browserSettings={data?.settings} />
+            </List.Section>
+          )}
+
+          {totalShown === 0 && !searchText.trim() && !isLoading && (
+            <List.EmptyView
+              icon={Icon.Clock}
+              title="No History Entries"
+              description="Sites you visit in Search Browser will appear here."
+            />
+          )}
+        </>
       )}
     </List>
   );

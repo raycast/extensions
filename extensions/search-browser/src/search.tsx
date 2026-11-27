@@ -16,7 +16,7 @@ export default function SearchAllCommand() {
   const preferences = getPreferenceValues<Preferences>();
 
   const { data: installed, isLoading: checkingInstall } = useSearchInstalled();
-  const { data, isLoading, revalidate } = useUnifiedSearchData();
+  const { data, error, isLoading, revalidate } = useUnifiedSearchData();
 
   const includeRemote = preferences.includeRemoteTabs !== false;
   const includePins = preferences.includePinnedTabs !== false;
@@ -97,6 +97,21 @@ export default function SearchAllCommand() {
         </List.Dropdown>
       }
     >
+      {error && (
+        <List.Section title="Data Read Error">
+          <List.Item
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+            title="Failed to read some Search Browser data"
+            subtitle={error.message}
+            actions={
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
       {showTabs && data?.permissionDenied && (
         <List.Section title="Permission Required">
           <List.Item
@@ -268,7 +283,7 @@ export default function SearchAllCommand() {
         </List.Section>
       )}
 
-      {!hasAnyResults && !trimmedQuery && !isLoading && (
+      {!hasAnyResults && !error && !trimmedQuery && !isLoading && (
         <List.EmptyView
           icon={Icon.Globe}
           title="No Results Yet"

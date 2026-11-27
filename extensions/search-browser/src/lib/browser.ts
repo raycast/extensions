@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 import { promisify } from "util";
 import { Toast, getApplications, open, showToast } from "@raycast/api";
+import { runAppleScript as runRaycastAppleScript } from "@raycast/utils";
 import {
   RECORD_SEP,
   SearchAppPrefs,
@@ -32,16 +33,12 @@ export {
 };
 
 /**
- * Run an AppleScript via `osascript`, throwing an Error whose message contains ONLY stderr
- * (never the full `osascript -e <script>` command string).
+ * Execute an AppleScript via `@raycast/utils`'s `runAppleScript`, passing all dynamic values
+ * cleanly through `argv` (`on run argv`) and surfacing only stderr on failure.
  */
-async function runAppleScript(script: string): Promise<string> {
+async function executeAppleScript(script: string, args: string[] = []): Promise<string> {
   try {
-    const { stdout } = await execFileAsync("osascript", ["-e", script], {
-      timeout: 8000,
-      maxBuffer: 10 * 1024 * 1024,
-    });
-    return stdout;
+    return await runRaycastAppleScript(script, args, { timeout: 8000 });
   } catch (error) {
     throw new Error(extractAppleScriptErrorMessage(error));
   }
@@ -96,7 +93,7 @@ export async function showNotInstalledToast(): Promise<void> {
  */
 export async function isSearchBrowserRunning(): Promise<boolean> {
   try {
-    const result = await runAppleScript(`application id "${SEARCH_BUNDLE_ID}" is running`);
+    const result = await executeAppleScript('application id "com.officecommun.search" is running');
     return result.trim().toLowerCase() === "true";
   } catch {
     return false;
@@ -137,18 +134,13 @@ export async function readSearchAppPrefs(): Promise<SearchAppPrefs> {
 
 const NOT_RUNNING_SENTINEL = "__SEARCH_NOT_RUNNING__";
 
-/**
- * Fetch live open tabs from Search Browser in ONE single osascript invocation.
- * Checks `is not running` inside the same script so Search is never launched and we avoid
- * paying a second osascript cold-start penalty.
- */
-async function queryLiveOpenTabsSingleShot(): Promise<{ tabs: SearchTab[]; isRunning: boolean }> {
-  const script = `
-if application id "${SEARCH_BUNDLE_ID}" is not running then return "${NOT_RUNNING_SENTINEL}"
+// Note: `application id "com.officecommun.search"` must remain a compile-time literal so AppleScript loads Search.sdef.
+const LIVE_TABS_SCRIPT = `
+if application id "com.officecommun.search" is not running then return "__SEARCH_NOT_RUNNING__"
 set fieldSep to character id 31
 set recordSep to character id 30
 set output to ""
-tell application id "${SEARCH_BUNDLE_ID}"
+tell application id "com.officecommun.search"
   repeat with w in windows
     set wid to 0
     try
@@ -207,7 +199,11 @@ end tell
 return output
 `;
 
-  const raw = await runAppleScript(script);
+/**
+ * Fetch live open tabs from Search Browser in ONE single osascript invocation.
+ */
+async function queryLiveOpenTabsSingleShot(): Promise<{ tabs: SearchTab[]; isRunning: boolean }> {
+  const raw = await executeAppleScript(LIVE_TABS_SCRIPT);
   if (raw.trim() === NOT_RUNNING_SENTINEL) {
     return { tabs: [], isRunning: false };
   }
@@ -219,7 +215,6 @@ return output
  * Surfaces Automation permission denials explicitly instead of masking stale session tabs as live.
  */
 export async function getOpenTabsWithFallback(): Promise<OpenTabsResult> {
-  // Warm preferences cache in the background without blocking tab listing
   void readSearchAppPrefs();
 
   try {
@@ -236,15 +231,10 @@ export async function getOpenTabsWithFallback(): Promise<OpenTabsResult> {
   }
 }
 
-/**
- * Return the currently active tab in Search Browser's frontmost browser window in a single osascript call.
- * Iterates through windows so non-browser windows (Settings, Downloads, History) don't cause an error.
- */
-export async function getFocusedTab(): Promise<SearchTab | null> {
-  const script = `
-if application id "${SEARCH_BUNDLE_ID}" is not running then return "${NOT_RUNNING_SENTINEL}"
+const FOCUSED_TAB_SCRIPT = `
+if application id "com.officecommun.search" is not running then return "__SEARCH_NOT_RUNNING__"
 set fieldSep to character id 31
-tell application id "${SEARCH_BUNDLE_ID}"
+tell application id "com.officecommun.search"
   repeat with w in windows
     try
       set ct to current tab of w
@@ -283,20 +273,203 @@ tell application id "${SEARCH_BUNDLE_ID}"
 end tell
 `;
 
-  const raw = await runAppleScript(script);
+/**
+ * Return the currently active tab in Search Browser's frontmost browser window in a single osascript call.
+ */
+export async function getFocusedTab(): Promise<SearchTab | null> {
+  const raw = await executeAppleScript(FOCUSED_TAB_SCRIPT);
   if (raw.trim() === NOT_RUNNING_SENTINEL) return null;
   const parsed = parseAppleScriptTabs(raw + RECORD_SEP);
   return parsed[0] ?? null;
 }
 
+const VERIFIED_KEY_SWITCH_SCRIPT = `
+on run argv
+  set targetWinId to (item 1 of argv) as integer
+  set targetIdx to (item 2 of argv) as integer
+  set targetUrl to item 3 of argv
+  set keyCodeNum to (item 4 of argv) as integer
+
+  tell application id "com.officecommun.search"
+    if not running then error "SEARCH_NOT_RUNNING"
+    set matchedWin to missing value
+    set matchedWinTitle to ""
+    set winCount to count of windows
+    repeat with w in windows
+      try
+        if (id of w) is targetWinId then
+          set matchedWin to w
+          exit repeat
+        end if
+      end try
+    end repeat
+    if matchedWin is missing value then error "INDEX_STALE"
+    set tabUrls to URL of tabs of matchedWin
+    if targetIdx > (count of tabUrls) then error "INDEX_STALE"
+    considering case
+      if (item targetIdx of tabUrls as text) is not targetUrl then error "INDEX_STALE"
+    end considering
+    try
+      set ct to current tab of matchedWin
+      if ct is not missing value then
+        set rawCtName to name of ct
+        if rawCtName is not missing value then set matchedWinTitle to rawCtName as text
+      end if
+    end try
+    activate
+  end tell
+
+  tell application "System Events"
+    set procs to (every application process whose bundle identifier is "com.officecommun.search")
+    if (count of procs) is 0 then error "PROCESS_NOT_FOUND"
+    set targetProc to item 1 of procs
+    tell targetProc
+      set frontmost to true
+      if winCount > 1 then
+        if matchedWinTitle is "" then error "WINDOW_AMBIGUOUS"
+        set matchedAxWins to {}
+        repeat with sw in windows
+          try
+            if (subrole of sw is "AXStandardWindow") and ((name of sw as text) is matchedWinTitle) then
+              set end of matchedAxWins to sw
+            end if
+          end try
+        end repeat
+        if (count of matchedAxWins) is not 1 then error "WINDOW_AMBIGUOUS"
+        perform action "AXRaise" of item 1 of matchedAxWins
+      end if
+      repeat 15 times
+        if frontmost then exit repeat
+        delay 0.02
+      end repeat
+    end tell
+    key code keyCodeNum using command down
+  end tell
+end run
+`;
+
+const STEP_TAB_SWITCH_SCRIPT = `
+on run argv
+  set targetWinId to (item 1 of argv) as integer
+  set hintTabIdx to (item 2 of argv) as integer
+  set targetUrl to item 3 of argv
+
+  tell application id "com.officecommun.search"
+    if not running then error "SEARCH_NOT_RUNNING"
+    set matchedWin to missing value
+    set matchedWinTitle to ""
+    set winCount to count of windows
+    set activeIdx to 0
+    set targetIdx to 0
+
+    considering case
+      repeat with w in windows
+        set wid to 0
+        try
+          set wid to id of w
+        end try
+        if wid is targetWinId then
+          try
+            set urls to URL of tabs of w
+            if hintTabIdx <= (count of urls) and ((item hintTabIdx of urls as text) is targetUrl) then
+              set matchedWin to w
+              set targetIdx to hintTabIdx
+            else
+              repeat with i from 1 to count of urls
+                if (item i of urls as text) is targetUrl then
+                  set matchedWin to w
+                  set targetIdx to i
+                  exit repeat
+                end if
+              end repeat
+            end if
+          end try
+          exit repeat
+        end if
+      end repeat
+
+      if matchedWin is missing value then
+        repeat with w in windows
+          try
+            set urls to URL of tabs of w
+            repeat with i from 1 to count of urls
+              if (item i of urls as text) is targetUrl then
+                set matchedWin to w
+                set targetIdx to i
+                exit repeat
+              end if
+            end repeat
+          end try
+          if matchedWin is not missing value then exit repeat
+        end repeat
+      end if
+    end considering
+
+    if matchedWin is missing value then error "TAB_NOT_FOUND"
+
+    set tabRefs to tabs of matchedWin
+    set ct to missing value
+    try
+      set ct to current tab of matchedWin
+    end try
+
+    if ct is not missing value then
+      try
+        set rawCtName to name of ct
+        if rawCtName is not missing value then set matchedWinTitle to rawCtName as text
+      end try
+      repeat with i from 1 to count of tabRefs
+        try
+          if item i of tabRefs is ct then
+            set activeIdx to i
+            exit repeat
+          end if
+        end try
+      end repeat
+    end if
+
+    if activeIdx is 0 then error "ACTIVE_TAB_UNKNOWN"
+    activate
+  end tell
+
+  set delta to targetIdx - activeIdx
+
+  tell application "System Events"
+    set procs to (every application process whose bundle identifier is "com.officecommun.search")
+    if (count of procs) is 0 then error "PROCESS_NOT_FOUND"
+    tell item 1 of procs
+      set frontmost to true
+      if winCount > 1 then
+        if matchedWinTitle is "" then error "WINDOW_AMBIGUOUS"
+        set matchedAxWins to {}
+        repeat with sw in windows
+          try
+            if (subrole of sw is "AXStandardWindow") and ((name of sw as text) is matchedWinTitle) then
+              set end of matchedAxWins to sw
+            end if
+          end try
+        end repeat
+        if (count of matchedAxWins) is not 1 then error "WINDOW_AMBIGUOUS"
+        perform action "AXRaise" of item 1 of matchedAxWins
+      end if
+      if delta > 0 then
+        repeat delta times
+          click menu item "Next Tab" of menu "Tabs" of menu bar 1
+        end repeat
+      else if delta < 0 then
+        repeat (-delta) times
+          click menu item "Previous Tab" of menu "Tabs" of menu bar 1
+        end repeat
+      end if
+    end tell
+  end tell
+end run
+`;
+
 /**
- * Focus an existing open tab in Search Browser as quickly and reliably as possible without
- * opening a duplicate tab or Little Window.
- *
- * Fast paths:
- * 1. Native Search tab reuse (`links.little = false` & `links.little.tabs = true`) -> `open -b <url>` (~70ms, all windows/spaces).
- * 2. Verified hardware `key code` Cmd+1..9 jump -> verifies live URL at target index before pressing Cmd+N (~140ms).
- * 3. Live active-index query + `Tabs -> Next Tab / Previous Tab` menu steps (scans all windows if tab moved).
+ * Focus an existing open tab in Search Browser without opening a duplicate tab or Little Window.
+ * All dynamic browser values are passed via AppleScript argv (never interpolated into script text).
+ * Multi-window raises require an unambiguous 1-to-1 AXStandardWindow match; ambiguous windows fall back safely.
  */
 export async function focusOpenTab(
   tab: SearchTab,
@@ -310,7 +483,8 @@ export async function focusOpenTab(
     return;
   }
 
-  const escapedUrl = tab.url.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const winIdArg = String(Math.max(0, Math.floor(tab.windowId)));
+  const tabIdxArg = String(Math.max(1, Math.floor(tab.tabIndex)));
   const cmdKeyCode = options.skipFastKeyCode
     ? null
     : getCommandNumberKeyCode(tab, {
@@ -318,73 +492,10 @@ export async function focusOpenTab(
         hasPinnedTabs: Boolean(options.hasPinnedTabs),
       });
 
-  // Tier 2: Verified hardware Cmd+1..9 jump (checks live window + URL at tabIndex so reordered/closed tabs never misfire)
+  // Tier 2: Verified hardware Cmd+1..9 jump via argv
   if (cmdKeyCode !== null) {
-    const verifiedKeyScript = `
-set targetWinId to ${Math.max(0, Math.floor(tab.windowId))}
-set targetIdx to ${Math.max(1, Math.floor(tab.tabIndex))}
-set targetUrl to "${escapedUrl}"
-
-tell application id "${SEARCH_BUNDLE_ID}"
-  if not running then error "SEARCH_NOT_RUNNING"
-  set matchedWin to missing value
-  set matchedWinTitle to ""
-  set winCount to count of windows
-  repeat with w in windows
-    try
-      if (id of w) is targetWinId then
-        set matchedWin to w
-        exit repeat
-      end if
-    end try
-  end repeat
-  if matchedWin is missing value then error "INDEX_STALE"
-  set tabUrls to URL of tabs of matchedWin
-  if targetIdx > (count of tabUrls) then error "INDEX_STALE"
-  considering case
-    if (item targetIdx of tabUrls as text) is not targetUrl then error "INDEX_STALE"
-  end considering
-  try
-    set ct to current tab of matchedWin
-    if ct is not missing value then
-      set rawCtName to name of ct
-      if rawCtName is not missing value then set matchedWinTitle to rawCtName as text
-    end if
-  end try
-  activate
-end tell
-
-tell application "System Events"
-  set procs to (every application process whose bundle identifier is "${SEARCH_BUNDLE_ID}")
-  if (count of procs) is 0 then error "PROCESS_NOT_FOUND"
-  set targetProc to item 1 of procs
-  tell targetProc
-    set frontmost to true
-    if winCount > 1 then
-      set raisedWin to false
-      if matchedWinTitle is not "" then
-        repeat with sw in windows
-          try
-            if (subrole of sw is "AXStandardWindow") and ((name of sw as text) is matchedWinTitle) then
-              perform action "AXRaise" of sw
-              set raisedWin to true
-              exit repeat
-            end if
-          end try
-        end repeat
-      end if
-      if not raisedWin then error "WINDOW_NOT_RAISED"
-    end if
-    repeat 15 times
-      if frontmost then exit repeat
-      delay 0.02
-    end repeat
-  end tell
-  key code ${cmdKeyCode} using command down
-end tell
-`;
     try {
-      await runAppleScript(verifiedKeyScript);
+      await executeAppleScript(VERIFIED_KEY_SWITCH_SCRIPT, [winIdArg, tabIdxArg, tab.url, String(cmdKeyCode)]);
       return;
     } catch (err) {
       const msg = extractAppleScriptErrorMessage(err);
@@ -393,147 +504,26 @@ end tell
           "Grant Raycast Accessibility permission in System Settings → Privacy & Security → Accessibility to switch directly to background tabs."
         );
       }
-      if (msg.includes("WINDOW_NOT_RAISED") || msg.includes("SEARCH_NOT_RUNNING")) {
+      if (msg.includes("WINDOW_AMBIGUOUS") || msg.includes("SEARCH_NOT_RUNNING")) {
         await openUrlInSearch(tab.url);
         return;
       }
       if (!msg.includes("INDEX_STALE")) {
         throw err;
       }
-      // Fall through to Tier 3 when tab moved/reordered
     }
   }
 
-  // Tier 3: Query live active index across all windows (handles moved tabs too) + Next/Previous Tab steps
-  const stepScript = `
-set targetWinId to ${Math.max(0, Math.floor(tab.windowId))}
-set hintTabIdx to ${Math.max(1, Math.floor(tab.tabIndex))}
-set targetUrl to "${escapedUrl}"
-
-tell application id "${SEARCH_BUNDLE_ID}"
-  if not running then error "SEARCH_NOT_RUNNING"
-  set matchedWin to missing value
-  set matchedWinTitle to ""
-  set winCount to count of windows
-  set activeIdx to 0
-  set targetIdx to 0
-
-  -- First try the original window ID and verify it still holds targetUrl
-  considering case
-    repeat with w in windows
-      set wid to 0
-      try
-        set wid to id of w
-      end try
-      if wid is targetWinId then
-        try
-          set urls to URL of tabs of w
-          if hintTabIdx <= (count of urls) and ((item hintTabIdx of urls as text) is targetUrl) then
-            set matchedWin to w
-            set targetIdx to hintTabIdx
-          else
-            repeat with i from 1 to count of urls
-              if (item i of urls as text) is targetUrl then
-                set matchedWin to w
-                set targetIdx to i
-                exit repeat
-              end if
-            end repeat
-          end if
-        end try
-        exit repeat
-      end if
-    end repeat
-
-    -- If the tab moved to another window, search every window
-    if matchedWin is missing value then
-      repeat with w in windows
-        try
-          set urls to URL of tabs of w
-          repeat with i from 1 to count of urls
-            if (item i of urls as text) is targetUrl then
-              set matchedWin to w
-              set targetIdx to i
-              exit repeat
-            end if
-          end repeat
-        end try
-        if matchedWin is not missing value then exit repeat
-      end repeat
-    end if
-  end considering
-
-  if matchedWin is missing value then error "TAB_NOT_FOUND"
-
-  set tabRefs to tabs of matchedWin
-  set ct to missing value
-  try
-    set ct to current tab of matchedWin
-  end try
-
-  if ct is not missing value then
-    try
-      set rawCtName to name of ct
-      if rawCtName is not missing value then set matchedWinTitle to rawCtName as text
-    end try
-    repeat with i from 1 to count of tabRefs
-      try
-        if item i of tabRefs is ct then
-          set activeIdx to i
-          exit repeat
-        end if
-      end try
-    end repeat
-  end if
-
-  if activeIdx is 0 then error "ACTIVE_TAB_UNKNOWN"
-  activate
-end tell
-
-set delta to targetIdx - activeIdx
-
-tell application "System Events"
-  set procs to (every application process whose bundle identifier is "${SEARCH_BUNDLE_ID}")
-  if (count of procs) is 0 then error "PROCESS_NOT_FOUND"
-  tell item 1 of procs
-    set frontmost to true
-    if winCount > 1 then
-      set raisedWin to false
-      if matchedWinTitle is not "" then
-        repeat with sw in windows
-          try
-            if (subrole of sw is "AXStandardWindow") and ((name of sw as text) is matchedWinTitle) then
-              perform action "AXRaise" of sw
-              set raisedWin to true
-              exit repeat
-            end if
-          end try
-        end repeat
-      end if
-      if not raisedWin then error "WINDOW_NOT_RAISED"
-    end if
-    if delta > 0 then
-      repeat delta times
-        click menu item "Next Tab" of menu "Tabs" of menu bar 1
-      end repeat
-    else if delta < 0 then
-      repeat (-delta) times
-        click menu item "Previous Tab" of menu "Tabs" of menu bar 1
-      end repeat
-    end if
-  end tell
-end tell
-`;
-
+  // Tier 3: Live active-index query across all windows + Next/Previous Tab steps via argv
   try {
-    await runAppleScript(stepScript);
+    await executeAppleScript(STEP_TAB_SWITCH_SCRIPT, [winIdArg, tabIdxArg, tab.url]);
   } catch (err) {
     const message = extractAppleScriptErrorMessage(err);
     if (
       message.includes("SEARCH_NOT_RUNNING") ||
       message.includes("TAB_NOT_FOUND") ||
       message.includes("ACTIVE_TAB_UNKNOWN") ||
-      message.includes("WINDOW_NOT_RAISED")
+      message.includes("WINDOW_AMBIGUOUS")
     ) {
       await openUrlInSearch(tab.url);
       return;
@@ -561,50 +551,51 @@ export async function activateSearchBrowser(): Promise<void> {
   await execFileAsync("open", ["-b", SEARCH_BUNDLE_ID]);
 }
 
+const TRIGGER_MENU_SCRIPT = `
+on run argv
+  set menuName to item 1 of argv
+  set itemName to item 2 of argv
+
+  tell application id "com.officecommun.search" to activate
+  tell application "System Events"
+    set targetProc to missing value
+    repeat 30 times
+      set procs to (every application process whose bundle identifier is "com.officecommun.search")
+      if (count of procs) > 0 then
+        set candidate to item 1 of procs
+        try
+          if (count of menu bar items of menu bar 1 of candidate) > 0 then
+            set targetProc to candidate
+            exit repeat
+          end if
+        end try
+      end if
+      delay 0.1
+    end repeat
+    if targetProc is missing value then
+      error "SEARCH_NOT_READY"
+    end if
+    tell targetProc
+      set frontmost to true
+      set targetItem to menu item itemName of menu menuName of menu bar 1
+      if not (enabled of targetItem) then
+        error "MENU_ITEM_DISABLED"
+      end if
+      click targetItem
+    end tell
+  end tell
+end run
+`;
+
 /**
- * Trigger a Search Browser menu bar item (e.g. File -> New Window / New Tab / New Private Tab / Reopen Closed Tab).
- * Polls until the Search process and menu bar are ready after a cold launch, and checks item enabled state.
+ * Trigger a Search Browser menu bar item (passing menu and item names via argv).
  */
 export async function triggerSearchMenuItem(
   menuName: "File" | "Tabs" | "Bookmarks" | "History" | "View",
   itemName: string
 ): Promise<void> {
-  const safeMenu = menuName.replace(/"/g, '\\"');
-  const safeItem = itemName.replace(/"/g, '\\"');
-
-  const script = `
-tell application id "${SEARCH_BUNDLE_ID}" to activate
-tell application "System Events"
-  set targetProc to missing value
-  repeat 30 times
-    set procs to (every application process whose bundle identifier is "${SEARCH_BUNDLE_ID}")
-    if (count of procs) > 0 then
-      set candidate to item 1 of procs
-      try
-        if (count of menu bar items of menu bar 1 of candidate) > 0 then
-          set targetProc to candidate
-          exit repeat
-        end if
-      end try
-    end if
-    delay 0.1
-  end repeat
-  if targetProc is missing value then
-    error "SEARCH_NOT_READY"
-  end if
-  tell targetProc
-    set frontmost to true
-    set targetItem to menu item "${safeItem}" of menu "${safeMenu}" of menu bar 1
-    if not (enabled of targetItem) then
-      error "MENU_ITEM_DISABLED"
-    end if
-    click targetItem
-  end tell
-end tell
-`;
-
   try {
-    await runAppleScript(script);
+    await executeAppleScript(TRIGGER_MENU_SCRIPT, [menuName, itemName]);
   } catch (err) {
     const message = extractAppleScriptErrorMessage(err);
     if (message.includes("MENU_ITEM_DISABLED")) {

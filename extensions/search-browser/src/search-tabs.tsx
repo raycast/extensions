@@ -14,7 +14,7 @@ export default function SearchTabsCommand() {
   const preferences = getPreferenceValues<Preferences>();
 
   const { data: installed, isLoading: checkingInstall } = useSearchInstalled();
-  const { data, isLoading, revalidate } = useOpenTabs();
+  const { data, error, isLoading, revalidate } = useOpenTabs();
 
   const includeRemote = preferences.includeRemoteTabs !== false;
   const includePins = preferences.includePinnedTabs !== false;
@@ -110,6 +110,21 @@ export default function SearchTabsCommand() {
         ) : undefined
       }
     >
+      {error && (
+        <List.Section title="Data Read Error">
+          <List.Item
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+            title="Failed to read Search Browser data"
+            subtitle={error.message}
+            actions={
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
       {data?.permissionDenied && (
         <List.Section title="Permission Required">
           <List.Item
@@ -203,7 +218,7 @@ export default function SearchTabsCommand() {
         </List.Section>
       )}
 
-      {!hasResults && !searchText.trim() && !isLoading && (
+      {!hasResults && !error && !searchText.trim() && !isLoading && (
         <List.EmptyView
           icon={Icon.AppWindowList}
           title="No Open Tabs Found"

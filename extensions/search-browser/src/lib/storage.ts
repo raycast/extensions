@@ -87,11 +87,22 @@ interface RawPagesIconMap {
 const VALID_ICON_HASH = /^[0-9a-f]{32}$/i;
 
 function readJsonFile<T>(filePath: string): T | null {
+  if (!fs.existsSync(filePath)) return null;
   try {
-    if (!fs.existsSync(filePath)) return null;
     const raw = fs.readFileSync(filePath, "utf8");
     if (!raw.trim()) return null;
     return JSON.parse(raw) as T;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException)?.code;
+    if (code === "ENOENT") return null;
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to read ${path.basename(filePath)}: ${reason}`);
+  }
+}
+
+function readJsonFileBestEffort<T>(filePath: string): T | null {
+  try {
+    return readJsonFile<T>(filePath);
   } catch {
     return null;
   }
@@ -480,28 +491,83 @@ export function readRemoteDeviceTabs(
  * Lightweight local snapshot for Search Tabs (skips reading history.json and bookmarks.json).
  */
 export function readTabsLocalSnapshot(baseDir: string = SEARCH_DATA_DIR) {
-  const icloud = readICloudFile(baseDir);
-  const spaces = readSpaces(baseDir, icloud);
-  const settings = readBrowserSettings(baseDir, icloud);
-  const pins = readPinnedTabs(baseDir, spaces, icloud);
-  const remoteDevices = readRemoteDeviceTabs(baseDir, icloud);
+  const errors: string[] = [];
+  let icloud: RawICloudFile | null = null;
+  try {
+    icloud = readICloudFile(baseDir);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
 
-  return { spaces, settings, pins, remoteDevices };
+  let spaces: SpaceInfo[] = [{ id: "00000000-0000-0000-0000-000000000001", name: "Personal", colour: 0 }];
+  try {
+    spaces = readSpaces(baseDir, icloud);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
+
+  const settings = readBrowserSettings(baseDir, icloud);
+
+  let pins: PinnedTab[] = [];
+  try {
+    pins = readPinnedTabs(baseDir, spaces, icloud);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
+
+  const remoteDevices = readRemoteDeviceTabs(baseDir, icloud);
+  const error = errors.length > 0 ? new Error(errors.join(" · ")) : null;
+
+  return { spaces, settings, pins, remoteDevices, error };
 }
 
 /**
  * Read spaces, pins, bookmarks, history, remote tabs, and settings while parsing `icloud.json` only once.
  */
 export function readLocalBrowserSnapshot(baseDir: string = SEARCH_DATA_DIR) {
-  const icloud = readICloudFile(baseDir);
-  const spaces = readSpaces(baseDir, icloud);
-  const settings = readBrowserSettings(baseDir, icloud);
-  const pins = readPinnedTabs(baseDir, spaces, icloud);
-  const remoteDevices = readRemoteDeviceTabs(baseDir, icloud);
-  const bookmarks = readBookmarks(baseDir, icloud);
-  const history = readHistory(baseDir);
+  const errors: string[] = [];
+  let icloud: RawICloudFile | null = null;
+  try {
+    icloud = readICloudFile(baseDir);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
 
-  return { spaces, settings, pins, remoteDevices, bookmarks, history };
+  let spaces: SpaceInfo[] = [{ id: "00000000-0000-0000-0000-000000000001", name: "Personal", colour: 0 }];
+  try {
+    spaces = readSpaces(baseDir, icloud);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
+
+  const settings = readBrowserSettings(baseDir, icloud);
+
+  let pins: PinnedTab[] = [];
+  try {
+    pins = readPinnedTabs(baseDir, spaces, icloud);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
+
+  const remoteDevices = readRemoteDeviceTabs(baseDir, icloud);
+
+  let bookmarks: BookmarkItem[] = [];
+  try {
+    bookmarks = readBookmarks(baseDir, icloud);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
+
+  let history: HistoryEntry[] = [];
+  try {
+    history = readHistory(baseDir);
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
+
+  const error = errors.length > 0 ? new Error(errors.join(" · ")) : null;
+
+  return { spaces, settings, pins, remoteDevices, bookmarks, history, error };
 }
 
 // --- Local Search Browser Favicon Cache ---
@@ -521,7 +587,7 @@ function loadPagesIconState(baseDir: string = SEARCH_DATA_DIR): CachedIconState 
   if (cached && now - cached.loadedAt < ICON_CACHE_TTL_MS) {
     return cached;
   }
-  const parsed = readJsonFile<RawPagesIconMap>(path.join(baseDir, "icons", "pages.json")) ?? {};
+  const parsed = readJsonFileBestEffort<RawPagesIconMap>(path.join(baseDir, "icons", "pages.json")) ?? {};
   const state: CachedIconState = { loadedAt: now, data: parsed, resolved: new Map() };
   cachedIconIndexes.set(baseDir, state);
   return state;

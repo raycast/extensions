@@ -141,7 +141,7 @@
       "arguments": [
         {
           "name": "url",
-          "placeholder": "URL or search query",
+          "placeholder": "URL or Search Query",
           "type": "text",
           "required": false
         }
@@ -156,7 +156,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "URL or search query (optional)",
+          "placeholder": "URL or Search Query (Optional)",
           "type": "text",
           "required": false
         }
@@ -254,6 +254,29 @@
         ]
       },
       {
+        "input": "@search-browser what is my current tab?",
+        "mocks": {
+          "get-focused-tab": {
+            "permissionDenied": false,
+            "tab": {
+              "title": "Search Browser",
+              "url": "https://searchbrowser.app/",
+              "windowId": 1,
+              "space": "Personal",
+              "profile": "Personal"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-focused-tab"
+          },
+          {
+            "includes": "searchbrowser.app"
+          }
+        ]
+      },
+      {
         "input": "@search-browser find raycast in my history",
         "mocks": {
           "search-history": {
@@ -343,7 +366,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "tsc --outDir .test-dist --module commonjs --target ES2023 --esModuleInterop --skipLibCheck --strict src/lib/constants.ts src/lib/types.ts src/lib/utils.ts src/lib/storage.ts src/lib/applescript-parser.ts && node --test tests/*.test.mjs && rm -rf .test-dist",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
