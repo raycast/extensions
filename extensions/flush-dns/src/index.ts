@@ -1,10 +1,9 @@
 import { confirmAlert, showHUD } from "@raycast/api";
-import { execFileSync, execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { platform } from "node:os";
 import { getMacOSCommandsForVersion } from "./macOSCommands";
 import { runWithPrivileges, type PrivilegedCommand } from "./sudoSupport";
-
-const WINDOWS_COMMAND = "ipconfig /flushdns";
+import { flushWindowsDns } from "./windowsSupport";
 
 export default async function main() {
   const osPlatform = platform();
@@ -23,13 +22,13 @@ export default async function main() {
       console.log(`🚀 Executing privileged DNS flush commands: ${commandSummary}`);
       await runWithPrivileges(commands);
     } else {
-      console.log(`🚀 Executing DNS flush command: ${WINDOWS_COMMAND}`);
-      execSync(WINDOWS_COMMAND, { stdio: "ignore" });
+      console.log("🚀 Executing DNS flush command: ipconfig /flushdns");
+      await flushWindowsDns();
     }
 
     await showHUD("✅ DNS Cache Flushed Successfully");
   } catch (error) {
-    await handleExecutionError(error, osPlatform);
+    await handleExecutionError(error);
   }
 }
 
@@ -63,21 +62,29 @@ async function getMacOSCommands(): Promise<readonly PrivilegedCommand[] | null> 
   }
 }
 
-async function handleExecutionError(error: unknown, os: string) {
-  let errorMessage = "⚠️ Error flushing DNS cache";
+async function handleExecutionError(error: unknown) {
+  console.error("💥 Execution failed:", error);
+  await showHUD(`⚠️ ${getErrorSummary(error)}`.substring(0, 64));
+}
 
-  if (typeof error === "object" && error !== null && "stderr" in error) {
-    const stderr = (error as { stderr?: Buffer | string }).stderr?.toString() || "";
-    if (stderr) {
-      console.error(".Stderr:", stderr);
-      if (os === "win32" && stderr.includes("The requested operation requires elevation")) {
-        errorMessage = "⚠️ Run Raycast as Administrator";
-      } else {
-        errorMessage = stderr.split("\n")[0].substring(0, 64);
-      }
-    }
+function getErrorSummary(error: unknown): string {
+  if (typeof error !== "object" || error === null) {
+    return "Error flushing DNS cache";
   }
 
-  console.error("💥 Execution failed:", error);
-  await showHUD(errorMessage);
+  const lines = (output: unknown) =>
+    String(output ?? "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+  // Command-line tools such as ipconfig print their errors on stdout, after a header.
+  const stderrLines = "stderr" in error ? lines(error.stderr) : [];
+  const stdoutLines = "stdout" in error ? lines(error.stdout) : [];
+
+  return (
+    stderrLines[0] ??
+    stdoutLines[stdoutLines.length - 1] ??
+    ("message" in error && typeof error.message === "string" ? error.message : "Error flushing DNS cache")
+  );
 }
