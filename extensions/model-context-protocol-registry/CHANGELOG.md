@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Klakix MCP Server] - {PR_MERGE_DATE}
+## [Add Klakix MCP Server] - 2026-11-27
 
 - Add Klakix to the official registry: generate AI video, images, voiceovers and music from your assistant (Seedance, Kling, Veo, Wan, Nano Banana, GPT Image and more). Hosted Streamable HTTP server at https://klakix.com/api/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a free Klakix account; generations spend credits.
 
