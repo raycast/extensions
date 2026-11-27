@@ -35,28 +35,36 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
       }
     };
 
+    const errors: unknown[] = [];
+
     // 1. Check Premiere Pro Prefs in Documents
     try {
       const prefsPaths = await this.readPremierePrefsRecents();
       for (const p of prefsPaths) addPath(p);
-    } catch {
-      // Non-blocking
+    } catch (err) {
+      errors.push(err);
     }
 
     // 2. Check MediaBrowser Plist in Preferences
     try {
       const mbPaths = await this.readMediaBrowserRecents();
       for (const p of mbPaths) addPath(p);
-    } catch {
-      // Non-blocking
+    } catch (err) {
+      errors.push(err);
     }
 
     // 3. Check Spotlight recent documents
     try {
       const spotlightPaths = await this.querySpotlightRecents(limit);
       for (const p of spotlightPaths) addPath(p);
-    } catch {
-      // Non-blocking
+    } catch (err) {
+      errors.push(err);
+    }
+
+    // If no recent files were discovered and errors occurred, throw so the UI can show a retry action
+    if (orderedList.length === 0 && errors.length > 0) {
+      const details = errors.map((e) => (e instanceof Error ? e.message : String(e))).join("; ");
+      throw new Error(`Failed to discover recent Premiere Pro projects: ${details}`);
     }
 
     return orderedList.slice(0, limit);
@@ -75,6 +83,9 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
     } else if (scope === "all" || scope === "global") {
       scopeDir = undefined;
     } else {
+      if (!fs.existsSync(scope)) {
+        throw new Error(`Search location does not exist or is not mounted: ${scope}`);
+      }
       scopeDir = scope;
     }
     const trimmed = searchTerm.trim();
@@ -171,6 +182,7 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
     const premiereDocsDir = path.join(os.homedir(), "Documents/Adobe/Premiere Pro");
     if (!fs.existsSync(premiereDocsDir)) return results;
 
+    let readError: unknown = null;
     try {
       const versionDirs = await fs.promises.readdir(premiereDocsDir);
       for (const vDir of versionDirs) {
@@ -178,7 +190,10 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
         const vStat = await fs.promises.stat(fullVDir).catch(() => null);
         if (!vStat || !vStat.isDirectory()) continue;
 
-        const subEntries = await fs.promises.readdir(fullVDir);
+        const subEntries = await fs.promises.readdir(fullVDir).catch((err) => {
+          readError = err;
+          return [];
+        });
         const profileDirs = subEntries.filter((s) => s.startsWith("Profile-"));
 
         // If no Profile-* folder, check if Prefs file sits directly in version folder
@@ -186,22 +201,30 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
 
         for (const targetDir of candidateDirs) {
           const prefsFile = path.join(targetDir, "Adobe Premiere Pro Prefs");
-          if (fs.existsSync(prefsFile)) {
-            const content = await fs.promises.readFile(prefsFile, "utf8");
-            // Match <BE.Prefs.MRU.Document.0>path</BE.Prefs.MRU.Document.0>
-            const mruRegex = /<BE\.Prefs\.MRU\.Document\.\d+>([^<]+)<\/BE\.Prefs\.MRU\.Document\.\d+>/gi;
-            let match: RegExpExecArray | null;
-            while ((match = mruRegex.exec(content)) !== null) {
-              const p = match[1].trim();
-              if (p && fs.existsSync(p)) {
-                results.push(p);
+          try {
+            if (fs.existsSync(prefsFile)) {
+              const content = await fs.promises.readFile(prefsFile, "utf8");
+              // Match <BE.Prefs.MRU.Document.0>path</BE.Prefs.MRU.Document.0>
+              const mruRegex = /<BE\.Prefs\.MRU\.Document\.\d+>([^<]+)<\/BE\.Prefs\.MRU\.Document\.\d+>/gi;
+              let match: RegExpExecArray | null;
+              while ((match = mruRegex.exec(content)) !== null) {
+                const p = match[1].trim();
+                if (p && fs.existsSync(p)) {
+                  results.push(p);
+                }
               }
             }
+          } catch (err) {
+            readError = err;
           }
         }
       }
-    } catch {
-      // Non-blocking
+    } catch (err) {
+      readError = err;
+    }
+
+    if (results.length === 0 && readError) {
+      throw readError;
     }
 
     return results;
@@ -214,25 +237,21 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
     const plistPath = path.join(os.homedir(), "Library/Preferences/com.adobe.mediabrowser.plist");
     if (!fs.existsSync(plistPath)) return [];
 
-    try {
-      const { stdout } = await execFileAsync("/usr/bin/plutil", ["-convert", "xml1", "-o", "-", plistPath], {
-        timeout: 4000,
-        encoding: "utf8",
-      });
+    const { stdout } = await execFileAsync("/usr/bin/plutil", ["-convert", "xml1", "-o", "-", plistPath], {
+      timeout: 4000,
+      encoding: "utf8",
+    });
 
-      const paths: string[] = [];
-      const regex = /<key>file-path<\/key>\s*<string>([^<]+)<\/string>/g;
-      let match: RegExpExecArray | null;
-      while ((match = regex.exec(stdout)) !== null) {
-        const candidate = match[1].trim();
-        if (candidate.endsWith(".prproj") && fs.existsSync(candidate)) {
-          paths.push(candidate);
-        }
+    const paths: string[] = [];
+    const regex = /<key>file-path<\/key>\s*<string>([^<]+)<\/string>/g;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(stdout)) !== null) {
+      const candidate = match[1].trim();
+      if (candidate.endsWith(".prproj") && fs.existsSync(candidate)) {
+        paths.push(candidate);
       }
-      return paths;
-    } catch {
-      return [];
     }
+    return paths;
   }
 
   private async querySpotlightRecents(limit: number): Promise<string[]> {

@@ -42,20 +42,28 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
       }
     };
 
+    const errors: unknown[] = [];
+
     // 1. Check Premiere Pro Prefs in User Documents
     try {
       const prefsPaths = await this.readPremierePrefsRecents();
       for (const p of prefsPaths) addPath(p);
-    } catch {
-      // Non-blocking
+    } catch (err) {
+      errors.push(err);
     }
 
     // 2. Check Windows Recent items folder
     try {
       const recentLnkPaths = await this.readWindowsRecentFolder();
       for (const p of recentLnkPaths) addPath(p);
-    } catch {
-      // Non-blocking
+    } catch (err) {
+      errors.push(err);
+    }
+
+    // If no recent files were discovered and errors occurred, throw so the UI can show a retry action
+    if (ordered.length === 0 && errors.length > 0) {
+      const details = errors.map((e) => (e instanceof Error ? e.message : String(e))).join("; ");
+      throw new Error(`Failed to discover recent Premiere Pro projects: ${details}`);
     }
 
     return ordered.slice(0, limit);
@@ -91,6 +99,9 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
         searchRoots = [systemDrive];
       }
     } else {
+      if (!fs.existsSync(scope)) {
+        throw new Error(`Search location does not exist or is not mounted: ${scope}`);
+      }
       searchRoots = [scope];
     }
 
@@ -174,6 +185,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const premiereDocsDir = path.join(userProfile, "Documents/Adobe/Premiere Pro");
     if (!fs.existsSync(premiereDocsDir)) return results;
 
+    let readError: unknown = null;
     try {
       const versionDirs = await fs.promises.readdir(premiereDocsDir);
       for (const vDir of versionDirs) {
@@ -181,27 +193,38 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
         const vStat = await fs.promises.stat(fullVDir).catch(() => null);
         if (!vStat || !vStat.isDirectory()) continue;
 
-        const subEntries = await fs.promises.readdir(fullVDir);
+        const subEntries = await fs.promises.readdir(fullVDir).catch((err) => {
+          readError = err;
+          return [];
+        });
         const profileDirs = subEntries.filter((s) => s.startsWith("Profile-"));
         const candidateDirs = profileDirs.length > 0 ? profileDirs.map((p) => path.join(fullVDir, p)) : [fullVDir];
 
         for (const targetDir of candidateDirs) {
           const prefsFile = path.join(targetDir, "Adobe Premiere Pro Prefs");
-          if (fs.existsSync(prefsFile)) {
-            const content = await fs.promises.readFile(prefsFile, "utf8");
-            const mruRegex = /<BE\.Prefs\.MRU\.Document\.\d+>([^<]+)<\/BE\.Prefs\.MRU\.Document\.\d+>/gi;
-            let match: RegExpExecArray | null;
-            while ((match = mruRegex.exec(content)) !== null) {
-              const p = match[1].trim();
-              if (p && fs.existsSync(p)) {
-                results.push(this.normalizePath(p));
+          try {
+            if (fs.existsSync(prefsFile)) {
+              const content = await fs.promises.readFile(prefsFile, "utf8");
+              const mruRegex = /<BE\.Prefs\.MRU\.Document\.\d+>([^<]+)<\/BE\.Prefs\.MRU\.Document\.\d+>/gi;
+              let match: RegExpExecArray | null;
+              while ((match = mruRegex.exec(content)) !== null) {
+                const p = match[1].trim();
+                if (p && fs.existsSync(p)) {
+                  results.push(this.normalizePath(p));
+                }
               }
             }
+          } catch (err) {
+            readError = err;
           }
         }
       }
-    } catch {
-      // Non-blocking
+    } catch (err) {
+      readError = err;
+    }
+
+    if (results.length === 0 && readError) {
+      throw readError;
     }
 
     return results;
@@ -215,16 +238,12 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const escapedRecentDir = recentDir.replace(/'/g, "''");
     const script = `$sh = New-Object -ComObject WScript.Shell; Get-ChildItem -LiteralPath '${escapedRecentDir}' -Filter '*.lnk' -ErrorAction SilentlyContinue | ForEach-Object { try { $target = $sh.CreateShortcut($_.FullName).TargetPath; if ($target -and $target.EndsWith('.prproj', [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $target)) { $target } } catch {} }`;
 
-    try {
-      const stdout = await runPowerShellScript(script, { timeout: 6000 });
+    const stdout = await runPowerShellScript(script, { timeout: 6000 });
 
-      return stdout
-        .split(/\r?\n/)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0 && p.toLowerCase().endsWith(".prproj") && fs.existsSync(p))
-        .map((p) => this.normalizePath(p));
-    } catch {
-      return [];
-    }
+    return stdout
+      .split(/\r?\n/)
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0 && p.toLowerCase().endsWith(".prproj") && fs.existsSync(p))
+      .map((p) => this.normalizePath(p));
   }
 }
