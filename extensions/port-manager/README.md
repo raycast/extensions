@@ -9,6 +9,12 @@ Find processes that are listening on TCP ports, name frequently used ports, and 
 - **Named Ports** lets you assign memorable labels to ports in the list.
 - **Open Ports in Menu Bar** provides the open-port list from the macOS menu bar.
 
+## Runtime and framework detection
+
+**Open Ports** shows what each listener is running as its icon and in the detail panel. The runtime comes from the executable (`node`, `bun`, `python3`, `postgres`, `redis-server`, …). For interpreted runtimes, the framework comes from the command line (`node_modules/.bin/astro`, `manage.py`, `uvicorn`, …). On macOS, a Node.js, Bun or Deno server whose command line names no framework is matched against the nearest `package.json` above its working directory, which finds libraries such as Express and narrows `vite` down to SvelteKit, React Router or SolidStart. Windows does not expose other processes' working directories, so detection there uses the command line only.
+
+Runtime and framework logos are from [Simple Icons](https://simpleicons.org/) ([CC0](https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md)). Brand logos remain trademarks of their owners.
+
 ## Platform support
 
 | Capability                      | macOS                                  | Windows                                  |

@@ -13,6 +13,7 @@ vi.mock("@raycast/api", () => ({
     }
   },
   Color: { Green: "green", Orange: "orange", Blue: "blue" },
+  Icon: { Terminal: "terminal" },
   Action: { Style: { Destructive: "destructive" } },
   Toast: { Style: { Success: "success", Failure: "failure" } },
   showToast: vi.fn(),
