@@ -1,6 +1,6 @@
 # Flush DNS Changelog
 
-## [Windows Elevation] - {PR_MERGE_DATE}
+## [Windows Elevation] - 2026-11-27
 
 - Asks for administrator permission on Windows when flushing the DNS cache requires elevation ([#34051](https://github.com/raycast/extensions/issues/34051)).
 - Shows the actual error message when flushing fails.
