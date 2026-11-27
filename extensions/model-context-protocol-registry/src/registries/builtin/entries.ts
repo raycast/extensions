@@ -5166,6 +5166,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
     remoteUrl: "https://whogothacked.com/mcp",
   },
+  {
+    name: "kite",
+    title: "Kite",
+    description:
+      "Design tool your AI agents and your team share: read and draw real, editable layers (frames, text, components, auto layout) in the same Kite file your team edits live, then copy frames to Figma or as HTML, React or Tailwind. Hosted Streamable HTTP server at https://kite.new/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Free plan with 200 agent actions a day; paid plans available.",
+    icon: "https://kite.new/apple-icon.png",
+    homepage: "https://kite.new/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://kite.new/api/mcp"],
+    },
+    remoteUrl: "https://kite.new/api/mcp",
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
