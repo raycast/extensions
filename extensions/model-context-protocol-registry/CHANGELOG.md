@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Figment Mac hosting MCP Server] - 2026-11-27
+
+- Add Figment Mac hosting to the official registry: rent a Mac in the cloud by the hour or the day from your AI agent (plans and prices, prepaid credit through a Stripe link, order, SSH and screen access, stop). 8 tools. Hosted Streamable HTTP server at https://figment.so/api/mcp with an API key from its account tool, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Scigantic MCP Server] - 2026-11-27
 
 - Add Scigantic to the official registry: search a catalog of 8,000+ public scientific datasets, read a dataset's schema card, list its files and get code that loads it. Hosted Streamable HTTP server at https://api.scigantic.com/mcp/catalog with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
