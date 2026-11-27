@@ -2,10 +2,10 @@ import { getPreferenceValues } from "@raycast/api";
 import { ChocoPreferences } from "./types";
 
 /**
- * Returns typed extension preferences with safe defaults.
+ * Returns typed extension preferences using the generated Preferences interface.
  */
 export function getChocoPreferences(): ChocoPreferences {
-  const prefs = getPreferenceValues<Partial<ChocoPreferences>>();
+  const prefs = getPreferenceValues<Preferences>();
   return {
     chocoPath: prefs.chocoPath?.trim() || undefined,
     elevationMethod: prefs.elevationMethod ?? "uac",

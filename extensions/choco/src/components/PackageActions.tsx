@@ -4,10 +4,11 @@ import {
   Alert,
   confirmAlert,
   Icon,
+  Keyboard,
   showToast,
   Toast,
-  Keyboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   ElevationCanceledError,
   installPackage,
@@ -18,28 +19,37 @@ import {
 } from "../choco/cli";
 import {
   ChocoPackage,
+  CliResult,
   InstalledPackage,
   OutdatedPackage,
 } from "../choco/types";
 import { InstallVersionForm } from "./InstallVersionForm";
 import { PackageInfoDetail } from "./PackageInfoDetail";
 
+export type PackageTaskStatus = "completed" | "launched" | "failed";
+
 export async function runPackageTask(options: {
   loadingTitle: string;
   successTitle: string;
   errorTitle: string;
-  task: () => Promise<unknown>;
-}): Promise<boolean> {
+  task: () => Promise<CliResult | void>;
+}): Promise<PackageTaskStatus> {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: options.loadingTitle,
   });
 
   try {
-    await options.task();
+    const result = await options.task();
+    if (result && result.launchedInTerminal) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Opened in Terminal";
+      toast.message = "Finish the operation in the terminal, then refresh.";
+      return "launched";
+    }
     toast.style = Toast.Style.Success;
     toast.title = options.successTitle;
-    return true;
+    return "completed";
   } catch (error) {
     if (
       error instanceof ElevationCanceledError ||
@@ -49,12 +59,11 @@ export async function runPackageTask(options: {
       toast.title = "Elevation Canceled";
       toast.message =
         "Administrator permission is required to modify packages.";
-      return false;
+      return "failed";
     }
-    toast.style = Toast.Style.Failure;
-    toast.title = options.errorTitle;
-    toast.message = error instanceof Error ? error.message : String(error);
-    return false;
+    await toast.hide();
+    await showFailureToast(error, { title: options.errorTitle });
+    return "failed";
   }
 }
 
@@ -80,33 +89,29 @@ export function PackageActions({
     `https://community.chocolatey.org/packages/${encodeURIComponent(id)}`;
 
   async function handleInstall(forceTerminal = false) {
-    const ok = await runPackageTask({
+    const status = await runPackageTask({
       loadingTitle: forceTerminal
         ? `Opening terminal to install ${id}...`
         : `Installing ${id}...`,
-      successTitle: forceTerminal
-        ? `Launched installer for ${id}`
-        : `Installed ${id}`,
+      successTitle: `Installed ${id}`,
       errorTitle: `Failed to install ${id}`,
       task: () => installPackage(id, { forceTerminal }),
     });
-    if (ok) {
+    if (status === "completed") {
       onRefresh();
     }
   }
 
   async function handleUpgrade(forceTerminal = false) {
-    const ok = await runPackageTask({
+    const status = await runPackageTask({
       loadingTitle: forceTerminal
         ? `Opening terminal to upgrade ${id}...`
         : `Upgrading ${id}...`,
-      successTitle: forceTerminal
-        ? `Launched upgrader for ${id}`
-        : `Upgraded ${id}`,
+      successTitle: `Upgraded ${id}`,
       errorTitle: `Failed to upgrade ${id}`,
       task: () => upgradePackage(id, { forceTerminal }),
     });
-    if (ok) {
+    if (status === "completed") {
       onRefresh();
     }
   }
@@ -124,13 +129,15 @@ export function PackageActions({
       return;
     }
 
-    const ok = await runPackageTask({
-      loadingTitle: `Uninstalling ${id}...`,
+    const status = await runPackageTask({
+      loadingTitle: forceTerminal
+        ? `Opening terminal to uninstall ${id}...`
+        : `Uninstalling ${id}...`,
       successTitle: `Uninstalled ${id}`,
       errorTitle: `Failed to uninstall ${id}`,
       task: () => uninstallPackage(id, { forceTerminal }),
     });
-    if (ok) {
+    if (status === "completed") {
       onRefresh();
     }
   }
@@ -140,13 +147,13 @@ export function PackageActions({
       return;
     }
     const willPin = !installed.pinned;
-    const ok = await runPackageTask({
+    const status = await runPackageTask({
       loadingTitle: willPin ? `Pinning ${id}...` : `Unpinning ${id}...`,
       successTitle: willPin ? `Pinned ${id}` : `Unpinned ${id}`,
       errorTitle: `Failed to ${willPin ? "pin" : "unpin"} ${id}`,
       task: () => (willPin ? pinPackage(id) : unpinPackage(id)),
     });
-    if (ok) {
+    if (status === "completed") {
       onRefresh();
     }
   }
@@ -180,7 +187,7 @@ export function PackageActions({
           <Action
             title={installed.pinned ? "Unpin Package" : "Pin Package"}
             icon={installed.pinned ? Icon.LockUnlocked : Icon.Pin}
-            shortcut={{ modifiers: ["ctrl"], key: "p" }}
+            shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={handleTogglePin}
           />
         )}
@@ -189,7 +196,7 @@ export function PackageActions({
             title="Uninstall Package"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={() => handleUninstall(false)}
           />
         )}
@@ -210,7 +217,10 @@ export function PackageActions({
         <Action
           title={installed ? "Upgrade in Terminal" : "Install in Terminal"}
           icon={Icon.Terminal}
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+          }}
           onAction={() =>
             installed ? handleUpgrade(true) : handleInstall(true)
           }
@@ -218,7 +228,10 @@ export function PackageActions({
         <Action.Push
           title="Show Choco Info"
           icon={Icon.Info}
-          shortcut={{ modifiers: ["ctrl"], key: "i" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "i" },
+            Windows: { modifiers: ["ctrl"], key: "i" },
+          }}
           target={<PackageInfoDetail packageId={id} />}
         />
       </ActionPanel.Section>
@@ -227,7 +240,7 @@ export function PackageActions({
         <Action.CopyToClipboard
           title="Copy Install Command"
           content={`choco install ${id} -y`}
-          shortcut={{ modifiers: ["ctrl"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
         <Action.CopyToClipboard title="Copy Package ID" content={id} />
         <Action.OpenInBrowser title="Open on Chocolatey" url={packageUrl} />

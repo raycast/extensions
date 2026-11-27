@@ -1,3 +1,4 @@
+import { runPowerShellScript } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
@@ -165,6 +166,14 @@ async function hasExecutable(name: string): Promise<boolean> {
   return res.exitCode === 0 && res.stdout.trim().length > 0;
 }
 
+function isElevationCanceledMessage(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("canceled by the user") ||
+    lower.includes("cancelled by the user")
+  );
+}
+
 /**
  * Runs an administrative Chocolatey command via PowerShell `Start-Process -Verb RunAs`,
  * capturing full output and exit code into temporary files.
@@ -196,27 +205,19 @@ async function runWithPowerShellUac(
 
   try {
     await writeFile(scriptPath, scriptContent, "utf8");
-    const launcherCommand = `Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',${escapePowerShellLiteral(scriptPath)}) -Verb RunAs -Wait -WindowStyle Hidden`;
-    const launchResult = await execRaw(
-      "powershell.exe",
-      ["-NoProfile", "-Command", launcherCommand],
-      600_000,
-    );
-
-    if (launchResult.exitCode !== 0) {
-      const combined =
-        `${launchResult.stderr}\n${launchResult.stdout}`.toLowerCase();
-      if (
-        combined.includes("canceled by the user") ||
-        combined.includes("cancelled by the user")
-      ) {
+    const quotedScriptArg = escapePowerShellLiteral(`"${scriptPath}"`);
+    const launcherCommand = `Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',${quotedScriptArg}) -Verb RunAs -Wait -WindowStyle Hidden`;
+    try {
+      await runPowerShellScript(launcherCommand, { timeout: 600_000 });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (isElevationCanceledMessage(msg)) {
         throw new ElevationCanceledError();
       }
       throw new ChocoCommandError(
-        launchResult.stderr.trim() ||
-          "Failed to launch elevated Chocolatey process.",
-        launchResult.exitCode,
-        launchResult.stderr,
+        msg.trim() || "Failed to launch elevated Chocolatey process.",
+        1,
+        msg,
       );
     }
 
@@ -236,45 +237,55 @@ async function runWithPowerShellUac(
 }
 
 /**
- * Opens an interactive elevated/normal terminal window running the Chocolatey command.
+ * Opens an elevated terminal window running the Chocolatey command.
+ * Returns `launchedInTerminal: true` because terminal execution runs interactively.
  */
 async function runInTerminal(
   chocoExe: string,
   args: string[],
 ): Promise<CliResult> {
-  const argString = [chocoExe, ...args].map(escapePowerShellLiteral).join(" ");
-  const psCommand = `& ${argString}; Write-Host ''; Read-Host 'Press Enter to close'`;
-  const hasWt = await hasExecutable("wt.exe");
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "raycast-choco-term-"));
+  const id = randomUUID();
+  const scriptPath = path.join(tempDir, `term-${id}.ps1`);
+  const psArgsArray = args.map(escapePowerShellLiteral).join(", ");
+  const scriptContent = [
+    "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8",
+    `$chocoExe = ${escapePowerShellLiteral(chocoExe)}`,
+    `$chocoArgs = @(${psArgsArray})`,
+    "& $chocoExe @chocoArgs",
+    "Write-Host ''",
+    "Read-Host 'Press Enter to close'",
+    `Remove-Item -LiteralPath ${escapePowerShellLiteral(tempDir)} -Recurse -Force -ErrorAction SilentlyContinue`,
+  ].join("\r\n");
 
-  if (hasWt) {
-    const launch = `Start-Process -FilePath 'wt.exe' -ArgumentList @('powershell.exe','-NoProfile','-Command',${escapePowerShellLiteral(psCommand)}) -Verb RunAs`;
-    const res = await execRaw(
-      "powershell.exe",
-      ["-NoProfile", "-Command", launch],
-      15_000,
-    );
-    if (
-      res.exitCode !== 0 &&
-      res.stderr.toLowerCase().includes("canceled by the user")
-    ) {
+  await writeFile(scriptPath, scriptContent, "utf8");
+  const quotedScriptArg = escapePowerShellLiteral(`"${scriptPath}"`);
+  const hasWt = await hasExecutable("wt.exe");
+  const launch = hasWt
+    ? `Start-Process -FilePath 'wt.exe' -ArgumentList @('powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',${quotedScriptArg}) -Verb RunAs`
+    : `Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',${quotedScriptArg}) -Verb RunAs`;
+
+  try {
+    await runPowerShellScript(launch, { timeout: 15_000 });
+  } catch (error) {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
+    const msg = error instanceof Error ? error.message : String(error);
+    if (isElevationCanceledMessage(msg)) {
       throw new ElevationCanceledError();
     }
-    return res;
+    throw new ChocoCommandError(
+      msg.trim() || "Failed to launch terminal Chocolatey process.",
+      1,
+      msg,
+    );
   }
 
-  const launch = `Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-Command',${escapePowerShellLiteral(psCommand)}) -Verb RunAs`;
-  const res = await execRaw(
-    "powershell.exe",
-    ["-NoProfile", "-Command", launch],
-    15_000,
-  );
-  if (
-    res.exitCode !== 0 &&
-    res.stderr.toLowerCase().includes("canceled by the user")
-  ) {
-    throw new ElevationCanceledError();
-  }
-  return res;
+  return {
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    launchedInTerminal: true,
+  };
 }
 
 /**
@@ -422,7 +433,9 @@ export async function installPackage(
   const result = await runChocoWrite(args, {
     overrideMethod: options.forceTerminal ? "terminal" : undefined,
   });
-  invalidatePackageCaches();
+  if (!result.launchedInTerminal) {
+    invalidatePackageCaches();
+  }
   return result;
 }
 
@@ -438,7 +451,9 @@ export async function upgradePackage(
   const result = await runChocoWrite(args, {
     overrideMethod: options.forceTerminal ? "terminal" : undefined,
   });
-  invalidatePackageCaches();
+  if (!result.launchedInTerminal) {
+    invalidatePackageCaches();
+  }
   return result;
 }
 
@@ -453,7 +468,9 @@ export async function upgradeAllPackages(
   const result = await runChocoWrite(args, {
     overrideMethod: options.forceTerminal ? "terminal" : undefined,
   });
-  invalidatePackageCaches();
+  if (!result.launchedInTerminal) {
+    invalidatePackageCaches();
+  }
   return result;
 }
 
@@ -469,19 +486,25 @@ export async function uninstallPackage(
   const result = await runChocoWrite(args, {
     overrideMethod: options.forceTerminal ? "terminal" : undefined,
   });
-  invalidatePackageCaches();
+  if (!result.launchedInTerminal) {
+    invalidatePackageCaches();
+  }
   return result;
 }
 
 export async function pinPackage(id: string): Promise<CliResult> {
   const result = await runChocoWrite(["pin", "add", `--name=${id}`]);
-  invalidatePackageCaches();
+  if (!result.launchedInTerminal) {
+    invalidatePackageCaches();
+  }
   return result;
 }
 
 export async function unpinPackage(id: string): Promise<CliResult> {
   const result = await runChocoWrite(["pin", "remove", `--name=${id}`]);
-  invalidatePackageCaches();
+  if (!result.launchedInTerminal) {
+    invalidatePackageCaches();
+  }
   return result;
 }
 
@@ -512,13 +535,17 @@ export async function addSource(params: {
     args.push(`--priority=${params.priority}`);
   }
   const result = await runChocoWrite(args);
-  invalidateSourceCache();
+  if (!result.launchedInTerminal) {
+    invalidateSourceCache();
+  }
   return result;
 }
 
 export async function removeSource(name: string): Promise<CliResult> {
   const result = await runChocoWrite(["source", "remove", `--name=${name}`]);
-  invalidateSourceCache();
+  if (!result.launchedInTerminal) {
+    invalidateSourceCache();
+  }
   return result;
 }
 
@@ -528,6 +555,8 @@ export async function setSourceEnabled(
 ): Promise<CliResult> {
   const action = enabled ? "enable" : "disable";
   const result = await runChocoWrite(["source", action, `--name=${name}`]);
-  invalidateSourceCache();
+  if (!result.launchedInTerminal) {
+    invalidateSourceCache();
+  }
   return result;
 }

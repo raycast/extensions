@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { FormValidation, useForm } from "@raycast/utils";
 import { addSource } from "../choco/cli";
 import { runPackageTask } from "./PackageActions";
 
@@ -7,52 +7,54 @@ interface AddSourceFormProps {
   onSuccess: () => void;
 }
 
+interface AddSourceValues {
+  name: string;
+  url: string;
+  priority: string;
+}
+
 export function AddSourceForm({ onSuccess }: AddSourceFormProps) {
   const { pop } = useNavigation();
-  const [nameError, setNameError] = useState<string | undefined>();
-  const [urlError, setUrlError] = useState<string | undefined>();
 
-  async function handleSubmit(values: {
-    name: string;
-    url: string;
-    priority: string;
-  }) {
-    const name = values.name.trim();
-    const url = values.url.trim();
-    const priorityRaw = values.priority.trim();
+  const { handleSubmit, itemProps } = useForm<AddSourceValues>({
+    initialValues: {
+      priority: "0",
+    },
+    validation: {
+      name: FormValidation.Required,
+      url: FormValidation.Required,
+    },
+    async onSubmit(values) {
+      const name = values.name.trim();
+      const url = values.url.trim();
+      const priorityRaw = values.priority.trim();
+      const parsedPriority = priorityRaw
+        ? Number.parseInt(priorityRaw, 10)
+        : undefined;
 
-    if (!name) {
-      setNameError("Source name is required");
-      return;
-    }
-    if (!url) {
-      setUrlError("Source URL or folder path is required");
-      return;
-    }
+      const status = await runPackageTask({
+        loadingTitle: `Adding source "${name}"...`,
+        successTitle: `Added source "${name}"`,
+        errorTitle: `Failed to add source "${name}"`,
+        task: () =>
+          addSource({
+            name,
+            url,
+            priority:
+              parsedPriority !== undefined && Number.isFinite(parsedPriority)
+                ? parsedPriority
+                : undefined,
+          }),
+      });
 
-    const parsedPriority = priorityRaw
-      ? Number.parseInt(priorityRaw, 10)
-      : undefined;
-    const ok = await runPackageTask({
-      loadingTitle: `Adding source "${name}"...`,
-      successTitle: `Added source "${name}"`,
-      errorTitle: `Failed to add source "${name}"`,
-      task: () =>
-        addSource({
-          name,
-          url,
-          priority:
-            parsedPriority !== undefined && Number.isFinite(parsedPriority)
-              ? parsedPriority
-              : undefined,
-        }),
-    });
-
-    if (ok) {
-      onSuccess();
-      pop();
-    }
-  }
+      if (status === "completed") {
+        onSuccess();
+        pop();
+      } else if (status === "launched") {
+        pop();
+      }
+    },
+  });
 
   return (
     <Form
@@ -67,24 +69,19 @@ export function AddSourceForm({ onSuccess }: AddSourceFormProps) {
       }
     >
       <Form.TextField
-        id="name"
         title="Source Name"
         placeholder="e.g. internal-feed"
-        error={nameError}
-        onChange={() => nameError && setNameError(undefined)}
+        {...itemProps.name}
       />
       <Form.TextField
-        id="url"
         title="Source URL"
         placeholder="https://packages.example.com/nuget"
-        error={urlError}
-        onChange={() => urlError && setUrlError(undefined)}
+        {...itemProps.url}
       />
       <Form.TextField
-        id="priority"
         title="Priority"
         placeholder="0 (lower runs first)"
-        defaultValue="0"
+        {...itemProps.priority}
       />
     </Form>
   );

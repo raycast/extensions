@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "choco",
   "title": "Chocolatey",
-  "description": "Search, install, upgrade, pin, and uninstall Chocolatey packages on Windows, manage sources, and export package manifests.",
+  "description": "Search, install, upgrade, pin, and uninstall Chocolatey packages on Windows, manage sources, and export package manifests. Requires Chocolatey CLI (choco) installed.",
   "icon": "icon.png",
   "author": "user_fb2826b29bbab02dfe18",
   "categories": [
@@ -85,36 +85,42 @@
     {
       "name": "search",
       "title": "Search Packages",
+      "subtitle": "Chocolatey",
       "description": "Search Chocolatey packages and install them",
       "mode": "view"
     },
     {
       "name": "installed",
       "title": "Show Installed",
+      "subtitle": "Chocolatey",
       "description": "List installed and pinned Chocolatey packages",
       "mode": "view"
     },
     {
       "name": "upgrades",
       "title": "Show Upgrades",
+      "subtitle": "Chocolatey",
       "description": "Review outdated Chocolatey packages and upgrade them",
       "mode": "view"
     },
     {
       "name": "upgrade-all",
       "title": "Upgrade All Packages",
+      "subtitle": "Chocolatey",
       "description": "Upgrade all non-pinned Chocolatey packages",
       "mode": "no-view"
     },
     {
       "name": "sources",
       "title": "Manage Sources",
+      "subtitle": "Chocolatey",
       "description": "Add, enable, disable, and remove Chocolatey package sources",
       "mode": "view"
     },
     {
       "name": "export",
       "title": "Export Packages",
+      "subtitle": "Chocolatey",
       "description": "Export installed Chocolatey packages to packages.config XML",
       "mode": "view"
     }

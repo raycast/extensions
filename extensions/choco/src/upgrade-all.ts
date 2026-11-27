@@ -22,7 +22,15 @@ export default async function UpgradeAllCommand() {
     }
 
     toast.title = `Upgrading ${upgradable.length} Chocolatey package${upgradable.length === 1 ? "" : "s"}...`;
-    await upgradeAllPackages();
+    const result = await upgradeAllPackages();
+
+    if (result.launchedInTerminal) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Opened in Terminal";
+      toast.message = "Finish upgrading packages in the terminal window.";
+      await showHUD("Opened terminal to upgrade Chocolatey packages");
+      return;
+    }
 
     toast.style = Toast.Style.Success;
     toast.title = `Upgraded ${upgradable.length} package${upgradable.length === 1 ? "" : "s"}`;

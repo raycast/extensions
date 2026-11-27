@@ -58,4 +58,5 @@ export interface CliResult {
   stdout: string;
   stderr: string;
   exitCode: number;
+  launchedInTerminal?: boolean;
 }

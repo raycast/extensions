@@ -1,20 +1,32 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Detail,
   Icon,
+  Keyboard,
   showInFinder,
   showToast,
   Toast,
-  Keyboard,
 } from "@raycast/api";
-import { writeFile } from "node:fs/promises";
+import { showFailureToast } from "@raycast/utils";
+import { access, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { useMemo, useState } from "react";
 import { generatePackagesConfigXml } from "./choco/parser";
 import { ChocoErrorView } from "./components/ChocoErrorView";
 import { useInstalledPackages } from "./hooks/useChocoData";
+
+async function fileExists(targetPath: string): Promise<boolean> {
+  try {
+    await access(targetPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export default function ExportPackagesCommand() {
   const [includeVersions, setIncludeVersions] = useState(true);
@@ -37,6 +49,20 @@ export default function ExportPackagesCommand() {
   async function saveToDesktop() {
     const filePath = path.join(os.homedir(), "Desktop", "packages.config");
     try {
+      if (await fileExists(filePath)) {
+        const confirmed = await confirmAlert({
+          title: "Overwrite existing packages.config?",
+          message: `${filePath} already exists on your Desktop.`,
+          primaryAction: {
+            title: "Overwrite",
+            style: Alert.ActionStyle.Destructive,
+          },
+        });
+        if (!confirmed) {
+          return;
+        }
+      }
+
       await writeFile(filePath, xmlContent, "utf8");
       await showToast({
         style: Toast.Style.Success,
@@ -45,11 +71,7 @@ export default function ExportPackagesCommand() {
       });
       await showInFinder(filePath);
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to save packages.config",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      await showFailureToast(err, { title: "Failed to save packages.config" });
     }
   }
 
@@ -75,10 +97,12 @@ export default function ExportPackagesCommand() {
           <Action.CopyToClipboard
             title="Copy Packages.Config XML"
             content={xmlContent}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action
             title="Save to Desktop as Packages.Config"
             icon={Icon.SaveDocument}
+            shortcut={Keyboard.Shortcut.Common.Save}
             onAction={saveToDesktop}
           />
           <Action
@@ -88,7 +112,10 @@ export default function ExportPackagesCommand() {
                 : "Include Version Numbers"
             }
             icon={Icon.Switch}
-            shortcut={{ modifiers: ["ctrl"], key: "v" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "v" },
+              Windows: { modifiers: ["ctrl"], key: "v" },
+            }}
             onAction={() => setIncludeVersions((prev) => !prev)}
           />
           <Action

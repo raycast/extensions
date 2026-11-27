@@ -73,13 +73,13 @@ export default function UpgradesCommand() {
       return;
     }
 
-    const ok = await runPackageTask({
+    const status = await runPackageTask({
       loadingTitle: `Upgrading ${upgradableItems.length} packages...`,
       successTitle: "Upgraded all packages",
       errorTitle: "Failed to upgrade all packages",
       task: () => upgradeAllPackages(),
     });
-    if (ok) {
+    if (status === "completed") {
       refreshAll();
     }
   }
@@ -141,7 +141,10 @@ export default function UpgradesCommand() {
                 <Action
                   title={`Upgrade All (${upgradableItems.length})`}
                   icon={Icon.ArrowUpCircleFilled}
-                  shortcut={{ modifiers: ["ctrl", "shift"], key: "u" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "u" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+                  }}
                   onAction={handleUpgradeAll}
                 />
               ) : undefined

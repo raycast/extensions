@@ -5,8 +5,8 @@ import {
   Color,
   confirmAlert,
   Icon,
-  List,
   Keyboard,
+  List,
 } from "@raycast/api";
 import { removeSource, setSourceEnabled } from "./choco/cli";
 import { ChocoSource } from "./choco/types";
@@ -29,13 +29,13 @@ export default function ManageSourcesCommand() {
 
   async function handleToggle(source: ChocoSource) {
     const nextEnabled = source.disabled;
-    const ok = await runPackageTask({
+    const status = await runPackageTask({
       loadingTitle: `${nextEnabled ? "Enabling" : "Disabling"} ${source.name}...`,
       successTitle: `${nextEnabled ? "Enabled" : "Disabled"} ${source.name}`,
       errorTitle: `Failed to update ${source.name}`,
       task: () => setSourceEnabled(source.name, nextEnabled),
     });
-    if (ok) {
+    if (status === "completed") {
       revalidate();
     }
   }
@@ -53,13 +53,13 @@ export default function ManageSourcesCommand() {
       return;
     }
 
-    const ok = await runPackageTask({
+    const status = await runPackageTask({
       loadingTitle: `Removing ${source.name}...`,
       successTitle: `Removed ${source.name}`,
       errorTitle: `Failed to remove ${source.name}`,
       task: () => removeSource(source.name),
     });
-    if (ok) {
+    if (status === "completed") {
       revalidate();
     }
   }
@@ -73,11 +73,13 @@ export default function ManageSourcesCommand() {
           <Action.Push
             title="Add Source"
             icon={Icon.Plus}
+            shortcut={Keyboard.Shortcut.Common.New}
             target={<AddSourceForm onSuccess={revalidate} />}
           />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
         </ActionPanel>
@@ -122,7 +124,7 @@ export default function ManageSourcesCommand() {
                     title="Remove Source"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => handleRemove(source)}
                   />
                 </ActionPanel.Section>
@@ -130,6 +132,7 @@ export default function ManageSourcesCommand() {
                   <Action.CopyToClipboard
                     title="Copy Source URL"
                     content={source.url}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                   <Action.OpenInBrowser
                     title="Open Source URL"

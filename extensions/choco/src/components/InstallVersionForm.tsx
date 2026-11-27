@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { FormValidation, useForm } from "@raycast/utils";
 import { installPackage } from "../choco/cli";
 import { runPackageTask } from "./PackageActions";
 
@@ -9,41 +9,47 @@ interface InstallVersionFormProps {
   onSuccess: () => void;
 }
 
+interface InstallVersionValues {
+  version: string;
+  openInTerminal: boolean;
+}
+
 export function InstallVersionForm({
   packageId,
   suggestedVersion,
   onSuccess,
 }: InstallVersionFormProps) {
   const { pop } = useNavigation();
-  const [version, setVersion] = useState(suggestedVersion ?? "");
-  const [versionError, setVersionError] = useState<string | undefined>();
 
-  async function handleSubmit(values: {
-    version: string;
-    openInTerminal: boolean;
-  }) {
-    const trimmed = values.version.trim();
-    if (!trimmed) {
-      setVersionError("Version is required");
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<InstallVersionValues>({
+    initialValues: {
+      version: suggestedVersion ?? "",
+      openInTerminal: false,
+    },
+    validation: {
+      version: FormValidation.Required,
+    },
+    async onSubmit(values) {
+      const trimmed = values.version.trim();
+      const status = await runPackageTask({
+        loadingTitle: `Installing ${packageId} (${trimmed})...`,
+        successTitle: `Installed ${packageId} ${trimmed}`,
+        errorTitle: `Failed to install ${packageId}`,
+        task: () =>
+          installPackage(packageId, {
+            version: trimmed,
+            forceTerminal: values.openInTerminal,
+          }),
+      });
 
-    const ok = await runPackageTask({
-      loadingTitle: `Installing ${packageId} (${trimmed})...`,
-      successTitle: `Installed ${packageId} ${trimmed}`,
-      errorTitle: `Failed to install ${packageId}`,
-      task: () =>
-        installPackage(packageId, {
-          version: trimmed,
-          forceTerminal: values.openInTerminal,
-        }),
-    });
-
-    if (ok) {
-      onSuccess();
-      pop();
-    }
-  }
+      if (status === "completed") {
+        onSuccess();
+        pop();
+      } else if (status === "launched") {
+        pop();
+      }
+    },
+  });
 
   return (
     <Form
@@ -59,22 +65,13 @@ export function InstallVersionForm({
     >
       <Form.Description title="Package" text={packageId} />
       <Form.TextField
-        id="version"
         title="Version"
         placeholder="e.g. 2.56.1"
-        value={version}
-        error={versionError}
-        onChange={(value) => {
-          setVersion(value);
-          if (versionError) {
-            setVersionError(undefined);
-          }
-        }}
+        {...itemProps.version}
       />
       <Form.Checkbox
-        id="openInTerminal"
         label="Open in elevated terminal window"
-        defaultValue={false}
+        {...itemProps.openInTerminal}
       />
     </Form>
   );
