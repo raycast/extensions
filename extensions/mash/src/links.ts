@@ -79,8 +79,9 @@ export function searchLink(query: string): string {
 
 /**
  * The terminal command for Mash's full search of the same words, for readers
- * without the desktop app. The words are quoted for a POSIX shell.
+ * without the desktop app. The words are quoted for a POSIX shell and follow
+ * `--`, so words that start with a dash are searched for.
  */
 export function searchCommand(query: string): string {
-  return `mash search '${query.trim().replace(/'/g, `'\\''`)}'`;
+  return `mash search -- '${query.trim().replace(/'/g, `'\\''`)}'`;
 }

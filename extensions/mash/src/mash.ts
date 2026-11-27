@@ -146,9 +146,13 @@ export function mashEnvironment(base: NodeJS.ProcessEnv = process.env): NodeJS.P
   return { ...base, MASH_CLIENT: "raycast" };
 }
 
-/** The arguments for a live search: this machine, by words, a short list. */
+/**
+ * The arguments for a live search: this machine, by words, a short list. The
+ * query follows `--`, so words such as `--force` are searched for rather than
+ * read as options.
+ */
 export function liveSearchArguments(query: string): string[] {
-  return ["search", query, "--live", "--limit", "20"];
+  return ["search", "--live", "--limit", "20", "--", query];
 }
 
 /**
@@ -252,11 +256,12 @@ export type StreamScope = "local" | "all";
 
 /**
  * Federated search: every source at once, one line of JSON per update. Mash
- * leaves subagent chats out unless asked to include them.
+ * leaves subagent chats out unless asked to include them. The query follows
+ * `--`, as in a live search.
  */
 export function streamArguments(query: string, scope: StreamScope, includeSubagents = false): string[] {
-  const asked = ["search", query, "--live", "--stream", "--limit", "20", "--scope", scope];
-  return includeSubagents ? [...asked, "--include-subagents"] : asked;
+  const asked = ["search", "--live", "--stream", "--limit", "20", "--scope", scope];
+  return [...asked, ...(includeSubagents ? ["--include-subagents"] : []), "--", query];
 }
 
 export interface SourceState {

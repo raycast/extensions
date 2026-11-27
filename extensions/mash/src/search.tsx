@@ -212,8 +212,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           title={isLoading ? "Searching…" : `No chats mention “${query}”`}
           description={[
             hasApp
-              ? "Press ⌘↵ to search every machine and by meaning in Mash."
-              : "This searches this machine’s chats by their words. Try other words, or press ⌘↵ to copy a terminal search that also covers your other machines.",
+              ? "Press ↵ to search every machine and by meaning in Mash."
+              : "This searches this machine’s chats by their words. Try other words, or press ↵ to copy a terminal search that also covers your other machines.",
             // Mash leaves these out unless asked; a search may have matched only them.
             subagentMatches ? "" : "Chats your agents started as subagents are left out.",
           ]
