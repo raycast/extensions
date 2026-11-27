@@ -1,0 +1,305 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glancecard",
+  "title": "Glancecard",
+  "description": "View any GitHub profile or repository as a glancecard in 25 looks, save the SVG, set up README cards, and ask AI for stats. Requires a GitHub account.",
+  "icon": "extension-icon.png",
+  "author": "Undolog",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "profile-card",
+      "title": "Profile Card",
+      "subtitle": "Glancecard",
+      "description": "A GitHub profile's card in every look: yours, or anyone's by login",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "login",
+          "placeholder": "Login (empty: you)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "repository-card",
+      "title": "Repository Card",
+      "subtitle": "Glancecard",
+      "description": "A public repository's card in every look: yours, or any repository on GitHub",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "repository",
+          "placeholder": "owner/name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "set-up-glancecard",
+      "title": "Set up Glancecard",
+      "subtitle": "Glancecard",
+      "description": "Where glancecard stands on your GitHub, and the workflow, README embeds and agent prompt that set it up or change it",
+      "mode": "view"
+    }
+  ],
+  "keywords": [
+    "github",
+    "readme",
+    "profile readme",
+    "github stats",
+    "svg",
+    "card",
+    "stars",
+    "contributions",
+    "github action",
+    "glancecard"
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "title": "Personal Access Token",
+      "description": "Optional. Leave empty to sign in with GitHub; a token needs no scope to read public data.",
+      "type": "password",
+      "required": false,
+      "placeholder": "ghp_… (optional)"
+    },
+    {
+      "name": "timeZone",
+      "title": "Time Zone",
+      "description": "IANA time zone the calendar and the weekly rhythm are read in, such as Europe/Rome. Empty: this Mac's.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Europe/Rome"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-profile-stats",
+      "title": "Get Profile Stats",
+      "description": "Get the numbers on a GitHub profile's glancecard: followers, stars across public repositories and how many came in the last 30 days and the last year, contributions and commits in the last year, pull requests, issues, the most starred repositories and languages. Leave the login empty for the signed-in user."
+    },
+    {
+      "name": "get-repository-stats",
+      "title": "Get Repository Stats",
+      "description": "Get the numbers on a public GitHub repository's glancecard: stars and how many came in the last 30 days and the last year, commits in the last 30 days and the last year, streaks, busiest weekday and hour, languages, releases and downloads, contributors, issues and pull requests, latest commits."
+    }
+  ],
+  "ai": {
+    "instructions": "- The numbers are glancecard's, read from GitHub's public data; `readAt` says when. Contributions follow GitHub's own calendar for the last year.\n- starHistory counts the stars still given, by the day they were given; it can be a star or two short of the repository's total. Null means GitHub had no history to give.\n- commitsLastYear counts the default branch only; when commitsLastYearIsCapped is true the repository has more than glancecard reads, so say \"at least\".\n- These tools only read: to show a card, point to the Profile Card or Repository Card command; to put cards in a README, to Set up Glancecard.",
+    "evals": [
+      {
+        "input": "@glancecard how many stars did gfazioli/glancecard get in the last 30 days?",
+        "mocks": {
+          "get-repository-stats": {
+            "repository": "gfazioli/glancecard",
+            "description": "Your GitHub profile and repositories, at a glance",
+            "stars": 7,
+            "forks": 0,
+            "watchers": 1,
+            "openIssues": 0,
+            "openPullRequests": 0,
+            "mergedPullRequests": 23,
+            "latestTag": "v0.9.0",
+            "totalCommits": 77,
+            "commitsLast30Days": 33,
+            "commitsLastYear": 77,
+            "commitsLastYearIsCapped": false,
+            "activeDaysLastYear": 21,
+            "currentStreakDays": 3,
+            "longestStreakDaysLastYear": 6,
+            "busiestWeekday": "Wednesday",
+            "peakHour": 12,
+            "languages": [
+              {
+                "language": "JavaScript",
+                "share": "78%"
+              },
+              {
+                "language": "HTML",
+                "share": "14%"
+              }
+            ],
+            "releases": 10,
+            "releaseDownloads": 0,
+            "contributors": 1,
+            "starHistory": {
+              "total": 7,
+              "last30Days": 4,
+              "lastYear": 7,
+              "bestWeek": {
+                "weekOf": "2026-10-12",
+                "stars": 3
+              },
+              "firstStar": "2026-10-14"
+            },
+            "readAt": "2026-11-27T12:00:00.000Z",
+            "url": "https://github.com/gfazioli/glancecard"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-repository-stats",
+              "arguments": {
+                "repository": {
+                  "includes": "gfazioli/glancecard"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@glancecard how many followers does octocat have, and which of their repositories has the most stars?",
+        "mocks": {
+          "get-profile-stats": {
+            "login": "octocat",
+            "name": "The Octocat",
+            "followers": 21000,
+            "following": 9,
+            "publicRepositories": 8,
+            "starsAcrossPublicRepositories": 19500,
+            "forksOfPublicRepositories": 160000,
+            "contributionsLastYear": 312,
+            "commitsLastYear": 201,
+            "pullRequests": 30,
+            "mergedPullRequests": 22,
+            "issuesOpened": 14,
+            "mostStarred": [
+              {
+                "name": "Spoon-Knife",
+                "stars": 13000,
+                "language": "HTML"
+              },
+              {
+                "name": "Hello-World",
+                "stars": 3100,
+                "language": null
+              }
+            ],
+            "languagesByRepositories": [
+              {
+                "language": "Ruby",
+                "repositories": 3
+              },
+              {
+                "language": "HTML",
+                "repositories": 2
+              }
+            ],
+            "starHistory": {
+              "total": 19500,
+              "last30Days": 180,
+              "lastYear": 2300,
+              "bestWeek": {
+                "weekOf": "2024-03-10",
+                "stars": 95
+              },
+              "firstStar": "2011-01-26"
+            },
+            "readAt": "2026-11-27T12:00:00.000Z",
+            "url": "https://github.com/octocat"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-profile-stats",
+              "arguments": {
+                "login": {
+                  "includes": "octocat"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@glancecard what is the busiest weekday on gfazioli/glancecard?",
+        "mocks": {
+          "get-repository-stats": {
+            "repository": "gfazioli/glancecard",
+            "description": "Your GitHub profile and repositories, at a glance",
+            "stars": 7,
+            "forks": 0,
+            "watchers": 1,
+            "openIssues": 0,
+            "openPullRequests": 0,
+            "mergedPullRequests": 23,
+            "latestTag": "v0.9.0",
+            "totalCommits": 77,
+            "commitsLast30Days": 33,
+            "commitsLastYear": 77,
+            "commitsLastYearIsCapped": false,
+            "activeDaysLastYear": 21,
+            "currentStreakDays": 3,
+            "longestStreakDaysLastYear": 6,
+            "busiestWeekday": "Wednesday",
+            "peakHour": 12,
+            "languages": [
+              {
+                "language": "JavaScript",
+                "share": "78%"
+              },
+              {
+                "language": "HTML",
+                "share": "14%"
+              }
+            ],
+            "releases": 10,
+            "releaseDownloads": 0,
+            "contributors": 1,
+            "starHistory": {
+              "total": 7,
+              "last30Days": 4,
+              "lastYear": 7,
+              "bestWeek": {
+                "weekOf": "2026-10-12",
+                "stars": 3
+              },
+              "firstStar": "2026-10-14"
+            },
+            "readAt": "2026-11-27T12:00:00.000Z",
+            "url": "https://github.com/gfazioli/glancecard"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-repository-stats"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0",
+    "glancecard": "^0.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
