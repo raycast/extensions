@@ -1,0 +1,54 @@
+{
+  "name": "dns-tools",
+  "title": "DNS Tools",
+  "description": "Flush the local DNS cache and check DNS records from global probes or public resolvers.",
+  "icon": "dns-tools-logo.png",
+  "author": "suryanavv",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "dns",
+    "cache",
+    "propagation",
+    "resolver"
+  ],
+  "commands": [
+    {
+      "name": "flush-dns",
+      "title": "Flush DNS Cache",
+      "description": "Clear the local operating system DNS resolver cache.",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-propagation",
+      "title": "Check DNS Propagation",
+      "description": "Check global DNS results and common records without an API key.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "react": "^19.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "react-devtools": "6.1.1",
+    "typescript": "^5.9.3"
+  }
+}
