@@ -3,8 +3,7 @@
   "display": "Node 18",
   "include": [
     "src/**/*",
-    "raycast-env.d.ts",
-    "tests/**/*"
+    "raycast-env.d.ts"
   ],
   "compilerOptions": {
     "lib": [

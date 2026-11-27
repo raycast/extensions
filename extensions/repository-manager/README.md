@@ -152,21 +152,3 @@ The extension provides quick access to:
 2. For code statistics, install tokei using your preferred method
 3. Configure your preferred editor and terminal in Raycast settings
 4. Enable caching for better performance with large numbers of repositories
-
-
-## Development and Validation
-
-Use Node.js 22.22.2 or newer. Run `npm ci`, `npm run build`, `npm run typecheck`, `npm run lint`, and `npm test`.
-
-The automated tests cover native paths, process environments, shortcuts, terminal launch arguments, real Git operations, and package scripts. Set `REPOSITORY_MANAGER_TEST_ALL_RUNNERS=1` to also test installed pnpm, yarn, and bun runners; set `REPOSITORY_MANAGER_TEST_TOKEI=1` to test an installed tokei binary. Automated tests do not replace testing inside Raycast.
-
-### Windows Raycast Smoke Test
-
-- Discover repositories in the configured folder, including a path with spaces and an apostrophe; check grouping and displayed paths.
-- Open a repository in the selected editor and each supported terminal; confirm the terminal's working directory is the repository.
-- Open configured URLs and Git remote pages; confirm the selected browser is used for project URLs.
-- Run Start Development with editor, terminal, and URLs; check that errors are reported if an app is missing.
-- Run package scripts and installed Make/Just/Task targets; check output and failures.
-- Check status, commit history, pull, and statistics with and without tokei.
-- Check favorites, tags, recently opened projects, cache refresh/clear, and configuration editing.
-- Verify Ctrl/Alt shortcuts, File Explorer reveal actions, and that editor resizing does not run on Windows.
