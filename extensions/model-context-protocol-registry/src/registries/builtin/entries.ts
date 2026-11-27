@@ -7,6 +7,21 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "straitly",
+    title: "Straitly",
+    description:
+      "One OpenAI-compatible API gateway for 100+ AI models including Claude, GPT, Gemini, Grok and DeepSeek. Search models, inspect model metadata and live catalog pricing, compare models side by side, and run chat completions across providers. 5 tools. Official local stdio server `straitly-mcp` (MIT) through `npx`, requiring Node.js 18 or later. Catalog, pricing and comparison tools work without an API key; `chat_completion` requires a Straitly API key set as `STRAITLY_API_KEY` from straitly.ai (pay per token from prepaid credits).",
+    icon: "straitly.svg",
+    homepage: "https://github.com/Straitly-ai/straitly-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "straitly-mcp"],
+      env: {
+        STRAITLY_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:

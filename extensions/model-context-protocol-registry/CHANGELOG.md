@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Straitly MCP Server] - {PR_MERGE_DATE}
+
+- Add Straitly to the official registry: search 100+ AI models, inspect model metadata and live catalog pricing, compare models side by side, and run chat completions through Straitly's OpenAI-compatible API gateway. 5 tools. Official local stdio server `straitly-mcp` (MIT) through `npx` (Node.js 18+); catalog, pricing and comparison tools work without an API key, and `chat_completion` uses `STRAITLY_API_KEY`.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
