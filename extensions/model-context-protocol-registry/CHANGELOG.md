@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add CleanedWeb MCP Server] - {PR_MERGE_DATE}
+## [Add CleanedWeb MCP Server] - 2026-11-27
 
 - Add CleanedWeb to the official registry: find and run maintained REST APIs that return structured records from public websites (job boards, marketplaces, app stores, package registries, research databases). Hosted Streamable HTTP server at https://api.cleanedweb.com/mcp?profile=catalog with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Searching is free; runs are paid per accepted record.
 
