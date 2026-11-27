@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "focus-stage",
+  "title": "Focus Stage",
+  "description": "Put one window center stage with a calm backdrop on every display, auto-hide the menu bar and Dock, and optionally hold notifications.",
+  "icon": "focus-stage-window-outline.png",
+  "author": "mirkopoloni",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "toggle-focus-stage",
+      "title": "Toggle Focus Stage",
+      "description": "Center the focused window, cover everything else with a plain backdrop on every display and hide the menu bar. Run again to restore everything.",
+      "mode": "no-view"
+    },
+    {
+      "name": "reset-focus-stage",
+      "title": "Reset Focus Stage",
+      "description": "End any focus stage, even one that looks wrong or won't turn off, and restore windows, menu bar, Dock and notifications.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-stage-menu-bar",
+      "title": "Focus Stage Menu Bar",
+      "description": "Show whether a focus stage is on, and start or end it from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "windowSize",
+      "title": "Window Size",
+      "description": "How much of the screen the focused window takes.",
+      "type": "dropdown",
+      "required": false,
+      "default": "0.8",
+      "data": [
+        {
+          "title": "60%",
+          "value": "0.6"
+        },
+        {
+          "title": "70%",
+          "value": "0.7"
+        },
+        {
+          "title": "80%",
+          "value": "0.8"
+        },
+        {
+          "title": "90%",
+          "value": "0.9"
+        },
+        {
+          "title": "Keep the window's size",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "name": "grain",
+      "title": "Background Grain",
+      "description": "Film grain on the backdrop.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "Off",
+          "value": "0"
+        },
+        {
+          "title": "Subtle",
+          "value": "1"
+        },
+        {
+          "title": "Medium",
+          "value": "2"
+        },
+        {
+          "title": "Strong",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "glow",
+      "title": "Appearance",
+      "label": "Glow around the focused window",
+      "description": "A soft halo in your accent color marks the window you are focusing on.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showLabel",
+      "label": "Show “Focus Stage on”",
+      "description": "A small label in the top-left corner of every display.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "coverSameAppWindows",
+      "title": "Behavior",
+      "label": "Cover the app's other windows",
+      "description": "The backdrop sits directly behind the focused window and covers all other windows, including the same app's. When off, the app's other windows stay visible next to it.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "hideDock",
+      "label": "Hide the Dock",
+      "description": "Turns on “Automatically hide and show the Dock” during the session, and back off afterwards if it was off. The window can then use the Dock's space.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "holdNotifications",
+      "label": "Hold notifications until focus ends",
+      "description": "No banners during the session; the ones that arrived show up when it ends, and all of them stay in Notification Center. Notification Center and desktop widgets don't open while it's on.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
+  }
+}

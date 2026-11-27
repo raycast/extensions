@@ -1,5 +1,10 @@
 # Flush DNS Changelog
 
+## [Windows Elevation] - 2026-11-27
+
+- Asks for administrator permission on Windows when flushing the DNS cache requires elevation ([#34051](https://github.com/raycast/extensions/issues/34051)).
+- Shows the actual error message when flushing fails.
+
 ## [Touch ID Authentication] - 2026-08-12
 
 - Added Touch ID authentication for macOS DNS flushing while retaining the administrator password fallback ([#13104](https://github.com/raycast/extensions/issues/13104)).

@@ -1,6 +1,7 @@
 /**
  * Formatting helpers shared by the list view and detail panel.
  */
+import { tildify } from "./empty-state-content";
 
 /**
  * Human-readable relative age, e.g. `42m`, `3h`, `2d`.
@@ -34,4 +35,29 @@ export function ageSection(ts: string, now: Date = new Date()): "Today" | "Yeste
 export function displayTitle(absPath: string): string {
   const filename = absPath.split("/").pop() ?? absPath;
   return filename.replace(/\.md$/, "");
+}
+
+/**
+ * Last path segment, extension included.
+ */
+export function fileName(absPath: string): string {
+  return absPath.split("/").pop() ?? absPath;
+}
+
+/**
+ * The file's folder, with `~` for home and a final slash.
+ */
+export function folderPath(absPath: string, home?: string): string {
+  const folder = absPath.slice(0, absPath.length - fileName(absPath).length).replace(/\/$/, "");
+  return `${tildify(folder, home)}/`;
+}
+
+/**
+ * The detail pane: what the file is, its name, then what's needed.
+ */
+export function detailMarkdown(entry: { path: string; ask: string; context: string }): string {
+  const name = fileName(entry.path);
+  const heading = entry.context.replace(/\s+/g, " ").trim();
+  if (!heading) return `# ${name}\n\n${entry.ask}`;
+  return `# ${heading}\n\n\`${name}\`\n\n${entry.ask}`;
 }

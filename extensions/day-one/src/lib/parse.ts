@@ -1,12 +1,86 @@
 // Pure helpers with no @raycast/api import, so `npm test` can run them under plain Node.
 
+import { join, resolve, sep } from "node:path";
+
 /** The oldest CLI release this extension was built and tested against. */
-export const MIN_CLI_VERSION = "0.22.1";
+export const MIN_CLI_VERSION = "0.23.1";
 
 /** Reads `dayone 0.22.1` (the CLI's `--version` line). Returns null for anything else, including the legacy Mac CLI. */
 export function parseCliVersion(output: string): string | null {
   const match = /^dayone (\d+\.\d+\.\d+)\s*$/m.exec(output.trim());
   return match ? match[1] : null;
+}
+
+/**
+ * Where the CLI (0.23+) keeps its search model: HF_HOME, then FASTEMBED_CACHE_DIR, then the platform's per-user cache
+ * folder (DayOne-Cli src/entry_embeddings.rs, embedding_model). Doctor looks here to tell whether it's downloaded.
+ * A relative override is resolved against `cwd`, the folder the extension runs the CLI in.
+ */
+export function cliModelCacheDir(
+  env: Record<string, string | undefined>,
+  platform: string,
+  home: string,
+  cwd = "/",
+): string {
+  const override = env.HF_HOME || env.FASTEMBED_CACHE_DIR;
+  if (override) return resolve(cwd, override);
+  const cache =
+    platform === "darwin"
+      ? join(home, "Library", "Caches")
+      : platform === "win32"
+        ? env.LOCALAPPDATA || join(home, "AppData", "Local")
+        : env.XDG_CACHE_HOME || join(home, ".cache");
+  return join(cache, "dayone-cli", "models");
+}
+
+/** The folder fastembed keeps Day One's search model in, inside the model cache. */
+export const SEARCH_MODEL_REPO = "models--Qdrant--all-MiniLM-L6-v2-onnx";
+
+/** True when two folders are the same, or one is inside the other. */
+export function pathsOverlap(a: string, b: string): boolean {
+  const [ra, rb] = [resolve(a), resolve(b)];
+  return ra === rb || ra.startsWith(rb + sep) || rb.startsWith(ra + sep);
+}
+
+/**
+ * Entries the search index is missing or holds old text for, from the details of `dayone doctor`'s embedding_index
+ * check. Null when the CLI didn't finish inspecting, so "unknown" never reads as "complete".
+ */
+export function indexGap(details: Record<string, unknown> | undefined): number | null {
+  if (!details || details.inspection_complete !== true) return null;
+  const { missing_embeddings: missing, stale_embeddings: stale } = details;
+  if (typeof missing !== "number" && typeof stale !== "number") return null;
+  return (typeof missing === "number" ? missing : 0) + (typeof stale === "number" ? stale : 0);
+}
+
+/**
+ * True when the index gap is entries the CLI's own rebuild skips: the last rebuild skipped at least that many, and
+ * nothing has synced since (a sync can bring new entries the rebuild never saw). The CLI's doctor still counts those
+ * entries as missing, so offering Rebuild again would never clear the row.
+ */
+export function gapIsSkippedEntries(
+  gap: number,
+  rebuild: { finishedAt: number; skipped: number } | null,
+  lastSyncAt: number | null,
+): boolean {
+  if (!rebuild || rebuild.skipped < gap) return false;
+  return lastSyncAt === null || lastSyncAt <= rebuild.finishedAt;
+}
+
+/**
+ * Copy Doctor Report: the CLI's own `dayone doctor` report, unchanged so Day One support can read it, plus what this
+ * extension checks itself under `raycast_extension`. Paths show the home folder as ~, matching the CLI's shareable mode.
+ */
+export function buildDoctorReport(cliReport: object | undefined, extension: object, home: string): object {
+  const hide = (value: unknown): unknown =>
+    typeof value === "string"
+      ? value.split(home).join("~")
+      : Array.isArray(value)
+        ? value.map(hide)
+        : value && typeof value === "object"
+          ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, hide(v)]))
+          : value;
+  return { ...(cliReport ?? { cli_doctor: "unavailable" }), raycast_extension: hide(extension) };
 }
 
 export function compareVersions(a: string, b: string): number {

@@ -1,3 +1,4 @@
+import { projectShortcut, revealProjectTitle, commandEnvironment } from '../platform'
 import { Action, ActionPanel, Color, Detail, Icon } from '@raycast/api'
 import { Project } from '../project'
 import { useExec } from '@raycast/utils'
@@ -50,7 +51,7 @@ ${JSON.stringify(project.config, null, 2)}
 }
 
 function useCurrentBranch(project: Project): { isLoading: boolean; currentBranch: string | undefined } {
-    const { isLoading, data: currentBranch } = useExec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: project.fullPath })
+    const { isLoading, data: currentBranch } = useExec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: project.fullPath, env: commandEnvironment })
     return { isLoading, currentBranch }
 }
 
@@ -67,7 +68,7 @@ function useCurrentCommit(project: Project): { isLoading: boolean; currentCommit
         }
     }
 
-    const { isLoading, data: currentCommit } = useExec('git', ['show', '-s', '--date=local', '--format=%H%n%an%n%ae%n%ad%n%B'], { cwd: project.fullPath, parseOutput })
+    const { isLoading, data: currentCommit } = useExec('git', ['show', '-s', '--date=local', '--format=%H%n%an%n%ae%n%ad%n%B'], { cwd: project.fullPath, env: commandEnvironment, parseOutput })
 
     return { isLoading, currentCommit }
 }
@@ -165,14 +166,14 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                     <Copy project={project} />
                     <Git project={project} />
                     <Action.ShowInFinder
-                        title="Show in Finder"
+                        title={revealProjectTitle}
                         path={project.fullPath}
-                        shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                        shortcut={projectShortcut('f')}
                     />
                     <Action.OpenWith
                         title="Open With"
                         path={project.fullPath}
-                        shortcut={{ modifiers: ['cmd', 'opt'], key: 'o' }}
+                        shortcut={projectShortcut('o', ['opt'])}
                     />
                 </ActionPanel>
             }

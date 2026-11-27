@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { sendMessage } from "./api";
@@ -42,12 +43,15 @@ ${answer}`;
           <Action.CopyToClipboard
             title="Copy All"
             content={`Prompt: ${prompt}\n\nClipboard: ${clipboardContent}\n\nResponse: ${answer}`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.Paste
             title="Paste Response"
             content={answer}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "return" },
+              Windows: { modifiers: ["ctrl"], key: "return" },
+            }}
           />
         </ActionPanel>
       }

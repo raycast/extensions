@@ -606,7 +606,7 @@ function authFixture(tokens, expired = false) {
     accessTokenExpiresAt: new Date(reference + (expired ? -1 : 3600000)).toISOString(),
     refreshTokenExpiresAt: new Date(reference + 86400000).toISOString(),
   };
-  const calls = { clear: 0, refresh: 0, connect: 0 };
+  const calls = { clear: 0, refresh: 0, connect: 0, statusRefresh: 0 };
   const renewed = {
     ...stored,
     accessToken: "new-access",
@@ -633,6 +633,13 @@ function authFixture(tokens, expired = false) {
   const { BrowserHandoffAuthProvider } = load("src/lib/auth/browser-handoff.ts", {
     "@raycast/api": { OAuth: { PKCEClient: Client, RedirectMethod: { App: "app" } } },
     "../config": { getWebAppUrl: () => "https://example.com" },
+    "../meals/status": {
+      refreshMealsStatus: async () => {
+        assert.equal(stored, undefined);
+        assert.equal(tokens, undefined);
+        calls.statusRefresh++;
+      },
+    },
     "./token-client": {
       postForTokens: async (endpoint) => {
         if (endpoint === "/auth/refresh") calls.refresh++;
@@ -675,7 +682,17 @@ test("Raycast logout clears valid and refreshable cached sessions without backgr
     assert.equal(fixture.calls.refresh, 0);
     assert.equal(fixture.calls.connect, 0);
     assert.ok(fixture.calls.clear > 0);
+    assert.equal(fixture.calls.statusRefresh, 0);
   }
+});
+
+test("explicit sign-out refreshes Meals Status once after both token stores are cleared", async () => {
+  const fixture = authFixture({ accessToken: "oauth-access" });
+  await fixture.provider.signOut();
+  assert.equal(fixture.calls.statusRefresh, 1);
+  assert.equal(await fixture.provider.getCachedSession(), undefined);
+  assert.equal(fixture.calls.statusRefresh, 1);
+  assert.equal(fixture.calls.connect, 0);
 });
 
 test("OAuth token presence preserves reuse and refresh; interactive logout requires reconnect", async () => {

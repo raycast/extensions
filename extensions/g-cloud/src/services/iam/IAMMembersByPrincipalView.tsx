@@ -435,6 +435,7 @@ export default function IAMMembersByPrincipalView({
       searchBarAccessory={
         <QuickProjectSwitcher
           gcloudPath={gcloudPath}
+          currentProjectId={projectId}
           onProjectSelect={(selectedProjectId) => {
             if (selectedProjectId !== projectId) {
               push(

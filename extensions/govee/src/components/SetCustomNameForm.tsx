@@ -41,9 +41,9 @@ const SetCustomNameForm = ({ deviceId, deviceName, currentName, setName }: SetCu
       <Form.Description text={deviceName} title="Device Name" />
       <Form.TextField
         id="name"
-        title="Custom Name"
+        title="New Name"
         defaultValue={localName ?? ""}
-        placeholder="Enter a custom name"
+        placeholder="Enter a new name"
         onChange={(value) => setLocalName(value)}
       />
     </Form>
