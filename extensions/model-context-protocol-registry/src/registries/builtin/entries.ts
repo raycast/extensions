@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "klakix",
+    title: "Klakix",
+    description:
+      "Generate AI video, images, voiceovers and music from your assistant with Seedance, Kling, Veo, Wan, Nano Banana, GPT Image and more behind one connector. Official server run by Klakix. Hosted Streamable HTTP server with OAuth 2.1 sign-in (PKCE and dynamic client registration); a free Klakix account is required, voiceovers work right away and video and image tools unlock after the first credit purchase. Generations spend credits at website prices and the cost is shown first. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://klakix.com/logo-512.png",
+    homepage: "https://klakix.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://klakix.com/api/mcp"],
+    },
+    remoteUrl: "https://klakix.com/api/mcp",
+  },
+  {
     name: "betadrop",
     title: "BetaDrop",
     description:
