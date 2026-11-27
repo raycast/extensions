@@ -16,7 +16,6 @@ import { formatAuditStatus, getAuditFallbackText } from "../utils/skill-audit-di
 import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
-import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 import { joinMetadataSections, type MetadataSection } from "./_common/metadata";
 
 function formatDate(iso: string): string | undefined {
@@ -70,6 +69,7 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
   const updatedDate = skill.updatedAt ? formatDate(skill.updatedAt) : undefined;
   const repositoryUrl = skill.sourceUrl;
   const repositoryText = skill.source ?? skill.sourceUrl;
+  const recordedLocal = skill.sourceType === "local" && !skill.managedBySkillsCli;
 
   const updateStatusDetailsSection: MetadataSection = [
     skill.hasUpdate && (
@@ -80,16 +80,35 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
   ];
 
   const localInfoDetailsSection: MetadataSection = [
+    <List.Item.Detail.Metadata.Label
+      key="local-info-management"
+      title="Management"
+      text={
+        skill.managedBySkillsCli
+          ? "Skills CLI"
+          : recordedLocal
+            ? "Local source (read-only)"
+            : "Local / externally managed"
+      }
+    />,
+    recordedLocal && skill.source && (
+      <List.Item.Detail.Metadata.Label key="skill-lock-local-source" title="Recorded Source" text={skill.source} />
+    ),
     installedDate && (
       <List.Item.Detail.Metadata.Label
         key="skill-lock-installed"
-        title="Installed"
+        title={recordedLocal ? "Recorded Installed" : "Installed"}
         text={installedDate}
         icon={Icon.Calendar}
       />
     ),
     updatedDate && (
-      <List.Item.Detail.Metadata.Label key="skill-lock-updated" title="Updated" text={updatedDate} icon={Icon.Clock} />
+      <List.Item.Detail.Metadata.Label
+        key="skill-lock-updated"
+        title={recordedLocal ? "Recorded Updated" : "Updated"}
+        text={updatedDate}
+        icon={Icon.Clock}
+      />
     ),
     <List.Item.Detail.Metadata.TagList key="local-info-agents" title="Agents">
       {skill.agents.map((agent) => (
@@ -199,11 +218,14 @@ function BaseInstalledSkillListItem({
 }: InstalledSkillListItemProps & { skillDetailPageUrl?: string; audits?: ReturnType<typeof useSkillAudits> }) {
   const extraAgents = skill.agentCount - skill.agents.length;
   const agentsText = extraAgents > 0 ? `${skill.agents.join(", ")} +${extraAgents} more` : skill.agents.join(", ");
+  const recordedLocal = skill.sourceType === "local" && !skill.managedBySkillsCli;
 
   return (
     <List.Item
       title={skill.name}
-      subtitle={isShowingDetail ? undefined : skill.source}
+      subtitle={
+        isShowingDetail ? undefined : recordedLocal && skill.source ? `Recorded: ${skill.source}` : skill.source
+      }
       icon={{ source: Icon.Hammer, tintColor: skill.hasUpdate ? Color.Orange : Color.Purple }}
       accessories={
         isShowingDetail
@@ -261,10 +283,11 @@ function BaseInstalledSkillListItem({
             />
             {skill.sourceUrl && <Action.CopyToClipboard title="Copy Source URL" content={skill.sourceUrl} />}
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            {skill.hasUpdate && <UpdateSkillAction skillName={skill.name} mutate={mutate} />}
-            <RemoveSkillAction skill={skill} mutate={mutate} />
-          </ActionPanel.Section>
+          {skill.managedBySkillsCli && (skill.mutableAgents?.length ?? 0) > 0 && (
+            <ActionPanel.Section>
+              <RemoveSkillAction skill={skill} mutate={mutate} />
+            </ActionPanel.Section>
+          )}
           <Action
             title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}
             icon={Icon.Sidebar}

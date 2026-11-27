@@ -1,5 +1,10 @@
 # X Changelog
 
+## [Read Direct Messages] - 2026-10-28
+
+- Add AI tools to list recent DM conversations with participant profiles and to read messages from one conversation
+- Refresh cached reads after sending a direct message
+
 ## [Copy Post URL] - 2026-10-15
 
 - Add a Copy Post URL action to bookmarks and other post lists and to the post detail view

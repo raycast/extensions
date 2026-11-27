@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keyboard-win-mac-switch",
   "title": "Keyboard Win Mac Switch",
-  "description": "This extension allow you to switch alt and window keys",
+  "description": "Swap the Option (Alt) and Command keys on your Mac when switching between a Windows keyboard and a Mac keyboard layout.",
   "icon": "keyboard-icon.png",
   "author": "fab_uleuh",
   "categories": [

@@ -2,13 +2,13 @@
 
 <br />
 
-The Capacities extension for [Raycast](https://www.raycast.com/) offers quick access to your Capacities data, improving productivity and reducing context switching. It is available on Mac and Windows.
+The Capacities extension for [Raycast](https://www.raycast.com/) offers quick access to your Capacities data, improving productivity and reducing context switching. It is available on Mac and Windows. Full guide: [Raycast integration in the Capacities docs](https://docs.capacities.io/reference/integrations/raycast).
 
 ## Setup
 
 1. In Capacities, go to Settings > Raycast and copy the communication token.
 
-2 .Click on 'Install Raycast Extension'. This will open the the [Raycast extension store](https://www.raycast.com/steffenble/capacities).
+2. Click on 'Install Raycast Extension'. This will open the [Raycast extension store](https://www.raycast.com/steffenble/capacities).
 
 3. Click 'Install Extension' in the Raycast Store
 
@@ -51,7 +51,7 @@ If you use several spaces, you can open any of them via the "Open Space" command
 
 Save any weblink to any space with this command.
 
-_For full functionality, you will need to have the correct Raycast permissions loaded first. [See this section](#weblinks-not-working) for more information._
+_For full functionality, you will need to have the correct Raycast permissions loaded first. [See the FAQs](#faqs) for more information._
 
 - Open Raycast from any webpage
 - Run `Save Weblink`
@@ -76,13 +76,11 @@ It will arrive in your daily note with an icon to show it's from Raycast.
 
 ![Save to daily note](./media/capacities-5.png)
 
-::: tip Good to know!
-You can use markdown, add tags, create content and more, all from Raycast. See more [here](https://docs.capacities.io/reference/integrations/email#how-it-works).
-:::
+> **Good to know:** You can use markdown, add tags, create content and more, all from Raycast. See [how it works](https://docs.capacities.io/reference/integrations/email#how-it-works).
 
 ### Create Task
 
-Send [tasks](/reference/task-management) with this command.
+Send [tasks](https://docs.capacities.io/reference/task-management) with this command.
 
 - Run `Create Task`
 - Enter any relevant information

@@ -7,7 +7,7 @@ const MINUTE = 60_000;
  * Where a prayer's time stands, which colors the masjid before the menu bar text: dark green from the
  * start, light green shortly before the preferred end, yellow after it, red once it is ending soon.
  */
-export type Period = "notStarted" | "darkGreen" | "lightGreen" | "yellow" | "red" | "ended";
+export type Period = "notStarted" | "darkGreen" | "lightGreen" | "yellow" | "red";
 
 /** Words for each period, for the dropdown row. */
 export const PERIOD_LABELS: Record<Period, string> = {
@@ -16,7 +16,6 @@ export const PERIOD_LABELS: Record<Period, string> = {
   lightGreen: "Light green",
   yellow: "Yellow",
   red: "Red",
-  ended: "Ended",
 };
 
 /** The minute settings the periods use. */
@@ -58,7 +57,6 @@ export function periodBounds(slot: PrayerSlot, windows: PeriodWindows) {
  */
 export function periodAt(slot: PrayerSlot, now: Date, windows: PeriodWindows): Period {
   if (now < slot.start) return "notStarted";
-  if (now >= slot.end) return "ended";
   const bounds = periodBounds(slot, windows);
   if (bounds.red && now >= bounds.red) return "red";
   if (bounds.hasPreferred && now >= bounds.preferred) return "yellow";
@@ -94,13 +92,9 @@ const ROW_LABELS: Record<CountdownKind, string> = {
  * @param slot - Prayer slot.
  * @param now - Current instant.
  * @param windows - Minute settings.
- * @returns The countdown, or undefined once the prayer has ended.
+ * @returns The countdown; the end once nothing else is ahead.
  */
-export function countdownTo(
-  slot: PrayerSlot,
-  now: Date,
-  windows: PeriodWindows,
-): { at: Date; kind: CountdownKind } | undefined {
+export function countdownTo(slot: PrayerSlot, now: Date, windows: PeriodWindows): { at: Date; kind: CountdownKind } {
   const bounds = periodBounds(slot, windows);
   const targets: { at: Date; kind: CountdownKind }[] = [
     { at: slot.start, kind: "start" },
@@ -111,7 +105,7 @@ export function countdownTo(
   ];
   // A late jamaat (e.g. end-5) can come after the preferred end or ending soon: count to whichever is nearer.
   targets.sort((a, b) => a.at.getTime() - b.at.getTime());
-  return targets.find((target) => target.at > now);
+  return targets.find((target) => target.at > now) ?? { at: slot.end, kind: "end" };
 }
 
 /** What the menu bar shows: the text and the masjid's color. */
@@ -157,8 +151,8 @@ export function nextMoment(slot: PrayerSlot, now: Date): { at: Date; kind: Momen
 }
 
 /**
- * Menu bar text: the prayer, what it counts down to and the time left, e.g. `Dhuhr Pref. ends 8m`, or
- * `Dhuhr ended` once its time is over unmarked. The masjid's color is the prayer's period.
+ * Menu bar text: the prayer, what it counts down to and the time left, e.g. `Dhuhr Pref. ends 8m`. The
+ * masjid's color is the prayer's period.
  *
  * @param state - What the menu bar shows.
  * @param now - Current instant.
@@ -168,7 +162,6 @@ export function nextMoment(slot: PrayerSlot, now: Date): { at: Date; kind: Momen
 export function menuBarTitle(state: MenuBarState, now: Date, windows: PeriodWindows): MenuBarTitle {
   const { slot } = state;
   const countdown = countdownTo(slot, now, windows);
-  if (state.kind === "ended" || !countdown) return { text: `${slot.name} ended`, tone: "ended" };
   const left = formatMinutes(countdown.at.getTime() - now.getTime(), "ceil");
   return { text: `${slot.name} ${TITLE_LABELS[countdown.kind]} ${left}`, tone: periodAt(slot, now, windows) };
 }
@@ -184,7 +177,6 @@ export function menuBarTitle(state: MenuBarState, now: Date, windows: PeriodWind
  */
 export function periodSubtitle(state: MenuBarState, now: Date, windows: PeriodWindows): string {
   const countdown = countdownTo(state.slot, now, windows);
-  if (state.kind === "ended" || !countdown) return `${PERIOD_LABELS.ended} · not marked`;
   const left = formatMinutes(countdown.at.getTime() - now.getTime(), "ceil");
   return `${PERIOD_LABELS[periodAt(state.slot, now, windows)]} · ${ROW_LABELS[countdown.kind]} in ${left}`;
 }

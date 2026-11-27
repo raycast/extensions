@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type CardSearchInput,
@@ -7,9 +15,11 @@ import {
   type RaycastCard,
   setCardFavorite,
 } from "../lib/api";
+import { failureMessage } from "../lib/cardActions";
 import { getCardTitle } from "../lib/cardDetailModel";
-import { getCardTypeIcon } from "../lib/cardIcons";
+import { getCardListIcon } from "../lib/cardIcons";
 import { removeCardById, upsertCard } from "../lib/cardListState";
+import { TEAK_HOME_URL } from "../lib/constants";
 import {
   HIDDEN_CARDS_HINT,
   isHiddenTag,
@@ -17,8 +27,11 @@ import {
   shouldCheckForHiddenCards,
 } from "../lib/hiddenTags";
 import {
+  applyArchivedFilter,
   applySortFilter,
   applyTagFilter,
+  applyTrashedFilter,
+  applyTypeFilter,
   clearSearchFilters,
   parseSearchFilters,
   toApiQuery,
@@ -26,46 +39,44 @@ import {
 import { newShuffleSeed } from "../lib/shuffleSeed";
 import { useHiddenCardsHint } from "../lib/useHiddenCardsHint";
 import { useTeakAuth } from "../lib/useTeakAuth";
+import { AccountActions } from "./AccountActions";
 import { CardListActions } from "./CardListActions";
+import { CardTypeDropdown } from "./CardTypeDropdown";
 import { getCardAccessories, getCardSubtitle } from "./cardListItem";
 import { MissingApiKeyDetail } from "./MissingApiKeyDetail";
-import { SetApiKeyAction } from "./SetApiKeyAction";
-import { SignOutAction } from "./SignOutAction";
 
 const PAGE_SIZE = 50;
 
 interface CardsListCommandProps {
-  /** Offers Save Search as Smart Folder; only the unscoped Search Cards list can save its whole search. */
   canSaveSmartFolder?: boolean;
   emptyDescription: string;
   emptyIcon: Icon;
   emptyTitle: string;
-  latestSectionTitle: string;
   loadCards: (input: CardSearchInput) => Promise<CardsResponse>;
-  navigationTitle: string;
+  navigationTitle?: string;
   removeTagFilterFromList?: boolean;
   removeUnfavoritedFromList?: boolean;
-  /** The tag this list is scoped to, so a hidden tag's list keeps its cards. */
   scopeTag?: string;
   searchBarPlaceholder: string;
-  /** Keeps the API's own order (closest first) until a sort is typed. */
+  sectionTitle: string;
   serverOrder?: boolean;
 }
 
-// A whole number the API takes as a shuffle seed; the same seed gives the
-// same order on every page.
+const countLabel = (count: number, hasMore: boolean): string =>
+  `${count}${hasMore ? "+" : ""} card${count === 1 && !hasMore ? "" : "s"}`;
+
 export function CardsListCommand({
   canSaveSmartFolder = false,
   emptyDescription,
   emptyIcon,
   emptyTitle,
-  latestSectionTitle,
   loadCards,
   navigationTitle,
   removeTagFilterFromList = false,
   removeUnfavoritedFromList = false,
   scopeTag,
   searchBarPlaceholder,
+  sectionTitle,
   serverOrder = false,
 }: CardsListCommandProps) {
   const [query, setQuery] = useState("");
@@ -76,8 +87,11 @@ export function CardsListCommand({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestGeneration = useRef(0);
-  // Where each card sat when it left the list, so Undo puts it back there.
   const removedAt = useRef(new Map<string, number>());
+  // Cards moved to Trash, deleted or gone. A save still answering for one,
+  // like a favorite flushed on leaving its details, mustn't put it back;
+  // only Undo does.
+  const goneIds = useRef(new Set<string>());
 
   const {
     isAuthenticated,
@@ -119,6 +133,12 @@ export function CardsListCommand({
       try {
         const response = await loadCards(input);
         if (generation === requestGeneration.current) {
+          removedAt.current.clear();
+          // A trashed card isn't in a fresh page, so it stays blocked; one
+          // restored elsewhere is back in the page and takes updates again.
+          for (const card of response.items) {
+            goneIds.current.delete(card.id);
+          }
           setItems(response.items);
           setNextCursor(response.nextCursor);
           setSimilarity(response.similarity);
@@ -148,6 +168,9 @@ export function CardsListCommand({
     try {
       const response = await loadCards({ ...requestInput, cursor: nextCursor });
       if (generation === requestGeneration.current) {
+        for (const card of response.items) {
+          goneIds.current.delete(card.id);
+        }
         setItems((previous) => {
           const seen = new Set(previous.map((card) => card.id));
           return [
@@ -159,7 +182,11 @@ export function CardsListCommand({
       }
     } catch (requestError) {
       if (generation === requestGeneration.current) {
-        setError(getUserFacingErrorMessage(requestError));
+        await showToast({
+          message: failureMessage(requestError),
+          style: Toast.Style.Failure,
+          title: "Couldn't load more cards",
+        });
       }
     } finally {
       if (generation === requestGeneration.current) {
@@ -196,6 +223,9 @@ export function CardsListCommand({
 
   const handleCardUpdated = useCallback(
     (next: RaycastCard) => {
+      if (goneIds.current.has(next.id)) {
+        return;
+      }
       setItems((previous) => {
         const index = previous.findIndex((card) => card.id === next.id);
         const updated = upsertCard(previous, next, {
@@ -223,8 +253,23 @@ export function CardsListCommand({
   );
 
   const handleCardRemoved = useCallback((cardId: string) => {
-    setItems((previous) => removeCardById(previous, cardId).cards);
+    goneIds.current.add(cardId);
+    setItems((previous) => {
+      const index = previous.findIndex((card) => card.id === cardId);
+      if (index !== -1) {
+        removedAt.current.set(cardId, index);
+      }
+      return removeCardById(previous, cardId).cards;
+    });
   }, []);
+
+  const handleCardRestored = useCallback(
+    (card: RaycastCard) => {
+      goneIds.current.delete(card.id);
+      handleCardUpdated(card);
+    },
+    [handleCardUpdated],
+  );
 
   const handleFilterByTag = useCallback((tag: string) => {
     setQuery((previous) => applyTagFilter(previous, tag));
@@ -244,8 +289,13 @@ export function CardsListCommand({
         handleCardUpdated(
           await setCardFavorite(card.id, !previousState, "interactive"),
         );
-      } catch {
+      } catch (error) {
         handleCardUpdated(card);
+        await showToast({
+          message: failureMessage(error),
+          style: Toast.Style.Failure,
+          title: "Favorite update failed",
+        });
       }
     },
     [handleCardUpdated],
@@ -259,7 +309,15 @@ export function CardsListCommand({
   );
 
   if (isCheckingAuth) {
-    return <List isLoading navigationTitle={navigationTitle} />;
+    return (
+      <List
+        isLoading
+        navigationTitle={navigationTitle}
+        onSearchTextChange={setQuery}
+        searchBarPlaceholder={searchBarPlaceholder}
+        searchText={query}
+      />
+    );
   }
 
   if (!isAuthenticated) {
@@ -267,7 +325,7 @@ export function CardsListCommand({
   }
 
   const isFiltered = Boolean(parsedFilters.rawQuery.trim());
-  let title = isFiltered ? navigationTitle : latestSectionTitle;
+  let title = isFiltered ? "Results" : sectionTitle;
   let empty = isFiltered
     ? {
         description: "Try a different keyword or clear your filters.",
@@ -308,57 +366,101 @@ export function CardsListCommand({
     empty = { ...empty, description: HIDDEN_CARDS_HINT };
   }
 
+  const hasMore = Boolean(nextCursor);
+  const subtitle =
+    items.length > 0
+      ? [
+          countLabel(items.length, hasMore),
+          inTrash ? "emptied after 30 days" : undefined,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : undefined;
+
+  const recoveryActions = (
+    <>
+      <ActionPanel.Section>
+        {inTrash ? (
+          <Action
+            icon={Icon.ArrowLeft}
+            onAction={() =>
+              setQuery((previous) => applyTrashedFilter(previous, undefined))
+            }
+            title="Leave Trash"
+          />
+        ) : null}
+        {archivedView && !inTrash ? (
+          <Action
+            icon={Icon.ArrowLeft}
+            onAction={() =>
+              setQuery((previous) => applyArchivedFilter(previous, undefined))
+            }
+            title="Leave Archive"
+          />
+        ) : null}
+        {parsedFilters.hasExplicitFilters ? (
+          <Action
+            icon={Icon.XMarkCircle}
+            onAction={() =>
+              setQuery((previous) => clearSearchFilters(previous))
+            }
+            title="Clear Filters"
+          />
+        ) : null}
+        <Action
+          icon={Icon.ArrowClockwise}
+          onAction={() => void load(requestInput)}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          title="Reload"
+        />
+        <Action.OpenInBrowser
+          shortcut={Keyboard.Shortcut.Common.Open}
+          title="Open Teak"
+          url={TEAK_HOME_URL}
+        />
+      </ActionPanel.Section>
+      <AccountActions onSignedOut={refreshAuth} />
+    </>
+  );
+
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={title}
+      navigationTitle={navigationTitle}
       onSearchTextChange={setQuery}
       pagination={{
-        hasMore: Boolean(nextCursor),
+        hasMore,
         onLoadMore: () => void loadMore(),
         pageSize: PAGE_SIZE,
       }}
+      searchBarAccessory={
+        <CardTypeDropdown
+          onChange={(type) =>
+            setQuery((previous) => applyTypeFilter(previous, type))
+          }
+          type={parsedFilters.type}
+        />
+      }
       searchBarPlaceholder={searchBarPlaceholder}
       searchText={query}
       throttle
     >
       {error ? (
         <List.EmptyView
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.ArrowClockwise}
-                onAction={() => {
-                  void load(requestInput);
-                }}
-                title="Retry"
-              />
-              {parsedFilters.hasExplicitFilters ? (
-                <Action
-                  icon={Icon.XMarkCircle}
-                  onAction={() => {
-                    setQuery((previous) => clearSearchFilters(previous));
-                  }}
-                  title="Clear Filters"
-                />
-              ) : null}
-              <SetApiKeyAction />
-              <SignOutAction onSignedOut={refreshAuth} />
-            </ActionPanel>
-          }
-          description="Check your API key and network connection, then retry."
+          actions={<ActionPanel>{recoveryActions}</ActionPanel>}
+          description="Check your connection, then reload."
           icon={Icon.ExclamationMark}
           title={error}
         />
       ) : null}
 
-      <List.Section
-        subtitle={inTrash ? "Teak empties Trash after 30 days" : undefined}
-        title={inTrash ? "Trash" : undefined}
-      >
+      <List.Section subtitle={subtitle} title={title}>
         {items.map((card) => (
           <List.Item
-            accessories={getCardAccessories(card)}
+            accessories={getCardAccessories(card, {
+              inArchive: archivedView && !inTrash,
+              inFavorites: removeUnfavoritedFromList,
+            })}
             actions={
               <CardListActions
                 canSaveSmartFolder={canSaveSmartFolder}
@@ -367,6 +469,7 @@ export function CardsListCommand({
                 inTrash={inTrash}
                 keepNewestSort={serverOrder}
                 onCardRemoved={handleCardRemoved}
+                onCardRestored={handleCardRestored}
                 onCardUpdated={handleCardUpdated}
                 onFilterByTag={handleFilterByTag}
                 onQueryChange={setQuery}
@@ -377,7 +480,8 @@ export function CardsListCommand({
                 showFavoritesFilter={!removeUnfavoritedFromList}
               />
             }
-            icon={getCardTypeIcon(card)}
+            icon={getCardListIcon(card)}
+            id={card.id}
             key={card.id}
             subtitle={getCardSubtitle(card)}
             title={getCardTitle(card)}
@@ -387,6 +491,7 @@ export function CardsListCommand({
 
       {!(isLoading || error) && items.length === 0 ? (
         <List.EmptyView
+          actions={<ActionPanel>{recoveryActions}</ActionPanel>}
           description={empty.description}
           icon={empty.icon}
           title={empty.title}

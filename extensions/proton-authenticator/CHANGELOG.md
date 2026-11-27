@@ -1,5 +1,13 @@
 # Proton Authenticator Changelog
 
+## [Fix database access on macOS 27] - 2026-11-02
+
+### Fixed
+
+- When macOS blocks Raycast from reading Proton Authenticator's data, Local Database mode now says so and explains how to allow access in Privacy & Security, with a button that opens the settings. Previously it showed "Failed to query database. Make sure sqlite3 is available" or "Failed to decrypt database. Please check your encryption key".
+- Other database errors now show the actual sqlite error instead of a generic message.
+- If the database can't be read on launch, the extension opens Local Database setup with the error instead of the mode selector.
+
 ## [Fix multi-key decryption] - 2026-10-26
 
 ### Fixed

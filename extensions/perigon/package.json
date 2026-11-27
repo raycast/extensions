@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "perigon",
+  "title": "Perigon",
+  "description": "Search Perigon news and stories, browse monitor events and briefings, and research news with AI using your Perigon account.",
+  "icon": "icon.png",
+  "author": "galen-perigon",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "News",
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^2.6.3",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nUse \\`npm run publish\\` to publish to the Raycast Store, not npm publish.\\n\\n\" && exit 1"
+  },
+  "commands": [
+    {
+      "name": "search-news",
+      "title": "Search News",
+      "subtitle": "Perigon",
+      "description": "Search recent news articles from Perigon and open or copy sources.",
+      "mode": "view"
+    },
+    {
+      "name": "search-stories",
+      "title": "Search Stories",
+      "subtitle": "Perigon",
+      "description": "Search clustered news stories from Perigon.",
+      "mode": "view"
+    },
+    {
+      "name": "my-monitors",
+      "title": "My Monitors",
+      "subtitle": "Perigon",
+      "description": "Browse your Perigon monitors, events, and topic briefings.",
+      "mode": "view"
+    }
+  ],
+  "ai": {
+    "mcp": {
+      "url": "https://mcp.perigon.io/v1/mcp",
+      "type": "http",
+      "oauth": {
+        "type": "dynamic"
+      }
+    },
+    "skills": [
+      {
+        "name": "perigon-news-research",
+        "title": "News Research"
+      },
+      {
+        "name": "perigon-monitor-insights",
+        "title": "Monitor Insights"
+      }
+    ],
+    "instructions": "You are connected to Perigon for real-time news, entities, monitors, and Signal Insights. Cite article titles, publishers, dates, and URLs when reporting facts. Call get_api_access once per session before assuming missing data."
+  }
+}

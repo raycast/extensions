@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-cli-manual",
   "title": "GitHub CLI Manual",
-  "description": "Raycast extension to search GitHub CLI Manual.",
+  "description": "Search the GitHub CLI (gh) manual and open command documentation.",
   "icon": "icon.png",
   "author": "demartini",
   "categories": [

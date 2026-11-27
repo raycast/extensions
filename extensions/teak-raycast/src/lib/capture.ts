@@ -4,7 +4,6 @@ import { parseTags } from "teak-sdk";
 import {
   type CreateCardInput,
   createCard,
-  findSavedCardId,
   getRecoveryHint,
   getUserFacingErrorMessage,
   MAX_UPLOAD_BYTES,
@@ -19,7 +18,6 @@ import {
 } from "./oauth";
 import { grandfatheredApiKey } from "./preferences";
 
-/** Optional tags (comma separated) and a note to send with a new card. */
 export const parseCaptureExtras = (extras: {
   notes?: string;
   tags?: string;
@@ -89,7 +87,8 @@ export const extractFirstHttpUrl = (value: string): string | null => {
     return null;
   }
 
-  if (isHttpUrl(trimmed)) {
+  // `new URL` encodes spaces, so a whole sentence would pass as one link.
+  if (!/\s/.test(trimmed) && isHttpUrl(trimmed)) {
     return trimmed;
   }
 
@@ -121,7 +120,6 @@ export const toLocalPath = (value: string): string =>
     ? decodeURIComponent(new URL(value).pathname)
     : value;
 
-/** Why a path can't be uploaded, or null when it can. */
 export const uploadRejection = (path: string): string | null => {
   try {
     const stats = statSync(path);
@@ -196,27 +194,18 @@ export const saveFilesWithFeedback = async (
   return saved;
 };
 
-export const showIfAlreadySaved = async (url: string): Promise<boolean> => {
-  let cardId: string | null = null;
-  try {
-    cardId = await findSavedCardId(url, "silent");
-  } catch {
-    return false;
+export const savedToastText = (
+  result: Pick<QuickSaveResponse, "resaved" | "wasArchived">,
+): { message?: string; title: string } => {
+  if (!result.resaved) {
+    return { title: "Saved to Teak" };
   }
-  if (!cardId) {
-    return false;
-  }
-  await showToast({
-    primaryAction: {
-      onAction: () => {
-        void open(getTeakCardUrl(cardId));
-      },
-      title: "Open Card",
-    },
-    style: Toast.Style.Success,
+  return {
+    message: result.wasArchived
+      ? "Moved back from Archive"
+      : "Moved to the top",
     title: "Already saved",
-  });
-  return true;
+  };
 };
 
 export const saveCardWithFeedback = async (
@@ -253,14 +242,17 @@ export const saveCardWithFeedback = async (
       };
     }
 
+    const { message, title } = savedToastText(result);
     toast.style = Toast.Style.Success;
-    toast.title = "Saved to Teak";
+    toast.title = title;
+    toast.message = message;
 
     return result;
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Save failed";
     toast.message = failureMessage(error);
-    throw error;
+    // Rethrowing would let Raycast replace this toast with its own error.
+    return null;
   }
 };

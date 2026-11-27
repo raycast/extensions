@@ -8,6 +8,7 @@ A lightweight Raycast extension for managing Google Cloud resources efficiently.
 - **Compute Engine**: Create and manage virtual machines and persistent disks
 - **Cloud Storage**: Browse and manage buckets, objects, and lifecycle rules
 - **Cloud Run**: View and manage Cloud Run services and revisions
+- **Artifact Registry**: Browse container images, tags, and packages across repositories
 - **Cloud Logging**: Search and filter logs across all your services
 - **Secret Manager**: Securely manage secrets and their versions
 - **IAM Management**: View and modify permissions for users, groups, and service accounts

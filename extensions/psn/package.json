@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "psn",
   "title": "PSN",
-  "description": "Access your PlayStation Network profile, view recently played games and earned trophies",
+  "description": "View your PlayStation Network (PSN) trophy stats, recently earned trophies and recently played games.",
   "icon": "icon.png",
   "author": "kylinwowo",
   "license": "MIT",

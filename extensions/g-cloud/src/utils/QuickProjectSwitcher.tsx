@@ -1,4 +1,4 @@
-import { List, useNavigation, showToast, Toast } from "@raycast/api";
+import { Icon, List, useNavigation, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { CacheManager, Project } from "./CacheManager";
 import ProjectView from "../ProjectView";
@@ -6,15 +6,25 @@ import { getProjects } from "../gcloud";
 
 interface QuickProjectSwitcherProps {
   gcloudPath: string;
+  currentProjectId?: string;
   onProjectSelect?: (projectId: string) => void;
 }
 
-export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProjectSwitcherProps) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const initialSetupDone = useRef(false);
+export function QuickProjectSwitcher({ gcloudPath, currentProjectId, onProjectSelect }: QuickProjectSwitcherProps) {
+  const [projects, setProjects] = useState<Project[]>(() => CacheManager.getProjectsList()?.projects ?? []);
+  const [selectedProject, setSelectedProject] = useState<string>(
+    () => currentProjectId || CacheManager.getSelectedProject()?.projectId || "",
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(() => !CacheManager.getProjectsList());
+  const initialSetupDone = useRef(Boolean(currentProjectId));
   const { push } = useNavigation();
+
+  useEffect(() => {
+    if (currentProjectId) {
+      setSelectedProject(currentProjectId);
+      initialSetupDone.current = true;
+    }
+  }, [currentProjectId]);
 
   useEffect(() => {
     async function loadProjects() {
@@ -23,10 +33,12 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
         setProjects(cachedProjects.projects);
         setIsLoading(false);
 
-        const cachedProject = CacheManager.getSelectedProject();
-        if (cachedProject) {
-          setSelectedProject(cachedProject.projectId);
-          initialSetupDone.current = true;
+        if (!currentProjectId) {
+          const cachedProject = CacheManager.getSelectedProject();
+          if (cachedProject) {
+            setSelectedProject(cachedProject.projectId);
+            initialSetupDone.current = true;
+          }
         }
       } else {
         // No cached projects, fetch them
@@ -63,9 +75,14 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
     }
 
     loadProjects();
-  }, [gcloudPath]);
+  }, [gcloudPath, currentProjectId]);
 
   const handleProjectChange = (projectId: string) => {
+    const activeProject = currentProjectId || selectedProject;
+    if (!projectId || projectId === activeProject) {
+      return;
+    }
+
     setSelectedProject(projectId);
     CacheManager.saveSelectedProject(projectId);
 
@@ -84,36 +101,70 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
     }
   };
 
-  const sortedProjects = useMemo(() => {
-    if (!projects.length) return [];
+  const { pinnedProjects, otherProjects } = useMemo(() => {
+    if (!projects.length) return { pinnedProjects: [], otherProjects: [] };
 
+    const pinnedIds = CacheManager.getPinnedProjects();
+    const pinnedSet = new Set(pinnedIds);
     const recentlyUsed = CacheManager.getRecentlyUsedProjects();
+    const projectsById = new Map(projects.map((p) => [p.id, p]));
 
-    return [...projects].sort((a, b) => {
-      const aIndex = recentlyUsed.indexOf(a.id);
-      const bIndex = recentlyUsed.indexOf(b.id);
+    const pinned: Project[] = [];
+    for (const id of pinnedIds) {
+      const project = projectsById.get(id);
+      if (project) pinned.push(project);
+    }
 
-      if (aIndex === -1 && bIndex === -1) {
-        return (a.name || "").localeCompare(b.name || "");
-      }
+    const rest = projects
+      .filter((p) => !pinnedSet.has(p.id))
+      .sort((a, b) => {
+        const aIndex = recentlyUsed.indexOf(a.id);
+        const bIndex = recentlyUsed.indexOf(b.id);
 
-      if (aIndex === -1) return 1;
-      if (bIndex === -1) return -1;
+        if (aIndex === -1 && bIndex === -1) {
+          return (a.name || a.id).localeCompare(b.name || b.id);
+        }
 
-      return aIndex - bIndex;
-    });
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+
+        return aIndex - bIndex;
+      });
+
+    return { pinnedProjects: pinned, otherProjects: rest };
   }, [projects]);
+
+  const hasCurrentProject = Boolean(selectedProject && projects.some((p) => p.id === selectedProject));
 
   return (
     <List.Dropdown
       tooltip="Search and switch projects"
-      value={selectedProject}
+      value={selectedProject || undefined}
       onChange={handleProjectChange}
       isLoading={isLoading}
     >
-      {sortedProjects.map((project) => (
-        <List.Dropdown.Item key={project.id} title={`${project.name || ""}`} value={project.id} />
-      ))}
+      {selectedProject && !hasCurrentProject && (
+        <List.Dropdown.Item key={selectedProject} title={selectedProject} value={selectedProject} />
+      )}
+      {pinnedProjects.length > 0 && (
+        <List.Dropdown.Section title="Pinned Projects">
+          {pinnedProjects.map((project) => (
+            <List.Dropdown.Item
+              key={project.id}
+              title={project.name || project.id}
+              value={project.id}
+              icon={Icon.Pin}
+            />
+          ))}
+        </List.Dropdown.Section>
+      )}
+      {otherProjects.length > 0 && (
+        <List.Dropdown.Section title={pinnedProjects.length > 0 ? "All Projects" : undefined}>
+          {otherProjects.map((project) => (
+            <List.Dropdown.Item key={project.id} title={project.name || project.id} value={project.id} />
+          ))}
+        </List.Dropdown.Section>
+      )}
     </List.Dropdown>
   );
 }

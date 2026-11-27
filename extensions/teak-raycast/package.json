@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teak-raycast",
-  "version": "1.0.88",
+  "version": "1.0.95",
   "private": true,
-  "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
+  "description": "Save notes, links, files, clipboard and browser tabs to Teak, search cards by content or tags, browse favorites, folders and tags, with AI tools.",
   "categories": [
     "Productivity"
   ],
@@ -19,14 +19,15 @@
     "typecheck": "tsc --noEmit"
   },
   "overrides": {
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "minimatch": "^11.0.1"
   },
   "dependencies": {
     "@raycast/api": "^1.104.24",
-    "teak-sdk": "1.0.87"
+    "teak-sdk": "1.0.93"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "20.14.5",
+    "@happy-dom/global-registrator": "21.0.4",
     "@types/node": "^26.2.0",
     "@types/react": "19.2.18",
     "react": "19.2.8",
@@ -296,7 +297,7 @@
       "title": "API Key",
       "type": "password",
       "required": false,
-      "description": "Optional — only if you prefer an API key over browser sign-in. Generate in Teak Settings > Manage API Keys."
+      "description": "Optional. Only if you prefer an API key to browser sign-in. Make one in Teak Settings > Integrations > API keys."
     }
   ],
   "title": "Teak",
@@ -339,7 +340,7 @@
     {
       "name": "update-card",
       "title": "Update Teak Card",
-      "description": "Add or remove a Teak card's tags (including tags Teak added), replace its notes, mark a link done, archive it, or add it to a folder."
+      "description": "Add or remove a Teak card's tags (including tags Teak added), replace its notes, add or remove a palette's colors, mark a link done, archive it, or add it to a folder."
     }
   ]
 }

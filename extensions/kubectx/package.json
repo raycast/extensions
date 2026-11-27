@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kubectx",
   "title": "kubectx",
-  "description": "Switch between clusters from Raycast",
+  "description": "Switch your current Kubernetes cluster context with kubectx.",
   "icon": "kubernetes-icon.png",
   "author": "oktay",
   "license": "MIT",

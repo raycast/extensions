@@ -1,9 +1,11 @@
-import { auth, calendar_v3 } from "@googleapis/calendar";
-import { OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
+import { createHash } from "node:crypto";
+import { calendar_v3 } from "@googleapis/calendar";
+import { getAccessToken, OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
 import { getPreferenceValues, Tool } from "@raycast/api";
 import { resolveCalendarIdForEventsList, resolveEventTypesForList } from "./event-types";
 import { getClientId } from "./utils";
+import { createGoogleClients } from "./google-clients";
 
 let calendar: calendar_v3.Calendar | null = null;
 let people: people_v1.People | null = null;
@@ -22,11 +24,7 @@ const google = OAuthService.google({
   clientId: getClientId(),
   scope: GOOGLE_OAUTH_SCOPES.join(" "),
   onAuthorize({ token }) {
-    const oauth = new auth.OAuth2();
-    oauth.setCredentials({ access_token: token });
-
-    calendar = new calendar_v3.Calendar({ auth: oauth });
-    people = new people_v1.People({ auth: oauth });
+    ({ calendar, people } = createGoogleClients(token));
   },
 });
 
@@ -44,6 +42,23 @@ export function getPeopleClient() {
   }
 
   return people;
+}
+
+const getAccountIdForToken = withCache(async (tokenHash: string) => {
+  void tokenHash;
+  const response = await getPeopleClient().people.get({ resourceName: "people/me", personFields: "metadata" });
+  const accountId = response.data.resourceName;
+  if (!accountId) throw new Error("Could not identify the signed-in Google account.");
+  return accountId;
+});
+
+/**
+ * A stable ID for the signed-in Google account. Caches of account data include it in their key, so signing in to
+ * another account never shows the previous account's contacts or events. Must run inside `withGoogleAPIs`.
+ */
+export async function getAccountKey() {
+  const tokenHash = createHash("sha256").update(getAccessToken().token).digest("hex");
+  return getAccountIdForToken(tokenHash);
 }
 
 export function withGoogleAPIs<Input, Output>(
@@ -66,24 +81,53 @@ export function useGoogleAPIs() {
 export async function searchContacts(query?: string) {
   const peopleClient = getPeopleClient();
 
-  const contactsResponse = await peopleClient.people.searchContacts({
-    query: query ?? "",
-    readMask: "names,emailAddresses,photos",
-    sources: ["READ_SOURCE_TYPE_CONTACT", "READ_SOURCE_TYPE_PROFILE"],
-  });
-  const contacts = contactsResponse.data.results
-    ?.map((contact) => contact.person)
-    .filter(Boolean) as people_v1.Schema$Person[];
+  const [contactsResponse, otherContactsResponse] = await Promise.allSettled([
+    peopleClient.people.searchContacts({
+      query: query ?? "",
+      readMask: "names,emailAddresses,photos",
+      sources: ["READ_SOURCE_TYPE_CONTACT", "READ_SOURCE_TYPE_PROFILE"],
+    }),
+    peopleClient.otherContacts.search({
+      readMask: "names,emailAddresses,photos",
+      query: query ?? "",
+    }),
+  ]);
+  const contacts =
+    contactsResponse.status === "fulfilled"
+      ? (contactsResponse.value.data.results
+          ?.map((contact) => contact.person)
+          .filter(Boolean) as people_v1.Schema$Person[])
+      : [];
+  const otherContacts =
+    otherContactsResponse.status === "fulfilled"
+      ? (otherContactsResponse.value.data.results
+          ?.map((contact) => contact.person)
+          .filter(Boolean) as people_v1.Schema$Person[])
+      : [];
 
-  const otherContactsResponse = await peopleClient.otherContacts.search({
-    readMask: "names,emailAddresses,photos",
-    query: query ?? "",
-  });
-  const otherContacts = otherContactsResponse.data.results
-    ?.map((contact) => contact.person)
-    .filter(Boolean) as people_v1.Schema$Person[];
+  if (contactsResponse.status === "rejected" && otherContactsResponse.status === "rejected") {
+    throw contactsResponse.reason;
+  }
 
   return [...(contacts ?? []), ...(otherContacts ?? [])];
+}
+
+/**
+ * Lists recently changed saved contacts for an empty search. Google needs an empty "warmup" search before prefix
+ * searches return fresh results, so it is sent alongside.
+ */
+export async function listRecentContacts() {
+  const peopleClient = getPeopleClient();
+  const [response] = await Promise.all([
+    peopleClient.people.connections.list({
+      resourceName: "people/me",
+      personFields: "names,emailAddresses,photos",
+      sortOrder: "LAST_MODIFIED_DESCENDING",
+      pageSize: 100,
+    }),
+    searchContacts("").catch(() => []),
+  ]);
+  return response.data.connections ?? [];
 }
 
 export async function getAutoAddHangouts() {
@@ -138,7 +182,6 @@ export function useEvents(calendarId?: string | null) {
           showBirthdays: !!showBirthdays,
         });
 
-        // Get recurring events and expanded instances in parallel
         const [recurringResponse, instancesResponse] = await Promise.all([
           calendar.events.list({
             calendarId: resolvedCalendarId,
@@ -159,7 +202,6 @@ export function useEvents(calendarId?: string | null) {
           }),
         ]);
 
-        // Create a map of recurring event rules
         const recurringRules = new Map(
           recurringResponse.data.items?.map((event) => [
             event.id,
@@ -177,7 +219,7 @@ export function useEvents(calendarId?: string | null) {
 
           return {
             ...event,
-            recurrence: recurringInfo?.recurrence, // RRULE string
+            recurrence: recurringInfo?.recurrence,
             isRecurring: !!recurringInfo,
           };
         });

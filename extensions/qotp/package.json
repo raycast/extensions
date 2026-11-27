@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qotp",
   "title": "QOTP",
-  "description": "QOTP is a simple tool to generate OTP code",
+  "description": "Generate one-time password (TOTP) codes for the qotp.corp platform from your saved secret.",
   "icon": "qotp.png",
   "author": "ariesly15",
   "license": "MIT",

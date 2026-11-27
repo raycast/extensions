@@ -1,17 +1,15 @@
 import type { RaycastCard } from "./api";
 import { isDone } from "./doneStates";
 
-const sortByCreatedAtDesc = (cards: RaycastCard[]): RaycastCard[] =>
-  [...cards].sort((left, right) => right.createdAt - left.createdAt);
+const savedTime = (card: RaycastCard): number => card.savedAt ?? card.createdAt;
+
+const sortBySavedAtDesc = (cards: RaycastCard[]): RaycastCard[] =>
+  [...cards].sort((left, right) => savedTime(right) - savedTime(left));
 
 export interface UpsertOptions {
-  /** The list shows archived cards only (true) or leaves them out (false). */
   archivedView?: boolean;
-  /** The list shows done links only, or links still to do. */
   doneView?: "done" | "todo";
-  /** Where a card that comes back goes, so Undo keeps a shuffled or closest-first order. */
   insertIndex?: number;
-  /** Hidden cards stay out of a list unless the search names a hidden tag. */
   removeWhenHidden?: boolean;
   removeWhenUnfavorited?: boolean;
 }
@@ -38,7 +36,7 @@ export const upsertCard = (
       const at = Math.min(Math.max(options.insertIndex, 0), cards.length);
       return [...cards.slice(0, at), next, ...cards.slice(at)];
     }
-    return sortByCreatedAtDesc([...cards, next]);
+    return sortBySavedAtDesc([...cards, next]);
   }
 
   const updated = [...cards];

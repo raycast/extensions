@@ -1,5 +1,18 @@
 # Google Search Changelog
 
+## [Configure the Return Key Action] - 2026-11-24
+
+- Choose whether Return opens a standard search or searches in AI mode in the Google Search command. Shift+Return runs the other action.
+
+## [Add AI Search Mode] - 2026-11-17
+
+- Add Google AI Search Mode command (`aiSearch`)
+- Add toggle action (`⇧↵`) to switch between regular search and AI search mode
+- Preserve default `⌘↵` shortcut for Copy URL action in regular search
+- Correctly open direct destinations for navigation suggestions in both modes
+- Ensure copied links in AI mode preserve `udm=50`
+- Display context-aware shortcut hints based on active search mode
+
 ## [Fix Suggestion Errors] - 2026-10-11
 
 - Fix "Premature close" error toast appearing while typing quickly

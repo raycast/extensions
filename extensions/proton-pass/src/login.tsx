@@ -1,12 +1,12 @@
 import { List, ActionPanel, Action, Alert, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { checkAuth, logout } from "./lib/pass-cli";
-import { PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { CliPathErrorType, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { LoginScreen, useBrowserLogin } from "./lib/login-view";
 import { platformShortcut } from "./lib/shortcuts";
-import { CliNotFoundView } from "./lib/error-views";
+import { CliPathErrorView } from "./lib/error-views";
 
-type AuthState = "loading" | "not-installed" | "not-authenticated" | "authenticated";
+type AuthState = "loading" | CliPathErrorType | "not-authenticated" | "authenticated";
 
 export default function Command() {
   const [authState, setAuthState] = useState<AuthState>("loading");
@@ -17,8 +17,8 @@ export default function Command() {
       setAuthState(isAuthenticated ? "authenticated" : "not-authenticated");
     } catch (error) {
       if (error instanceof PassCliError) {
-        if (error.type === "not_installed") {
-          setAuthState("not-installed");
+        if (PassCliError.isCliPath(error.type)) {
+          setAuthState(error.type);
           return;
         }
         if (error.type === "not_authenticated") {
@@ -72,7 +72,7 @@ export default function Command() {
     verifyAuth();
   }, []);
 
-  // A login in progress comes first, also one started from the logged-in screen to log in again.
+  // A login in progress comes first.
   if (login.status.state === "waiting") {
     return <LoginScreen login={login} onCheckAgain={checkAgain} />;
   }
@@ -81,8 +81,8 @@ export default function Command() {
     return <List isLoading={true} />;
   }
 
-  if (authState === "not-installed") {
-    return <CliNotFoundView />;
+  if (PassCliError.isCliPath(authState)) {
+    return <CliPathErrorView errorType={authState} />;
   }
 
   if (authState === "not-authenticated") {
@@ -94,21 +94,17 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.CheckCircle}
         title="You're Logged In"
-        description={
-          login.status.state === "failed"
-            ? `Your session is still active, but the new login didn't complete: ${login.status.error.message}`
-            : "You are successfully authenticated with Proton Pass. You can now use other commands to search and manage your vaults."
-        }
+        description="You are successfully authenticated with Proton Pass. You can now use other commands to search and manage your vaults."
         actions={
           <ActionPanel>
-            <Action title="Re-Run Browser Login" icon={Icon.Globe} onAction={login.start} />
+            {/* Logging in again is only needed after logging out, to change accounts for instance. */}
+            <Action title="Logout" icon={Icon.Logout} style={Action.Style.Destructive} onAction={confirmLogOut} />
             <Action.OpenInBrowser
               title="View CLI Documentation"
               url={PROTON_PASS_CLI_DOCS}
               icon={Icon.Globe}
               shortcut={platformShortcut(["cmd"], "d")}
             />
-            <Action title="Logout" icon={Icon.Logout} style={Action.Style.Destructive} onAction={confirmLogOut} />
           </ActionPanel>
         }
       />

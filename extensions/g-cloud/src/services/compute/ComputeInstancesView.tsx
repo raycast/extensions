@@ -12,11 +12,13 @@ import {
   useNavigation,
   Clipboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { friendlyErrorMessage } from "../../utils/errorMessages";
 import { LogsView } from "../logs-service";
 import { CloudShellAction } from "../../components/CloudShellAction";
@@ -33,9 +35,10 @@ import {
 interface ComputeInstancesViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeInstancesViewProps) {
+export default function ComputeInstancesView({ projectId, gcloudPath, onProjectChange }: ComputeInstancesViewProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [instances, setInstances] = useState<ComputeInstance[]>([]);
   const [filteredInstances, setFilteredInstances] = useState<ComputeInstance[]>([]);
@@ -331,10 +334,73 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     }
   };
 
+  const deleteInstance = async (instance: ComputeInstance) => {
+    if (!service) {
+      return;
+    }
+
+    if (
+      await confirmAlert({
+        title: "Delete Instance",
+        message: `Permanently delete ${instance.name}? Disks configured to auto-delete will also be deleted. This action cannot be undone.`,
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
+      const zone = service.formatZone(instance.zone);
+      const deletingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Deleting instance ${instance.name}...`,
+        message: `Zone: ${zone}`,
+      });
+
+      try {
+        const result = await service.deleteInstance(instance.name, zone);
+        deletingToast.hide();
+
+        if (!result.isTimedOut) {
+          setInstances((current) => current.filter((item) => item.id !== instance.id));
+        }
+
+        showToast({
+          style: Toast.Style.Success,
+          title: result.isTimedOut ? "Delete requested" : "Instance deleted",
+          message: result.isTimedOut
+            ? `${instance.name} is still being deleted. Refresh again in a moment to confirm.`
+            : `${instance.name} has been permanently deleted.`,
+        });
+
+        if (result.isTimedOut) {
+          await fetchInstances(service, { silent: true });
+        }
+      } catch (error) {
+        deletingToast.hide();
+        const friendly = friendlyErrorMessage(error, "Failed to delete instance");
+        await showFailureToast(error, {
+          title: friendly.title,
+          message: friendly.message,
+        });
+      }
+    }
+  };
+
   const viewInstanceDetails = (instance: ComputeInstance) => {
     if (!service) {
       return;
     }
+
+    const zone = service.formatZone(instance.zone);
+    CacheManager.saveRecentResource({
+      id: instance.id || instance.name,
+      type: "compute",
+      name: instance.name,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/compute/instancesDetail/zones/${zone}/instances/${instance.name}?project=${projectId}`,
+      metadata: { zone },
+    });
 
     push(
       <ComputeInstanceDetailView
@@ -353,6 +419,16 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
     const zone = service.formatZone(instance.zone).split("/").pop() || "";
     const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${projectId}"`;
+
+    CacheManager.saveRecentResource({
+      id: instance.id || instance.name,
+      type: "compute",
+      name: instance.name,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/compute/instancesDetail/zones/${zone}/instances/${instance.name}?project=${projectId}`,
+      metadata: { zone },
+    });
 
     Clipboard.copy(command);
     showToast({
@@ -404,7 +480,14 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       searchText={searchText}
       onSearchTextChange={setSearchText}
       navigationTitle={`VM Instances - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="compute"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Create Vm Instance" icon={{ source: Icon.Plus }} onAction={createVMInstance} />
@@ -464,6 +547,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               projectId={projectId}
               onViewDetails={viewInstanceDetails}
               onInstanceAction={runInstanceAction}
+              onDelete={deleteInstance}
               onSshCommand={copyConnectionCommand}
               onCreateVM={createVMInstance}
             />
@@ -481,6 +565,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               projectId={projectId}
               onViewDetails={viewInstanceDetails}
               onInstanceAction={runInstanceAction}
+              onDelete={deleteInstance}
               onSshCommand={copyConnectionCommand}
               onCreateVM={createVMInstance}
             />

@@ -1,4 +1,7 @@
+import { randomUUID } from "node:crypto";
 import process from "node:process";
+import { LocalStorage } from "@raycast/api";
+import { groupBy } from "lodash";
 import {
   checkIfSayIsRunning as nativeCheckIfSayIsRunning,
   getAudioDevices as nativeGetAudioDevices,
@@ -7,11 +10,13 @@ import {
   say as nativeSay,
 } from "native-say";
 import type { SayOptions, Voice as NativeVoice, WindowsSayOptions, WindowsVoice } from "native-say";
-import { maxRate, minRate } from "./constants.js";
+import { autoDetectWithAI, isAutoDetectVoice, maxRate, minRate } from "./constants.js";
+import { getMacVoices, getRunningMacSpeech, sayMacVoice, stopMacSpeech, type MacVoice } from "./macSpeech.js";
 
 export type { Device, SayOptions } from "native-say";
 
 export type Voice = {
+  identifier?: string;
   name: string;
   languageCode: string;
   example: string;
@@ -19,6 +24,9 @@ export type Voice = {
   gender?: string;
   age?: string;
   enabled?: boolean;
+  quality?: MacVoice["quality"];
+  isSiri?: boolean;
+  siriVoiceNumber?: number;
 };
 
 export const isMacOS = process.platform === "darwin";
@@ -27,6 +35,8 @@ export const supportsAudioDeviceSelection = isMacOS;
 
 const windowsMinRate = -10;
 const windowsMaxRate = 10;
+const lastStopKey = "lastSpeechStop";
+const getLastStop = () => LocalStorage.getItem<string>(lastStopKey);
 
 const toWindowsRate = (rate?: number) => {
   if (rate === undefined) return undefined;
@@ -63,21 +73,92 @@ const normalizeWindowsVoice = (voice: WindowsVoice): Voice => ({
 });
 
 export const say = async (text: string, options?: SayOptions) => {
-  if (isWindows) {
-    await nativeSay(text, toWindowsSayOptions(options));
+  const lastStop = await getLastStop();
+  const wasStopped = async () => (await getLastStop()) !== lastStop;
+
+  if (isAutoDetectVoice(options?.voice)) {
+    const { detectVoice } = await import("./detectVoice.js");
+    const voice = await detectVoice(
+      text,
+      options?.voice === autoDetectWithAI,
+      isMacOS ? options?.inputFile : undefined,
+    );
+    if (await wasStopped()) return;
+    options = { ...options, voice };
+  }
+
+  if (!options?.skipRunningCheck) await stopPlayback();
+  if (isMacOS && options?.voice?.startsWith("com.apple.")) {
+    await sayMacVoice(text, options.voice, options, wasStopped);
     return;
   }
 
-  await nativeSay(text, options);
+  if (await wasStopped()) return;
+  await nativeSay(text, { ...(isWindows ? toWindowsSayOptions(options) : options), skipRunningCheck: true });
 };
 
+const macVoiceTraits = ({ quality, isSiri, shortName }: MacVoice) => ({
+  quality,
+  isSiri,
+  siriVoiceNumber: isSiri ? Number(shortName.match(/\d+/)?.[0] ?? 0) : undefined,
+});
+
 export const getVoices = async (): Promise<Voice[]> => {
-  const voices = await nativeGetVoices();
-  return voices.map((voice) => (isWindowsVoice(voice) ? normalizeWindowsVoice(voice) : voice));
+  const [voices, macVoices] = await Promise.all([nativeGetVoices(), isMacOS ? getMacVoices() : []]);
+  const normalized = voices.map((voice) => (isWindowsVoice(voice) ? normalizeWindowsVoice(voice) : voice));
+  if (!isMacOS) return normalized;
+
+  // say can list the same selectable name more than once with different
+  // examples. Deduplicate by the value accepted by say, rather than the row.
+  const legacyNames = new Set<string>();
+  const legacyVoices = normalized.filter((voice) => {
+    if (legacyNames.has(voice.name)) return false;
+    legacyNames.add(voice.name);
+    return true;
+  });
+  const modernVoices = [...new Map(macVoices.map((voice) => [voice.identifier, voice])).values()];
+  const byLegacyName = groupBy(modernVoices, (voice) => voice.legacyName);
+  return [
+    ...legacyVoices.map((voice) => {
+      const variants = byLegacyName[voice.name];
+      return variants?.length === 1 ? { ...voice, ...macVoiceTraits(variants[0]) } : voice;
+    }),
+    ...modernVoices
+      // Keep distinct quality variants when a legacy name cannot identify one
+      // voice unambiguously. Existing saved names remain available above.
+      .filter(
+        (voice) => !voice.legacyName || !legacyNames.has(voice.legacyName) || byLegacyName[voice.legacyName].length > 1,
+      )
+      .map((voice) => ({
+        identifier: voice.identifier,
+        name: `${voice.name} [${voice.quality}]`,
+        languageCode: voice.language.replaceAll("-", "_"),
+        example: `Hello! My name is ${voice.isSiri ? "Siri" : voice.shortName}.`,
+        ...macVoiceTraits(voice),
+      })),
+  ];
 };
 
 export const getAudioDevices = nativeGetAudioDevices;
 
-export const checkIfSayIsRunning = nativeCheckIfSayIsRunning;
+export const checkIfSayIsRunning = async () => {
+  if (isMacOS) {
+    const [speech] = await getRunningMacSpeech();
+    if (speech) return speech;
+  }
+  return nativeCheckIfSayIsRunning();
+};
 
-export const killRunningSay = nativeKillRunningSay;
+const stopPlayback = async () => {
+  if (isMacOS) await stopMacSpeech();
+  await nativeKillRunningSay();
+};
+
+export const killRunningSay = async () => {
+  // All commands share this marker. Playback replacement must not change it.
+  try {
+    await LocalStorage.setItem(lastStopKey, randomUUID());
+  } finally {
+    await stopPlayback();
+  }
+};

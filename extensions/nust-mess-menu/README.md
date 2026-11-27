@@ -2,11 +2,11 @@
 
 Raycast extension for the NUST hostel mess. Today's breakfast, lunch, and dinner, plus the week. No login.
 
-The menu comes from the public API behind [mess-menu-six.vercel.app](https://mess-menu-six.vercel.app/), a community site. Neither the site nor this extension is affiliated with NUST.
+The menu comes from the free public API of [Eat Deez Nust](https://eat.deeznust.com), a community site. Neither the site nor this extension is affiliated with NUST.
 
 ## Commands
 
-**Today's Mess Menu.** Breakfast, lunch, and dinner.
+**Today's Mess Menu.** Breakfast, lunch, and dinner, with serving times.
 
 **Weekly Mess Menu.** The week in one table.
 

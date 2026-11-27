@@ -23,6 +23,19 @@ const { OFFICIAL_ENTRIES } = loadSource("src/registries/builtin/entries.ts");
 const { writeMCPConfig } = loadSource("src/shared/mcp.ts");
 const linear = OFFICIAL_ENTRIES.find((entry) => entry.name === "linear");
 const elevenlabs = OFFICIAL_ENTRIES.find((entry) => entry.name === "elevenlabs");
+const kilobat = OFFICIAL_ENTRIES.find((entry) => entry.name === "kilobat-cli");
+
+test("Kilobat uses the installed local executable and explains its prerequisites", () => {
+  const server = getRaycastServer(kilobat);
+  assert.equal(server.transport, "stdio");
+  assert.equal(server.command, "kilobat");
+  assert.deepEqual(server.args, ["mcp"]);
+  const setup = getSetupMarkdown(kilobat);
+  assert.match(setup, /macOS 14\+/);
+  assert.match(setup, /separately installed/);
+  assert.match(setup, /command -v kilobat/);
+  assert.match(setup, /change settings/);
+});
 
 test("Linear installs directly in Raycast without npx or npm dependencies", () => {
   const server = getRaycastServer(linear);
@@ -87,9 +100,52 @@ test("ElevenLabs uses the maintained hosted server", () => {
   });
 });
 
+test("Gumlet installs over HTTP with a replaceable API key header", () => {
+  const gumlet = OFFICIAL_ENTRIES.find((entry) => entry.name === "gumlet");
+  assert.ok(gumlet);
+  assert.equal(gumlet.remoteUrl, "https://mcp.gumlet.com/mcp/v1");
+  assert.deepEqual(getRaycastServer(gumlet), {
+    name: "Gumlet",
+    description: gumlet.description,
+    transport: "sse",
+    url: "https://mcp.gumlet.com/mcp/v1",
+    headers: { GUMLET_API_KEY: "YOUR_GUMLET_API_KEY" },
+  });
+  assert.deepEqual(gumlet.configuration.env, { GUMLET_API_KEY: "YOUR_GUMLET_API_KEY" });
+  assert.match(getSetupMarkdown(gumlet), /Replace placeholder values in the HTTP headers/);
+  assert.match(getSetupMarkdown(gumlet), /Node\.js is not required in Raycast/);
+});
+
 test("archived or missing built-in servers are not offered", () => {
   const names = new Set(OFFICIAL_ENTRIES.map((entry) => entry.name));
   for (const name of ["e2b", "google-drive", "shopify-dev"]) {
     assert.equal(names.has(name), false, `${name} should not remain in the built-in registry`);
   }
+});
+
+test("Scrapewise installs with headerless native HTTP and keeps its Bearer proxy fallback", () => {
+  const scrapewise = OFFICIAL_ENTRIES.find((entry) => entry.name === "scrapewise");
+  assert.ok(scrapewise);
+  assert.equal(scrapewise.remoteUrl, "https://mcp.scrapewise.ai/mcp");
+  assert.deepEqual(getRaycastServer(scrapewise), {
+    name: "Scrapewise",
+    description: scrapewise.description,
+    transport: "sse",
+    url: "https://mcp.scrapewise.ai/mcp",
+  });
+  assert.deepEqual(scrapewise.configuration, {
+    command: "npx",
+    args: [
+      "-y",
+      "mcp-remote",
+      "https://mcp.scrapewise.ai/mcp",
+      "--header",
+      "Authorization: Bearer YOUR_SCRAPEWISE_API_KEY",
+    ],
+  });
+  assert.deepEqual(getAccessories(scrapewise), [{ icon: "globe", tooltip: "HTTP" }]);
+  const [raycastSetup, proxySetup] = getSetupMarkdown(scrapewise).split("## Other clients");
+  assert.match(raycastSetup, /Complete sign-in when prompted/);
+  assert.match(raycastSetup, /Node\.js is not required in Raycast/);
+  assert.match(proxySetup, /Requires \[Node\.js with npm\]/);
 });

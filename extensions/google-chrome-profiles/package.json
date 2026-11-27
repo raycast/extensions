@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chrome-profiles",
   "title": "Google Chrome Profiles",
-  "description": "Switch between Chrome profiles and access their bookmarks instantly",
+  "description": "Switch between Google Chrome profiles, browse each profile's bookmarks, open new tabs and move the current tab to another profile.",
   "icon": "command-icon.png",
   "author": "frouo",
   "contributors": [
@@ -13,7 +13,9 @@
     "smpeotn",
     "radek_cabaj",
     "0xdhrv",
-    "masamallow"
+    "masamallow",
+    "danlane",
+    "alexi.build"
   ],
   "license": "MIT",
   "commands": [
@@ -39,6 +41,28 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-current-profile",
+      "title": "Get Current Profile",
+      "description": "Get the active profile name for the frontmost regular window of the configured browser."
+    },
+    {
+      "name": "list-profiles",
+      "title": "List Profiles",
+      "description": "List visible profiles for the configured browser, including their names and directory IDs."
+    },
+    {
+      "name": "move-current-tab",
+      "title": "Move Current Tab",
+      "description": "Move the active tab of the frontmost regular browser window to another profile and close the original after verifying the destination. Use List Profiles to find the destination directory ID."
+    },
+    {
+      "name": "open-profile",
+      "title": "Open Profile",
+      "description": "Bring a profile to the front or open a web URL in it. Use List Profiles to find the directory ID first."
+    }
+  ],
   "categories": [
     "Web"
   ],
@@ -58,6 +82,14 @@
         {
           "title": "Google Chrome Canary",
           "value": "chrome-canary"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "brave"
+        },
+        {
+          "title": "Brave Origin",
+          "value": "brave-origin"
         }
       ]
     },
@@ -87,6 +119,15 @@
           "value": "lastUsed"
         }
       ]
+    },
+    {
+      "name": "maskProfileEmails",
+      "title": "Privacy",
+      "label": "Mask profile emails",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Show masked email addresses in Switch Profiles and Move Current Tab. You can still search by email."
     },
     {
       "name": "popToRootAfterOpen",

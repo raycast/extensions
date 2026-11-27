@@ -9,7 +9,7 @@ import {
 } from "./api";
 import { doneToastTitle } from "./doneStates";
 
-const failureMessage = (error: unknown): string => {
+export const failureMessage = (error: unknown): string => {
   const hint = getRecoveryHint(error);
   return hint
     ? `${getUserFacingErrorMessage(error)} ${hint}`
@@ -75,7 +75,6 @@ export const unarchiveCard = async (
   return true;
 };
 
-/** Marks a link read, watched, bought or done, or takes the mark off. */
 export const toggleCardDone = async (
   card: RaycastCard,
   done: boolean,
@@ -99,7 +98,6 @@ export const toggleCardDone = async (
   }
 };
 
-/** Asks Teak to read the page and card again; it finishes in the background. */
 export const refreshCardDetails = async (card: RaycastCard): Promise<void> => {
   const toast = await showToast({
     style: Toast.Style.Animated,

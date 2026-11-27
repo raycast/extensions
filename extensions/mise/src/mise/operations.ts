@@ -6,14 +6,19 @@ export type MiseOperation = {
   successTitle: string;
   failureTitle: string;
   retry?: (stderr: string) => Retry | undefined;
+  // A run that exits 0 can still leave work undone; this reads that from stderr.
+  caveat?: (stderr: string) => Caveat | undefined;
 };
+
+export type Caveat = { title: string; message: string; next?: Retry };
 
 export type Retry = { title: string; op: MiseOperation };
 
 export type Progress = { kind: "progress"; message: string } | { kind: "summary"; message: string };
 
 export type UseOptions = { configFile?: string; jobs?: number; toolOptions?: Record<string, string> };
-export type UpgradeOptions = { bump?: boolean; inactive?: boolean; jobs?: number; prune?: boolean };
+// `global` upgrades only what the global and system config request (see GLOBAL_FLAG_SINCE).
+export type UpgradeOptions = { global?: boolean; bump?: boolean; inactive?: boolean; jobs?: number; prune?: boolean };
 export type UninstallOptions = { unuse?: { configFile: string; requested: string } };
 export type PruneScope = "all" | "tools" | "configs";
 
@@ -59,18 +64,48 @@ export function failureMessage(stderr: string): string {
   return error?.slice("mise ERROR ".length) ?? lines[lines.length - 1] ?? "";
 }
 
-export function upgrade(tool?: string, options: UpgradeOptions = {}): MiseOperation {
-  const flags = [
+function upgradeFlags(options: UpgradeOptions): string[] {
+  return [
+    ...(options.global ? ["--global"] : []),
     ...(options.bump ? ["--bump"] : []),
     ...(options.inactive ? ["--inactive"] : []),
     ...jobsFlag(options.jobs),
     ...(options.prune ? ["--prune"] : []),
   ];
+}
+
+export function upgrade(tool?: string, options: UpgradeOptions = {}): MiseOperation {
   return {
-    args: ["upgrade", ...flags, ...(tool ? [tool] : [])],
+    args: ["upgrade", ...upgradeFlags(options), ...(tool ? [tool] : [])],
     title: tool ? `Upgrading ${tool}…` : "Upgrading all tools…",
     successTitle: tool ? `${tool} upgraded` : "All tools upgraded",
     failureTitle: tool ? `Upgrading ${tool} failed` : "Upgrading all tools failed",
+  };
+}
+
+// Since 2026.11.12 `mise upgrade --vulnerable` exits 0 when an affected tool has no newer version in its
+// configured range, and says so only on stderr:
+//   mise WARN  known vulnerabilities, but no newer version in the configured range: jq@1.8.1, npm:lodash@4.17.15
+//   Run `mise upgrade --vulnerable --bump` to upgrade past the range.
+const OUT_OF_RANGE_WARNING = /no newer version in the configured range: (.+)$/m;
+
+export function upgradeVulnerable(options: UpgradeOptions = {}): MiseOperation {
+  return {
+    args: ["upgrade", "--vulnerable", ...upgradeFlags(options)],
+    title: "Upgrading vulnerable tools…",
+    successTitle: "Vulnerable tools upgraded",
+    failureTitle: "Upgrading vulnerable tools failed",
+    caveat: (stderr) => {
+      const stuck = OUT_OF_RANGE_WARNING.exec(stderr)?.[1].trim();
+      if (!stuck) return undefined;
+      return {
+        title: `Still vulnerable: ${stuck}`,
+        message: "No newer version in the configured range",
+        next: options.bump
+          ? undefined
+          : { title: "Upgrade Past Range", op: upgradeVulnerable({ ...options, bump: true }) },
+      };
+    },
   };
 }
 
@@ -130,6 +165,67 @@ export function runTask(name: string): MiseOperation {
     title: `Running ${name}…`,
     successTitle: `${name} finished`,
     failureTitle: `${name} failed`,
+  };
+}
+
+// mise runs every task with the tag, in parallel up to --jobs, and cancels the rest when one fails.
+// --tag=<tag> keeps a tag that starts with - from being read as a flag.
+export function runTaggedTasks(tag: string): MiseOperation {
+  return {
+    args: ["run", `--tag=${tag}`],
+    title: `Running tasks tagged ${tag}…`,
+    successTitle: `Tasks tagged ${tag} finished`,
+    failureTitle: `Tasks tagged ${tag} failed`,
+  };
+}
+
+// `run` is the command's words; mise shell-quotes each one (see splitCommand). The description goes
+// as --description=… so one starting with - is not read as a flag.
+export function addTask(name: string, fields: { description: string; run: string[] }): MiseOperation {
+  const description = fields.description ? [`--description=${fields.description}`] : [];
+  return {
+    args: ["tasks", "add", "--global", ...description, name, "--", ...fields.run],
+    title: `Creating ${name}…`,
+    successTitle: `${name} created`,
+    failureTitle: `Creating ${name} failed`,
+  };
+}
+
+// Changes only the fields given, in the file the task list says defines the task. An empty
+// description removes the field.
+export function editTask(
+  task: { name: string; source: string },
+  changes: { description?: string; run?: string[] },
+): MiseOperation {
+  const description =
+    changes.description === undefined
+      ? []
+      : changes.description
+        ? [`--description=${changes.description}`]
+        : ["--unset", "description"];
+  return {
+    args: [
+      "tasks",
+      "set",
+      "--path",
+      task.source,
+      ...description,
+      task.name,
+      ...(changes.run ? ["--", ...changes.run] : []),
+    ],
+    title: `Saving ${task.name}…`,
+    successTitle: `${task.name} saved`,
+    failureTitle: `Saving ${task.name} failed`,
+  };
+}
+
+// `tasks rm` asks first and fails without a terminal unless --yes; the extension confirms instead.
+export function deleteTask(task: { name: string; source: string }): MiseOperation {
+  return {
+    args: ["tasks", "rm", "--yes", "--path", task.source, task.name],
+    title: `Deleting ${task.name}…`,
+    successTitle: `${task.name} deleted`,
+    failureTitle: `Deleting ${task.name} failed`,
   };
 }
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createDailyPlan, createPlanClock, planItemId, planClockKey } from "../src/lib/plan-model";
+import { createDailyPlan, createPlanClock, planItemId, planClockKey, sortPlansForDisplay } from "../src/lib/plan-model";
 import type { SavedPlan, Project, WorkLog } from "../src/lib/types";
 
 const now = new Date(2026, 9, 18, 0, 20);
@@ -66,6 +66,79 @@ test("the plan can revisit earlier dates without losing unplanned totals or unkn
   assert.equal(state.goals[0].seconds, 600);
   assert.equal(state.active, null);
   assert.equal(state.previousPlanDate, "2026-10-17");
+});
+
+test("completed plans follow unfinished plans without changing saved or subtask order", () => {
+  const completedAt = now.toISOString();
+  const completed = { ...goal, id: "done", tasks: goal.tasks.map((task) => ({ ...task, completedAt })) };
+  const partial = {
+    ...goal,
+    id: "partial",
+    tasks: [{ id: "done-step", title: "Done", completedAt }, ...goal.tasks],
+  };
+  const standalone = { ...goal, id: "standalone", tasks: [], completedAt };
+  const pending = { ...goal, id: "pending", tasks: [] };
+  const data = { goals: [completed, partial, standalone, pending], projects: [project], logs: [], timer: null };
+  const snapshot = createDailyPlan(data, goal.date, now);
+  const before = structuredClone(snapshot);
+  const displayed = sortPlansForDisplay(snapshot.goals);
+  assert.deepEqual(
+    displayed.map((item) => item.id),
+    ["partial", "pending", "done", "standalone"],
+  );
+  assert.deepEqual(
+    displayed[0].tasks.map((task) => task.id),
+    ["done-step", "task"],
+  );
+  assert.equal(displayed[2], snapshot.goals[0]);
+  assert.deepEqual(snapshot, before);
+  assert.deepEqual(sortPlansForDisplay([]), []);
+});
+
+test("finishing and reopening a plan updates display order while retaining saved priority", () => {
+  const data = {
+    goals: [goal, { ...goal, id: "second" }],
+    projects: [project],
+    logs: [],
+    timer: null,
+  };
+  const ids = () => sortPlansForDisplay(createDailyPlan(data, goal.date, now).goals).map((item) => item.id);
+  assert.deepEqual(ids(), ["goal", "second"]);
+  data.goals = [
+    { ...goal, tasks: goal.tasks.map((task) => ({ ...task, completedAt: now.toISOString() })) },
+    data.goals[1],
+  ];
+  assert.deepEqual(ids(), ["second", "goal"]);
+  data.goals = [goal, data.goals[1]];
+  assert.deepEqual(ids(), ["goal", "second"]);
+});
+
+test("yesterday's completed plan stays completed when an unfinished subtask has moved to today", () => {
+  const yesterday = "2026-10-17";
+  const shared = {
+    ...goal,
+    date: yesterday,
+    tasks: [
+      { ...goal.tasks[0], completedAt: new Date(2026, 9, 17, 18).toISOString() },
+      { id: "moved-to-today", title: "Send", date: goal.date },
+    ],
+  };
+  const data = {
+    goals: [shared, { ...goal, id: "pending", date: yesterday }],
+    projects: [project],
+    logs: [],
+    timer: null,
+  };
+  const displayed = sortPlansForDisplay(createDailyPlan(data, yesterday, now).goals);
+  assert.deepEqual(
+    displayed.map((item) => item.id),
+    ["pending", "goal"],
+  );
+  assert.deepEqual(
+    displayed[1].tasks.map((task) => task.id),
+    ["task"],
+  );
+  assert.equal(createDailyPlan(data, goal.date, now).goals[0].complete, false);
 });
 
 test("date validation and selection ids cannot confuse a goal with its subtask", () => {

@@ -3,7 +3,7 @@ const MEET_HOSTNAME = "meet.google.com";
 // Generated meeting codes are three lowercase letter/number groups, e.g.
 // "pen-adzt-swz". This intentionally excludes "/new" (the creation page),
 // "/_meet/..." and other Meet routes that aren't a shareable meeting link.
-const MEETING_CODE_PATH = /^\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/i;
+const MEETING_CODE_PATH = /^\/(?:meet\/)?([a-z]{3}-[a-z]{4}-[a-z]{3})$/i;
 
 /**
  * Validates a candidate string as a real, shareable Google Meet URL and
@@ -32,11 +32,12 @@ export function normalizeMeetingUrl(value: string): string | undefined {
     return undefined;
   }
 
-  if (!MEETING_CODE_PATH.test(url.pathname)) {
+  const code = MEETING_CODE_PATH.exec(url.pathname)?.[1];
+  if (!code) {
     return undefined;
   }
 
-  return `https://${MEET_HOSTNAME}${url.pathname.toLowerCase()}`;
+  return `https://${MEET_HOSTNAME}/${code.toLowerCase()}`;
 }
 
 /**

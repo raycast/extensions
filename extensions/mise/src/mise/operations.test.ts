@@ -3,7 +3,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   addGlobally,
+  addTask,
   clearCache,
+  deleteTask,
+  editTask,
   failureMessage,
   parseProgressLine,
   prune,
@@ -11,11 +14,14 @@ import {
   runTask,
   uninstall,
   upgrade,
+  upgradeVulnerable,
 } from "./operations";
 
 const useStderr = readFileSync(join(__dirname, "fixtures/use-stderr.txt"), "utf8");
 const uninstallStderr = readFileSync(join(__dirname, "fixtures/uninstall-stderr.txt"), "utf8");
 const lowDownloadsStderr = readFileSync(join(__dirname, "fixtures/use-low-downloads-stderr.txt"), "utf8");
+const outOfRangeStderr = readFileSync(join(__dirname, "fixtures/upgrade-vulnerable-out-of-range-stderr.txt"), "utf8");
+const setMissingStderr = readFileSync(join(__dirname, "fixtures/tasks-set-missing-stderr.txt"), "utf8");
 
 describe("addGlobally", () => {
   it("builds mise use -g <tool>@latest by default", () => {
@@ -98,6 +104,7 @@ describe("upgrade", () => {
   });
 
   it("adds each flag on its own", () => {
+    expect(upgrade("jq", { global: true }).args).toEqual(["upgrade", "--global", "jq"]);
     expect(upgrade("jq", { bump: true }).args).toEqual(["upgrade", "--bump", "jq"]);
     expect(upgrade("jq", { inactive: true }).args).toEqual(["upgrade", "--inactive", "jq"]);
     expect(upgrade("jq", { jobs: 4 }).args).toEqual(["upgrade", "-j", "4", "jq"]);
@@ -105,9 +112,10 @@ describe("upgrade", () => {
     expect(upgrade("jq", { bump: false, inactive: false, prune: false }).args).toEqual(["upgrade", "jq"]);
   });
 
-  it("orders the flags --bump --inactive -j N --prune before the tool", () => {
-    expect(upgrade("jq", { bump: true, inactive: true, jobs: 4, prune: true }).args).toEqual([
+  it("orders the flags --global --bump --inactive -j N --prune before the tool", () => {
+    expect(upgrade("jq", { global: true, bump: true, inactive: true, jobs: 4, prune: true }).args).toEqual([
       "upgrade",
+      "--global",
       "--bump",
       "--inactive",
       "-j",
@@ -197,6 +205,96 @@ describe("runTask", () => {
   });
 });
 
+describe("addTask", () => {
+  it("adds to the global config with the run words after --", () => {
+    expect(addTask("greet", { description: "Say hello", run: ["echo", "hello there"] })).toEqual({
+      args: ["tasks", "add", "--global", "--description=Say hello", "greet", "--", "echo", "hello there"],
+      title: "Creating greet…",
+      successTitle: "greet created",
+      failureTitle: "Creating greet failed",
+    });
+  });
+
+  it("leaves out an empty description and keeps one starting with - as a value", () => {
+    expect(addTask("greet", { description: "", run: ["echo"] }).args).toEqual([
+      "tasks",
+      "add",
+      "--global",
+      "greet",
+      "--",
+      "echo",
+    ]);
+    expect(addTask("greet", { description: "-loud", run: ["echo"] }).args).toContain("--description=-loud");
+  });
+});
+
+describe("editTask", () => {
+  const greet = { name: "greet", source: "/Users/lachlan/.config/mise/conf.d/tasks.toml" };
+
+  it("sets only the changed fields, in the file that defines the task", () => {
+    expect(editTask(greet, { description: "Say hello loudly", run: ["echo", "HELLO there"] })).toEqual({
+      args: [
+        "tasks",
+        "set",
+        "--path",
+        greet.source,
+        "--description=Say hello loudly",
+        "greet",
+        "--",
+        "echo",
+        "HELLO there",
+      ],
+      title: "Saving greet…",
+      successTitle: "greet saved",
+      failureTitle: "Saving greet failed",
+    });
+    expect(editTask(greet, { run: ["true"] }).args).toEqual([
+      "tasks",
+      "set",
+      "--path",
+      greet.source,
+      "greet",
+      "--",
+      "true",
+    ]);
+    expect(editTask(greet, { description: "x" }).args).toEqual([
+      "tasks",
+      "set",
+      "--path",
+      greet.source,
+      "--description=x",
+      "greet",
+    ]);
+  });
+
+  it("unsets the description when it is cleared", () => {
+    expect(editTask(greet, { description: "" }).args).toEqual([
+      "tasks",
+      "set",
+      "--path",
+      greet.source,
+      "--unset",
+      "description",
+      "greet",
+    ]);
+  });
+
+  it("shows mise's reason when the task is no longer in the file", () => {
+    expect(failureMessage(setMissingStderr)).toBe("no task named greet in /tmp/mise-iso5e/config/config.toml");
+  });
+});
+
+describe("deleteTask", () => {
+  it("removes the task from its file without mise's own prompt", () => {
+    expect(deleteTask({ name: "greet", source: "/cfg/config.toml" })).toEqual({
+      args: ["tasks", "rm", "--yes", "--path", "/cfg/config.toml", "greet"],
+      title: "Deleting greet…",
+      successTitle: "greet deleted",
+      failureTitle: "Deleting greet failed",
+    });
+  });
+});
+
 describe("parseProgressLine", () => {
   it("turns the captured stderr of mise use -g jq@1.7.1 into progress then a summary", () => {
     const parsed = useStderr.split("\n").map(parseProgressLine);
@@ -222,5 +320,33 @@ describe("parseProgressLine", () => {
       { kind: "summary", message: "removed 1 tool in 0ms" },
       undefined,
     ]);
+  });
+});
+
+describe("upgradeVulnerable", () => {
+  it("upgrades only the affected tools, with the flags upgrade takes", () => {
+    expect(upgradeVulnerable()).toMatchObject({
+      args: ["upgrade", "--vulnerable"],
+      successTitle: "Vulnerable tools upgraded",
+    });
+    expect(upgradeVulnerable({ global: true, bump: true, inactive: true, jobs: 2, prune: true }).args).toEqual(
+      upgrade(undefined, { global: true, bump: true, inactive: true, jobs: 2, prune: true }).args.flatMap((arg, i) =>
+        i === 0 ? [arg, "--vulnerable"] : [arg],
+      ),
+    );
+  });
+
+  it("names the tools left without a newer version and offers the same run past the range", () => {
+    const caveat = upgradeVulnerable({ global: true }).caveat?.(outOfRangeStderr);
+    expect(caveat).toMatchObject({ title: "Still vulnerable: jq@1.8.1, npm:lodash@4.17.15" });
+    expect(caveat?.next).toEqual({
+      title: "Upgrade Past Range",
+      op: expect.objectContaining({ args: ["upgrade", "--vulnerable", "--global", "--bump"] }),
+    });
+  });
+
+  it("offers nothing past the range when it already bumped, and nothing when mise did not warn", () => {
+    expect(upgradeVulnerable({ bump: true }).caveat?.(outOfRangeStderr)?.next).toBeUndefined();
+    expect(upgradeVulnerable().caveat?.("mise upgrade done\n")).toBeUndefined();
   });
 });

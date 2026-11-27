@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linear",
   "title": "Linear",
-  "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
+  "description": "Create, search and update Linear issues, browse projects, cycles, documents and custom views, and see Linear notifications in the menu bar.",
   "icon": "linear-app-icon.png",
   "owner": "linear",
   "access": "public",
@@ -22,7 +22,8 @@
     "alexi.build",
     "samuelkraft",
     "ChrisPanTaken",
-    "nengqi"
+    "nengqi",
+    "sean_al-gattas"
   ],
   "pastContributors": [
     "mathieudutour",
@@ -34,6 +35,24 @@
   ],
   "license": "MIT",
   "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Select the action that runs when pressing Enter on an issue, project, document, or view in a list.",
+      "default": "showDetails",
+      "required": false,
+      "data": [
+        {
+          "title": "Show Details",
+          "value": "showDetails"
+        },
+        {
+          "title": "Open in Linear",
+          "value": "openInLinear"
+        }
+      ]
+    },
     {
       "name": "issueCustomCopyAction",
       "type": "textfield",
@@ -191,6 +210,14 @@
       "preferences": [
         {
           "type": "checkbox",
+          "label": "Group notifications like Linear",
+          "name": "groupNotifications",
+          "description": "Show and count notification groups from your Linear inbox. Opening or marking a group as read applies to the whole group.",
+          "default": false,
+          "required": false
+        },
+        {
+          "type": "checkbox",
           "label": "Always Show",
           "name": "alwaysShow",
           "description": "Show the menu bar extra even when you don't have any unread notifications.",
@@ -283,7 +310,32 @@
       "mode": "view"
     }
   ],
+  "resourceProvider": "read-resource",
   "tools": [
+    {
+      "name": "search-user-mentions",
+      "title": "Users",
+      "description": "Search active Linear users by name, display name, or email to mention in AI Chat.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "name": "search-issue-mentions",
+      "title": "Issues",
+      "description": "Search Linear issues by identifier or text to mention in AI Chat. Shows recently updated issues when the query is empty.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "name": "search-project-mentions",
+      "title": "Projects",
+      "description": "Search Linear projects by name to mention in AI Chat. Shows your active projects first when the query is empty.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "name": "full-text-search-issues",
       "title": "Full Text Search Issues",
@@ -557,7 +609,7 @@
   ],
   "dependencies": {
     "@linear/sdk": "^91.0.0",
-    "@raycast/api": "^2.5.0",
+    "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.2.3",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.23",
@@ -568,8 +620,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.16",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "@types/remove-markdown": "^0.3.4",
     "eslint": "^9.22.0",
     "eslint-plugin-import": "^2.31.0",
@@ -581,7 +633,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/favorites.test.mts tests/issueTemplates.test.mts",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/documentCreator.test.mts tests/favorites.test.mts tests/inboxNotifications.test.mts tests/issueTemplates.test.mts tests/mentions.test.mts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

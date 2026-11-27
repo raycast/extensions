@@ -52,6 +52,7 @@ export {
   isAbortError,
   isBrewLockError,
   isPinnedRefusal,
+  isNotInstalledRefusal,
   upgradeSkipReason,
   isDownloadTimeoutError,
   isStaleProcessError,
@@ -84,7 +85,7 @@ import "./array";
 export { wait } from "./async";
 
 // Text utilities
-export { pluralize, formatCount } from "./text";
+export { pluralize, formatCount, codeBlock } from "./text";
 
 // Memory diagnostics
 export {

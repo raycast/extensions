@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mandarin-chinese-dictionary",
   "title": "Mandarin Chinese Dictionary",
-  "description": "Mandarin Chinese Dictionary",
+  "description": "Look up definitions of Chinese words and idioms in Taiwan's Educational Encyclopedia (教育百科) Mandarin dictionary.",
   "icon": "icon.png",
   "author": "CofCat",
   "categories": [

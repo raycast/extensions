@@ -44,8 +44,10 @@ function report(args: string[], code: number | null, startedAt: number): void {
 export function miseJson<T>(
   location: MiseLocation,
   args: string[],
-  parse: (raw: unknown) => T,
-  options: { signal?: AbortSignal } = {},
+  // stderr carries the warnings of a successful run, which some commands report nowhere else.
+  parse: (raw: unknown, stderr: string) => T,
+  // Exit codes that still carry a report on stdout, such as the 1 `mise audit` exits with when it finds advisories.
+  options: { signal?: AbortSignal; okCodes?: number[] } = {},
 ): Promise<T> {
   const fullArgs = [...args, "--json"];
   const startedAt = Date.now();
@@ -63,7 +65,7 @@ export function miseJson<T>(
       (error, stdout, stderr) => {
         const code = error ? (typeof error.code === "number" ? error.code : null) : 0;
         report(fullArgs, code, startedAt);
-        if (error) {
+        if (error && !(code !== null && options.okCodes?.includes(code))) {
           reject(error.name === "AbortError" ? error : new MiseExitError(args, code, stderr || error.message));
           return;
         }
@@ -75,7 +77,7 @@ export function miseJson<T>(
           return;
         }
         try {
-          resolve(parse(json));
+          resolve(parse(json, stderr));
         } catch (parseError) {
           reject(parseError);
         }

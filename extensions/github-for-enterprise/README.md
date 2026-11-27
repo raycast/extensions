@@ -68,3 +68,5 @@ Once this information has been filled in, you should have access to manage your 
 
 In the event your GitHub enterprise server has a self-hosted certificate, this extension may not work right away. Try enabling "unsafe HTTPS" if
 everything else looks correct.
+
+The extension icon matches GitHub Gist in light and dark appearances.

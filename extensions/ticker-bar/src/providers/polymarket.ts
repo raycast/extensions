@@ -70,6 +70,7 @@ export async function fetchPolymarketQuote(
     name: market.question,
     price,
     priceLabel: formatPrice(price, "probability"),
+    currency: "probability",
     changePercent: polymarketOutcomeChange(
       finiteNumber(market.oneDayPriceChange),
       index,

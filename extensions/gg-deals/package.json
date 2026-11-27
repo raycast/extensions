@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gg-deals",
   "title": "gg.deals",
-  "description": "Fetch the latest deals from gg.deals",
+  "description": "Find the latest game deals on GG.deals and search game prices across stores.",
   "icon": "icon.png",
   "author": "Whitespace",
   "categories": [

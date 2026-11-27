@@ -8,26 +8,12 @@ import {
   applySortFilter,
   applyTagFilter,
   applyTrashedFilter,
-  applyTypeFilter,
   clearSearchFilters,
   HUE_OPTIONS,
   type ParsedSearchFilters,
-  type RaycastCardType,
   toSmartFolderQuery,
 } from "../lib/searchFilters";
 import { SmartFolderForm } from "./SmartFolderForm";
-
-const TYPE_OPTIONS: Array<{ title: string; value?: RaycastCardType }> = [
-  { title: "All Types" },
-  { title: "Text", value: "text" },
-  { title: "Links", value: "link" },
-  { title: "Images", value: "image" },
-  { title: "Videos", value: "video" },
-  { title: "Audio", value: "audio" },
-  { title: "Documents", value: "document" },
-  { title: "Palettes", value: "palette" },
-  { title: "Quotes", value: "quote" },
-];
 
 const capitalize = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1);
@@ -111,19 +97,6 @@ export function CardFilterActions({
           }
           title="To Do"
         />
-      </ActionPanel.Submenu>
-      <ActionPanel.Submenu icon={Icon.List} title="Filter by Type">
-        {TYPE_OPTIONS.map((option) => (
-          <Action
-            key={option.title}
-            onAction={() =>
-              onQueryChange((previous) =>
-                applyTypeFilter(previous, option.value),
-              )
-            }
-            title={option.title}
-          />
-        ))}
       </ActionPanel.Submenu>
       <ActionPanel.Submenu icon={Icon.Swatch} title="Filter by Color">
         <Action

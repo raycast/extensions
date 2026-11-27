@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "get-favicon",
   "title": "Get Favicon",
-  "description": "Get favicon from website URL",
+  "description": "Get the favicon of any website URL: copy the icon, copy its URL, or download it at your chosen size.",
   "icon": "icon.png",
   "author": "vimtor",
   "contributors": [

@@ -19,6 +19,7 @@ import IAMMembersView from "./IAMMembersView";
 import { IAMMembersByPrincipalView } from "../iam";
 import StorageStatsView from "./StorageStatsView";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { listStorageBuckets, createStorageBucket, deleteStorageBucket } from "../../utils/gcpApi";
 import { LogsView } from "../logs-service";
@@ -29,6 +30,7 @@ import { friendlyErrorMessage } from "../../utils/errorMessages";
 interface StorageBucketViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
 interface Bucket {
@@ -39,7 +41,7 @@ interface Bucket {
   created: string;
 }
 
-export default function StorageBucketView({ projectId, gcloudPath }: StorageBucketViewProps) {
+export default function StorageBucketView({ projectId, gcloudPath, onProjectChange }: StorageBucketViewProps) {
   const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
   const [isLoading, setIsLoading] = useState(true);
   const [buckets, setBuckets] = useState<Bucket[]>([]);
@@ -168,6 +170,14 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   }
 
   function viewBucketObjects(bucketName: string) {
+    CacheManager.saveRecentResource({
+      id: bucketName,
+      type: "storage",
+      name: bucketName,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/storage/browser/${bucketName}?project=${projectId}`,
+    });
     push(<StorageObjectsView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
   }
 
@@ -312,7 +322,14 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       isLoading={isLoading}
       searchBarPlaceholder="Search buckets..."
       navigationTitle={`Cloud Storage Buckets - ${projectId}`}
-      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="storage" />}
+      searchBarAccessory={
+        <ServiceViewBar
+          projectId={projectId}
+          gcloudPath={gcloudPath}
+          serviceName="storage"
+          onProjectChange={onProjectChange}
+        />
+      }
       actions={
         <ActionPanel>
           <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />

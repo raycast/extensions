@@ -1,5 +1,10 @@
 # RSS Reader Changelog
 
+## [Non-Standard Publish Dates] - 2026-11-13
+
+- Read publish dates that feeds nest in non-standard elements, such as Mikan Project's torrent element
+- Set a time zone per feed for dates that don't include one
+
 ## [Read State Fixes] - 2026-10-20
 
 - Keep read state for stories from Atom feeds and feeds without GUIDs

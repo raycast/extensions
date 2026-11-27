@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "everhour",
   "title": "Everhour Time Tracking",
-  "description": "Track time against projects",
+  "description": "Track time in Everhour: browse active projects and recent tasks, log time, and view, start or stop the current timer.",
   "icon": "everhour-logo.png",
   "author": "farisaziz12",
   "contributors": [

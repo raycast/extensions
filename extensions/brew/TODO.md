@@ -4,16 +4,6 @@ This is the small set of work that remains both useful to Brew users and realist
 
 ## Next
 
-### Finish action toasts in place again
-
-Next, once the Remove Tap fix (#31853) merges. A finished install can be left showing its progress toast: "Installing Tinycast / Operation completed successfully" with a live Cancel button, instead of "Installed Tinycast" (seen 2026-10-02).
-
-The likely cause is a choice brew made. Raycast's convention is to finish a toast in place (`toast.style = Toast.Style.Success`), and a Sourcegraph search of `raycast/extensions` on 2026-10-02 found 212 extensions doing exactly that and none with any toast queue or controller. Brew did too until `5c5526d` (2026-09-06), which switched `settle` in `src/utils/toast.ts` to replacing the toast with `showToast`, so that a stale Cancel could not survive. That puts two kinds of request in flight together, the `updateToast` a progress setter sends and the `showToast` that finishes, and those two were seen to apply out of order. Nothing shows that updates to the same toast reorder; that part is inferred.
-
-- **Finish in place.** In `settle`, set `style`, `title`, `message = undefined`, `primaryAction = undefined` and `secondaryAction = undefined` on the toast itself, with no replacing `showToast`. Keep the `hide()` only on the Close After Action path.
-- **Confirm it before calling it fixed**, two ways: install a tapped cask (the case that reproduced it) and check the toast ends on "Installed …" with no Cancel; and a throwaway dev command that sets a progress message and finishes in place in the same tick, a few hundred times, checking the toast never ends animated with Cancel.
-- **If it still sticks,** write up the Raycast behavior with that repro before trying anything broader. A timing-based fix (hold the final toast until the last update is 250 ms old) was built and pulled from #31853 after four review rounds kept finding new late hides; it is not the way back in.
-
 ### Import and export a Brewfile
 
 Homebrew's own portability format, and the missing half of "set up a new Mac". `brew bundle dump --file=<path>` writes every installed formula, cask and tap; `brew bundle install --file=<path>` pours them back. Both already exist — the work is the UI around them, not the mechanism.
@@ -37,7 +27,7 @@ Picked up after third-party taps ship. Closing the Raycast window mid-install en
 
 - **Run brew detached**, in `execBrewWithProgress` (`src/utils/brew/progress.ts`) and in the paths that still use the buffered `execBrew` for long work — uninstall (`brewUninstall`) and Upgrade All (`brewUpgradeAll`) in `src/utils/brew/actions.ts` — or move those onto it: its own process group, output to a log file instead of pipes. While the extension is alive it reads that file for the progress toast; cancel kills the process group.
 - **Report the result with a native macOS notification when nobody else does.** A small shell wrapper records brew's exit code; the extension, if still running, shows its usual toast or HUD and marks the result handled; if nothing has marked it shortly after brew exits, the wrapper posts "Installed omlx" / "Failed to install omlx" itself. raycast-downloader does exactly this (`/Users/messina/Developer/GitHub/chrismessina/raycast-downloader/src/runner.ts:683`, `osascript display notification`), and it reads well in Notification Center.
-- **Show progress through brew's quiet stretches.** The omlx install that did finish went 3.5 minutes (23:31:31 → 23:35:00) with the toast frozen on "Auto-updating Homebrew…": brew prints nothing while pip builds from source, because pip writes to per-step files under `~/Library/Logs/Homebrew/<name>/` (`02.pip.log`, `03.pip.log`, …). Add an elapsed clock to the message (Adopt's `adoptProgressText` already ticks one), and consider tailing the newest of those files for the current step. Log each step as it starts, so a stall is attributable afterwards.
+- **Show progress through brew's quiet stretches.** The omlx install that did finish went 3.5 minutes (23:31:31 → 23:35:00) with the toast frozen on "Auto-updating Homebrew…": brew prints nothing while pip builds from source, because pip writes to per-step files under `~/Library/Logs/Homebrew/<name>/` (`02.pip.log`, `03.pip.log`, …). Add an elapsed clock to the message (Adopt's `adoptProgressText` already ticks one), and consider tailing the newest of those files for the current step. Log each step as it starts, so a stall is attributable afterward.
 - **Revisit the 5-minute stale watchdog** once output arrives via a file: a quiet source build can legitimately run longer than that without a line of output.
 
 ### Keep cached search results trustworthy
@@ -57,6 +47,19 @@ Replace the unconditional `brew update` used by the outdated refresh and Check f
 ### Do not report a no-op as a completed package change
 
 Homebrew can exit successfully after declining work. Close the remaining gaps around install and uninstall: an already-installed cask can be a silent install no-op, and a package pinned after the extension's preflight can make uninstall exit 0. Confirm the resulting installed/pin state before showing a success HUD, and describe a refusal as skipped with the next action rather than as installed or uninstalled.
+
+### Stop the package detail from refetching itself
+
+Selecting a row in Search fetches that package's record from formulae.brew.sh (`usePackageDetail`, a `useFetch`), and a dev-build trace on 2026-11-02 showed every one of those requests created, aborted and recreated in the same millisecond. The request is wasted, and on Raycast 2.10.1 the abort is what crashes Search: Node 26's undici throws `InformationalError: socket idle timeout` 4 s after an HTTP/2 request is aborted before its response ([nodejs/undici#5936](https://github.com/nodejs/undici/issues/5936), fixed by #5983 but unreleased as of 2026-11-02; reported to Raycast).
+
+Not yet known is whether brew or Raycast causes the double run. Ruled out: the inline `onError` (`useFetch` strips it before comparing arguments) and unstable row keys (rows are keyed by package name in `src/components/list.tsx`). Left: Raycast remounting the detail element on a selection change, or `@raycast/utils` `useCachedPromise` (2.3.0) re-running the effect.
+
+- **Find out which,** with a temporary dev-build trace that logs `FormulaListItemDetail` mounts and unmounts alongside the `undici:request:create` diagnostics channel.
+- **If it is brew,** fix it there. **If it is Raycast,** report it with the trace, and leave the code alone.
+
+### Keep bulk upgrades and Remove Tap out of a busy package's way
+
+Install, Upgrade and Uninstall claim a package so a second brew for it can't start (`AGENTS.md`, "One brew operation per package"). The bulk paths don't consult those claims yet: Show Upgrades' Upgrade Selected / Upgrade All (`useBrewUpgrade`), the whole-machine preview's Upgrade All and its `brew upgrade` in Terminal, and Remove Tap's uninstalls (`untapSteps` in `src/manage-taps.tsx`). Start a single upgrade, then run one of these, and brew can fail on the lock partway through. Skip claimed packages (reporting them as skipped), or wait for them, rather than racing them.
 
 ## Not planned
 

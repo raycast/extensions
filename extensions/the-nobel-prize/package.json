@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-nobel-prize",
   "title": "The Nobel Prize",
-  "description": "Information about the Nobel Prizes and the Nobel Prize Laureates",
+  "description": "Search Nobel Prize laureates by name or motivation and browse all Nobel Prizes by year and category, using the official Nobel Prize API.",
   "icon": "command-icon.png",
   "author": "xmok",
   "contributors": [

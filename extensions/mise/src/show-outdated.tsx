@@ -2,17 +2,21 @@ import { Action, ActionPanel, Icon, Keyboard, launchCommand, type LaunchProps, L
 import { useCachedPromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AUDIT_SINCE, listVulnerabilities } from "./mise/audit";
 import type { MiseLocation } from "./mise/locate";
 import { upgrade } from "./mise/operations";
-import { listOutdated, outdatedSubtitle, type OutdatedTool } from "./mise/outdated";
+import { currentOutdated, listOutdated, outdatedSubtitle, outdatedVersions, type OutdatedTool } from "./mise/outdated";
+import { atLeast } from "./mise/version";
 import { miseCommandLine } from "./terminal/script";
 import { LoadError, loadErrorInView } from "./ui/LoadError";
+import { MiseUpdateListItem } from "./ui/MiseUpdate";
 import { MissingMise } from "./ui/MissingMise";
 import { outdatedOptions, readPreferences, upgradeOptions, type MisePreferences } from "./ui/preferences";
 import { RunInTerminalAction } from "./ui/runInTerminal";
 import { runOperation } from "./ui/runOperation";
 import { useCommandSubtitle } from "./ui/useCommandSubtitle";
 import { useMise } from "./ui/useMise";
+import { VulnerableItem } from "./ui/Vulnerable";
 
 type LaunchContext = { upgrade?: string };
 
@@ -26,42 +30,106 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
 function OutdatedTools({ location, upgradeOnLaunch }: { location: MiseLocation; upgradeOnLaunch?: string }) {
   const [prefs] = useState(readPreferences);
-  const outdated = useCachedPromise(listOutdated, [location, outdatedOptions(prefs)], loadErrorInView);
+  const outdated = useCachedPromise(listOutdated, [location, outdatedOptions(prefs, location)], loadErrorInView);
+  const data = currentOutdated(outdated.data);
+  const auditSupported = atLeast(location.version, AUDIT_SINCE);
+  // The audit only adds a section, so a failure to run it leaves the section off.
+  const audit = useCachedPromise(listVulnerabilities, [location], {
+    execute: auditSupported,
+    onError: () => undefined,
+  });
   const launchHandled = useRef(false);
-  useCommandSubtitle(outdated.data && outdatedSubtitle(outdated.data.length));
-  const refresh = useCallback(() => {
+  useCommandSubtitle(data && outdatedSubtitle(data));
+  const revalidate = useCallback(() => {
     outdated.revalidate();
+    // revalidate runs even when `execute` is false, so older mise would get a call it can't answer.
+    if (auditSupported) audit.revalidate();
+  }, [outdated.revalidate, audit.revalidate, auditSupported]);
+  const refresh = useCallback(() => {
+    revalidate();
     launchCommand({ name: "outdated-tools", type: LaunchType.Background }).catch(() => undefined);
-  }, [outdated.revalidate]);
+  }, [revalidate]);
 
   useEffect(() => {
     if (!upgradeOnLaunch || launchHandled.current) return;
     launchHandled.current = true;
-    const op = upgrade(upgradeOnLaunch === "all" ? undefined : upgradeOnLaunch, upgradeOptions(prefs));
+    const op = upgrade(upgradeOnLaunch === "all" ? undefined : upgradeOnLaunch, upgradeOptions(prefs, location));
     runOperation(location, op, refresh);
   }, [location, upgradeOnLaunch, refresh, prefs]);
 
-  const tools = outdated.data ?? [];
+  const tools = data?.tools ?? [];
+  const unchecked = data?.unchecked ?? [];
+  const vulnerable = auditSupported ? (audit.data ?? []) : [];
+  const auditLoading = auditSupported && audit.isLoading;
 
   return (
-    <List isLoading={outdated.isLoading} searchBarPlaceholder="Search outdated tools">
-      {outdated.error && !outdated.data ? (
+    <List
+      isLoading={outdated.isLoading || auditLoading || (!data && !outdated.error)}
+      searchBarPlaceholder="Search outdated tools"
+    >
+      {outdated.error && !data ? (
         <LoadError error={outdated.error} retry={outdated.revalidate} />
       ) : (
-        !outdated.isLoading && (
+        data &&
+        !outdated.isLoading &&
+        !auditLoading &&
+        unchecked.length === 0 &&
+        vulnerable.length === 0 && (
           <List.EmptyView icon={Icon.CheckCircle} title="All tools up to date" description="Nothing to upgrade" />
         )
       )}
-      {tools.map((tool) => (
-        <ToolItem
-          key={tool.name}
-          tool={tool}
-          location={location}
-          prefs={prefs}
-          refresh={refresh}
-          revalidate={outdated.revalidate}
-        />
-      ))}
+      {/* Any item hides the EmptyView, which carries the load error and its Retry. */}
+      {!(outdated.error && !data) && <MiseUpdateListItem location={location} />}
+      {!(outdated.error && !data) && vulnerable.length > 0 && (
+        <List.Section title="Vulnerable" subtitle={String(vulnerable.length)}>
+          {vulnerable.map((item) => (
+            <VulnerableItem
+              key={`${item.tool}@${item.version}`}
+              vulnerable={item}
+              location={location}
+              prefs={prefs}
+              refresh={refresh}
+              revalidate={revalidate}
+            />
+          ))}
+        </List.Section>
+      )}
+      {tools.length > 0 && (
+        <List.Section title="Outdated" subtitle={String(tools.length)}>
+          {tools.map((tool) => (
+            <ToolItem
+              key={tool.name}
+              tool={tool}
+              location={location}
+              prefs={prefs}
+              refresh={refresh}
+              revalidate={revalidate}
+            />
+          ))}
+        </List.Section>
+      )}
+      {unchecked.length > 0 && (
+        <List.Section title="Couldn't Check" subtitle={String(unchecked.length)}>
+          {unchecked.map((tool) => (
+            <List.Item
+              key={`${tool.name}@${tool.version}`}
+              icon={Icon.Warning}
+              title={tool.name}
+              subtitle={tool.version}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Retry"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    onAction={outdated.revalidate}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
@@ -79,18 +147,19 @@ function ToolItem({
   refresh: () => void;
   revalidate: () => void;
 }) {
-  const upgradeOne = upgrade(tool.name, upgradeOptions(prefs));
-  const upgradeAll = upgrade(undefined, upgradeOptions(prefs));
+  const upgradeOne = upgrade(tool.name, upgradeOptions(prefs, location));
+  const upgradeAll = upgrade(undefined, upgradeOptions(prefs, location));
+  const version = "malformed" in tool ? undefined : tool;
   const accessories: List.Item.Accessory[] = [];
-  if (tool.sourcePath) {
-    if (tool.requested !== "latest") accessories.push({ text: tool.requested, tooltip: "Requested version" });
-    accessories.push({ tag: basename(tool.sourcePath) });
+  if (version?.sourcePath) {
+    if (version.requested !== "latest") accessories.push({ text: version.requested, tooltip: "Requested version" });
+    accessories.push({ tag: basename(version.sourcePath) });
   }
 
   return (
     <List.Item
       title={tool.name}
-      subtitle={`${tool.current} → ${tool.latest}`}
+      subtitle={outdatedVersions(tool)}
       accessories={accessories}
       actions={
         <ActionPanel>
@@ -107,8 +176,11 @@ function ToolItem({
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             command={miseCommandLine(location, upgradeAll)}
           />
-          {tool.releaseUrl && <Action.OpenInBrowser title="Open Release Notes" url={tool.releaseUrl} />}
-          <Action.CopyToClipboard title="Copy Upgrade Command" content={`mise upgrade ${tool.name}`} />
+          {version?.releaseUrl && <Action.OpenInBrowser title="Open Release Notes" url={version.releaseUrl} />}
+          <Action.CopyToClipboard
+            title="Copy Upgrade Command"
+            content={miseCommandLine({ path: "mise" }, upgradeOne)}
+          />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}

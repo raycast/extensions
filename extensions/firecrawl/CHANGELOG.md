@@ -1,5 +1,26 @@
 # Firecrawl Changelog
 
+## [Remove the Extract tool] - 2026-11-25
+
+### Removed
+- `extract` tool, because Firecrawl's Extract API (`/extract`) shuts down on December 10, 2026 ([migration guide](https://docs.firecrawl.dev/migrating-from-extract)). Use the `scrape` tool to read a page and pull out the details you need
+
+### Changed
+- Updated `@raycast/api` from `^1.99.4` to `^2.10.0` and `@raycast/utils` from `^1.17.0` to `^2.3.3`
+
+## [Move Deep Research and LLMs.txt to the v2 API] - 2026-11-18
+
+### Changed
+- `deep-research` tool now runs on Firecrawl's Agent API (`/v2/agent`), because the Deep Research API (`/v1/deep-research`) shuts down on December 10, 2026 ([migration guide](https://docs.firecrawl.dev/migrating-from-deep-research))
+- `Generate LLMs.txt` now builds llms.txt and llms-full.txt from Firecrawl's map and batch scrape APIs (`/v2/map`, `/v2/batch/scrape`), because the LLMs.txt API (`/v1/llmstxt`) shuts down the same day ([migration guide](https://docs.firecrawl.dev/migrating-from-llmstxt))
+- Updated `@mendable/firecrawl-js` from `^4.3.4` to `^4.54.0`
+
+### Added
+- `Max Credits` preference (default 100), which caps Firecrawl agent credits per Deep Research run
+
+### Removed
+- `Max Depth` and `Time Limit` preferences, which the Agent API has no equivalent for
+
 ## [Major Update: Firecrawl SDK v4.3.4] - 2025-09-10
 
 ### Changed

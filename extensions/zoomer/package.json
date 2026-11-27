@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoomer",
   "title": "Zoomer",
-  "description": "Capture screenshots, control recordings, and open Zoomer from Raycast.",
+  "description": "Take screenshots and start or stop screen recordings with the Zoomer Mac app, and open your recent captures, recordings and settings.",
   "icon": "icon.png",
   "author": "colindotfun",
   "license": "MIT",
@@ -29,6 +29,45 @@
         "snip",
         "region",
         "selection"
+      ],
+      "arguments": [
+        {
+          "name": "output",
+          "type": "dropdown",
+          "placeholder": "After Capture",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Zoomer Settings",
+              "value": "default"
+            },
+            {
+              "title": "Copy Image",
+              "value": "copy"
+            },
+            {
+              "title": "Save to Folder",
+              "value": "save"
+            },
+            {
+              "title": "Upload to Zoomer",
+              "value": "upload"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "capture-scrolling",
+      "title": "Capture Scrolling Area",
+      "description": "Capture a scrolling area as one tall screenshot with Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "scrolling",
+        "long",
+        "full page",
+        "stitch"
       ],
       "arguments": [
         {

@@ -33,13 +33,14 @@ import {
   CHUNKED_CACHE_VERSION,
 } from "../cache";
 import { brewPath, brewCachePrefix } from "./paths";
+import { brewTrustFile } from "./trustFile";
 import { isCask, normalizeOutdatedResults } from "./helpers";
 import { execBrew, execBrewJson } from "./commands";
 import { parseBrewVulns, VulnResults } from "./vulns";
 import { invalidateBrewMajorVersion } from "./brew-version";
 import { compactCaskArtifacts } from "./link";
-import { ADOPT_INDEX_FILE, adoptIndexEntry, type AdoptIndex } from "./adopt";
-import { AdoptIndexUnavailableError } from "../errors";
+import { ADOPT_INDEX_FILE, adoptIndexEntry, caskAppdir, caskOptsAppdir, type AdoptIndex } from "./adopt";
+import { AdoptIndexUnavailableError, isAbortError } from "../errors";
 import { brewLogger, cacheLogger } from "../logger";
 
 /// Cache Paths
@@ -121,10 +122,10 @@ export async function hasSearchCache(): Promise<boolean> {
  * Fetch all installed packages with full metadata.
  */
 export async function brewFetchInstalled(useCache: boolean, cancel?: AbortSignal): Promise<InstalledMap | undefined> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   const results = await brewFetchInstallableResults(useCache, cancel);
   const mapped = brewMapInstalled(results);
-  const duration = Date.now() - startTime;
+  const duration = Math.round(performance.now() - startTime);
 
   if (mapped) {
     brewLogger.log("Installed packages fetched", {
@@ -160,10 +161,10 @@ export async function brewFetchInstallableResults(
   }
 
   async function updateCache(): Promise<InstallableResults> {
-    const startTime = Date.now();
+    const startTime = performance.now();
     const info = await installed();
     const parsed = JSON.parse(info) as InstallableResults;
-    const duration = Date.now() - startTime;
+    const duration = Math.round(performance.now() - startTime);
 
     try {
       await fs.writeFile(installedCachePath, info);
@@ -227,6 +228,14 @@ export async function brewFetchInstallableResults(
     // covers a git-based install. Either may be absent, hence OrZero.
     const apiIndexTime = await mtimeMsOrZero(path.join(brewCachePrefix, "api"));
     const fetchHeadTime = await mtimeMsOrZero(brewPath(".git/FETCH_HEAD"));
+    // Homebrew 7.0.14 skips installed formulae from an untrusted tap, so a
+    // trust change (here or from the CLI) changes what `--installed` returns.
+    // The directory as well as the file: brew deletes trust.json when the last
+    // entry goes (trust/store.rb), which a missing file's 0 can't show, while
+    // the unlink, like the rename behind every atomic write, moves the
+    // directory's mtime.
+    const trustFile = brewTrustFile(process.env);
+    const trustTime = Math.max(await mtimeMsOrZero(trustFile), await mtimeMsOrZero(path.dirname(trustFile)));
 
     if (
       homebrewTime < cacheTime &&
@@ -235,7 +244,8 @@ export async function brewFetchInstallableResults(
       pinnedTime < cacheTime &&
       pinnedCasksTime < cacheTime &&
       apiIndexTime < cacheTime &&
-      fetchHeadTime < cacheTime
+      fetchHeadTime < cacheTime &&
+      trustTime < cacheTime
     ) {
       const cacheBuffer = await fs.readFile(installedCachePath);
       const cached = JSON.parse(cacheBuffer.toString()) as InstallableResults;
@@ -255,6 +265,7 @@ export async function brewFetchInstallableResults(
         locksTime,
         pinnedTime,
         pinnedCasksTime,
+        trustTime,
         cacheTime,
       });
       return await updateCache();
@@ -347,7 +358,7 @@ export async function brewFetchOutdated(
  * JSON on stdout is a success. Only an exit with nothing on stdout (an unknown
  * formula, a broken brew) is a real failure, and then brew's own `ExecError`
  * is rethrown so its stderr reaches the failure toast. Warnings brew emits
- * alongside a good scan (untrusted tap, missing SBOM) are logged, not surfaced.
+ * alongside a good scan (untrusted tap, missing SBOM) are logged.
  */
 export async function brewFetchVulns(cancel?: AbortSignal): Promise<VulnResults> {
   brewLogger.log("Scanning for vulnerabilities");
@@ -360,6 +371,8 @@ export async function brewFetchVulns(cancel?: AbortSignal): Promise<VulnResults>
     brewLogger.log("Vulnerability scan complete", {
       findingsCount: results.findings.length,
       skippedCount: results.skipped.length,
+      unscannedCount: results.unscanned.length,
+      outdatedWithoutSbomCount: results.outdatedWithoutSbom.length,
     });
     return results;
   };
@@ -394,7 +407,7 @@ export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
  * waiting shows no update badge until something runs `brew update`.
  *
  * The refresh is unavoidably global: Homebrew has no per-tap, let alone
- * per-formula, update. What is scoped is the re-read afterwards — one
+ * per-formula, update. What is scoped is the re-read afterward — one
  * `brew info` for the package the user asked about, rather than the full
  * `brew outdated` sweep the Check for Updates command runs.
  *
@@ -549,6 +562,38 @@ export async function loadCasksByToken(tokens: readonly string[]): Promise<Cask[
   const index = await loadIndex(caskRemote.chunkedConfig);
   const entries = index.entries.filter((entry) => wanted.has(entry.id));
   return loadItemsFromChunks<Cask>(caskRemote.chunkedConfig, entries);
+}
+
+/**
+ * The folder brew installs casks into when this extension runs it.
+ *
+ * `brew config` prints `HOMEBREW_CASK_OPTS` after brew loads its `brew.env`
+ * files, which the extension's environment doesn't have. It prints the words as
+ * a Ruby array, or no line when the variable is unset. If brew fails or the
+ * line won't parse, this falls back to `caskAppdir`.
+ *
+ * Don't use `brew ruby` here. It's a developer command, and the first one a
+ * user runs turns on Homebrew's developer mode for good.
+ */
+export async function brewFetchCaskAppdir(cancel?: AbortSignal): Promise<string> {
+  const prefix = "HOMEBREW_CASK_OPTS: ";
+  try {
+    const { stdout } = await execBrew("config", { signal: cancel });
+    const line = stdout.split("\n").find((l) => l.startsWith(prefix));
+    if (!line) return caskOptsAppdir([]);
+    // Ruby's `inspect` matches JSON here, except that it escapes `#` before
+    // `{`, `$` and `@`.
+    const json = line.slice(prefix.length).replace(/\\[\\#]/g, (esc) => (esc === "\\#" ? "#" : esc));
+    const words: unknown = JSON.parse(json);
+    if (Array.isArray(words) && words.every((w) => typeof w === "string")) return caskOptsAppdir(words);
+    brewLogger.warn("Unexpected HOMEBREW_CASK_OPTS in brew config", { line });
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    brewLogger.warn("Could not read HOMEBREW_CASK_OPTS from brew config", {
+      error: err instanceof Error ? err.message : err,
+    });
+  }
+  return caskAppdir();
 }
 
 /**
@@ -889,13 +934,13 @@ export async function fetchCaskItems(entries: IndexEntry[]): Promise<Cask[]> {
  * Much faster than fetching all installed packages.
  */
 export async function brewFetchFormulaInfo(name: string, cancel?: AbortSignal): Promise<Formula | undefined> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   brewLogger.log("Fetching formula info", { name });
 
   try {
     const output = await execBrew(`info --json=v2 ${name}`, { signal: cancel });
     const results = JSON.parse(output.stdout) as InstallableResults;
-    const duration = Date.now() - startTime;
+    const duration = Math.round(performance.now() - startTime);
 
     if (results.formulae.length > 0) {
       brewLogger.log("Formula info fetched", { name, durationMs: duration });
@@ -915,7 +960,7 @@ export async function brewFetchFormulaInfo(name: string, cancel?: AbortSignal): 
  * Much faster than fetching all installed packages.
  */
 export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Promise<Cask | undefined> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   brewLogger.log("Fetching cask info", { token });
 
   try {
@@ -923,7 +968,7 @@ export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Pr
     // same-named FORMULA (cli/named_args.rb), returning an empty `casks` array.
     const output = await execBrew(`info --json=v2 --cask ${token}`, { signal: cancel });
     const results = JSON.parse(output.stdout) as InstallableResults;
-    const duration = Date.now() - startTime;
+    const duration = Math.round(performance.now() - startTime);
 
     if (results.casks.length > 0) {
       brewLogger.log("Cask info fetched", { token, durationMs: duration });

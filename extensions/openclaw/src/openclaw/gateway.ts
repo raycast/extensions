@@ -20,6 +20,7 @@ import { RaycastGatewayClient } from "./gateway-client";
 
 const ROLE = "operator";
 const SCOPES = ["operator.read", "operator.write"];
+const LOCAL_ADMIN_SCOPES = ["operator.read", "operator.admin"];
 const RUN_TIMEOUT_MS = 5 * 60 * 1000;
 
 type ChatEvent = {
@@ -180,11 +181,23 @@ export class OpenClawGateway {
     private readonly storageWrites: Promise<void>[],
   ) {}
 
-  static async connect(): Promise<OpenClawGateway> {
+  static async connect(
+    access?: "local-read" | "local-admin",
+  ): Promise<OpenClawGateway> {
     const preferences = getPreferences();
-    const identity = await loadOrCreateDeviceIdentity();
-    const instanceId = await loadOrCreateInstanceId();
-    const deviceToken = await loadDeviceAuthToken(preferences.gatewayUrl, ROLE);
+    if (access && preferences.connectionMode !== "local") {
+      throw new Error(
+        "Select Local Gateway on This Mac in extension preferences.",
+      );
+    }
+    const profile = access === "local-admin" ? access : undefined;
+    const identity = await loadOrCreateDeviceIdentity(profile);
+    const instanceId = await loadOrCreateInstanceId(profile);
+    const deviceToken = await loadDeviceAuthToken(
+      preferences.gatewayUrl,
+      ROLE,
+      profile,
+    );
     const storageWrites: Promise<void>[] = [];
     const startedAt = Date.now();
     const edgeAuthHeaders = await resolveEdgeAuthHeaders(preferences);
@@ -208,20 +221,22 @@ export class OpenClawGateway {
       deviceIdentity: identity,
       instanceId,
       clientName: "gateway-client",
-      clientDisplayName: "Raycast OpenClaw",
+      clientDisplayName: profile
+        ? "Raycast OpenClaw (Local Administration)"
+        : "Raycast OpenClaw",
       clientVersion: "2026.9.4",
       platform: process.platform,
       deviceFamily: "Mac",
       mode: "ui",
       role: ROLE,
-      scopes: SCOPES,
+      scopes: profile ? LOCAL_ADMIN_SCOPES : SCOPES,
       hostDeps: {
         signDevicePayload,
         publicKeyRawBase64UrlFromPem,
         storeDeviceAuthToken: ({ token, scopes }) => {
           const record: DeviceAuthTokenRecord = { token, scopes };
           storageWrites.push(
-            storeDeviceAuthToken(preferences.gatewayUrl, ROLE, record),
+            storeDeviceAuthToken(preferences.gatewayUrl, ROLE, record, profile),
           );
         },
       },

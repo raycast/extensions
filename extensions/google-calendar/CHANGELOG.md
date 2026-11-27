@@ -1,5 +1,34 @@
 # Google Calendar Changelog
 
+## [Event Creation and Reliability] - 2026-11-26
+
+- **Conferencing**: Added an empty state when no custom providers are saved
+- **Create Event**: Added shortcut guidance that matches the current platform
+- **Contact Search**: Results remain available when one Google contacts source fails
+- **Conferencing**: Editing a provider's name or link now updates it in place instead of creating a duplicate
+- **Create Event**: Opening the form with cached calendar data no longer triggers a React state-update warning
+- **Event Responses**: RSVP actions are now available only for active invitations and event types that support responses
+- **List Events**: Cached events and calendars no longer trigger a React state-update warning while the list mounts
+- **Suggested Times**: Available slots align with work hours in the selected time zone
+- **Icons**: Updated Google Calendar and Google Meet icons to the new gradient refresh icons
+- **Actions**: Change Response Status now uses `⌘`/`Ctrl` `⇧` `R` and the new Refresh action uses `⌘`/`Ctrl` `R`
+
+## [Improve README] - 2026-11-26
+
+- Rewrite the README to explain what each command does.
+
+## [Fix Google API Requests] - 2026-11-26
+
+- Fix a crash when searching contacts or making Google Calendar requests in Raycast.
+
+## [Contact and Event Mentions in AI Chat] - 2026-11-03
+
+- Add a **Contacts** mention search to find people in your Google Contacts and Other contacts by name or email. Without a query it lists your recently changed contacts. Type a full email address to mention someone who is not in your contacts.
+- Read the selected person's current name and email addresses when sending a mention, so AI can invite them or check their availability without searching first.
+- Add an **Events** mention search to find events across your visible calendars by title, description, location, or attendee. Without a query it lists today's and the coming week's events. Searches cover the past 90 days and the coming year, upcoming events first, and a recurring meeting shows only its next and most recent occurrence.
+- Read the selected event's current details when sending a mention, including time, attendees, location, conferencing, and description, so AI can work with it without searching first.
+- Search saved contacts and Other contacts in parallel, so contact search answers faster.
+
 ## [Simplify OAuth Client Selection] - 2026-10-02
 
 - Simplify OAuth client selection to match the redirect schemes used by current Raycast versions.

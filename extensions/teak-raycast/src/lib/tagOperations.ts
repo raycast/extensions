@@ -19,12 +19,12 @@ export type TagChange =
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-/** Starts the change, then polls until Teak has rewritten every card. */
 export const runTagOperation = async (
   change: TagChange,
-  options: { pollIntervalMs?: number } = {},
+  options: { onStarted?: () => void; pollIntervalMs?: number } = {},
 ): Promise<RaycastTagOperation> => {
   let operation = await startTagOperation(change, "interactive");
+  options.onStarted?.();
   for (
     let poll = 0;
     operation.status === "running" && poll < MAX_POLLS;
@@ -42,17 +42,17 @@ const titles = {
   rename: { done: "Tag renamed", running: "Renaming tag…" },
 } as const;
 
-/** Runs a tag change behind a toast; true when every card was rewritten. */
 export const changeTagWithFeedback = async (
   change: TagChange,
   onFinished: () => void,
+  onStarted?: () => void,
 ): Promise<boolean> => {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: titles[change.kind].running,
   });
   try {
-    const operation = await runTagOperation(change);
+    const operation = await runTagOperation(change, { onStarted });
     if (operation.status === "completed") {
       toast.style = Toast.Style.Success;
       toast.title = titles[change.kind].done;

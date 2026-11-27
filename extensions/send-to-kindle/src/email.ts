@@ -106,7 +106,7 @@ export async function testEmailPreferences(preferences: EmailPreferences): Promi
 function normalizePreferences(preferences: EmailPreferences): NormalizedEmailPreferences {
   const kindleEmail = preferences.kindleEmail?.trim();
   const senderEmail = preferences.senderEmail?.trim();
-  const smtpHost = preferences.smtpHost?.trim();
+  const smtpHost = preferences.smtpHost?.trim().replace(/^\[|\]$/g, "");
   const smtpPort = Number(preferences.smtpPort ?? "");
   const smtpSecurity = (preferences.smtpSecurity ?? "ssl") as SmtpSecurity;
   const smtpUsername = preferences.smtpUsername?.trim() || "";
@@ -258,7 +258,10 @@ class SmtpClient {
 
   async connect(): Promise<void> {
     const { host, port, security } = this.options;
-    this.socket = security === "ssl" ? tls.connect({ host, port, servername: host }) : net.connect({ host, port });
+    this.socket =
+      security === "ssl"
+        ? tls.connect({ host, port, servername: net.isIP(host) ? undefined : host })
+        : net.connect({ host, port });
 
     this.socket.setEncoding("utf8");
     this.socket.on("data", (chunk) => this.handleData(chunk.toString()));
@@ -276,7 +279,11 @@ class SmtpClient {
     await this.sendCommand("STARTTLS", [220]);
     const current = this.socket;
     if (!current) throw new Error("SMTP connection unavailable.");
-    this.socket = tls.connect({ socket: current, servername: this.options.host });
+    this.socket = tls.connect({
+      socket: current,
+      host: this.options.host,
+      servername: net.isIP(this.options.host) ? undefined : this.options.host,
+    });
     this.socket.setEncoding("utf8");
     this.socket.on("data", (chunk) => this.handleData(chunk.toString()));
     this.socket.on("error", (error) => this.failPending(error));

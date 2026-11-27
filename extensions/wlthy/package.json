@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wlthy",
   "title": "Wlthy",
-  "description": "See your net worth, day and month change, and allocation from your wlthy wealth account — read-only, without leaving your keyboard.",
+  "description": "See your net worth from your wlthy wealth account, with daily and monthly change, allocation, assets, debts and a menu bar view.",
   "icon": "wlthy-icon.png",
   "author": "alirbaba",
   "categories": [

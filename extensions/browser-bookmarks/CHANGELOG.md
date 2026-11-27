@@ -1,5 +1,17 @@
 # Browser Bookmarks Changelog
 
+## [Fix Keyboard Shortcuts on Windows] - 2026-11-24
+
+- Fix the Select Profile, Select Browsers, Create Quicklink and Refresh shortcuts doing nothing on Windows
+
+## [Chromium Permission Guidance] - 2026-11-18
+
+- Show a clear Full Disk Access message when Raycast cannot read selected Chromium browser profiles
+
+## [Support for Ardia] - 2026-11-17
+
+- Added support for the `Ardia` browser on macOS
+
 ## [Search Profiles] - 2026-10-26
 
 - Search 1.0.7 added profiles: each one has its own bookmarks, pins and spaces, and can be picked from the Select Profile submenu

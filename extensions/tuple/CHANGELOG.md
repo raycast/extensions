@@ -1,5 +1,22 @@
 # Tuple Changelog
 
+## [Stop Webcam] - 2026-11-25
+
+- Add Stop Webcam, as a hotkey-friendly command and in Active Call, to ask Tuple to stop sharing your webcam.
+
+## [Send Reactions] - 2026-11-14
+
+- Add Send Reaction to search and send the sound and webcam reactions supported by your installed Tuple CLI.
+
+## [CLI Compatibility and Voice Notes] - 2026-11-10
+
+- Fix starting calls to contacts and connected machines with the current Tuple CLI.
+- Allow calls to finish ringing before the extension times out.
+- Ask before switching away from another call, and leave already-active rooms connected.
+- Preserve chat, annotations, speaker names, and current CLI guides in captured context.
+- Show idle presence and avatars, and count people once when they connect from multiple machines.
+- Browse voice notes and locally transcribed received notes when supported. Hide the feature when unavailable or disabled.
+
 ## [Canonical CLI Migration] - 2026-09-14
 
 - Use canonical Call and Capture commands, complete Capture exports, and Connect prompts.

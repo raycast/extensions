@@ -1,6 +1,7 @@
 import { Action, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { useBrewDependencies } from "../hooks/useBrewDependencies";
 import { ensureTrusted } from "./trust";
+import { BUSY, inFlightKey, inFlightLabel, runClaimed, useInFlight } from "../utils/inFlight";
+import { BusyAction, packageKey } from "./busy";
 import {
   type BrewProgress,
   brewInstallWithProgress,
@@ -8,9 +9,12 @@ import {
   brewIdentifier,
   brewPinnedIdentifiers,
   isPinnedPackage,
+  pinAliases,
+  pinnedBeforeUpgrade,
   isCask,
   brewPin,
   brewUninstall,
+  brewUninstallCommand,
   brewUnpin,
   brewUpgradeAll,
   brewCheckForUpdate,
@@ -25,6 +29,7 @@ import {
   type Cask,
   ensureError,
   isPinnedRefusal,
+  isNotInstalledRefusal,
   upgradeSkipReason,
   type Formula,
   type Nameable,
@@ -36,10 +41,14 @@ import {
   copyLogsAction,
   actionsLogger,
   brewFetchQualifiedPackage,
+  brewFetchTap,
   brewIsTapped,
   brewPackageTrust,
   brewTapCommand,
   execBrew,
+  tapPackageKind,
+  untrustedLoadTarget,
+  loadRefusedPackage,
   type TapTarget,
 } from "../utils";
 
@@ -63,6 +72,13 @@ async function readPins(operation: string): Promise<{ formulae: Set<string>; cas
   }
 }
 
+/**
+ * What a view runs after an action: usually its revalidate. Returning that
+ * promise keeps the package claimed until the row shows the new state; until
+ * then the row would still offer the action that just finished.
+ */
+type OnAction = (result: boolean) => unknown;
+
 export function FormulaInstallAction(props: {
   formula: Cask | Formula;
   /**
@@ -71,8 +87,10 @@ export function FormulaInstallAction(props: {
    * — passes "Install <name>" so the scope is not left to the cursor.
    */
   title?: string;
-  onAction: (result: boolean) => void;
+  onAction: OnAction;
 }) {
+  const busy = useInFlight(packageKey(props.formula));
+  if (busy) return <BusyAction label={busy} />;
   // TD: Support installing other versions?
   return (
     <Action
@@ -80,7 +98,7 @@ export function FormulaInstallAction(props: {
       icon={Icon.Plus}
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       onAction={async () => {
-        props.onAction(await install(props.formula));
+        await install(props.formula, { refresh: props.onAction });
       }}
     />
   );
@@ -94,17 +112,18 @@ export function FormulaUninstallAction(props: {
    * knows better says so rather than letting a guard read the stale value.
    */
   pinned?: boolean;
-  onAction: (result: boolean) => void;
+  /** Overrides Common.Remove, for a panel that swaps this with Run Uninstall in Terminal. */
+  shortcut?: Keyboard.Shortcut;
+  onAction: OnAction;
 }) {
   return (
     <Action
       title="Uninstall"
       icon={Icon.Trash}
-      shortcut={Keyboard.Shortcut.Common.Remove}
+      shortcut={props.shortcut ?? Keyboard.Shortcut.Common.Remove}
       style={Action.Style.Destructive}
       onAction={async () => {
-        const result = await uninstall(props.formula, false, props.pinned, props.onAction);
-        props.onAction(result);
+        await uninstall(props.formula, false, props.pinned, props.onAction);
       }}
     />
   );
@@ -142,6 +161,9 @@ export function FormulaUpgradeAction(props: {
   // Name the package: this action sits beside "Upgrade All" in the same panel,
   // so "Upgrade" alone leaves the scope of what is about to run ambiguous.
   const name = brewName(props.formula);
+  const key = packageKey(props.formula);
+  const busy = useInFlight(key);
+  if (busy) return <BusyAction label={busy} />;
 
   return (
     <Action
@@ -149,28 +171,31 @@ export function FormulaUpgradeAction(props: {
       icon={unpinAndUpgrade ? Icon.TackDisabled : Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
-        const result = await upgradeChecked(props.formula, {
-          allowUnpin: unpinAndUpgrade,
-          onStart: props.onStart,
-        });
-        if (result.outcome === "skipped") {
-          if (props.onSkip) {
-            // Brew or a pin declined rather than failed. A view that tracks
-            // per-package status owns the row's verdict, and its `onAction`
-            // reads `false` as "failed" — so the refresh must NOT be sent here
-            // or a skip would paint the row red.
-            props.onSkip();
-            return;
-          }
-          // Nothing upgraded, but the pin on disk moved or never matched the
-          // row. The remaining callers ignore the boolean and just revalidate.
-          if (result.refresh) props.onAction(false);
-          return;
-        }
-        if (result.outcome === "aborted") {
-          return;
-        }
-        props.onAction(result.ok);
+        // Same key as Install: a refresh mid-install can turn this row's
+        // Install into Upgrade, and that press would collide just the same.
+        await whileClaimed(
+          key,
+          `Upgrading ${name}…`,
+          undefined,
+          () => upgradeChecked(props.formula, { allowUnpin: unpinAndUpgrade, onStart: props.onStart }),
+          (result) => {
+            if (result.outcome === "skipped") {
+              if (props.onSkip) {
+                // Brew or a pin declined rather than failed. A view that tracks
+                // per-package status owns the row's verdict, and its `onAction`
+                // reads `false` as "failed" — so the refresh must NOT be sent here
+                // or a skip would paint the row red.
+                props.onSkip();
+                return;
+              }
+              // Nothing upgraded, but the pin on disk moved or never matched the
+              // row. The remaining callers ignore the boolean and just revalidate.
+              return result.refresh ? props.onAction(false) : undefined;
+            }
+            if (result.outcome === "aborted") return;
+            return props.onAction(result.ok);
+          },
+        );
       }}
     />
   );
@@ -211,7 +236,7 @@ export function FormulaUpgradeAllAction(props: {
  * tap nobody has pulled. Show Installed and Search both offer this; the answer
  * lands in the toast AND in the row, because `onAction` revalidates.
  */
-export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: (result: boolean) => void }) {
+export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: OnAction }) {
   const name = brewName(props.item);
 
   return (
@@ -262,10 +287,15 @@ export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: (
                   // the one whose pin state and version this decision was made
                   // on. DECLINED means brew refused (pinned, disabled) and has
                   // already said so in its own toast — not a failure to report.
-                  const result = await upgradeChecked(fresh, { allowUnpin: true });
-                  if (result.outcome === "upgraded") {
-                    props.onAction(result.ok);
-                  }
+                  // Claimed like the row's Upgrade, so a second brew can't start
+                  // beside a running one, and held until the row refreshes.
+                  await whileClaimed(
+                    packageKey(fresh),
+                    `Upgrading ${name}…`,
+                    undefined,
+                    () => upgradeChecked(fresh, { allowUnpin: true }),
+                    (result) => (result.outcome === "upgraded" ? props.onAction(result.ok) : undefined),
+                  );
                 },
               },
             });
@@ -347,50 +377,53 @@ export function CaskLinkAction(props: {
   );
 }
 
-export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => void }) {
-  const [excludeDependencies, setExcludeDependencies] = useBrewDependencies();
-
+/**
+ * Install a package from a third-party tap by its qualified name, pasted into
+ * Search: `abue-ammar/tinycast/tinycast`, or a whole install-page line.
+ *
+ * One confirmation covers what happens, in the only order brew allows: add the
+ * tap (brew will not read an untapped one), learn from `tap-info` whether the
+ * name is a formula or a cask (`brew trust` records any name it is handed, so
+ * the kind cannot be guessed), trust that one package, then read its record
+ * with `brew info` and install through the same path as every other install.
+ * Trust comes before `brew info`: from Homebrew 7.0.14, `brew info` refuses a
+ * package from an untrusted tap, while `tap-info` lists names without loading
+ * them. A name `tap-info` doesn't list (an alias, a rename) is read first;
+ * when brew refuses it, the refusal names the real package, which is trusted
+ * and read once more.
+ *
+ * A failure after the tap is added leaves the tap: it is untrusted, so brew
+ * will load nothing from it, and Manage Taps can remove it.
+ */
+export function InstallFromTapAction(props: { target: TapTarget & { package: string }; onAction: OnAction }) {
+  const name = props.target.package.split("/").pop() ?? props.target.package;
+  const busy = useInFlight(tapTargetKey(props.target));
+  if (busy) return <BusyAction label={busy} />;
   return (
     <Action
-      title={excludeDependencies ? "Show Dependencies" : "Hide Dependencies"}
-      icon={excludeDependencies ? Icon.Eye : Icon.EyeDisabled}
-      shortcut={{ modifiers: ["cmd"], key: "d" }}
-      onAction={() => {
-        const result = toggleExcludeDeps(excludeDependencies, setExcludeDependencies);
-        props.onAction(result);
+      title={`Install ${name}`}
+      icon={Icon.Plus}
+      onAction={async () => {
+        await installFromTap(props.target, name, props.onAction);
       }}
     />
   );
 }
 
-/**
- * Install a package from a third-party tap by its qualified name, pasted into
- * Search: `abue-ammar/tinycast/tinycast`, or a whole install-page line.
- *
- * One confirmation covers the three things that happen, in the only order brew
- * allows: add the tap (brew will not read an untapped one), learn from
- * `brew info` whether the name is a formula or a cask (`brew trust` records
- * any name it is handed, so the kind cannot be guessed), trust that one
- * package, then install through the same path as every other install.
- *
- * A failure after the tap is added leaves the tap: it is untrusted, so brew
- * will load nothing from it, and Manage Taps can remove it.
- */
-export function InstallFromTapAction(props: {
-  target: TapTarget & { package: string };
-  onAction: (result: boolean) => void;
-}) {
-  const name = props.target.package.split("/").pop() ?? props.target.package;
-  return (
-    <Action
-      title={`Install ${name}`}
-      icon={Icon.Plus}
-      onAction={async () => props.onAction(await installFromTap(props.target, name))}
-    />
-  );
+async function installFromTap(
+  target: TapTarget & { package: string },
+  name: string,
+  refresh: OnAction,
+): Promise<boolean> {
+  const key = tapTargetKey(target);
+  return whileClaimed(key, `Installing ${name}…`, false, () => installFromTapOnce(target, name, key), refresh);
 }
 
-async function installFromTap(target: TapTarget & { package: string }, name: string): Promise<boolean> {
+async function installFromTapOnce(
+  target: TapTarget & { package: string },
+  name: string,
+  claimedKey: string,
+): Promise<boolean> {
   const user = target.tap.split("/")[0];
   let tapped: boolean;
   try {
@@ -400,15 +433,11 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
     return false;
   }
 
+  // The title names the tap; the message says who stands behind it and what
+  // gets trusted. That adding the tap comes first is implied by "from".
   const confirmed = await confirmAlert({
-    title: `Install ${name}?`,
-    message: [
-      `From ${target.tap}, maintained by ${user}, not Homebrew.`,
-      tapped ? undefined : "Homebrew adds the tap first.",
-      `Only ${name} is trusted, not the rest of the tap.`,
-    ]
-      .filter(Boolean)
-      .join(" "),
+    title: `Install ${name} from ${target.tap}?`,
+    message: `Maintained by ${user}, not Homebrew. Only ${name} will be trusted.`,
     primaryAction: { title: "Install", style: Alert.ActionStyle.Default },
     dismissAction: { title: "Cancel" },
   });
@@ -427,12 +456,34 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
       actionsLogger.log("Tapped for install", { tap: target.tap });
       handle.updateTitle(`Finding ${name}`);
     }
-    item = await brewFetchQualifiedPackage(target.package, target.cask);
-    if (item && (await brewPackageTrust(target.tap, brewIdentifier(item), isCask(item))) === "untrusted") {
-      await execBrew(brewTapCommand("trust", isCask(item) ? "--cask" : "--formula", brewIdentifier(item)), {
-        raw: true,
-      });
-      actionsLogger.log("Trusted package for install", { package: brewIdentifier(item) });
+    const tap = await brewFetchTap(target.tap);
+    const trust = async (kind: "formula" | "cask", fullName: string) => {
+      if ((await brewPackageTrust(target.tap, fullName, kind === "cask", tap)) !== "untrusted") return;
+      await execBrew(brewTapCommand("trust", `--${kind}`, fullName), { raw: true });
+      actionsLogger.log("Trusted package for install", { package: fullName, kind });
+    };
+    // An unflagged name listed only as a cask may still be a formula alias,
+    // which brew resolves first and `tap-info` doesn't list. So the kind is
+    // taken as known for a formula, or for a cask the input flagged; anything
+    // else is read first, and brew's refusal names what to trust.
+    const listedKind = tap && tapPackageKind(tap, target.package, target.cask);
+    const kind = listedKind === "formula" || target.cask ? listedKind : undefined;
+    if (tap && kind) {
+      const listed = kind === "cask" ? tap.cask_tokens : tap.formula_names;
+      await trust(kind, listed.find((n) => n.toLowerCase() === target.package.toLowerCase()) ?? target.package);
+    }
+    // The known kind is passed on, so brew never also loads a same-named
+    // package of the other kind, which may not be trusted.
+    const fetchItem = () => brewFetchQualifiedPackage(target.package, kind ? kind === "cask" : target.cask);
+    try {
+      item = await fetchItem();
+    } catch (err) {
+      // An alias or old name: brew resolved it to a package it won't load yet.
+      // Only within the tap the confirmation named: a migration to another tap
+      // is not what the user agreed to trust.
+      const refused = kind ? undefined : untrustedLoadTarget(err);
+      if (!refused || !refused.fullName.toLowerCase().startsWith(`${target.tap.toLowerCase()}/`)) throw err;
+      item = await loadRefusedPackage(target.package, refused, brewFetchQualifiedPackage, trust, target.cask);
     }
   } catch (err) {
     await showBrewFailureToast(`Failed to install ${name}`, ensureError(err));
@@ -445,19 +496,77 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
     );
     return false;
   }
-  return install(item);
+  return install(item, { alreadyClaimedKey: claimedKey });
+}
+
+/**
+ * The key a tap install claims before the package's record is read. For a
+ * listed name it is the same key the package's own row reads, so that row
+ * shows it busy too; an alias resolves to a different record, claimed again by
+ * `install`.
+ */
+function tapTargetKey(target: TapTarget & { package: string }): string {
+  return inFlightKey(target.cask === true, target.package);
 }
 
 /// Utilties
 
-async function install(formula: Cask | Formula): Promise<boolean> {
-  if (!(await ensureTrusted(formula))) return false;
+/**
+ * Run `fn` holding the in-flight claim on `key`, or return `refused` when
+ * something already holds it: that would start a second brew, which loses
+ * Homebrew's lock. A refusal shows no toast, since the running action's
+ * progress toast is already up and a handle acts on whichever toast is
+ * visible, so a second toast would take over its progress and Cancel.
+ */
+async function whileClaimed<T, R>(
+  key: string,
+  label: string,
+  refused: R,
+  fn: () => Promise<T>,
+  /** The view's refresh, awaited before the claim is released; see `OnAction`. */
+  after?: (result: T) => unknown,
+): Promise<T | R> {
+  const result = await runClaimed(key, label, fn, after);
+  if (result !== BUSY) return result;
+  actionsLogger.log("Package busy; ignoring", { key, wanted: label, running: inFlightLabel(key) });
+  return refused;
+}
+
+async function install(
+  formula: Cask | Formula,
+  opts: { alreadyClaimedKey?: string; refresh?: OnAction } = {},
+): Promise<boolean> {
+  const key = packageKey(formula);
+  if (key === opts.alreadyClaimedKey) return installOnce(formula);
+  return whileClaimed(key, `Installing ${brewName(formula)}…`, false, () => installOnce(formula), opts.refresh);
+}
+
+async function installOnce(formula: Cask | Formula): Promise<boolean> {
   const name = brewName(formula);
-  const handle = showActionToast({
-    title: `Installing ${name}`,
-    message: "",
-    cancelable: true,
+  const toast = () => showActionToast({ title: `Installing ${name}`, message: "", cancelable: true });
+  // Up before the trust check: for a third-party package it runs `brew
+  // tap-info`, about a second with nothing on screen. If the check has to ask
+  // or fail, the toast steps aside first, since a handle acts on whichever
+  // toast is visible, and comes back if the install goes ahead.
+  let handle = toast();
+  let stepped = false;
+  const trusted = await ensureTrusted(formula, {
+    beforePrompt: () => {
+      stepped = true;
+      handle.hide();
+    },
   });
+  if (!trusted) {
+    if (!stepped) handle.hide();
+    return false;
+  }
+  // Cancel pressed while the trust check ran: the new toast below would bring
+  // a fresh controller, and the install would go ahead anyway.
+  if (handle.abort?.signal.aborted) {
+    actionsLogger.log("Install canceled during the trust check", { package: brewIdentifier(formula) });
+    return false;
+  }
+  if (stepped) handle = toast();
   try {
     // Use progress-enabled install to show download progress
     await brewInstallWithProgress(
@@ -482,50 +591,117 @@ async function install(formula: Cask | Formula): Promise<boolean> {
 
 /**
  * Homebrew refuses to uninstall a pinned package of either kind. Say so, and
- * offer the one thing that gets past it — which unpins, so it needs an explicit
- * confirmation rather than a silent `--force`.
+ * offer the two ways past it, as the message names them: Force Uninstall
+ * (`--force` drops the pin as part of the removal) or Unpin alone, which
+ * leaves the package installed. Both need a press, never a silent `--force`.
  */
 async function offerForcedUninstall(
   formula: Cask | Nameable,
   name: string,
   cask: boolean,
   effectivePinned: boolean | undefined,
-  onComplete?: (result: boolean) => void,
+  onComplete?: OnAction,
 ): Promise<void> {
+  const kind = cask ? "cask" : "formula";
   await showToast({
     style: Toast.Style.Failure,
-    title: `Can't uninstall pinned ${cask ? "cask" : "formula"} ${name}`,
+    title: `Can't uninstall pinned ${kind} ${name}`,
     message: "It is pinned. Unpin it first, or force the uninstall.",
     primaryAction: {
-      title: `Unpin ${cask ? "Cask" : "Formula"} and Force Uninstall`,
+      title: "Force Uninstall",
       onAction: async (toast) => {
         await toast.hide();
         // Tell the caller the row changed: without this the view revalidates
         // only after the refused attempt, leaving the removed package on screen.
-        onComplete?.(await uninstall(formula, true, effectivePinned));
+        await uninstall(formula, true, effectivePinned, onComplete);
+      },
+    },
+    secondaryAction: {
+      title: `Unpin ${cask ? "Cask" : "Formula"}`,
+      onAction: async (toast) => {
+        await toast.hide();
+        // The row still shows the pin until it is read again.
+        await onComplete?.(await unpin(formula as Pinnable, kind));
       },
     },
   });
 }
 
+/**
+ * Whether `formula` is pinned, read from brew's pin directory rather than the
+ * cached payload, as FormulaUpgradeAction does. A caller's effective value wins
+ * and skips brew, because the review tracks live pin changes. Undefined means
+ * the pins could not be read, and a failure toast already said so.
+ */
+async function pinnedForUninstall(formula: Cask | Nameable, effectivePinned?: boolean): Promise<boolean | undefined> {
+  if (effectivePinned !== undefined) {
+    return effectivePinned;
+  }
+  const pins = await readPins("Uninstall");
+  return pins && isPinnedPackage(pins, brewIdentifier(formula), isCask(formula), pinAliases(formula));
+}
+
+/**
+ * Run Uninstall in Terminal on ⌃X, where the terminal preference puts it.
+ * The panel shows it only when its pin state says unpinned, but a pin set from
+ * the CLI since the list loaded still makes brew refuse. So this reads brew's
+ * pins first, even when the caller passes `false`, and sends a pinned package
+ * to the in-Raycast Uninstall, which asks to unpin. A caller's `true` is a live
+ * pin and needs no read.
+ */
+export async function uninstallInTerminal(
+  formula: Cask | Nameable,
+  effectivePinned: boolean | undefined,
+  runCommandInTerminal: (command: string) => Promise<void>,
+  onAction: OnAction,
+): Promise<void> {
+  const pinned = effectivePinned === true || (await pinnedForUninstall(formula));
+  if (pinned === undefined) {
+    return;
+  }
+  if (pinned) {
+    // Pass the pin just read, so uninstall does not ask brew again.
+    await uninstall(formula, false, true, onAction);
+    return;
+  }
+  await runCommandInTerminal(brewUninstallCommand(formula));
+}
+
+/** What `uninstallOnce` returns when brew refuses because the package is pinned. */
+const PINNED = Symbol("pinned");
+
 async function uninstall(
   formula: Cask | Nameable,
   force = false,
   effectivePinned?: boolean,
-  onComplete?: (result: boolean) => void,
+  onComplete?: OnAction,
 ): Promise<boolean> {
+  const outcome = await whileClaimed(
+    packageKey(formula),
+    `Uninstalling ${brewName(formula)}…`,
+    false,
+    () => uninstallOnce(formula, force, effectivePinned),
+    // A pinned refusal changed nothing, so it calls nothing back: the choice
+    // made on its toast does, once. A view that closes itself on its callback
+    // (Details) would otherwise close on the refusal and again on the choice.
+    (result) => (result === PINNED ? undefined : onComplete?.(result)),
+  );
+  if (outcome !== PINNED) return outcome;
+  // Offered after the claim is released, so Force Uninstall can claim afresh.
+  await offerForcedUninstall(formula, brewName(formula), isCask(formula), effectivePinned, onComplete);
+  return false;
+}
+
+async function uninstallOnce(
+  formula: Cask | Nameable,
+  force: boolean,
+  effectivePinned: boolean | undefined,
+): Promise<boolean | typeof PINNED> {
   const name = brewName(formula);
-  const cask = isCask(formula);
-  // Ask Homebrew, not the cached payload — see FormulaUpgradeAction. The caller's
-  // effective value still wins when it has one (a live pin change in the review).
   // Only ask about pins when the caller has not already decided.
-  let pinned = effectivePinned;
+  const pinned = await pinnedForUninstall(formula, effectivePinned);
   if (pinned === undefined) {
-    const pins = await readPins("Uninstall");
-    if (!pins) {
-      return false;
-    }
-    pinned = isPinnedPackage(pins, brewIdentifier(formula), cask);
+    return false;
   }
 
   // Homebrew refuses to uninstall a pinned package — casks in
@@ -533,10 +709,7 @@ async function uninstall(
   // ("is pinned. You must unpin it to uninstall."). Rather than let that
   // surface as a raw brew error, say what happened and offer the remedy, which
   // unpins as part of the removal and so needs explicit confirmation.
-  if (!force && pinned) {
-    await offerForcedUninstall(formula, name, cask, effectivePinned, onComplete);
-    return false;
-  }
+  if (!force && pinned) return PINNED;
 
   const handle = showActionToast({
     title: `Uninstalling ${name}`,
@@ -553,8 +726,16 @@ async function uninstall(
     // `onoe` and exits 0, so it never lands here — see TODO.md.
     if (!force && isPinnedRefusal(error)) {
       await handle.hide();
-      await offerForcedUninstall(formula, name, cask, effectivePinned, onComplete);
-      return false;
+      return PINNED;
+    }
+    // Gone already: removed from the CLI or another command since the row was
+    // read. The goal is met, so say so rather than report a failure, and
+    // return true so the view refreshes the row away.
+    if (isNotInstalledRefusal(error)) {
+      handle.hide();
+      await showToast({ style: Toast.Style.Success, title: `${name} was already uninstalled` });
+      actionsLogger.log("Uninstall found nothing to remove", { package: brewIdentifier(formula) });
+      return true;
     }
     await handle.showFailureHUD(`Failed to uninstall ${name}`);
     showBrewFailureToast("Uninstall failed", error);
@@ -656,9 +837,13 @@ async function upgradeChecked(
   }
 
   // Identity, not display name: `brewName` gives a cask its title.
-  const pinnedOnDisk = isPinnedPackage(pins, brewIdentifier(item), cask);
+  // Mostly the pin directory; where nothing unpins, a formula's own `pinned`
+  // also counts, since brew's outdated record knows aliases the disk check
+  // cannot (`pinnedBeforeUpgrade`).
+  const pinnedOnDisk = pinnedBeforeUpgrade(pins, item, { allowUnpin: opts?.allowUnpin === true });
   // The payload is a snapshot; another command or the CLI may have moved the
-  // pin since the fetch. EITHER direction leaves the row lying about it.
+  // pin since the fetch. EITHER direction leaves the row lying about it. When
+  // the payload flag alone decided, the two agree and no refresh is asked for.
   const stalePin = pinnedOnDisk !== isPinned(item);
   let unpinned = false;
   if (pinnedOnDisk) {
@@ -809,10 +994,4 @@ async function linkCask(cask: Cask, action: CaskLinkVerb): Promise<boolean> {
     showCommands: false,
     message,
   });
-}
-
-function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {
-  setExclude(!exclude);
-
-  return true;
 }

@@ -26,9 +26,11 @@ export function ratingTag(rating: number | undefined): { value: string; color: C
 // Returns a titleSlug -> rounded rating map. Fetched only when `enabled`.
 export function useProblemRatings(enabled: boolean) {
   const { isLoading, data } = useFetch<Record<string, number>>(RATINGS_URL, {
-    async parseResponse(response: { ok: boolean; text: () => Promise<string> }) {
+    async parseResponse(response: { ok: boolean; status: number; text: () => Promise<string> }) {
+      // Throw instead of returning {}: an empty map would read as "loaded" and
+      // tag every problem as Unrated. On failure the last cached ratings stay.
+      if (!response.ok) throw new Error(`Failed to load zerotrac ratings (HTTP ${response.status})`);
       const ratings: Record<string, number> = {};
-      if (!response.ok) return ratings;
       const lines = (await response.text()).split('\n');
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split('\t');

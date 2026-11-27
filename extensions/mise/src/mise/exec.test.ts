@@ -18,6 +18,35 @@ describe("mise processes run from the home directory", () => {
   });
 });
 
+describe("miseJson", () => {
+  it("hands the stderr of a successful run to the parser beside the JSON", async () => {
+    const location: MiseLocation = { path: "/bin/sh", env };
+    const parsed = await miseJson(
+      location,
+      ["-c", 'echo "mise WARN  careful" >&2; echo "{}"', "--"],
+      (raw, stderr) => ({
+        raw,
+        stderr,
+      }),
+    );
+    expect(parsed).toEqual({ raw: {}, stderr: "mise WARN  careful\n" });
+  });
+});
+
+describe("miseJson okCodes", () => {
+  const location: MiseLocation = { path: "/bin/sh", env };
+  const exitWith = (code: number) => ["-c", `echo '{"found":true}'; exit ${code}`, "--"];
+
+  it("parses the stdout of a run that exits with an accepted code", async () => {
+    await expect(miseJson(location, exitWith(1), (raw) => raw, { okCodes: [1] })).resolves.toEqual({ found: true });
+  });
+
+  it("still rejects every other non-zero exit", async () => {
+    await expect(miseJson(location, exitWith(2), (raw) => raw, { okCodes: [1] })).rejects.toThrow(/exited with 2/);
+    await expect(miseJson(location, exitWith(1), (raw) => raw)).rejects.toThrow(/exited with 1/);
+  });
+});
+
 describe("observeCommands", () => {
   afterEach(() => observeCommands(undefined));
 

@@ -21,7 +21,7 @@ class TeakRefreshRevokedError extends TeakSessionExpiredError {}
 class TeakRefreshUnavailableError extends Error {}
 class TeakRefreshClientRejectedError extends Error {}
 const reconnectAfterSignOut =
-  "Sign Out before reconnecting, then wait five minutes for disconnect to finish.";
+  "Sign Out before reconnecting, then wait 15 minutes for disconnect to finish.";
 export class TeakSignOutRequiredError extends Error {
   constructor() {
     super(reconnectAfterSignOut);
@@ -35,6 +35,9 @@ interface Provider {
 const providers = new Map<string, Provider>();
 const discovery = (forceRefresh = false) =>
   discoverAuthServer(getApiBaseUrl(), { forceRefresh });
+// Saved connections are keyed by the API URL with `/v1`, as earlier versions
+// wrote them; a new key would sign everyone out on update.
+const savedConnectionUrl = () => `${getApiBaseUrl()}/v1`;
 
 interface SavedProvider {
   apiBaseUrl: string;
@@ -49,12 +52,12 @@ const connectionNamespace = ({
 }: Omit<SavedProvider, "providerId">) => `${apiBaseUrl}|${issuer}|${clientId}`;
 const providerKey = (auth: AuthDiscovery) =>
   connectionNamespace({
-    apiBaseUrl: getApiBaseUrl(),
+    apiBaseUrl: savedConnectionUrl(),
     clientId: auth.clients.raycast,
     issuer: auth.issuer,
   });
 const registryPrefix = () =>
-  `teak.oauth.provider:${encodeURIComponent(getApiBaseUrl())}:`;
+  `teak.oauth.provider:${encodeURIComponent(savedConnectionUrl())}:`;
 const nativeClient = (providerId: string) =>
   new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
@@ -65,7 +68,7 @@ const nativeClient = (providerId: string) =>
   });
 function savedProvider(auth: AuthDiscovery): SavedProvider {
   return {
-    apiBaseUrl: getApiBaseUrl(),
+    apiBaseUrl: savedConnectionUrl(),
     providerId: `teak:${providerKey(auth)}`,
     issuer: auth.issuer,
     clientId: auth.clients.raycast,
@@ -76,7 +79,7 @@ function validateSavedProvider(raw: unknown): SavedProvider {
     !raw ||
     typeof raw !== "object" ||
     !("apiBaseUrl" in raw) ||
-    raw.apiBaseUrl !== getApiBaseUrl() ||
+    raw.apiBaseUrl !== savedConnectionUrl() ||
     !("providerId" in raw) ||
     typeof raw.providerId !== "string" ||
     !("issuer" in raw) ||
@@ -417,9 +420,31 @@ async function revokeStoredSession(): Promise<SignOutResult> {
   return localOnly ? "local-only" : "disconnected";
 }
 
+// The fresh access token of this deployment's only saved connection, read
+// without discovery: it goes only to the deployment it was saved for, and a
+// refresh or a 401 checks the provider again. Anything else, including two
+// saved connections, is left to discovery.
+async function freshSavedAccessToken(): Promise<string | null> {
+  const entries = Object.entries(await LocalStorage.allItems()).filter(
+    ([key]) => key.startsWith(registryPrefix()),
+  );
+  if (entries.length !== 1) {
+    return null;
+  }
+  const { records } = readSavedConnections(entries);
+  if (records.length !== 1) {
+    return null;
+  }
+  const tokens = await nativeClient(records[0].providerId).getTokens();
+  return tokens?.accessToken && !tokens.isExpired() ? tokens.accessToken : null;
+}
+
 export async function hasStoredTeakSession(): Promise<boolean> {
   if (inFlightSignOut) {
     return false;
+  }
+  if (await freshSavedAccessToken()) {
+    return true;
   }
   const provider = await getProvider();
   return Boolean(await provider.client.getTokens());
@@ -441,6 +466,10 @@ export function getStoredTeakAccessToken(): Promise<string | null> {
 }
 
 async function resolveStoredTeakAccessToken(): Promise<string | null> {
+  const saved = await freshSavedAccessToken();
+  if (saved) {
+    return saved;
+  }
   const provider = await getProvider();
   const tokens = await provider.client.getTokens();
   if (!tokens) {

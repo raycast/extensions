@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-calendar",
   "title": "Google Calendar",
-  "description": "Manage your Google calendar easily. Create events, search contacts, and check out your upcoming schedule.",
+  "description": "View upcoming Google Calendar events, create events and quick events, search Google Contacts, and manage events and calendars with AI tools.",
   "icon": "icon.png",
   "author": "thomas",
   "version": "1.4.4",
@@ -15,7 +15,8 @@
     "0xdhrv",
     "peduarte",
     "oguma0923",
-    "alerix"
+    "alerix",
+    "muhammadrizo"
   ],
   "categories": [
     "Productivity",
@@ -88,7 +89,24 @@
       "subtitle": "Google Calendar"
     }
   ],
+  "resourceProvider": "read-resource",
   "tools": [
+    {
+      "title": "Contacts",
+      "name": "search-contact-mentions",
+      "description": "Search Google Contacts by name or email to mention people in AI Chat, or type a full email address to mention anyone.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "title": "Events",
+      "name": "search-event-mentions",
+      "description": "Search events across your visible Google calendars by title, description, location, or attendee to mention in AI Chat, listing this week's events by default.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "name": "create-event",
       "title": "Create Event",
@@ -281,22 +299,22 @@
     }
   ],
   "dependencies": {
-    "@googleapis/calendar": "^15.0.0",
-    "@googleapis/people": "^7.0.1",
-    "@raycast/api": "^2.5.0",
-    "@raycast/utils": "^2.2.4",
-    "chrono-node": "^2.9.1",
-    "date-fns": "^4.1.0",
-    "humanize-duration": "^3.33.2"
+    "@googleapis/calendar": "^20.2.0",
+    "@googleapis/people": "^12.0.1",
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3",
+    "chrono-node": "^2.10.3",
+    "date-fns": "^4.4.0",
+    "humanize-duration": "^3.36.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/humanize-duration": "^3.27.4",
-    "@types/node": "25.6.2",
-    "@types/react": "19.2.14",
-    "eslint": "^10.3.0",
-    "prettier": "^3.8.3",
-    "tsx": "^4.23.1",
+    "@types/node": "26.6.10",
+    "@types/react": "19.3.3",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -313,8 +331,7 @@
     "Windows"
   ],
   "allowScripts": {
-    "esbuild@0.27.7": true,
-    "esbuild@0.28.1": true,
+    "esbuild@0.28.2": true,
     "fsevents@2.3.3": true
   }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "json-format",
   "title": "Format JSON",
-  "description": "Formats a JSON file with a selected indentation. If the JSON is stringified, it will be parsed before formatting.",
+  "description": "Format and beautify JSON from your clipboard or selection with your chosen indentation, parse stringified JSON, view it as a tree or convert to JSON Lines.",
   "icon": "command-icon.png",
   "author": "destiner",
   "contributors": [

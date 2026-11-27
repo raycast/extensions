@@ -1,5 +1,25 @@
 # Copy Path Changelog
 
+## [Fix browsers with more than one running instance] - 2026-11-23
+
+- Fix Chromium browsers: copy the URL of the tab in use, not the window title or the URL of a hidden page, while a second instance of the browser is running, such as the headless one that Playwright, Puppeteer or Selenium starts.
+
+## [Fix Picture-in-Picture windows] - 2026-11-21
+
+- Fix Chromium browsers: copy the URL of the tab in use instead of `about:blank` while a Picture-in-Picture window, such as Google Meet's floating mini-window, is open.
+
+## [Support Notion] - 2026-11-21
+
+- Copy the link of the current page from the Notion desktop app instead of the window title.
+
+## [Improve picker copying and copy feedback] - 2026-10-28
+
+- Copy selected item paths from focused native Open panels, preserving the existing fallback when no readable selection exists.
+- Show an additional-item count in multi-path copy tips and shorten long display paths while retaining filename endings.
+- Add a Show emoji preference for copy tips.
+- Prefer QSpace’s unified selection interface when available and apply home-directory shortening to every copied path.
+- Correct the contributor username to arjan.flac.
+
 ## [Support Little Arc and Peek] - 2026-09-19
 
 - Fix Arc: copy the URL of a focused Little Arc window or Peek preview instead of the underlying tab of the main window (#12677)

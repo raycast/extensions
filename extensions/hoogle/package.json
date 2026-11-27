@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hoogle",
   "title": "Hoogle",
-  "description": "Search Haskell documentation in Hoogle",
+  "description": "Search Haskell functions, types and documentation on Hoogle.",
   "icon": "haskell.png",
   "author": "waj",
   "categories": [

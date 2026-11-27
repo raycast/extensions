@@ -13,24 +13,11 @@ import {
   trash,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import {
-  accessSync,
-  closeSync,
-  constants,
-  existsSync,
-  mkdtempSync,
-  openSync,
-  opendirSync,
-  readdirSync,
-  readFileSync,
-  readSync,
-  rmSync,
-  statSync,
-} from "fs";
-import { rm } from "fs/promises";
+import { accessSync, closeSync, constants, existsSync, openSync, opendirSync, readSync, statSync } from "fs";
+import { opendir, rm, stat } from "fs/promises";
 import { join } from "path";
 import { execFile, execSync } from "child_process";
-import { homedir, tmpdir } from "os";
+import { homedir } from "os";
 import { ComponentType } from "react";
 import untildify from "untildify";
 
@@ -211,6 +198,84 @@ function getDownloadsInOrder(
 
 export function getDownloads(limit?: number, offset: number = 0, currentFolderPath: string | null = null) {
   return getDownloadsInOrder(fileOrder, limit, offset, currentFolderPath);
+}
+
+async function countDirectoryItemsAsync(dirPath: string): Promise<number> {
+  try {
+    const dir = await opendir(dirPath);
+    let count = 0;
+    for await (const entry of dir) {
+      if (showHiddenFiles || !entry.name.startsWith(".")) {
+        count += 1;
+      }
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
+async function getDownloadsInOrderAsync(
+  order: DownloadOrder,
+  limit?: number,
+  offset: number = 0,
+  currentFolderPath: string | null = null,
+): Promise<Download[]> {
+  const folderPath = currentFolderPath ?? downloadsFolder;
+  const maximumCandidates = limit === undefined ? undefined : offset + limit;
+  const candidates: Download[] = [];
+
+  const dir = await opendir(folderPath);
+  for await (const entry of dir) {
+    if (!showHiddenFiles && entry.name.startsWith(".")) {
+      continue;
+    }
+
+    const path = join(folderPath, entry.name);
+    try {
+      const stats = await stat(path);
+      const isDirectory = stats.isDirectory();
+      const download: Download = {
+        file: entry.name,
+        path,
+        size: isDirectory ? 0 : stats.size,
+        isDirectory,
+        lastModifiedAt: stats.mtime,
+        createdAt: stats.ctime,
+        addedAt: stats.atime,
+        birthAt: stats.birthtime,
+      };
+
+      const insertionIndex = candidates.findIndex((candidate) => compareDownloads(download, candidate, order) < 0);
+      candidates.splice(insertionIndex === -1 ? candidates.length : insertionIndex, 0, download);
+      if (maximumCandidates !== undefined && candidates.length > maximumCandidates) {
+        candidates.pop();
+      }
+    } catch (error) {
+      console.warn(`Skipping '${path}' because it could not be stat'd:`, error);
+    }
+  }
+
+  const page = limit === undefined ? candidates : candidates.slice(offset, offset + limit);
+  return Promise.all(
+    page.map(async (download) => ({
+      ...download,
+      itemCount: download.isDirectory ? await countDirectoryItemsAsync(download.path) : undefined,
+    })),
+  );
+}
+
+export async function getDownloadsAsync(
+  limit?: number,
+  offset: number = 0,
+  currentFolderPath: string | null = null,
+): Promise<Download[]> {
+  return getDownloadsInOrderAsync(fileOrder, limit, offset, currentFolderPath);
+}
+
+export async function getLatestDownloadAsync(): Promise<Download | undefined> {
+  const results = await getDownloadsInOrderAsync(latestDownloadOrder, 1);
+  return results[0];
 }
 
 export function getLatestDownload() {
@@ -577,83 +642,6 @@ export function getTextFilePreview(filePath: string): string {
       closeSync(descriptor);
     }
   }
-}
-
-const PREVIEW_THUMBNAIL_SIZE = 512;
-
-export function getQuickLookPreviewDataUrl(filePath: string): Promise<string | null> {
-  return new Promise((resolve) => {
-    if (process.platform !== "darwin") {
-      resolve(null);
-      return;
-    }
-
-    const TIMEOUT_MS = 1000;
-
-    let tempDir: string | null = null;
-    let resolved = false;
-
-    const resolveOnce = (value: string | null) => {
-      if (!resolved) {
-        resolved = true;
-        resolve(value);
-      }
-    };
-
-    const cleanup = () => {
-      if (tempDir) {
-        try {
-          rmSync(tempDir, { recursive: true });
-        } catch {
-          // ignore cleanup errors
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      console.warn(`Quick Look preview timed out for '${filePath}'`);
-      cleanup();
-      resolveOnce(null);
-    }, TIMEOUT_MS);
-
-    try {
-      tempDir = mkdtempSync(join(tmpdir(), "raycast-ql-preview-"));
-      execFile(
-        "qlmanage",
-        ["-t", "-s", String(PREVIEW_THUMBNAIL_SIZE), "-o", tempDir, filePath],
-        (error, _stdout, stderr) => {
-          try {
-            if (error || stderr) {
-              resolveOnce(null);
-              return;
-            }
-
-            const files = readdirSync(tempDir!);
-            const png = files.find((f) => f.endsWith(".png"));
-
-            if (!png) {
-              resolveOnce(null);
-              return;
-            }
-
-            const buffer = readFileSync(join(tempDir!, png));
-            resolveOnce(`data:image/png;base64,${buffer.toString("base64")}`);
-          } catch (err) {
-            console.warn(`Error generating Quick Look preview for '${filePath}':`, err);
-            resolveOnce(null);
-          } finally {
-            clearTimeout(timeoutId);
-            cleanup();
-          }
-        },
-      );
-    } catch (err) {
-      console.warn(`Error starting Quick Look for '${filePath}':`, err);
-      clearTimeout(timeoutId);
-      cleanup();
-      resolveOnce(null);
-    }
-  });
 }
 
 export function formatFileSize(bytes: number): string {

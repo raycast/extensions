@@ -78,5 +78,14 @@ buffer
 mutedeck
 nocal
 openqr
+twelfth
 done-bear
 happy-squid
+glaze
+zemtu
+highseat
+tiro
+deapi
+prisma-docs-search
+prisma-postgres
+prisma-cli-commands

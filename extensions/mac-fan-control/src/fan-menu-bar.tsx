@@ -1,0 +1,174 @@
+import { Color, Icon, MenuBarExtra, showHUD } from "@raycast/api";
+import { useEffect } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import {
+  average,
+  mode,
+  readStatus,
+  rpm,
+  setAutomatic,
+  setPercent,
+} from "macos-fan-control-client";
+import { triggerDetail, triggerLabel } from "./labels";
+import { openCommand } from "./launch";
+
+// The menu is often left open while watching a workload, and the `interval` in
+// package.json only restarts the command, which does not re-render an open menu.
+const REFRESH_INTERVAL_MS = 2000;
+
+export default function Command() {
+  // Failures are reported inside the menu; without this the default failure toast
+  // would reappear on every `interval` tick while the core is missing.
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    readStatus,
+    [true],
+    {
+      onError: () => {
+        // Shown inline below instead.
+      },
+    },
+  );
+  const fans = data?.fans ?? [];
+  const fastest = fans.reduce(
+    (highest, fan) => Math.max(highest, fan.actual),
+    0,
+  );
+  const current = fans.length ? mode(fans) : "";
+
+  useEffect(() => {
+    const timer = setInterval(revalidate, REFRESH_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [revalidate]);
+
+  async function apply(action: () => Promise<string>, confirmation: string) {
+    try {
+      await action();
+      await showHUD(confirmation);
+      revalidate();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed" });
+    }
+  }
+
+  return (
+    <MenuBarExtra
+      isLoading={isLoading}
+      icon={{
+        source: Icon.Gauge,
+        tintColor: error
+          ? Color.Red
+          : current === "Forced"
+            ? Color.Blue
+            : Color.PrimaryText,
+      }}
+      title={fans.length ? String(Math.round(fastest)) : undefined}
+      tooltip={
+        error
+          ? error.message
+          : fans.length
+            ? `${current} · ${Math.round(average(fans))}%`
+            : "Fan Control"
+      }
+    >
+      {error ? (
+        <MenuBarExtra.Section title="Fan Control Unavailable">
+          <MenuBarExtra.Item
+            title={error.message}
+            icon={Icon.ExclamationMark}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
+      <MenuBarExtra.Section title={current}>
+        {fans.map((fan) => (
+          <MenuBarExtra.Item
+            key={fan.index}
+            title={`Fan ${fan.index}`}
+            subtitle={`${rpm(fan.actual)} · ${Math.round(fan.percent)}%`}
+          />
+        ))}
+      </MenuBarExtra.Section>
+      {data?.temperatures ? (
+        <MenuBarExtra.Section title="Temperature">
+          <MenuBarExtra.Item
+            title="CPU"
+            subtitle={`${data.temperatures.cpu.toFixed(1)} °C`}
+          />
+          <MenuBarExtra.Item
+            title="GPU"
+            subtitle={`${data.temperatures.gpu.toFixed(1)} °C`}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
+      {data?.cooling ? (
+        <MenuBarExtra.Section title="Cooldown">
+          <MenuBarExtra.Item
+            title={`Holding ${Math.round(data.cooling.percent)}%`}
+            subtitle={`until below ${Math.round(data.cooling.below)} °C`}
+            icon={Icon.Snowflake}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
+      {data?.trigger ? (
+        <MenuBarExtra.Section title="Thermal Trigger">
+          <MenuBarExtra.Item
+            title={triggerLabel(data.trigger)}
+            subtitle={triggerDetail(data.trigger)}
+            icon={Icon.Temperature}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Thermal Trigger…"
+          icon={Icon.Temperature}
+          onAction={() =>
+            openCommand("thermal-trigger", "Could not open Thermal Trigger")
+          }
+        />
+        {data?.trigger ? (
+          <MenuBarExtra.Item
+            title="Cancel Trigger"
+            icon={Icon.XMarkCircle}
+            onAction={() => apply(setAutomatic, "Trigger cancelled")}
+          />
+        ) : null}
+        <MenuBarExtra.Item
+          title="Cool Until Below…"
+          icon={Icon.Snowflake}
+          onAction={() =>
+            openCommand("cool-until", "Could not open Cool Until Below")
+          }
+        />
+        {data?.cooling ? (
+          <MenuBarExtra.Item
+            title="Cancel Cooldown"
+            icon={Icon.XMarkCircle}
+            onAction={() => apply(setAutomatic, "Fans on automatic")}
+          />
+        ) : null}
+        <MenuBarExtra.Item
+          title="Force Maximum"
+          icon={Icon.Bolt}
+          onAction={() => apply(() => setPercent(100), "Fans at maximum")}
+        />
+        <MenuBarExtra.Item
+          title="Restore Automatic"
+          icon={Icon.Repeat}
+          onAction={() => apply(setAutomatic, "Fans on automatic")}
+        />
+        <MenuBarExtra.Item
+          title="Set Fan Speed…"
+          icon={Icon.Gauge}
+          onAction={() =>
+            openCommand("set-fan-speed", "Could not open Set Fan Speed")
+          }
+        />
+        <MenuBarExtra.Item
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          onAction={revalidate}
+        />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  );
+}

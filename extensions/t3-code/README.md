@@ -46,6 +46,25 @@ The server origin comes from `~/.t3/userdata/server-runtime.json` unless the
 `Server Origin` preference is set, so a restarted server on a new port needs no
 reconfiguration.
 
+### Threads on other machines
+
+Waiting T3 Threads and Search T3 Threads can also list threads from T3 Code servers on
+other machines, such as a Mac mini you reach over Tailscale. Issue a token on that
+machine the same way, then add an entry to the `Additional Servers` preference:
+
+```
+http://my-mac-mini.tailnet-name.ts.net:3773 <token>
+```
+
+Split several entries with commas. Plain `http://` is accepted only for loopback and
+Tailscale MagicDNS names (`*.ts.net`), because Tailscale encrypts that traffic and the
+name does not resolve when Tailscale is off. Raw Tailscale IP addresses are not
+accepted, because other networks use the same address range. Use `https://` for anything
+else. Each thread shows the
+machine it runs on, and opening it uses that machine's environment ID, so the desktop app
+must have that environment linked. If one server does not answer, the others still show.
+Prompt T3 Code still starts sessions on the main server only.
+
 ## How it talks to T3
 
 Everything runs against the T3 Code server on this machine, over loopback:
@@ -61,12 +80,16 @@ uses one `orchestration.launchThread` call over the WebSocket: it creates the th
 the worktree and sends the first message. Attachments are uploaded first through
 `attachments.createUploadUrl`. On v1 the images travel inside the turn as data URLs.
 
-Opening a thread activates T3 Code and drives its command palette, because the
-desktop app registers `t3code://` for its own auth callbacks and an external URL
-only reveals the window. The extension types the thread's title, project and
-branch, and presses Enter only when that query matches exactly one thread;
-otherwise the palette stays open on the narrowed list for you to pick from.
-macOS asks for Accessibility permission the first time.
+Opening a thread uses `t3code://threads/<environmentId>/<threadId>` on supported
+desktops (stable 0.1.0 and later, or Nightly builds from 2026-10-12 build 3010).
+The environment ID comes from the configured server, and the desktop version is
+read from the selected app's bundle. This avoids title typing and differences
+between the extension's and T3 Code's search rules.
+
+Older desktops, unavailable bundle versions, or servers without an environment ID
+retain command-palette navigation. This fallback types the thread's title, project
+and branch, and presses Enter only when the extension counts one matching thread.
+macOS asks for Accessibility permission when this fallback is first used.
 
 The app is found by release channel. The stable build is named `T3 Code (Alpha)` and the
 Nightly build `T3 Code (Nightly)`. With the `App Name` preference empty, the extension

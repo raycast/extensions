@@ -28,6 +28,8 @@ import { formatBrewSize, parseUpgradeDryRun } from "../utils/brew/dry-run";
 import { brewFindPackage } from "../utils/brew/search";
 import { useTerminalApp } from "../utils/terminal";
 import * as Actions from "./actions";
+import { packageKey } from "./busy";
+import { useInFlight } from "../utils/inFlight";
 import { WARNING_ICON } from "./palette";
 import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
@@ -425,15 +427,21 @@ function useDryRunPreview<A>(
 /**
  * Hand the command to a terminal instead of running it inside Raycast.
  *
- * Owns `useTerminalApp()` so neither preview has to call it.
+ * Owns `useTerminalApp()` so neither preview has to call it. ⌘⇧T, as Show
+ * Upgrades' Run Upgrade in Terminal: never ⌘↵, which is the panel's default
+ * for its second action, and this one is second or third.
  */
-function RunInTerminalAction(props: { verb: string; command: string }) {
+function RunInTerminalAction(props: { verb: string; command: string; item?: Cask | Nameable }) {
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  // Hidden while the package is busy: a Terminal brew beside the claimed one
+  // would lose the lock. A whole-machine `brew upgrade` names no package.
+  const busy = useInFlight(props.item ? packageKey(props.item) : "");
+  if (busy) return null;
   return (
     <Action
       title={`Run ${props.verb} in ${terminalName}`}
       icon={terminalIcon}
-      shortcut={{ modifiers: ["cmd"], key: "return" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
       onAction={() => runCommandInTerminal(props.command)}
     />
   );
@@ -511,11 +519,11 @@ export function InstallPreview(props: {
                 title={`Install ${name}`}
                 onAction={(result) => {
                   pop();
-                  props.onAction(result);
+                  return props.onAction(result);
                 }}
               />
             )}
-            {ready && <RunInTerminalAction verb="Install" command={command} />}
+            {ready && <RunInTerminalAction verb="Install" command={command} item={item} />}
           </ActionPanel.Section>
           <PreviewCopyActions
             verb="Install"
@@ -660,7 +668,7 @@ export function UpgradePreview(props: {
                   upgrade everything — the view names a single package, and the
                   action would act on every outdated one. */}
               {canUpgrade && !target && <Actions.FormulaUpgradeAllAction onAction={props.onAction} />}
-              {canUpgrade && <RunInTerminalAction verb="Upgrade" command={command} />}
+              {canUpgrade && <RunInTerminalAction verb="Upgrade" command={command} item={target} />}
             </ActionPanel.Section>
             <PreviewCopyActions
               verb="Upgrade"

@@ -1,9 +1,12 @@
 # Prayer Times Changelog
 
+## [Menu Bar Clears After the End] - 2026-10-27
+
+- The menu bar clears once a prayer's time ends, instead of showing `Dhuhr ended`
+
 ## [Menu Bar Periods and Jamaat Formulas] - 2026-10-26
 
 - Menu bar: the masjid disc shows the prayer's period (grey, dark green, light green, yellow, red) and the title says what it counts down to, e.g. `Dhuhr Pref. ends 8m`
-- An unmarked prayer shows as `Dhuhr ended` after its time, with Mark as Prayed and Mark Missed
 - The dropdown names the current period, with the preferred end and end
 - Before Preferred End (Minutes) setting, default 15
 - Jamaat formulas: a Jamaat setting can be a formula such as `ceil(start, 15) + 15`, in the same language as the phone app, with a Jamaat Formula Guide command

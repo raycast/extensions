@@ -1,0 +1,96 @@
+# Compact queries for AI Chat mention searches. They run on every keystroke, so they only ask for what a mention row shows.
+
+fragment IssueMentionFields on Issue {
+  number
+  title
+  closed
+  stateReason
+  repository {
+    nameWithOwner
+  }
+  author {
+    login
+  }
+}
+
+fragment PullRequestMentionFields on PullRequest {
+  number
+  title
+  closed
+  merged
+  isDraft
+  repository {
+    nameWithOwner
+  }
+  author {
+    login
+  }
+}
+
+fragment RepositoryMentionFields on Repository {
+  nameWithOwner
+  description
+  isPrivate
+  isArchived
+  owner {
+    avatarUrl(size: 64)
+  }
+}
+
+query searchIssueMentions($query: String!, $numberOfItems: Int!) {
+  search(query: $query, type: ISSUE, first: $numberOfItems) {
+    nodes {
+      ... on Issue {
+        ...IssueMentionFields
+      }
+    }
+  }
+}
+
+query searchPullRequestMentions($query: String!, $numberOfItems: Int!) {
+  search(query: $query, type: ISSUE, first: $numberOfItems) {
+    nodes {
+      ... on PullRequest {
+        ...PullRequestMentionFields
+      }
+    }
+  }
+}
+
+query issueOrPullRequestMention($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    issueOrPullRequest(number: $number) {
+      __typename
+      ... on Issue {
+        ...IssueMentionFields
+      }
+      ... on PullRequest {
+        ...PullRequestMentionFields
+      }
+    }
+  }
+}
+
+query searchRepositoryMentions($query: String!, $numberOfItems: Int!) {
+  search(query: $query, type: REPOSITORY, first: $numberOfItems) {
+    nodes {
+      ... on Repository {
+        ...RepositoryMentionFields
+      }
+    }
+  }
+}
+
+query viewerRepositoryMentions($numberOfItems: Int!) {
+  viewer {
+    repositories(
+      first: $numberOfItems
+      orderBy: { field: PUSHED_AT, direction: DESC }
+      ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
+    ) {
+      nodes {
+        ...RepositoryMentionFields
+      }
+    }
+  }
+}
