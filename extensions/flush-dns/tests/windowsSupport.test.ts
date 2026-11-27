@@ -61,6 +61,16 @@ describe("createWindowsDnsFlusher", () => {
     assert.match(ELEVATED_FLUSH_SCRIPT, /exit \$process\.ExitCode/);
   });
 
+  test("ends every multi-line block with a blank line so PowerShell runs it from stdin", () => {
+    const lines = ELEVATED_FLUSH_SCRIPT.split("\n");
+
+    lines.forEach((line, index) => {
+      if (line === "}") {
+        assert.equal(lines[index + 1], "", `line ${index + 1} closes a block without a following blank line`);
+      }
+    });
+  });
+
   test("does not ask for elevation when ipconfig cannot be started", async () => {
     const spawnError = commandFailure("ENOENT");
     let elevated = false;

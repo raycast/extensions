@@ -8,6 +8,7 @@ const ELEVATION_TIMEOUT = 60_000;
 
 // Process.Start is used instead of Start-Process because its failure keeps the Win32 reason as the innermost
 // exception, so a cancelled UAC prompt reports just "The operation was canceled by the user" on stderr.
+// runPowerShellScript feeds the script through stdin, where a multi-line block only runs after a blank line.
 export const ELEVATED_FLUSH_SCRIPT = `
 $info = New-Object System.Diagnostics.ProcessStartInfo
 $info.FileName = Join-Path $env:SystemRoot 'System32\\ipconfig.exe'
@@ -23,6 +24,7 @@ try {
   [Console]::Error.WriteLine($reason.Message)
   exit 1
 }
+
 $process.WaitForExit()
 exit $process.ExitCode
 `;
