@@ -24,6 +24,7 @@ import { useState } from "react";
 import { copyPNG, copySVG, savePNG, saveSVG } from "./code-exports";
 import { dynamicCodeRenderProps } from "./code-style";
 import { SAVE_PNG_SHORTCUT, SAVE_SVG_SHORTCUT } from "./generate-qr";
+import { markdownCell } from "./markdown";
 import { cacheDir, codeSVG, drawPNG, previewMarkdown } from "./preview-files";
 import { type QRRenderProps, withLogoData, withoutRemoteLogo } from "./qr-engine";
 import {
@@ -334,7 +335,7 @@ function sparkline(series: { count: number }[]): string {
 /** A Markdown table of the top rows of a breakdown. */
 function table(title: string, rows: { label: string; count: number }[]): string {
   if (rows.length === 0) return "";
-  const lines = rows.slice(0, 5).map((row) => `| ${row.label.replace(/\|/g, "\\|")} | ${formatCount(row.count)} |`);
+  const lines = rows.slice(0, 5).map((row) => `| ${markdownCell(row.label)} | ${formatCount(row.count)} |`);
   return [`| ${title} | Scans |`, "| --- | ---: |", ...lines].join("\n");
 }
 
