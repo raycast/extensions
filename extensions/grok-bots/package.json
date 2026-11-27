@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grok-bots",
+  "title": "Grok Bots",
+  "description": "Send prompts to your Grok Bot teammates, preview their latest messages and recent chats, and sort Bots by activity, usage, sidebar order or name.",
+  "icon": "extension-icon.png",
+  "author": "stanleybogode",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "chat-with-bot",
+      "title": "Chat with Grok Bot",
+      "description": "Pick one of your Grok Bots, see its latest messages, and send it a prompt.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Prompt",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sortOrder",
+      "type": "dropdown",
+      "title": "Sort Bots By",
+      "description": "How Chat with Grok Bot orders your Bots.",
+      "default": "frequent",
+      "required": false,
+      "data": [
+        {
+          "title": "Most Used",
+          "value": "frequent"
+        },
+        {
+          "title": "Latest Activity",
+          "value": "recent"
+        },
+        {
+          "title": "Grok Bot Sidebar Order",
+          "value": "sidebar"
+        },
+        {
+          "title": "Name",
+          "value": "alphabetical"
+        }
+      ]
+    },
+    {
+      "name": "autoSend",
+      "type": "checkbox",
+      "title": "Delivery",
+      "label": "Send automatically (press Return in Grok Bot)",
+      "description": "Grok Bot's prompt links only fill in the message box. When this is on, Raycast waits until your prompt is in the box and presses Return for you. Needs Raycast to be allowed in System Settings → Privacy & Security → Accessibility.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "useWebhooks",
+      "type": "checkbox",
+      "title": "Webhooks",
+      "label": "Send through a bot's routine webhook when one is set",
+      "description": "Bots with a webhook set up in this extension get the prompt in the background, without opening Grok Bot.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showHidden",
+      "type": "checkbox",
+      "title": "Hidden Bots",
+      "label": "Include bots hidden from the sidebar",
+      "default": true,
+      "required": false,
+      "description": "List Bots you've hidden from Grok Bot's sidebar. They stay active and can still get prompts."
+    },
+    {
+      "name": "dataDir",
+      "type": "directory",
+      "title": "Grok Bot Data Folder",
+      "description": "Only needed if Grok Bot stores its data somewhere other than ~/Library/Application Support/Grok Bot.",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

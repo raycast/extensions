@@ -6,6 +6,8 @@ import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from
 
 import type { DeviceScenario, ScenarioData, ScenariosHook } from "@/types";
 
+import { visibleColor } from "@/lib/kelvin";
+
 import useErrorInForm from "@/hooks/useErrorInForm";
 
 import DeviceScenarioForm from "@/components/DeviceScenarioForm";
@@ -32,6 +34,9 @@ const ScenarioForm = (props: ScenarioFormProps) => {
   const isNew = "newScenario" in props;
   const withDevice = "withDevice" in props ? props.withDevice : null;
   const withId = "id" in props ? props.id : null;
+  // Prefill from the device's current state. Skip brightness/colour when it's off (setting a colour
+  // would switch it back on) or when it's a cloud group that doesn't report them.
+  const copyLevels = !!withDevice && withDevice.isOn && ((withDevice as { showLevels?: boolean }).showLevels ?? true);
 
   const [titleError, setTitleError, dropTitleErrorIfNeeded] = useErrorInForm();
   const [brightnessError, setBrightnessError, dropBrightnessErrorIfNeeded] = useErrorInForm();
@@ -47,7 +52,11 @@ const ScenarioForm = (props: ScenarioFormProps) => {
   );
 
   const [color, setColor] = useState<string>(
-    selectedScenario?.all?.color ? colord(selectedScenario.all.color).toHex() : "",
+    selectedScenario?.all?.color
+      ? colord(selectedScenario.all.color).toHex()
+      : copyLevels
+        ? colord(visibleColor(withDevice!.color, withDevice!.colorTemperature)).toHex()
+        : "",
   );
   const [cachedDeviceScenarios, _setCachedDeviceScenarios] = useState<Record<string, DeviceScenario>>(
     selectedDeviceScenarios?.reduce(
@@ -72,6 +81,7 @@ const ScenarioForm = (props: ScenarioFormProps) => {
     color: string;
     icon: keyof typeof Icon;
     devices: string[];
+    fade: boolean;
   }) => {
     if (!input.title.trim()) {
       setTitleError("Please enter a name for the scenario");
@@ -102,6 +112,7 @@ const ScenarioForm = (props: ScenarioFormProps) => {
         icon: input.icon,
         all: null,
         devices: [],
+        fade: input.fade,
       };
       if (input.powerChange !== "ignore" || input.brightness || input.color) {
         scenario.all = {
@@ -127,6 +138,7 @@ const ScenarioForm = (props: ScenarioFormProps) => {
     const scenario = selectedScenario as ScenarioData;
     scenario.title = input.title;
     scenario.icon = input.icon;
+    scenario.fade = input.fade;
     if (input.powerChange !== "ignore" || input.brightness || input.color) {
       scenario.all = {
         onOff: input.powerChange === "ignore" ? null : input.powerChange === "on",
@@ -166,7 +178,7 @@ const ScenarioForm = (props: ScenarioFormProps) => {
                 />
               }
               icon={Icon.Pencil}
-              shortcut={{ key: "b", modifiers: ["cmd"] }}
+              shortcut={{ key: "c", modifiers: ["cmd", "opt"] }}
             />
             <Action
               title="Select All Devices"
@@ -222,7 +234,11 @@ const ScenarioForm = (props: ScenarioFormProps) => {
           }
         }}
       />
-      <Form.Dropdown id="icon" title="Icon" defaultValue={selectedScenario?.icon || ("Play" as keyof typeof Icon)}>
+      <Form.Dropdown
+        id="icon"
+        title="Icon"
+        defaultValue={selectedScenario?.icon || ("CircleFilled" as keyof typeof Icon)}
+      >
         {Object.keys(Icon).map((icon) => (
           <Form.Dropdown.Item key={icon} value={icon} title={icon} icon={Icon[icon as keyof typeof Icon]} />
         ))}
@@ -233,7 +249,15 @@ const ScenarioForm = (props: ScenarioFormProps) => {
         id="powerChange"
         title="Power"
         defaultValue={
-          typeof selectedScenario?.all?.onOff === "boolean" ? (selectedScenario.all.onOff ? "on" : "off") : "ignore"
+          typeof selectedScenario?.all?.onOff === "boolean"
+            ? selectedScenario.all.onOff
+              ? "on"
+              : "off"
+            : withDevice
+              ? withDevice.isOn
+                ? "on"
+                : "off"
+              : "ignore"
         }
         info="This will either switch all devices on/off or ignore it"
       >
@@ -245,7 +269,9 @@ const ScenarioForm = (props: ScenarioFormProps) => {
         id="brightness"
         title="Brightness"
         error={brightnessError}
-        defaultValue={selectedScenario?.all?.brightness?.toString() || ""}
+        defaultValue={
+          selectedScenario?.all?.brightness?.toString() || (copyLevels ? String(withDevice!.brightness) : "")
+        }
         placeholder="0-100, leave empty to ignore"
         info="This will set the brightness for all devices or ignore it by leaving it empty"
         onChange={dropBrightnessErrorIfNeeded}
@@ -268,7 +294,7 @@ const ScenarioForm = (props: ScenarioFormProps) => {
         error={colorError}
         value={color}
         placeholder="RGB color (#RRGGBB) or leave empty to ignore"
-        info="You can also choose a color from the color menu (Cmd + B)"
+        info="You can also choose a color from the color menu (⌘⌥C)"
         onChange={(value) => {
           setColor(value);
           dropColorErrorIfNeeded();
@@ -285,6 +311,12 @@ const ScenarioForm = (props: ScenarioFormProps) => {
             dropColorErrorIfNeeded();
           }
         }}
+      />
+      <Form.Checkbox
+        id="fade"
+        label="Quick fade to the color (LAN lights)"
+        defaultValue={selectedScenario?.fade ?? false}
+        info="Fades over half a second instead of jumping. Cloud lights jump to the color anyway."
       />
       <Form.Separator />
       <Form.TagPicker

@@ -1,21 +1,7 @@
 import { open, showToast, Toast } from "@raycast/api";
 import { getPreferences } from "./api";
-import { exec } from "child_process";
 import { Socket } from "net";
-import { promisify } from "util";
-import os from "os";
-import path from "path";
-
-const execAsync = promisify(exec);
-
-/**
- * Resolve the path to the hermes binary.
- * Hermes is typically installed at ~/.local/bin/hermes.
- */
-function getHermesPath(): string {
-  const hermesBinPath = path.join(os.homedir(), ".local", "bin", "hermes");
-  return hermesBinPath;
-}
+import { startDashboard } from "./dashboard";
 
 export default async function Command() {
   try {
@@ -118,21 +104,4 @@ async function waitForPort(
   throw new Error(
     `Dashboard did not become available on ${host}:${port} within ${timeout}ms. Try running: hermes dashboard`,
   );
-}
-
-async function startDashboard(): Promise<void> {
-  const hermesPath = getHermesPath();
-
-  // Use nohup with absolute path to hermes binary
-  // Run in background so the command returns immediately
-  const command = `nohup "${hermesPath}" dashboard --no-open > /dev/null 2>&1 &`;
-
-  await execAsync(command, {
-    timeout: 5000,
-    // Ensure we have a minimal PATH that includes standard system locations
-    env: {
-      ...process.env,
-      PATH: `${path.dirname(hermesPath)}:/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ""}`,
-    },
-  });
 }

@@ -1,34 +1,30 @@
 /**
- * API Client with timeout, retry logic, and proper error handling
+ * API Client with timeout, safe GET retry logic, and proper error handling
  */
 
 import { getPreferenceValues } from "@raycast/api";
 import { API_CONFIG, SECURITY_HEADERS } from "../constants";
-import { handleError } from "../utils/error-handler";
+import { ApiError, handleError, isRetryableError } from "../utils/error-handler";
+import { sanitizeUrl } from "../utils/security";
 import type { ApiErrorResponse } from "../types";
-
-interface Preferences {
-  apiHost: string;
-  apiKey: string;
-}
 
 /**
  * Get API key from preferences
  */
 export function getApiKey(): string {
   const { apiKey } = getPreferenceValues<Preferences>();
-  if (!apiKey) {
+  if (!apiKey?.trim()) {
     throw new Error("API Key is not configured. Please set it in extension preferences.");
   }
-  return apiKey;
+  return apiKey.trim();
 }
 
 /**
- * Get API host from preferences
+ * Get validated API host from preferences
  */
 export function getApiHost(): string {
   const { apiHost } = getPreferenceValues<Preferences>();
-  return apiHost.replace(/\/$/, ""); // Remove trailing slash
+  return sanitizeUrl(apiHost);
 }
 
 /**
@@ -42,9 +38,6 @@ export function getAuthHeaders(): Record<string, string> {
   };
 }
 
-/**
- * Fetch with timeout support using AbortController
- */
 async function fetchWithTimeout(
   url: string,
   options: RequestInit,
@@ -54,46 +47,43 @@ async function fetchWithTimeout(
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(url, {
+    return await fetch(url, {
       ...options,
       signal: controller.signal,
     });
-    return response;
   } finally {
     clearTimeout(timeoutId);
   }
 }
 
-/**
- * Handle API response with proper error handling
- */
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorText = await response.text().catch(() => "{}");
 
-    let errorData: ApiErrorResponse;
+    let errorData: Partial<ApiErrorResponse>;
     try {
-      errorData = JSON.parse(errorText) as ApiErrorResponse;
+      errorData = JSON.parse(errorText) as Partial<ApiErrorResponse>;
     } catch {
-      errorData = { success: false, error: "Unknown error occurred" };
+      errorData = {};
     }
 
-    // Create error with status for proper categorization
-    const error = new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-    (error as Error & { status: number }).status = response.status;
-    throw error;
+    throw new ApiError(
+      errorData.error || `HTTP ${response.status}: ${response.statusText}`,
+      response.status,
+      errorData.code,
+    );
   }
   return response.json() as Promise<T>;
 }
 
 /**
- * Make API request with timeout and retry logic
+ * Make API request with timeout and safe retries for idempotent GET requests
  */
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}, retryCount: number = 0): Promise<T> {
   const url = `${getApiHost()}${endpoint}`;
   const headers = options.headers || {};
+  const method = (options.method || "GET").toUpperCase();
 
-  // Add auth headers if not a public endpoint
   const isPublicEndpoint = endpoint === "/api/health";
   const finalHeaders = isPublicEndpoint
     ? { ...headers, "Content-Type": "application/json" }
@@ -109,8 +99,7 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {},
   } catch (error) {
     const appError = handleError(error);
 
-    // Retry on retryable errors
-    if (retryCount < API_CONFIG.RETRY_ATTEMPTS && appError.category === "timeout") {
+    if (method === "GET" && retryCount < API_CONFIG.RETRY_ATTEMPTS && isRetryableError(appError)) {
       await new Promise((resolve) => setTimeout(resolve, API_CONFIG.RETRY_DELAY_MS * (retryCount + 1)));
       return apiRequest<T>(endpoint, options, retryCount + 1);
     }

@@ -45,6 +45,14 @@ interface IpinfoResponse {
   org?: string;
 }
 
+interface InternetDataResponse {
+  error?: string;
+  is_bogon?: boolean;
+  location?: { country?: string | null; country_name?: string | null } | null;
+  asn?: { asn?: number | null; name?: string | null } | null;
+  company?: { name?: string | null } | null;
+}
+
 interface RdapResponse {
   errorCode?: number;
   title?: string;
@@ -371,6 +379,51 @@ export async function lookupIpinfo(ip: string): Promise<ProviderResult> {
   }
 }
 
+export async function lookupInternetData(ip: string): Promise<ProviderResult> {
+  const url = `https://api.internetdata.io/${ip}`;
+  try {
+    const response = await axios.get<InternetDataResponse>(url, {
+      timeout: 8000,
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 (compatible; RaycastExtension)",
+      },
+    });
+    const data = response.data;
+    if (cleanString(data.error)) {
+      return { provider: "InternetData", url, ok: false, error: cleanString(data.error) };
+    }
+    if (data.is_bogon) {
+      return { provider: "InternetData", url, ok: false, error: "Private or reserved address" };
+    }
+    const countryCode = cleanCountryCode(data.location?.country);
+    const country = cleanString(data.location?.country_name) || deriveCountryName(countryCode);
+    const asnName = cleanString(data.asn?.name);
+    const company = cleanString(data.company?.name);
+    const asn = data.asn?.asn ? formatAsn(data.asn.asn) : undefined;
+    if (!countryCode && !asn && !company) {
+      return { provider: "InternetData", url, ok: false, error: "No data returned" };
+    }
+    return {
+      provider: "InternetData",
+      url,
+      ok: true,
+      country,
+      countryCode,
+      city: undefined,
+      isp: company || asnName,
+      asn,
+    };
+  } catch (error: unknown) {
+    return {
+      provider: "InternetData",
+      url,
+      ok: false,
+      error: getErrorMessage(error),
+    };
+  }
+}
+
 export async function lookupRdap(ip: string): Promise<ProviderResult> {
   const url = `https://rdap.org/ip/${ip}`;
   try {
@@ -454,6 +507,7 @@ export async function compareProviders(ip: string): Promise<ProviderResult[]> {
     lookupIpwhois(cleanIp),
     lookupIpapiIs(cleanIp),
     lookupIpinfo(cleanIp),
+    lookupInternetData(cleanIp),
     lookupRdap(cleanIp),
   ]);
 }

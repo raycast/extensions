@@ -44,6 +44,14 @@ const server = http.createServer((req, res) => {
     }
     return res.end(JSON.stringify(url.pathname.endsWith("/transcript") ? { id: note.id, state: "done", text: "Meet at noon." } : [note]));
   }
+  if (req.method === "DELETE" && url.pathname === "/call/call-id/webcam") {
+    res.statusCode = 204;
+    return res.end();
+  }
+  if (req.method === "DELETE" && url.pathname === "/call/ended-call/webcam") {
+    res.statusCode = 410;
+    return res.end();
+  }
   if (url.pathname === "/recording/calls") return res.end(JSON.stringify([storedCall]));
   if (url.pathname === "/call/call-id/recording") return res.end(fixture);
   if (url.pathname === "/call/call-id")
@@ -105,6 +113,16 @@ test("actual CLI composes recent-call filters in its store request", async () =>
   assert.equal(url.pathname, "/recording/calls");
   assert.equal(url.searchParams.get("participant"), "Riley");
   assert.equal(url.searchParams.get("limit"), "10");
+});
+
+test("actual CLI stops the webcam on the named call and reports an ended call", async () => {
+  const before = requests.length;
+  await tuple.stopWebcam("call-id");
+  assert.deepEqual(
+    requests.slice(before).map((url) => url.pathname),
+    ["/call/call-id/webcam"],
+  );
+  await assert.rejects(tuple.stopWebcam("ended-call"));
 });
 
 test("actual CLI supplies operating guides rather than bootstrap pointers alone", async () => {

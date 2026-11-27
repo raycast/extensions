@@ -5,7 +5,7 @@ import { serializeEvent } from "./lib/events";
 import { getCalendarClient, searchContacts, withGoogleAPIs } from "./lib/google";
 
 type Input = {
-  /** The URI of a person or event selected from the Contacts or Events mention search. */
+  /** URI of a person or event selected from Contacts or Events mention search. */
   uri: string;
 };
 

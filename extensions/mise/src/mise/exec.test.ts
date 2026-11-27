@@ -33,6 +33,20 @@ describe("miseJson", () => {
   });
 });
 
+describe("miseJson okCodes", () => {
+  const location: MiseLocation = { path: "/bin/sh", env };
+  const exitWith = (code: number) => ["-c", `echo '{"found":true}'; exit ${code}`, "--"];
+
+  it("parses the stdout of a run that exits with an accepted code", async () => {
+    await expect(miseJson(location, exitWith(1), (raw) => raw, { okCodes: [1] })).resolves.toEqual({ found: true });
+  });
+
+  it("still rejects every other non-zero exit", async () => {
+    await expect(miseJson(location, exitWith(2), (raw) => raw, { okCodes: [1] })).rejects.toThrow(/exited with 2/);
+    await expect(miseJson(location, exitWith(1), (raw) => raw)).rejects.toThrow(/exited with 1/);
+  });
+});
+
 describe("observeCommands", () => {
   afterEach(() => observeCommands(undefined));
 

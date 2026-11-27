@@ -43,11 +43,9 @@ type Input = {
   timeMax: string;
 };
 
-/**
- * Automatically includes the current user in the list of attendees.
- */
 const tool = async (input: Input) => {
   const currentUser = await getCurrentUser();
+  if (!currentUser.email) throw new Error("Could not determine the current user's calendar email.");
   const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
   if (invalidEntries.length > 0) {
     throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);

@@ -1865,3 +1865,327 @@ export async function createCloudSqlBackupRun(
   const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}/backupRuns`;
   return gcpPost<CloudSqlOperation>(gcloudPath, url, description ? { description } : {});
 }
+
+// ============================================================================
+// Artifact Registry API
+// ============================================================================
+
+export const ARTIFACT_REGISTRY_API = "https://artifactregistry.googleapis.com/v1";
+
+/** Guards against a malformed response looping forever; far above any realistic page count. */
+export const ARTIFACT_REGISTRY_MAX_PAGES = 50;
+
+export interface ArtifactRegistryListResult<T> {
+  items: T[];
+  /** True when the page cap was reached while a nextPageToken was still outstanding. */
+  truncated: boolean;
+}
+
+export interface ArtifactRepositoryListResult extends ArtifactRegistryListResult<ArtifactRepository> {
+  /** Locations that failed to load during multi-region fan-out (partial failure). */
+  failedLocations: string[];
+}
+
+export interface ArtifactRepository {
+  /** projects/{project}/locations/{location}/repositories/{repo} */
+  name: string;
+  format: string;
+  description?: string;
+  labels?: Record<string, string>;
+  createTime?: string;
+  updateTime?: string;
+  kmsKeyName?: string;
+  mode?: string;
+  sizeBytes?: string;
+  registryUri?: string;
+  cleanupPolicies?: Record<string, { id?: string; action?: string }>;
+  cleanupPolicyDryRun?: boolean;
+}
+
+export interface ArtifactDockerImage {
+  /** projects/{project}/locations/{location}/repositories/{repo}/dockerImages/{image}@sha256:{hash} */
+  name: string;
+  /** Full pull URI by digest: {location}-docker.pkg.dev/{project}/{repo}/{image}@sha256:{hash} */
+  uri: string;
+  tags?: string[];
+  imageSizeBytes?: string;
+  uploadTime?: string;
+  mediaType?: string;
+  buildTime?: string;
+  updateTime?: string;
+}
+
+export interface ArtifactPackage {
+  /** projects/{project}/locations/{location}/repositories/{repo}/packages/{package} */
+  name: string;
+  displayName?: string;
+  createTime?: string;
+  updateTime?: string;
+  annotations?: Record<string, string>;
+}
+
+export interface ArtifactPackageVersion {
+  /** projects/{project}/locations/{location}/repositories/{repo}/packages/{package}/versions/{version} */
+  name: string;
+  description?: string;
+  createTime?: string;
+  updateTime?: string;
+  relatedTags?: Array<{ name: string; version?: string }>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ArtifactRegistryOperation {
+  name?: string;
+  done?: boolean;
+  error?: {
+    code?: number;
+    message?: string;
+  };
+}
+
+const ARTIFACT_REGISTRY_CONCURRENCY = 12;
+
+/**
+ * Encodes each segment of an Artifact Registry resource name so characters like `:`, `+`, `#`, `?`
+ * (common in Maven/APT/YUM/Docker IDs) are safely percent-encoded without double-encoding existing
+ * `%XX` escapes returned by the API (e.g. `%2F` for scoped npm/Go or nested Docker image names).
+ */
+function encodeArtifactResourcePath(resourceName: string): string {
+  return resourceName
+    .split("/")
+    .map((segment) =>
+      segment
+        .split(/(%[0-9A-Fa-f]{2})/)
+        .map((part, index) => (index % 2 === 1 ? part : encodeURIComponent(part)))
+        .join(""),
+    )
+    .join("/");
+}
+
+export interface ArtifactLocation {
+  name: string;
+  locationId: string;
+  displayName?: string;
+}
+
+/**
+ * Lists all Artifact Registry locations available for a project.
+ */
+export async function listArtifactLocations(gcloudPath: string, projectId: string): Promise<string[]> {
+  const locations: string[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
+
+  do {
+    const params = new URLSearchParams({ pageSize: "100" });
+    if (pageToken) params.set("pageToken", pageToken);
+    const url = `${ARTIFACT_REGISTRY_API}/projects/${encodeURIComponent(projectId)}/locations?${params.toString()}`;
+    const response = await gcpFetch<{ locations?: ArtifactLocation[]; nextPageToken?: string }>(gcloudPath, url);
+
+    for (const loc of response.locations || []) {
+      if (loc.locationId) {
+        locations.push(loc.locationId);
+      }
+    }
+    pageToken = response.nextPageToken;
+    pages += 1;
+  } while (pageToken && pages < ARTIFACT_REGISTRY_MAX_PAGES);
+
+  return locations;
+}
+
+async function listArtifactRepositoriesInLocation(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  options?: { pageSize?: number },
+): Promise<ArtifactRegistryListResult<ArtifactRepository>> {
+  const paginate = !options?.pageSize;
+  const repositories: ArtifactRepository[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
+
+  do {
+    const params = new URLSearchParams();
+    params.set("pageSize", (options?.pageSize ?? 100).toString());
+    if (pageToken) params.set("pageToken", pageToken);
+    const url = `${ARTIFACT_REGISTRY_API}/projects/${encodeURIComponent(projectId)}/locations/${encodeURIComponent(location)}/repositories?${params.toString()}`;
+    const response = await gcpFetch<{ repositories?: ArtifactRepository[]; nextPageToken?: string }>(gcloudPath, url);
+
+    repositories.push(...(response.repositories || []));
+    pageToken = paginate ? response.nextPageToken : undefined;
+    pages += 1;
+  } while (pageToken && pages < ARTIFACT_REGISTRY_MAX_PAGES);
+
+  return { items: repositories, truncated: Boolean(pageToken) };
+}
+
+/**
+ * Lists Artifact Registry repositories across all supported locations (or a single `location`).
+ * Artifact Registry v1 does not support the `locations/-` wildcard on repositories.list,
+ * so multi-region listing enumerates `projects/{project}/locations` and fans out with bounded concurrency.
+ */
+export async function listArtifactRepositories(
+  gcloudPath: string,
+  projectId: string,
+  options?: { location?: string; pageSize?: number },
+): Promise<ArtifactRepositoryListResult> {
+  if (options?.location) {
+    const result = await listArtifactRepositoriesInLocation(gcloudPath, projectId, options.location, options);
+    return { ...result, failedLocations: [] };
+  }
+
+  const locations = await listArtifactLocations(gcloudPath, projectId);
+  if (locations.length === 0) {
+    return { items: [], truncated: false, failedLocations: [] };
+  }
+
+  const repositories: ArtifactRepository[] = [];
+  const failedLocations: string[] = [];
+  let truncated = false;
+  let succeededCount = 0;
+  let firstError: unknown = null;
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < locations.length) {
+      const location = locations[nextIndex++];
+      try {
+        const result = await listArtifactRepositoriesInLocation(gcloudPath, projectId, location, options);
+        repositories.push(...result.items);
+        if (result.truncated) truncated = true;
+        succeededCount += 1;
+      } catch (err) {
+        failedLocations.push(location);
+        if (!firstError) firstError = err;
+      }
+    }
+  }
+
+  const workerCount = Math.min(ARTIFACT_REGISTRY_CONCURRENCY, locations.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+
+  if (succeededCount === 0 && firstError) {
+    throw firstError;
+  }
+
+  repositories.sort((a, b) => a.name.localeCompare(b.name));
+  failedLocations.sort((a, b) => a.localeCompare(b));
+  return { items: repositories, truncated, failedLocations };
+}
+
+export async function listArtifactDockerImages(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  repository: string,
+): Promise<ArtifactRegistryListResult<ArtifactDockerImage>> {
+  const images: ArtifactDockerImage[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
+
+  do {
+    const params = new URLSearchParams({ pageSize: "100" });
+    if (pageToken) params.set("pageToken", pageToken);
+    const url = `${ARTIFACT_REGISTRY_API}/projects/${encodeURIComponent(projectId)}/locations/${encodeURIComponent(location)}/repositories/${encodeURIComponent(repository)}/dockerImages?${params.toString()}`;
+    const response = await gcpFetch<{ dockerImages?: ArtifactDockerImage[]; nextPageToken?: string }>(gcloudPath, url);
+
+    images.push(...(response.dockerImages || []));
+    pageToken = response.nextPageToken;
+    pages += 1;
+  } while (pageToken && pages < ARTIFACT_REGISTRY_MAX_PAGES);
+
+  return { items: images, truncated: Boolean(pageToken) };
+}
+
+export async function listArtifactPackages(
+  gcloudPath: string,
+  projectId: string,
+  location: string,
+  repository: string,
+): Promise<ArtifactRegistryListResult<ArtifactPackage>> {
+  const packages: ArtifactPackage[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
+
+  do {
+    const params = new URLSearchParams({ pageSize: "100" });
+    if (pageToken) params.set("pageToken", pageToken);
+    const url = `${ARTIFACT_REGISTRY_API}/projects/${encodeURIComponent(projectId)}/locations/${encodeURIComponent(location)}/repositories/${encodeURIComponent(repository)}/packages?${params.toString()}`;
+    const response = await gcpFetch<{ packages?: ArtifactPackage[]; nextPageToken?: string }>(gcloudPath, url);
+
+    packages.push(...(response.packages || []));
+    pageToken = response.nextPageToken;
+    pages += 1;
+  } while (pageToken && pages < ARTIFACT_REGISTRY_MAX_PAGES);
+
+  return { items: packages, truncated: Boolean(pageToken) };
+}
+
+export async function listArtifactPackageVersions(
+  gcloudPath: string,
+  packageResourceName: string,
+): Promise<ArtifactRegistryListResult<ArtifactPackageVersion>> {
+  const versions: ArtifactPackageVersion[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
+  const encodedPath = encodeArtifactResourcePath(packageResourceName);
+
+  do {
+    const params = new URLSearchParams({ pageSize: "100", view: "FULL" });
+    if (pageToken) params.set("pageToken", pageToken);
+    const url = `${ARTIFACT_REGISTRY_API}/${encodedPath}/versions?${params.toString()}`;
+    const response = await gcpFetch<{ versions?: ArtifactPackageVersion[]; nextPageToken?: string }>(gcloudPath, url);
+
+    versions.push(...(response.versions || []));
+    pageToken = response.nextPageToken;
+    pages += 1;
+  } while (pageToken && pages < ARTIFACT_REGISTRY_MAX_PAGES);
+
+  return { items: versions, truncated: Boolean(pageToken) };
+}
+
+export async function getArtifactOperation(
+  gcloudPath: string,
+  operationName: string,
+): Promise<ArtifactRegistryOperation> {
+  const encodedPath = encodeArtifactResourcePath(operationName);
+  const url = `${ARTIFACT_REGISTRY_API}/${encodedPath}`;
+  return gcpFetch<ArtifactRegistryOperation>(gcloudPath, url);
+}
+
+export async function deleteArtifactVersion(
+  gcloudPath: string,
+  versionResourceName: string,
+  force: boolean = true,
+): Promise<{ done: boolean; timedOut: boolean }> {
+  const qs = force ? "?force=true" : "";
+  const encodedPath = encodeArtifactResourcePath(versionResourceName);
+  const url = `${ARTIFACT_REGISTRY_API}/${encodedPath}${qs}`;
+  let operation = await gcpDelete<ArtifactRegistryOperation>(gcloudPath, url);
+
+  const throwIfOperationFailed = (op: ArtifactRegistryOperation) => {
+    if (op.error) {
+      throw new Error(op.error.message || `Operation failed (code ${op.error.code ?? "unknown"})`);
+    }
+  };
+
+  throwIfOperationFailed(operation);
+  if (operation.done || !operation.name) {
+    return { done: true, timedOut: false };
+  }
+
+  // Poll the long-running operation up to 15s so we don't report success before deletion finishes.
+  const operationName = operation.name;
+  const deadline = Date.now() + 15000;
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 750));
+    operation = await getArtifactOperation(gcloudPath, operationName);
+    throwIfOperationFailed(operation);
+    if (operation.done) {
+      return { done: true, timedOut: false };
+    }
+  }
+
+  return { done: false, timedOut: true };
+}

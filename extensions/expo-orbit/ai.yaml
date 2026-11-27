@@ -1,0 +1,156 @@
+instructions: |
+  Expo Orbit runs iOS simulators, Android emulators, and connected devices for Expo and React Native development.
+
+  - Call get-devices before acting on a device unless the user gave its exact id. Pass a device's `id` to the other
+    tools. If several devices match what the user said, ask which one they mean.
+  - Devices of type "Physical Device" are real iPhones, iPads, or Android phones. They can't be launched or stopped,
+    but builds and updates can be opened on them.
+  - The user pins the devices they use most. When a request fits several devices, prefer a pinned one. Ignore hidden
+    devices unless the user names one.
+  - When the user doesn't say which device to open something on, choose a running device on the build's platform,
+    preferring a pinned one, and pass its `id`.
+  - open-on-device takes EAS Build install links (expo.dev/artifacts/…), EAS Update links (exp://u.expo.dev/… or
+    https://u.expo.dev/…), Snack links (exp://…), expo-orbit:// links, and paths of .apk, .app, .ipa, or .tar.gz files.
+    An .apk only runs on Android, and .app, .ipa, and .tar.gz builds only run on Apple devices.
+  - If a tool says Expo Orbit isn't installed, tell the user to install it from https://expo.dev/orbit or with
+    `brew install --cask expo-orbit`.
+  - If get-devices returns problems, such as a missing Android SDK, pass the message on to the user.
+evals:
+  - input: "@expo-orbit which simulators are running?"
+    mocks:
+      get-devices:
+        devices:
+          - id: 4C1F6E52-8E1B-4D93-9C55-3B7A0E2F9A10
+            name: iPhone 17 Pro
+            os: iOS
+            osVersion: "26.1"
+            type: Simulator
+            status: Running
+            isRunning: true
+          - id: 9B2D4A71-1C3E-4F5A-8B6D-2E7F9A0C1D34
+            name: iPad Air 11-inch (M3)
+            os: iOS
+            osVersion: "26.1"
+            type: Simulator
+            status: Shut Down
+            isRunning: false
+          - id: Pixel_9_Pro_API_35
+            name: Pixel 9 Pro API 35
+            os: Android
+            type: Emulator
+            status: Running
+            isRunning: true
+        problems: []
+    expected:
+      - callsTool: get-devices
+      - includes: "iPhone 17 Pro"
+      - includes: "Pixel 9 Pro"
+  - input: "@expo-orbit boot the iPad simulator"
+    mocks:
+      get-devices:
+        devices:
+          - id: 4C1F6E52-8E1B-4D93-9C55-3B7A0E2F9A10
+            name: iPhone 17 Pro
+            os: iOS
+            osVersion: "26.1"
+            type: Simulator
+            status: Shut Down
+            isRunning: false
+          - id: 9B2D4A71-1C3E-4F5A-8B6D-2E7F9A0C1D34
+            name: iPad Air 11-inch (M3)
+            os: iOS
+            osVersion: "26.1"
+            type: Simulator
+            status: Shut Down
+            isRunning: false
+        problems: []
+      launch-device:
+        device: iPad Air 11-inch (M3)
+        result: launched
+    expected:
+      - callsTool:
+          name: launch-device
+          arguments:
+            device: 9B2D4A71-1C3E-4F5A-8B6D-2E7F9A0C1D34
+  - input: "@expo-orbit shut down the Pixel emulator"
+    mocks:
+      get-devices:
+        devices:
+          - id: Pixel_9_Pro_API_35
+            name: Pixel 9 Pro API 35
+            os: Android
+            type: Emulator
+            status: Running
+            isRunning: true
+        problems: []
+      stop-device:
+        device: Pixel 9 Pro API 35
+        result: shut down
+    expected:
+      - callsTool:
+          name: stop-device
+          arguments:
+            device: Pixel_9_Pro_API_35
+  - input: "@expo-orbit open exp://u.expo.dev/0f3c1a2b-4d5e-6f70-8192-a3b4c5d6e7f8?channel-name=preview on the iPhone simulator"
+    mocks:
+      get-devices:
+        devices:
+          - id: 4C1F6E52-8E1B-4D93-9C55-3B7A0E2F9A10
+            name: iPhone 17 Pro
+            os: iOS
+            osVersion: "26.1"
+            type: Simulator
+            status: Running
+            isRunning: true
+          - id: Pixel_9_Pro_API_35
+            name: Pixel 9 Pro API 35
+            os: Android
+            type: Emulator
+            status: Shut Down
+            isRunning: false
+        problems: []
+      open-on-device:
+        device: iPhone 17 Pro
+        opened: Update
+    expected:
+      - callsTool:
+          name: open-on-device
+          arguments:
+            url: exp://u.expo.dev/0f3c1a2b-4d5e-6f70-8192-a3b4c5d6e7f8?channel-name=preview
+            device: 4C1F6E52-8E1B-4D93-9C55-3B7A0E2F9A10
+  - input: "@expo-orbit install https://expo.dev/artifacts/eas/aB3dE5fG7hJ9kL1mN3pQ5r.apk"
+    mocks:
+      get-devices:
+        devices:
+          - id: 4C1F6E52-8E1B-4D93-9C55-3B7A0E2F9A10
+            name: iPhone 17 Pro
+            os: iOS
+            osVersion: "26.1"
+            type: Simulator
+            status: Running
+            isRunning: true
+            pinned: true
+          - id: Pixel_8_API_35
+            name: Pixel 8 API 35
+            os: Android
+            type: Emulator
+            status: Shut Down
+            isRunning: false
+            pinned: false
+          - id: Pixel_9_Pro_API_35
+            name: Pixel 9 Pro API 35
+            os: Android
+            type: Emulator
+            status: Running
+            isRunning: true
+            pinned: false
+        problems: []
+      open-on-device:
+        device: Pixel 9 Pro API 35
+        opened: Build
+    expected:
+      - callsTool:
+          name: open-on-device
+          arguments:
+            url: https://expo.dev/artifacts/eas/aB3dE5fG7hJ9kL1mN3pQ5r.apk
+            device: Pixel_9_Pro_API_35

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "usb-devices",
+  "title": "USB Devices",
+  "description": "List every connected USB device with glanceable tags for type, link speed, power, drivers, volumes and serial ports.",
+  "icon": "extension-icon.png",
+  "author": "dimik",
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "usb-devices",
+      "title": "USB Devices",
+      "description": "Browse connected USB devices by type or by hub, with a detail pane for each one.",
+      "mode": "view",
+      "keywords": [
+        "usb",
+        "hub",
+        "ioreg",
+        "peripherals",
+        "midi",
+        "serial"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "autoRefresh",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Live Updates",
+      "label": "Refresh every 2 seconds while open",
+      "description": "Picks up plugged and unplugged devices without pressing \u2318R."
+    },
+    {
+      "name": "showBuiltIn",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show built-in devices",
+      "description": "Include internal devices such as the keyboard, trackpad and camera.",
+      "title": "Built-in Devices"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

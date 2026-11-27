@@ -3,6 +3,11 @@ import { describe, it } from "node:test";
 import {
   canSignOut,
   classifyCliError,
+  cliModelCacheDir,
+  pathsOverlap,
+  indexGap,
+  gapIsSkippedEntries,
+  buildDoctorReport,
   cleanBody,
   compareVersions,
   entryTitle,
@@ -13,6 +18,9 @@ import {
   timeZoneOrUndefined,
   isLegacyCliTarget,
   parseCliVersion,
+  parseNpmLatest,
+  installExitCode,
+  updateAvailable,
   parseSyncProgress,
   plural,
   unsavedRemainder,
@@ -29,11 +37,134 @@ describe("parseCliVersion", () => {
   });
 });
 
+describe("cliModelCacheDir", () => {
+  const home = "/Users/someone";
+  it("resolves a relative override against the folder the CLI runs in", () => {
+    assert.equal(
+      cliModelCacheDir({ FASTEMBED_CACHE_DIR: "search-model" }, "darwin", home, "/support"),
+      "/support/search-model",
+    );
+  });
+  it("uses HF_HOME first, then FASTEMBED_CACHE_DIR, as the CLI does", () => {
+    assert.equal(cliModelCacheDir({ HF_HOME: "/hf", FASTEMBED_CACHE_DIR: "/fe" }, "darwin", home), "/hf");
+    assert.equal(cliModelCacheDir({ FASTEMBED_CACHE_DIR: "/fe" }, "darwin", home), "/fe");
+  });
+  it("falls back to the platform's per-user cache folder", () => {
+    assert.equal(cliModelCacheDir({}, "darwin", home), "/Users/someone/Library/Caches/dayone-cli/models");
+    assert.equal(cliModelCacheDir({}, "linux", home), "/Users/someone/.cache/dayone-cli/models");
+    assert.equal(cliModelCacheDir({ XDG_CACHE_HOME: "/xdg" }, "linux", home), "/xdg/dayone-cli/models");
+  });
+  it("ignores empty variables", () => {
+    assert.equal(
+      cliModelCacheDir({ HF_HOME: "", FASTEMBED_CACHE_DIR: "" }, "darwin", home),
+      "/Users/someone/Library/Caches/dayone-cli/models",
+    );
+  });
+});
+
+describe("pathsOverlap", () => {
+  it("is true for the same folder, or one inside the other", () => {
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model/"), true);
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model/hf"), true);
+    assert.equal(pathsOverlap("/a", "/a/search-model"), true);
+  });
+  it("is false for siblings that only share a prefix", () => {
+    assert.equal(pathsOverlap("/a/search-model", "/a/search-model-2"), false);
+    assert.equal(pathsOverlap("/a/search-model", "/Users/someone/Library/Caches/dayone-cli/models"), false);
+  });
+});
+
+describe("indexGap", () => {
+  it("counts missing and stale embeddings from the CLI's embedding_index check", () => {
+    assert.equal(indexGap({ missing_embeddings: 1, stale_embeddings: 2, inspection_complete: true }), 3);
+    assert.equal(indexGap({ missing_embeddings: 0, stale_embeddings: 0, inspection_complete: true }), 0);
+  });
+  it("is null when the CLI didn't inspect the index or reported no numbers", () => {
+    assert.equal(indexGap(undefined), null);
+    assert.equal(indexGap({ missing_embeddings: 1, inspection_complete: false }), null);
+    assert.equal(indexGap({ inspection_complete: true }), null);
+  });
+});
+
+describe("gapIsSkippedEntries", () => {
+  const rebuild = { finishedAt: 1_000_000, skipped: 1 };
+  it("is true when the last rebuild skipped at least as many entries as are missing, with no sync since", () => {
+    assert.equal(gapIsSkippedEntries(1, rebuild, 900_000), true);
+    assert.equal(gapIsSkippedEntries(1, rebuild, null), true);
+  });
+  it("is false when more are missing than the rebuild skipped", () => {
+    assert.equal(gapIsSkippedEntries(2, rebuild, 900_000), false);
+  });
+  it("is false after a sync since the rebuild, which can bring entries the rebuild never saw", () => {
+    assert.equal(gapIsSkippedEntries(1, rebuild, 1_100_000), false);
+  });
+  it("is false with no finished rebuild", () => {
+    assert.equal(gapIsSkippedEntries(1, null, null), false);
+  });
+});
+
+describe("buildDoctorReport", () => {
+  const home = "/Users/someone";
+  it("keeps the CLI's report as it is and adds the extension's own checks", () => {
+    const cli = { status: "attention", checks: [{ check: "config", status: "pass" }] };
+    const report = buildDoctorReport(cli, { search: { model_downloaded: true } }, home) as Record<string, unknown>;
+    assert.equal(report.status, "attention");
+    assert.deepEqual(report.checks, cli.checks);
+    assert.deepEqual(report.raycast_extension, { search: { model_downloaded: true } });
+  });
+  it("shows the home folder as ~ in every string, including nested ones", () => {
+    const report = buildDoctorReport(
+      undefined,
+      { cli: { path: "/Users/someone/.nvm/bin/dayone" }, problems: ["failed at /Users/someone/x"] },
+      home,
+    ) as { raycast_extension: { cli: { path: string }; problems: string[] } };
+    assert.equal(report.raycast_extension.cli.path, "~/.nvm/bin/dayone");
+    assert.deepEqual(report.raycast_extension.problems, ["failed at ~/x"]);
+  });
+  it("still reports the extension when the CLI's doctor didn't run", () => {
+    const report = buildDoctorReport(undefined, { a: 1 }, home) as Record<string, unknown>;
+    assert.equal(report.cli_doctor, "unavailable");
+    assert.deepEqual(report.raycast_extension, { a: 1 });
+  });
+});
+
 describe("compareVersions", () => {
   it("compares numerically, not as text", () => {
     assert.ok(compareVersions("0.22.1", "0.9.0") > 0);
     assert.equal(compareVersions("0.22.1", "0.22.1"), 0);
     assert.ok(compareVersions("0.21.9", "0.22.1") < 0);
+  });
+});
+
+describe("parseNpmLatest", () => {
+  it("reads the version from the registry's latest document", () => {
+    assert.equal(parseNpmLatest({ name: "@dayone/cli", version: "0.23.1" }), "0.23.1");
+  });
+  it("rejects anything that isn't a plain release version", () => {
+    assert.equal(parseNpmLatest({ version: "0.24.0-rc.1" }), null);
+    assert.equal(parseNpmLatest({ version: 23 }), null);
+    assert.equal(parseNpmLatest({ error: "Not found" }), null);
+    assert.equal(parseNpmLatest(null), null);
+  });
+});
+
+describe("installExitCode", () => {
+  it("reads the exit code the install command appends", () => {
+    assert.equal(installExitCode("added 2 packages in 4s\n__dayone_install_exit=0\n"), 0);
+    assert.equal(installExitCode("__dayone_install_exit=1\n"), 1);
+  });
+  it("is null while the install is still running, even if the shell profile printed something", () => {
+    assert.equal(installExitCode(""), null);
+    assert.equal(installExitCode("Welcome back!\n"), null);
+  });
+});
+
+describe("updateAvailable", () => {
+  it("is the newer version only when npm has one", () => {
+    assert.equal(updateAvailable("0.22.1", "0.23.1"), "0.23.1");
+    assert.equal(updateAvailable("0.23.1", "0.23.1"), null);
+    assert.equal(updateAvailable("0.24.0", "0.23.1"), null);
+    assert.equal(updateAvailable("0.22.1", null), null);
   });
 });
 
