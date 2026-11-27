@@ -7,6 +7,15 @@ export interface Task {
   parent?: string;
   position?: string;
   notes?: string;
+  webViewLink?: string;
+  assignmentInfo?: AssignmentInfo;
+}
+
+export interface AssignmentInfo {
+  linkToTask?: string;
+  surfaceType?: "SURFACE_TYPE_UNSPECIFIED" | "DOCUMENT" | "SPACE";
+  driveResourceInfo?: { driveFileId?: string; resourceKey?: string };
+  spaceInfo?: { space?: string };
 }
 
 export interface TaskList {
