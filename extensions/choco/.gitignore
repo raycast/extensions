@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.test-dist/
+.raycast/
+*.log
+.DS_Store
+Thumbs.db

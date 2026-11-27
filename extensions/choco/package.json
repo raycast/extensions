@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "choco",
+  "title": "Chocolatey",
+  "description": "Search, install, upgrade, pin, and uninstall Chocolatey packages on Windows, manage sources, and export package manifests.",
+  "icon": "icon.png",
+  "author": "user_fb2826b29bbab02dfe18",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "chocoPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Chocolatey Executable Path",
+      "description": "Custom path to choco.exe. Leave empty to auto-detect via ChocolateyInstall or PATH.",
+      "placeholder": "C:\\ProgramData\\chocolatey\\bin\\choco.exe"
+    },
+    {
+      "name": "elevationMethod",
+      "type": "dropdown",
+      "required": true,
+      "default": "uac",
+      "title": "Elevation Method",
+      "description": "How administrative Chocolatey commands (install, upgrade, uninstall, pin, sources) are executed.",
+      "data": [
+        {
+          "title": "Windows UAC Prompt (PowerShell)",
+          "value": "uac"
+        },
+        {
+          "title": "gsudo (Inline Elevation)",
+          "value": "gsudo"
+        },
+        {
+          "title": "Open in Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "No Elevation (Non-Admin Install)",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "confirmAutomatically",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Confirm prompts automatically (-y)",
+      "description": "Pass -y to install, upgrade, and uninstall commands so they run without interactive prompts."
+    },
+    {
+      "name": "useCommunityApi",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Use Chocolatey Community OData API for search",
+      "description": "Fetch rich package metadata, icons, and download counts quickly from community.chocolatey.org. Disable to query local/private sources via choco search."
+    },
+    {
+      "name": "includePrerelease",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Include prerelease packages",
+      "description": "Include prerelease package versions in search results."
+    },
+    {
+      "name": "showPackageIcons",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show package icons",
+      "description": "Display package icons from Chocolatey repository metadata."
+    }
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Packages",
+      "description": "Search Chocolatey packages and install them",
+      "mode": "view"
+    },
+    {
+      "name": "installed",
+      "title": "Show Installed",
+      "description": "List installed and pinned Chocolatey packages",
+      "mode": "view"
+    },
+    {
+      "name": "upgrades",
+      "title": "Show Upgrades",
+      "description": "Review outdated Chocolatey packages and upgrade them",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade-all",
+      "title": "Upgrade All Packages",
+      "description": "Upgrade all non-pinned Chocolatey packages",
+      "mode": "no-view"
+    },
+    {
+      "name": "sources",
+      "title": "Manage Sources",
+      "description": "Add, enable, disable, and remove Chocolatey package sources",
+      "mode": "view"
+    },
+    {
+      "name": "export",
+      "title": "Export Packages",
+      "description": "Export installed Chocolatey packages to packages.config XML",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "test": "node -e \"require('esbuild').buildSync({entryPoints:['test/parser.test.ts'],bundle:true,platform:'node',format:'cjs',outfile:'.test-dist/parser.test.cjs'})\" && node --test .test-dist/parser.test.cjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "fast-xml-parser": "^5.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.7.0"
+  }
+}
