@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "multi-workspace-status-for-slack",
+  "title": "Multi-Workspace Status for Slack",
+  "description": "Set your status once and apply it across all your selected Slack workspaces.",
+  "icon": "extension-icon.png",
+  "author": "marcusthiele",
+  "license": "MIT",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "set-status",
+      "title": "Set Status",
+      "subtitle": "Slack",
+      "description": "Set your status in the selected Slack workspaces and manage your connected workspaces.",
+      "mode": "view"
+    },
+    {
+      "name": "clear-status",
+      "title": "Clear Status",
+      "subtitle": "Slack",
+      "description": "Clear your status in the Slack workspaces you selected last.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
