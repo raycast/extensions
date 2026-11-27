@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "geneh",
+  "title": "Geneh",
+  "description": "Egypt's bank exchange rates, gold and silver prices, with the cheapest place to buy and the best place to sell.",
+  "icon": "icon.png",
+  "author": "tarek_elmadady",
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "egypt",
+    "egp",
+    "exchange rate",
+    "dollar",
+    "gold",
+    "silver",
+    "جنيه",
+    "دولار",
+    "ذهب"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rates",
+      "title": "Exchange Rates",
+      "subtitle": "Geneh",
+      "description": "Every currency with the cheapest bank to buy it and the best bank to sell it.",
+      "mode": "view"
+    },
+    {
+      "name": "gold",
+      "title": "Gold and Silver Prices",
+      "subtitle": "Geneh",
+      "description": "Gold and silver prices per gram in Egypt, every karat.",
+      "mode": "view"
+    },
+    {
+      "name": "convert",
+      "title": "Convert to Egyptian Pounds",
+      "subtitle": "Geneh",
+      "description": "Type an amount such as 100 USD to see it in Egyptian pounds.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "amount",
+          "placeholder": "100 USD",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lang",
+      "title": "Language",
+      "description": "The language prices and names are shown in.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "العربية",
+          "value": "ar"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test test/*.test.mts"
+  }
+}
