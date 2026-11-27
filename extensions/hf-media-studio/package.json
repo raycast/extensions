@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hf-media-studio",
+  "title": "HF Media Studio",
+  "description": "Generate and edit images, audio, and video, and explore public Hugging Face Spaces with a native media toolbox.",
+  "icon": "icon.png",
+  "author": "canibeyours2001-ui",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "generate-image",
+      "title": "HF Generate Image",
+      "description": "Generate images with FLUX or Z-Image",
+      "mode": "view"
+    },
+    {
+      "name": "generate-audio",
+      "title": "HF Generate Speech",
+      "description": "Generate short English speech using Kokoro CPU",
+      "mode": "view"
+    },
+    {
+      "name": "generate-music",
+      "title": "HF Generate Music or Sound Effects",
+      "description": "Generate music and effects with Stable Audio 3",
+      "mode": "view"
+    },
+    {
+      "name": "remove-background",
+      "title": "HF Remove Background",
+      "description": "Remove image background using BiRefNet",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "HF Media History",
+      "description": "Browse downloaded media",
+      "mode": "view"
+    },
+    {
+      "name": "ai-toolbox",
+      "title": "HF AI Toolbox",
+      "description": "Discover and run public Hugging Face media Space APIs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Primary Hugging Face Token",
+      "description": "Use a dedicated, least-privilege Hugging Face token. Enable billing read only if you want quota reporting.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "output",
+      "title": "Output Folder",
+      "description": "Leave empty to use Downloads/HF Media Studio",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "test": "node --test tests/*.test.cjs",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

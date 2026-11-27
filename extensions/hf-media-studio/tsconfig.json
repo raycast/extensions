@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2022","module":"CommonJS","moduleResolution":"Node","jsx":"react-jsx","strict":true,"esModuleInterop":true,"skipLibCheck":true,"lib":["ES2022","DOM","DOM.Iterable"],"allowJs":true,"checkJs":false,"noEmit":true},"include":["src/**/*"]}
