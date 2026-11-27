@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ChatAcademia MCP Server] - {PR_MERGE_DATE}
+
+- Add ChatAcademia to the official registry: the AI research assistant for academics (paper and grant search, citation verification, research gaps, data extraction, mock peer review). Hosted Streamable HTTP server at https://api.chatacademia.com/mcp/raycast with OAuth 2.1 sign-in (dynamic client registration, PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
