@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [Fix Unit Rollover] - {PR_MERGE_DATE}
+
+- Show sizes and rates that round up to 1024 in the next unit ("1 MB/s" instead of "1024 KB/s")
+
 ## [Copy System Info] - 2026-10-24
 
 - Add a Copy Info submenu (⌘⇧C) on System Info to copy the macOS version, hostname, model, chip, serial number and other values
