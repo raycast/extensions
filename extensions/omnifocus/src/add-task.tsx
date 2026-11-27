@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, usePromise } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import { addTask, AddTaskResult } from "./lib/api/add-task";
 import { getProjects } from "./lib/api/list-projects";
 import { listTags } from "./lib/api/list-tags";
@@ -8,6 +9,8 @@ import { CreateOmniFocusTaskOptions } from "./lib/types/task";
 
 interface FormValues extends CreateOmniFocusTaskOptions {
   tagsToCreate?: string;
+  /** Drafts saved before projects were matched by id store the project's name here instead of `projectId`. */
+  projectName?: string;
 }
 
 export default function Command(props: LaunchProps<{ draftValues: FormValues }>) {
@@ -49,18 +52,15 @@ function getWarnings(result: AddTaskResult) {
 }
 
 function AddTaskForm({ draftValues }: { draftValues?: FormValues }) {
+  // failureToastOptions only changes the title, keeping the built-in toast's Retry action.
   const { isLoading: tagsLoading, data: tags } = usePromise(listTags, [], {
-    onError: async (error) => {
-      await showFailureToast(error, { title: "Couldn't load your OmniFocus tags" });
-    },
+    failureToastOptions: { title: "Couldn't load your OmniFocus tags" },
   });
   const { isLoading: projectsLoading, data: projects } = usePromise(getProjects, [], {
-    onError: async (error) => {
-      await showFailureToast(error, { title: "Couldn't load your OmniFocus projects" });
-    },
+    failureToastOptions: { title: "Couldn't load your OmniFocus projects" },
   });
 
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
     initialValues: draftValues,
     async onSubmit(values) {
       const { tagsToCreate, ...options } = values;
@@ -96,6 +96,24 @@ function AddTaskForm({ draftValues }: { draftValues?: FormValues }) {
       name: FormValidation.Required,
     },
   });
+
+  // Restore the project selection of a draft saved by an older version, which stored the project's name.
+  // Runs once, after the projects have loaded.
+  const restoredLegacyProject = useRef(false);
+  useEffect(() => {
+    if (restoredLegacyProject.current || !projects) {
+      return;
+    }
+    restoredLegacyProject.current = true;
+    const legacyName = draftValues?.projectName;
+    if (!legacyName || draftValues?.projectId) {
+      return;
+    }
+    const match = projects.find((project) => project.name === legacyName);
+    if (match) {
+      setValue("projectId", match.id);
+    }
+  }, [projects, draftValues, setValue]);
 
   return (
     <Form
