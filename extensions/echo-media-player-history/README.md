@@ -6,7 +6,7 @@ Summon, filter, navigate and resume, all from the keys. This extension brings Ec
 
 ## Requirements
 
-[Echo](https://www.theodorehq.com/echo) for Mac, version 1.0.14 or later, running on the same Mac.
+[Echo](https://www.theodorehq.com/echo) for Mac, a paid app, version 1.0.14 or later, running on the same Mac.
 
 ## Setup
 
