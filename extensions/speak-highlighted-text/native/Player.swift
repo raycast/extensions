@@ -1,39 +1,82 @@
 import AppKit
+import Combine
 import AVFoundation
 import SwiftUI
 
 struct PlayerView: View {
     @ObservedObject var reader: Reader
+    let close: () -> Void
+
+    private var action: (title: String, icon: String) {
+        switch reader.state {
+        case .finished: return ("Replay", "arrow.counterclockwise")
+        case .failed: return ("Retry", "arrow.clockwise")
+        case .paused: return ("Resume", "play.fill")
+        default: return ("Pause", "pause.fill")
+        }
+    }
+
+    private var width: CGFloat {
+        let textWidth = (reader.excerpt as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 16)]).width
+        return min(404, max(reader.state == .downloading ? 380 : 340, ceil(textWidth) + 42))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label(reader.source, systemImage: reader.source == "Clipboard" ? "clipboard" : "text.cursor")
-                Spacer()
-                Text(reader.state.rawValue)
-            }.font(.subheadline).foregroundStyle(.secondary)
-            Text(reader.excerpt).font(.system(size: 16)).lineLimit(3)
-                .frame(maxWidth: .infinity, minHeight: 60, alignment: .topLeading)
-            ProgressView(value: reader.progress).accessibilityLabel("Reading progress")
-            HStack {
+            Text(reader.excerpt)
+                .font(.system(size: 16)).lineSpacing(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+
+            GeometryReader { track in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.primary.opacity(0.10))
+                    Capsule().fill(Color.accentColor.opacity(0.8))
+                        .frame(width: track.size.width * min(1, max(0, reader.progress)))
+                }
+            }.frame(height: 2)
+                .accessibilityElement().accessibilityLabel("Reading progress")
+                .accessibilityValue(reader.progress.formatted(.percent))
+
+            HStack(spacing: 6) {
+                Button { reader.seek(-5) } label: {
+                    Label("Back five seconds", systemImage: "gobackward.5").frame(width: 24, height: 24)
+                }.disabled(!reader.canSeek).keyboardShortcut(.leftArrow, modifiers: []).help("Back 5 seconds (←)")
                 Button(action: reader.toggle) {
-                    Label(reader.state == .finished ? "Replay" : reader.state == .failed ? "Retry" : reader.state == .paused ? "Resume" : "Pause",
-                          systemImage: [.reading, .preparing, .downloading].contains(reader.state) ? "pause.fill" : "play.fill")
-                        .frame(minWidth: 72)
-                }.disabled(reader.state == .downloading).buttonStyle(.borderedProminent).keyboardShortcut(.space, modifiers: []).help("Space")
-                Spacer()
-                Button { reader.changeSpeed(-1) } label: { Image(systemName: "minus").frame(width: 18, height: 16) }
-                    .disabled(reader.step == 2).keyboardShortcut("-", modifiers: []).accessibilityLabel("Speak slower").help("Slower (-)")
-                Text(String(format: "%g×", Double(reader.step) / 4)).monospacedDigit().frame(width: 44)
-                Button { reader.changeSpeed(1) } label: { Image(systemName: "plus").frame(width: 18, height: 16) }
-                    .disabled(reader.step == 8).keyboardShortcut("=", modifiers: []).accessibilityLabel("Speak faster").help("Faster (=)")
-            }
-        }.padding(18).frame(width: 366)
+                    Label(action.title, systemImage: action.icon).frame(width: 24, height: 24)
+                }.disabled(reader.state == .downloading)
+                    .keyboardShortcut(.space, modifiers: []).help(action.title + " (Space)")
+                Button { reader.seek(5) } label: {
+                    Label("Forward five seconds", systemImage: "goforward.5").frame(width: 24, height: 24)
+                }.disabled(!reader.canSeek || reader.state == .finished).keyboardShortcut(.rightArrow, modifiers: []).help("Forward 5 seconds (→)")
+                if reader.state == .preparing || reader.state == .downloading {
+                    Text(reader.state.rawValue).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 4)
+                Button { reader.changeSpeed(-1) } label: {
+                    Label("Speak slower", systemImage: "minus").frame(width: 22, height: 24)
+                }.disabled(reader.step == 2).keyboardShortcut("-", modifiers: []).help("Slower (-)")
+                Text(String(format: "%g×", Double(reader.step) / 4))
+                    .font(.callout.monospacedDigit()).frame(minWidth: 36)
+                Button { reader.changeSpeed(1) } label: {
+                    Label("Speak faster", systemImage: "plus").frame(width: 22, height: 24)
+                }.disabled(reader.step == 8).keyboardShortcut("=", modifiers: []).help("Faster (=)")
+                Divider().frame(height: 12).padding(.horizontal, 2)
+                Button(action: close) {
+                    Label("Close player", systemImage: "xmark").frame(width: 22, height: 24)
+                }.keyboardShortcut("w", modifiers: .command).help("Close player (⌘W)")
+            }.buttonStyle(.borderless).labelStyle(.iconOnly)
+        }
+        .padding(.horizontal, 18).padding(.top, 16).padding(.bottom, 10)
+        .frame(width: width).fixedSize()
+        .ignoresSafeArea()
     }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     let reader = Reader()
     var panel: NSPanel?
+    private var sizing: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         DistributedNotificationCenter.default().addObserver(self, selector: #selector(control(_:)),
@@ -61,10 +104,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 _ = rmdir(dir.path)
             }
             if panel == nil {
-                let window = NSPanel(contentRect: .zero, styleMask: [.titled, .closable, .utilityWindow], backing: .buffered, defer: false)
+                let window = NSPanel(contentRect: .zero, styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: false)
                 window.title = "Speak Text"
-                window.contentView = NSHostingView(rootView: PlayerView(reader: reader))
-                window.setContentSize(window.contentView!.fittingSize)
+                window.titleVisibility = .hidden
+                window.titlebarAppearsTransparent = true
+                window.isMovableByWindowBackground = true
+                for button in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
+                    window.standardWindowButton(button)?.isHidden = true
+                }
+                let view = PlayerView(reader: reader, close: { [weak window] in window?.close() })
+                let host = NSHostingController(rootView: view)
+                host.sizingOptions = []
+                if #available(macOS 13.3, *) { host.safeAreaRegions = [] }
+                window.contentViewController = host
+                let measure = { host.sizeThatFits(in: CGSize(width: 404, height: 2000)) }
+                window.setContentSize(measure())
+                sizing = reader.$excerpt.receive(on: DispatchQueue.main).sink { [weak window] _ in
+                    guard let window else { return }
+                    host.rootView = view
+                    let measured = measure()
+                    let size = CGSize(width: ceil(measured.width), height: ceil(measured.height))
+                    var frame = window.frame
+                    guard frame.size != size else { return }
+                    frame.origin.y = frame.maxY - size.height
+                    frame.size = size
+                    if let screen = window.screen {
+                        frame.origin.x = max(screen.visibleFrame.minX, min(frame.minX, screen.visibleFrame.maxX - size.width))
+                        frame.origin.y = max(screen.visibleFrame.minY, min(frame.minY, screen.visibleFrame.maxY - size.height))
+                    }
+                    window.setFrame(frame, display: true)
+                }
                 window.level = .floating
                 window.hidesOnDeactivate = false
                 window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
@@ -78,7 +147,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     previous.terminate()
                 }
             }
-            reader.load(value, source: url.deletingPathExtension().lastPathComponent)
+            reader.load(value)
             NSApp.activate(ignoringOtherApps: true)
             panel?.makeKeyAndOrderFront(nil)
         } catch {

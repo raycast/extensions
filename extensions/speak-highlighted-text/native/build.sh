@@ -8,7 +8,7 @@ printf '%s  %s\n' b575df36a35db0b384a708b05df968846af8c215ae5e9f3b76d35f31620d0e
 cp native/Player.swift "$stage/main.swift"
 for arch in arm64 x86_64; do
   xcrun clang -O2 -target "$arch-apple-macos13" -I "$stage" -c native/Voice.c -o "$stage/voice.o"
-  xcrun swiftc -O -target "$arch-apple-macos13" "$stage/main.swift" native/Reader.swift native/VoiceWorker.swift -import-objc-header native/Voice.h "$stage/voice.o" -o "$stage/$arch"
+  xcrun swiftc -O -target "$arch-apple-macos13" "$stage/main.swift" native/Reader.swift native/Passages.swift native/VoiceWorker.swift -import-objc-header native/Voice.h "$stage/voice.o" -o "$stage/$arch"
 done
 xcrun lipo -create "$stage/arm64" "$stage/x86_64" -output assets/SpeakPlayer
 codesign --force --sign - assets/SpeakPlayer

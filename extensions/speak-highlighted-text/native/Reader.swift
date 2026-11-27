@@ -4,7 +4,7 @@ import AVFoundation
 final class Reader: NSObject, ObservableObject {
     enum State: String { case downloading = "Downloading voice", preparing = "Preparing", reading = "Reading", paused = "Paused", finished = "Finished", failed = "Couldn’t read" }
     @Published var state = State.preparing
-    @Published var source = "Selection"
+    @Published private(set) var canSeek = false
     @Published var excerpt = ""
     @Published var progress = 0.0
     @Published var step = min(8, max(2, (UserDefaults.standard.object(forKey: "speedStep") as? Int) ?? 4))
@@ -22,10 +22,13 @@ final class Reader: NSObject, ObservableObject {
     private var workers: [VoiceWorker] = []
     private var session = UUID()
     private var ready: [Int: AVAudioPCMBuffer] = [:]
-    private var nextJob = 0
+    private var rendering: Set<Int> = []
+    private var playbackID = UUID()
+    private var ends: [Int64] = []
+    private var origin: Int64 = 0
+    private var parked: Int64 = 0
     private var nextBuffer = 0
     private var frameCounts: [Int: Int64] = [:]
-    private var completedFrames: Int64 = 0
     private var timer: Timer?
 
     override init() {
@@ -36,37 +39,21 @@ final class Reader: NSObject, ObservableObject {
         engine.connect(pitch, to: engine.mainMixerNode, format: format)
     }
 
-    func load(_ value: String, source: String) {
-        stopPlayback()
-        self.source = source
-        chunks = []
-        value.enumerateSubstrings(in: value.startIndex..<value.endIndex, options: .bySentences) { sentence, _, _, _ in
-            var phrase = ""
-            for word in (sentence ?? "").split(whereSeparator: { $0.isWhitespace }) {
-                let limit = self.chunks.count < 2 ? 38 : self.chunks.count < 4 ? 72 : 150
-                if phrase.count + word.count > limit, !phrase.isEmpty { self.chunks.append(phrase); phrase = "" }
-                var remainder = word
-                while remainder.count > 220 {
-                    self.chunks.append(String(remainder.prefix(220)))
-                    remainder = remainder.dropFirst(220)
-                }
-                phrase += (phrase.isEmpty ? "" : " ") + remainder
-            }
-            if !phrase.isEmpty { self.chunks.append(phrase) }
-        }
-        if chunks.isEmpty { chunks = [String(value.prefix(220))] }
+    func load(_ value: String) {
+        chunks = Passages.split(value)
+        guard !chunks.isEmpty else { stopPlayback(); return }
         begin()
     }
 
     private func begin() {
         idleRelease?.invalidate()
+        stopPlayback()
         let rate = max(1, min(1.6, Float(step) / 4))
         if rate != synthesisRate {
             workers.forEach { $0.stop() }
             workers.removeAll()
             synthesisRate = rate
         }
-        resetQueue()
         progress = 0
         excerpt = chunks[0]
         if FileManager.default.fileExists(atPath: voice.path) {
@@ -93,17 +80,20 @@ final class Reader: NSObject, ObservableObject {
         let limit = min(chunks.count, cores >= 4 ? 2 : 1)
         let token = session
         do {
-            while nextJob < chunks.count && nextJob < index + 10 {
+            for number in index..<min(chunks.count, index + 10) {
+                if ready[number] != nil || rendering.contains(number) { continue }
                 let worker: VoiceWorker
                 if let idle = workers.first(where: { !$0.busy }) { worker = idle }
                 else if workers.count < limit {
                     worker = try VoiceWorker(voice: voice, threads: max(1, min(5, cores / limit)), speed: synthesisRate)
                     workers.append(worker)
                 } else { return }
-                let number = nextJob
-                nextJob += 1
+                rendering.insert(number)
                 worker.render(chunks[number], format: format) { [weak self] buffer in
                     guard let self, self.session == token else { return }
+                    self.rendering.remove(number)
+                    guard self.state != .finished else { return }
+                    guard number >= self.index - 4 && number < self.index + 10 else { self.fillQueue(); return }
                     guard let buffer else { self.fail("Couldn’t generate this passage. Retry to read it again."); return }
                     self.ready[number] = buffer
                     self.scheduleReady()
@@ -114,14 +104,39 @@ final class Reader: NSObject, ObservableObject {
     }
 
     private func scheduleReady() {
-        let token = session
-        while let buffer = ready.removeValue(forKey: nextBuffer) {
+        let token = playbackID
+        while let source = ready[nextBuffer] {
             let number = nextBuffer
+            let base = number == 0 ? 0 : ends[number - 1]
+            let end = base + Int64(source.frameLength)
+            if ends.count == number { ends.append(end) }
+            if !canSeek { canSeek = true }
             nextBuffer += 1
+            // seeking past rendered audio waits for the target, even across passages.
+            if end <= origin {
+                index = nextBuffer
+                trimCache()
+                if index == chunks.count { finish(); return }
+                excerpt = chunks[index]
+                continue
+            }
+            let skip = AVAudioFrameCount(max(0, origin - base))
+            let buffer: AVAudioPCMBuffer
+            if skip == 0 {
+                buffer = source
+            } else {
+                let count = source.frameLength - skip
+                guard let slice = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: count) else {
+                    fail("Couldn’t seek in this passage."); return
+                }
+                slice.frameLength = count
+                slice.floatChannelData![0].update(from: source.floatChannelData![0].advanced(by: Int(skip)), count: Int(count))
+                buffer = slice
+            }
             frameCounts[number] = Int64(buffer.frameLength)
             player.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
                 DispatchQueue.main.async {
-                    guard let self, self.session == token else { return }
+                    guard let self, self.playbackID == token else { return }
                     self.finishedBuffer(number)
                 }
             }
@@ -144,42 +159,83 @@ final class Reader: NSObject, ObservableObject {
         } catch { fail("Couldn’t start audio playback. Check your sound output and retry.") }
     }
 
+    private var position: Int64 {
+        guard state == .reading, let time = player.lastRenderTime.flatMap(player.playerTime(forNodeTime:)) else { return parked }
+        return min(ends.last ?? origin, origin + max(0, time.sampleTime))
+    }
+
     private func updateProgress() {
-        guard let time = player.lastRenderTime.flatMap(player.playerTime(forNodeTime:)),
-              let frames = frameCounts[index] else { return }
-        let fraction = min(1, max(0, Double(time.sampleTime - completedFrames) / Double(frames)))
+        guard index < ends.count else { return }
+        let base = index == 0 ? 0 : ends[index - 1]
+        let fraction = min(1, max(0, Double(position - base) / Double(max(1, ends[index] - base))))
         progress = (Double(index) + fraction) / Double(chunks.count)
+    }
+
+    func seek(_ seconds: Int) {
+        guard canSeek else { return }
+        idleRelease?.invalidate()
+        let paused = state == .paused
+        let delta = Int64(Double(seconds) * format.sampleRate / Double(synthesisRate))
+        var target = max(0, position + delta)
+        if ends.count == chunks.count { target = min(target, ends.last!) }
+        playbackID = UUID()
+        player.stop()
+        timer?.invalidate()
+        frameCounts.removeAll()
+        origin = target
+        parked = target
+        index = ends.firstIndex(where: { $0 > target }) ?? ends.count
+        if index == chunks.count { finish(); return }
+        nextBuffer = index
+        excerpt = chunks[index]
+        state = paused ? .paused : .preparing
+        updateProgress()
+        trimCache()
+        scheduleReady()
+        fillQueue()
+    }
+
+    private func trimCache() {
+        ready = ready.filter { $0.key >= index - 4 && $0.key < index + 10 }
+    }
+
+    private func finish() {
+        index = chunks.count
+        parked = ends.last ?? 0
+        progress = 1
+        state = .finished
+        excerpt = chunks.last ?? ""
+        timer?.invalidate()
+        player.stop()
+        engine.pause()
+        idleRelease?.invalidate()
+        idleRelease = Timer.scheduledTimer(withTimeInterval: 20, repeats: false) { [weak self] _ in
+            self?.workers.forEach { $0.stop() }
+            self?.workers.removeAll()
+        }
     }
 
     private func finishedBuffer(_ number: Int) {
         guard number == index else { return }
-        completedFrames += frameCounts.removeValue(forKey: number) ?? 0
+        frameCounts.removeValue(forKey: number)
         index += 1
         progress = Double(index) / Double(chunks.count)
-        if index == chunks.count {
-            state = .finished
-            timer?.invalidate()
+        if index == chunks.count { finish(); return }
+        excerpt = chunks[index]
+        if nextBuffer == index {
             player.stop()
-            engine.pause()
-            idleRelease = Timer.scheduledTimer(withTimeInterval: 20, repeats: false) { [weak self] _ in
-                self?.workers.forEach { $0.stop() }
-                self?.workers.removeAll()
-            }
-        } else {
-            excerpt = chunks[index]
-            if nextBuffer == index {
-                player.stop()
-                completedFrames = 0
-                timer?.invalidate()
-                if state != .paused { state = .preparing }
-            }
-            fillQueue()
+            origin = ends[number]
+            parked = origin
+            timer?.invalidate()
+            if state != .paused { state = .preparing }
         }
+        trimCache()
+        fillQueue()
     }
 
     func toggle() {
         switch state {
-        case .reading, .preparing: player.pause(); timer?.invalidate(); state = .paused
+        case .reading, .preparing: parked = position; player.pause(); timer?.invalidate(); state = .paused
         case .paused:
             state = .preparing
             startWhenReady()
@@ -205,9 +261,13 @@ final class Reader: NSObject, ObservableObject {
     private func resetQueue() {
         session = UUID()
         index = 0
-        nextJob = 0
+        playbackID = UUID()
+        rendering.removeAll()
+        ends.removeAll()
+        canSeek = false
+        origin = 0
+        parked = 0
         nextBuffer = 0
-        completedFrames = 0
         ready.removeAll()
         frameCounts.removeAll()
     }
