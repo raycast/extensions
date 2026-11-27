@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Scigantic MCP Server] - {PR_MERGE_DATE}
+## [Add Scigantic MCP Server] - 2026-11-27
 
 - Add Scigantic to the official registry: search a catalog of 8,000+ public scientific datasets, read a dataset's schema card, list its files and get code that loads it. Hosted Streamable HTTP server at https://api.scigantic.com/mcp/catalog with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
