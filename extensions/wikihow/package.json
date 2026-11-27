@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wikihow",
+  "title": "wikiHow",
+  "description": "Search wikiHow how-to guides, keep your recently viewed articles, and open a random article.",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "how to",
+    "articles",
+    "guides",
+    "search"
+  ],
+  "commands": [
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "subtitle": "wikiHow",
+      "description": "Search wikiHow articles, preview indexed excerpts, and open the full article",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "How to…",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "random-article",
+      "title": "Random Article",
+      "subtitle": "wikiHow",
+      "description": "Open a random wikiHow article in your browser.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "braveApiKey",
+      "type": "password",
+      "title": "Brave Search API Key",
+      "placeholder": "Enter Your Brave Search API Key",
+      "description": "A personal key for the Brave Web Search API. Create one at api-dashboard.search.brave.com. Search requests use your API allowance.",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  }
+}
