@@ -6,7 +6,6 @@ const EMAIL_PATTERN = /^[^\s@<>()[\]",;:]+@[^\s@<>()[\]",;:]+\.[^\s@<>()[\]",;:]
 
 type Person = Pick<people_v1.Schema$Person, "names" | "emailAddresses" | "photos">;
 
-/** The few contact fields mentions need, small enough to cache. */
 export type MentionPerson = { name?: string; emails: string[]; photo?: string };
 
 export function isEmailAddress(value: string) {
@@ -36,11 +35,7 @@ export function toContactMentionUri(email: string) {
   return `${URI_PREFIX}${encodeURIComponent(normalizeEmail(email))}`;
 }
 
-/**
- * Lists one mention per email address, so people with several addresses can be mentioned by the one that matters,
- * de-duplicated across Google Contacts and Other contacts. A complete email address the user typed comes first when no
- * contact has it, so anyone can be mentioned.
- */
+/** Lists each contact email once and prioritizes a complete typed address not already in contacts. */
 export function toContactMentions(people: readonly MentionPerson[], query: string, fallbackIcon: string) {
   const seen = new Set<string>();
   const mentions: { title: string; uri: string; description: string; icon: string }[] = [];
@@ -85,10 +80,7 @@ export function parseContactMentionUri(uri: string) {
   return normalizeEmail(email);
 }
 
-/**
- * Resolves a mentioned email address against the user's contacts when the message is sent, so the name and other
- * addresses are current. An address that is not in the contacts is still a valid mention and is returned on its own.
- */
+/** Resolves the selected address again at read time so names and alternate emails are current. */
 export async function readContactMention(uri: string, searchPeople: (query: string) => Promise<Person[]>) {
   const email = parseContactMentionUri(uri);
   const person = toMentionPeople(await searchPeople(email)).find((candidate) =>

@@ -9,7 +9,7 @@ const CalendarSelector = ({
   defaultValue,
 }: {
   calendars: UseCalendarsData;
-  onCalendarChange: (calendarId: string | null) => void;
+  onCalendarChange: (calendarId: string) => void;
   storeValue?: boolean;
   defaultValue?: string;
 }) => {
@@ -20,7 +20,7 @@ const CalendarSelector = ({
   return (
     <List.Dropdown
       tooltip="Select Calendar"
-      onChange={(calendarId) => onCalendarChange(resolvePickerCalendarId(calendarId) ?? null)}
+      onChange={(calendarId) => onCalendarChange(resolvePickerCalendarId(calendarId) ?? calendarId)}
       storeValue={storeValue}
       defaultValue={pickerDefaultValue}
     >

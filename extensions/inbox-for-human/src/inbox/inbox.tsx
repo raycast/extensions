@@ -6,13 +6,15 @@ import {
   Keyboard,
   List,
   confirmAlert,
+  getDefaultApplication,
   getPreferenceValues,
   open,
   openExtensionPreferences,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef } from "react";
-import { ageSection, displayTitle, relativeAge } from "./format";
+import { findAppPaths, rowIconPath } from "./app-icons";
+import { ageSection, detailMarkdown, displayTitle, folderPath, relativeAge } from "./format";
 import { archiveIds, loadQueue, markOpened, watchQueue, type QueueEntry } from "./queue";
 import { archivePathFor, resolveQueuePath } from "./queue-path";
 import { secondaryOpenTarget, type SecondaryOpenTarget } from "./opener";
@@ -34,6 +36,10 @@ import {
 
 const SEARCH_PLACEHOLDER = "Search inbox...";
 
+async function readAppPaths(paths: string[]) {
+  return findAppPaths(paths, getDefaultApplication);
+}
+
 async function readInbox(queuePath: string) {
   return { load: loadQueue(queuePath), setUp: isSetUp(queuePath) };
 }
@@ -53,6 +59,7 @@ export default function Command() {
 
   const entries = data?.load.entries ?? [];
   const sections = useMemo(() => groupBySection(entries), [entries]);
+  const { data: apps } = useCachedPromise(readAppPaths, [entries.map((e) => e.path)], { keepPreviousData: true });
 
   async function handleOpen(entry: QueueEntry, target?: SecondaryOpenTarget) {
     try {
@@ -175,20 +182,19 @@ export default function Command() {
         <List.Section key={section.title} title={section.title}>
           {section.entries.map((entry) => {
             const title = displayTitle(entry.path);
-            const md = `# ${title}\n\n${entry.ask}\n\n${entry.context}`;
             const target = secondaryOpenTarget(prefs, entry);
             return (
               <List.Item
                 key={entry.id}
                 title={title}
-                icon={{ fileIcon: entry.path }}
+                icon={{ fileIcon: rowIconPath(entry.path, apps) }}
                 accessories={[{ text: relativeAge(entry.timestamp) }]}
                 detail={
                   <List.Item.Detail
-                    markdown={md}
+                    markdown={detailMarkdown(entry)}
                     metadata={
                       <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Path" text={tildify(entry.path)} />
+                        <List.Item.Detail.Metadata.Label title="Path" text={folderPath(entry.path)} />
                         <List.Item.Detail.Metadata.Label title="Queued" text={`${relativeAge(entry.timestamp)} ago`} />
                         {entry.opened_at && (
                           <List.Item.Detail.Metadata.Label

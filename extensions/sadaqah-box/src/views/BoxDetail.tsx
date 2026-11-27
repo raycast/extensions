@@ -10,21 +10,18 @@ import {
   Alert,
   Icon,
   Color,
+  Keyboard,
 } from "@raycast/api";
-import {
-  getBoxCached,
-  listSadaqahsCached,
-  deleteBoxCached,
-  emptyBoxCached,
-  deleteSadaqahCached,
-  listCollectionsCached,
-} from "./api/cached";
-import { getErrorMessage } from "./utils/error-handler";
-import { SUCCESS_MESSAGES } from "./constants";
-import { Box, BoxStats, Sadaqah, Collection } from "./types";
-import AddSadaqahCommand from "./add-sadaqah";
-import EditBoxCommand from "./edit-box";
-import CollectionDetail from "./collection-detail";
+import { showFailureToast } from "@raycast/utils";
+import { getBoxCached, listSadaqahsCached, deleteSadaqahCached, listCollectionsCached } from "../api/cached";
+import { confirmAndCollectBox, confirmAndDeleteBox } from "../hooks/useBoxActions";
+import { getErrorMessage } from "../utils/error-handler";
+import { formatCurrency, formatDate } from "../utils/format";
+import { PAGINATION, SUCCESS_MESSAGES } from "../constants";
+import { Box, BoxStats, Sadaqah, Collection } from "../types";
+import AddSadaqahForm from "./AddSadaqahForm";
+import EditBoxForm from "./EditBoxForm";
+import CollectionDetail from "./CollectionDetail";
 
 interface BoxDetailProps {
   boxId: string;
@@ -41,116 +38,72 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionsTotal, setCollectionsTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [collectionsPage, setCollectionsPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
-  const COLLECTIONS_PER_PAGE = 5;
 
-  const fetchBoxData = useCallback(
-    async (page: number = 1) => {
-      try {
-        setIsLoading(true);
-        const [boxResponse, sadaqahsResponse, collectionsResponse] = await Promise.all([
-          getBoxCached(boxId),
-          listSadaqahsCached(boxId, page, ITEMS_PER_PAGE),
-          listCollectionsCached(boxId, collectionsPage, COLLECTIONS_PER_PAGE),
-        ]);
+  const fetchBoxData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setLoadError(null);
+      const [boxResponse, sadaqahsResponse, collectionsResponse] = await Promise.all([
+        getBoxCached(boxId),
+        listSadaqahsCached(boxId, currentPage, PAGINATION.ITEMS_PER_PAGE),
+        listCollectionsCached(boxId, collectionsPage, PAGINATION.COLLECTIONS_PER_PAGE),
+      ]);
 
-        setBox(boxResponse.box);
-        setStats(boxResponse.stats);
-        setSadaqahs(sadaqahsResponse.sadaqahs);
-        setTotalCount(sadaqahsResponse.pagination?.total || boxResponse.box.count || 0);
-        setCollections(collectionsResponse.collections);
-        setCollectionsTotal(collectionsResponse.pagination?.total || collectionsResponse.collections.length || 0);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load box details",
-          message: getErrorMessage(error),
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [boxId, collectionsPage],
-  );
+      setBox(boxResponse.box);
+      setStats(boxResponse.stats);
+      setSadaqahs(sadaqahsResponse.sadaqahs);
+      setTotalCount(sadaqahsResponse.total ?? sadaqahsResponse.pagination?.total ?? boxResponse.box.count ?? 0);
+      setCollections(collectionsResponse.collections);
+      setCollectionsTotal(
+        collectionsResponse.total ??
+          collectionsResponse.pagination?.total ??
+          collectionsResponse.collections.length ??
+          0,
+      );
+    } catch (error) {
+      const message = getErrorMessage(error);
+      setLoadError(message);
+      await showFailureToast(new Error(message), {
+        title: "Failed to load box details",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [boxId, currentPage, collectionsPage]);
 
   useEffect(() => {
-    fetchBoxData(currentPage);
-  }, [fetchBoxData, currentPage, collectionsPage]);
+    fetchBoxData();
+  }, [fetchBoxData]);
 
   async function handleDeleteBox() {
     if (!box) return;
 
-    const confirmed = await confirmAlert({
-      title: "Delete Box",
-      message: `Are you sure you want to delete "${box.name}"? This will also delete all ${box.count} sadaqahs in this box.`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (confirmed) {
-      try {
-        setIsLoading(true);
-        await deleteBoxCached(box.id);
-
-        showToast({
-          style: Toast.Style.Success,
-          title: SUCCESS_MESSAGES.BOX_DELETED,
-        });
-
+    await confirmAndDeleteBox(box, {
+      onBeforeStart: () => setIsLoading(true),
+      onDeleted: () => {
         onBoxDeleted();
         pop();
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to delete box",
-          message: getErrorMessage(error),
-        });
-        setIsLoading(false);
-      }
-    }
+      },
+      onError: () => setIsLoading(false),
+    });
   }
 
   async function handleCollectBox() {
-    if (!box || box.count === 0) return;
+    if (!box) return;
 
-    const confirmed = await confirmAlert({
-      title: "Collect Box",
-      message: `Are you sure you want to collect "${box.name}"? This will collect all ${box.count} sadaqahs (${formatCurrency(box.totalValue, box.baseCurrency)}).`,
-      primaryAction: {
-        title: "Collect Box",
-        style: Alert.ActionStyle.Default,
-      },
-    });
-
-    if (confirmed) {
-      try {
-        setIsLoading(true);
-        const response = await emptyBoxCached(box.id);
-
-        showToast({
-          style: Toast.Style.Success,
-          title: "Box collected successfully",
-        });
-
-        // Navigate to collection detail view for the new collection
+    await confirmAndCollectBox(box, {
+      onBeforeStart: () => setIsLoading(true),
+      onCollected: async (response) => {
         if (response.collection) {
-          push(<CollectionDetail collection={response.collection} box={box} />);
+          push(<CollectionDetail collection={response.collection} box={response.box || box} />);
         }
-
-        await fetchBoxData(currentPage);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to collect box",
-          message: String(error),
-        });
-        setIsLoading(false);
-      }
-    }
+        await fetchBoxData();
+      },
+      onError: () => setIsLoading(false),
+    });
   }
 
   async function handleDeleteSadaqah(sadaqah: Sadaqah) {
@@ -175,41 +128,13 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
         });
 
         onSadaqahDeleted?.();
-        await fetchBoxData(currentPage);
+        await fetchBoxData();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(new Error(getErrorMessage(error)), {
           title: "Failed to delete sadaqah",
-          message: getErrorMessage(error),
         });
       }
     }
-  }
-
-  function formatCurrency(value: number | undefined | null, currency?: { code?: string; symbol?: string }): string {
-    const symbol = currency?.symbol || "";
-    const code = currency?.code || "";
-    const numericValue = value ?? 0;
-
-    // Use 5 decimal places for small values (e.g., gold XAU), otherwise use locale default
-    const formattedValue = numericValue < 0.01 ? numericValue.toFixed(5) : numericValue.toLocaleString();
-
-    // Avoid showing duplicate when symbol equals code (e.g., "XAU0 XAU")
-    if (symbol && code && symbol === code) {
-      return `${formattedValue} ${code}`;
-    }
-
-    return `${symbol}${formattedValue} ${code}`.trim();
-  }
-
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
   function handleViewCollectionDetail(collection: Collection) {
@@ -220,12 +145,25 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
   if (!box) {
     return (
       <List isLoading={isLoading}>
-        <List.EmptyView title="Loading box details..." />
+        <List.EmptyView
+          title={loadError ? "Failed to load box details" : "Loading box details..."}
+          description={loadError ?? undefined}
+          icon={loadError ? Icon.ExclamationMark : Icon.Box}
+          actions={
+            loadError ? (
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={fetchBoxData} />
+              </ActionPanel>
+            ) : undefined
+          }
+        />
       </List>
     );
   }
 
   const baseCurrency = box.baseCurrency;
+  const totalSadaqahPages = Math.ceil(totalCount / PAGINATION.ITEMS_PER_PAGE);
+  const totalCollectionPages = Math.ceil(collectionsTotal / PAGINATION.COLLECTIONS_PER_PAGE);
 
   return (
     <List isLoading={isLoading} navigationTitle={box.name} searchBarPlaceholder="Search sadaqahs...">
@@ -242,10 +180,18 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
           subtitle={baseCurrency ? `${baseCurrency.name} (${baseCurrency.code})` : box.baseCurrencyId}
         />
         {stats && stats.firstSadaqahAt && (
-          <List.Item title="First Sadaqah" icon={Icon.Calendar} subtitle={formatDate(stats.firstSadaqahAt)} />
+          <List.Item
+            title="First Sadaqah"
+            icon={Icon.Calendar}
+            subtitle={formatDate(stats.firstSadaqahAt, { includeTime: true })}
+          />
         )}
         {stats && stats.lastSadaqahAt && (
-          <List.Item title="Last Sadaqah" icon={Icon.Calendar} subtitle={formatDate(stats.lastSadaqahAt)} />
+          <List.Item
+            title="Last Sadaqah"
+            icon={Icon.Calendar}
+            subtitle={formatDate(stats.lastSadaqahAt, { includeTime: true })}
+          />
         )}
       </List.Section>
 
@@ -257,15 +203,13 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
 
       <List.Section
         title={`Sadaqahs (${totalCount})`}
-        subtitle={
-          totalCount > ITEMS_PER_PAGE ? `Page ${currentPage} of ${Math.ceil(totalCount / ITEMS_PER_PAGE)}` : undefined
-        }
+        subtitle={totalCount > PAGINATION.ITEMS_PER_PAGE ? `Page ${currentPage} of ${totalSadaqahPages}` : undefined}
       >
         {sadaqahs.map((sadaqah) => (
           <List.Item
             key={sadaqah.id}
             title={formatCurrency(sadaqah.value, sadaqah.currency)}
-            subtitle={formatDate(sadaqah.createdAt)}
+            subtitle={formatDate(sadaqah.createdAt, { includeTime: true })}
             icon={{ source: Icon.Coin, tintColor: Color.Green }}
             accessories={[{ text: sadaqah.currency?.code || sadaqah.currencyId }]}
             actions={
@@ -276,7 +220,7 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => handleDeleteSadaqah(sadaqah)}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Navigation">
@@ -284,15 +228,21 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
                     <Action
                       title="Previous Page"
                       icon={Icon.ArrowLeft}
-                      shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+                        Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+                      }}
                       onAction={() => setCurrentPage((p) => p - 1)}
                     />
                   )}
-                  {currentPage < Math.ceil(totalCount / ITEMS_PER_PAGE) && (
+                  {currentPage < totalSadaqahPages && (
                     <Action
                       title="Next Page"
                       icon={Icon.ArrowRight}
-                      shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "arrowRight" },
+                        Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+                      }}
                       onAction={() => setCurrentPage((p) => p + 1)}
                     />
                   )}
@@ -307,8 +257,8 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
         <List.Section
           title={`Collections (${collectionsTotal})`}
           subtitle={
-            collectionsTotal > COLLECTIONS_PER_PAGE
-              ? `Page ${collectionsPage} of ${Math.ceil(collectionsTotal / COLLECTIONS_PER_PAGE)}`
+            collectionsTotal > PAGINATION.COLLECTIONS_PER_PAGE
+              ? `Page ${collectionsPage} of ${totalCollectionPages}`
               : undefined
           }
         >
@@ -316,7 +266,7 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
             <List.Item
               key={collection.id}
               title={`Collected ${formatCurrency(collection.totalValue, collection.currency)}`}
-              subtitle={formatDate(collection.emptiedAt)}
+              subtitle={formatDate(collection.emptiedAt, { includeTime: true })}
               icon={{ source: Icon.ArrowDownCircle, tintColor: Color.Blue }}
               accessories={[{ text: collection.currency?.code || collection.currencyId }]}
               actions={
@@ -333,15 +283,21 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
                       <Action
                         title="Previous Collections"
                         icon={Icon.ArrowLeft}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "arrowLeft" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "arrowLeft" },
+                        }}
                         onAction={() => setCollectionsPage((p) => p - 1)}
                       />
                     )}
-                    {collectionsPage < Math.ceil(collectionsTotal / COLLECTIONS_PER_PAGE) && (
+                    {collectionsPage < totalCollectionPages && (
                       <Action
                         title="Next Collections"
                         icon={Icon.ArrowRight}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "arrowRight" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "arrowRight" },
+                        }}
                         onAction={() => setCollectionsPage((p) => p + 1)}
                       />
                     )}
@@ -359,10 +315,7 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
           icon={{ source: Icon.Plus, tintColor: Color.Green }}
           actions={
             <ActionPanel>
-              <Action
-                title="Add Sadaqah"
-                onAction={() => push(<AddSadaqahCommand box={box} onAdd={() => fetchBoxData(currentPage)} />)}
-              />
+              <Action title="Add Sadaqah" onAction={() => push(<AddSadaqahForm box={box} onAdd={fetchBoxData} />)} />
             </ActionPanel>
           }
         />
@@ -371,10 +324,7 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
           icon={Icon.Pencil}
           actions={
             <ActionPanel>
-              <Action
-                title="Edit Box"
-                onAction={() => push(<EditBoxCommand box={box} onUpdate={() => fetchBoxData(currentPage)} />)}
-              />
+              <Action title="Edit Box" onAction={() => push(<EditBoxForm box={box} onUpdate={fetchBoxData} />)} />
             </ActionPanel>
           }
         />
@@ -400,7 +350,10 @@ export default function BoxDetail({ boxId, onBoxDeleted, onSadaqahDeleted }: Box
                 title="Delete Box"
                 style={Action.Style.Destructive}
                 onAction={handleDeleteBox}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "delete" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+                }}
               />
             </ActionPanel>
           }

@@ -1,6 +1,6 @@
 /**
- * Refactored API Layer
- * Uses the new client with timeout, retry, and proper error handling
+ * API Layer
+ * Direct HTTP endpoint wrappers
  */
 
 import { get, post, patch, del } from "./client";
@@ -64,14 +64,6 @@ export async function deleteBox(boxId: string): Promise<DeleteResponse> {
 
 export async function emptyBox(boxId: string): Promise<EmptyBoxResponse> {
   return post<EmptyBoxResponse>(`/api/boxes/${encodeURIComponent(boxId)}/empty`, {});
-}
-
-export async function getBoxCollections(
-  boxId: string,
-  page: number = 1,
-  limit: number = 20,
-): Promise<ListCollectionsResponse> {
-  return get<ListCollectionsResponse>(`/api/boxes/${encodeURIComponent(boxId)}/collections`, { page, limit });
 }
 
 // Sadaqahs

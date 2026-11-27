@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { getErrorMessage, isAbortError } from "./errors";
+import { getErrorMessage, isAbortError, isNotInstalledRefusal } from "./errors";
 
 describe("isAbortError", () => {
   it("recognizes the abort a DOM AbortController raises", () => {
@@ -46,5 +46,28 @@ describe("getErrorMessage", () => {
       ].join("\n"),
     });
     expect(getErrorMessage(error)).toBe("No repo found at github.com/jundot/homebrew-omlx");
+  });
+});
+
+// `brew uninstall` on a package that is already gone, as brew words it on 7.x.
+describe("isNotInstalledRefusal", () => {
+  it.each([
+    // FormulaOrCaskUnavailableError: named-args resolution folds a missing keg into this.
+    'Error: No available formula or cask with the name "kitlangton/tap/tailcode". Did you mean kitlangton/tap/scala-update?',
+    // NoSuchKegError, with and without its tap.
+    "Error: No such keg: /opt/homebrew/Cellar/tailcode",
+    "Error: No such keg: /opt/homebrew/Cellar/tailcode from tap kitlangton/tap",
+    // CaskNotInstalledError.
+    "Error: Cask 'scrawl' is not installed.",
+  ])("reads %j as not installed", (stderr) => {
+    expect(isNotInstalledRefusal(Object.assign(new Error("Command failed"), { stderr }))).toBe(true);
+  });
+
+  it.each([
+    "Error: Another active Homebrew process is already in progress.",
+    "Error: Refusing to uninstall /opt/homebrew/Cellar/llvm because it is required by rust, which is currently installed.",
+    "Error: Homebrew-installed `curl` is not installed for: https://example.com",
+  ])("does not read %j as not installed", (stderr) => {
+    expect(isNotInstalledRefusal(Object.assign(new Error("Command failed"), { stderr }))).toBe(false);
   });
 });

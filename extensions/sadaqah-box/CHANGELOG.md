@@ -4,6 +4,21 @@ All notable changes to the Sadaqah Box Raycast Extension will be documented in t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Updates & Improvements] - 2026-11-26
+
+### Changed
+- **Default API Host Updated** – Changed the default `API Host` preference from `https://sadaqahbox.apps.erklab.com` to `https://live.sadaqahbox.apps.erklab.com`. Existing users who relied on the previous default and have not customized their host should verify or update **API Host** in Extension Preferences if needed.
+- **Default Base Currency** – Updated the default box currency option in Create Box from `USD` to `Gold (XAU)` to match the SadaqahBox API.
+- **Preset Reordering Shortcuts** – Updated preset reordering shortcuts in **Manage Presets** to `⌘⌥↑` / `⌘⌥↓` on macOS (`Ctrl+Alt+↑` / `Ctrl+Alt+↓` on Windows), matching Raycast's standard move shortcuts.
+
+### Fixed
+- **Sadaqah Multiplier & Limits** – Quick-add presets and **Add Sadaqah** now multiply unit `value * amount` into a single summed sadaqah entry and cap the multiplier `amount` at `1,000`.
+- **Dashboard Totals & Pagination** – Aligned dashboard statistics with the `{ stats }` response (`convertedTotal` / normalized `totalValue`) and read top-level `total` counts on sadaqah and collection lists.
+- **Clearing Box Descriptions** – Fixed **Edit Box** so clearing an existing description removes it on the server.
+- **Error Reporting & Retries** – Fixed HTTP error categorization (`401`/`403`/`404`/`422`/`5xx`), restricted automatic retries to read requests, and added a **Retry** action when loading currencies or box details fails.
+- **Host-Scoped Caching** – Isolated cached boxes, stats, and currencies per `API Host` and persisted cache key tracking so updates from one command clear stale balances in other views.
+- **Preset Ordering & Validation** – Fixed preset reordering when older presets lack an `order` field, added field-level validation for `amount`, and ensured invalid stored presets are safely ignored.
+
 ## [Initial Version] - 2026-03-12
 
 ### Added
