@@ -1,6 +1,6 @@
 # Google Cloud CLI Changelog
 
-## [Add Quick Access Recent Resources & Pinned Projects] - {PR_MERGE_DATE}
+## [Add Quick Access Recent Resources & Pinned Projects] - 2026-11-27
 
 - Populated the Hub's **Quick Access** section automatically as you open VMs, Storage buckets, Cloud Run services, Cloud Functions, Cloud SQL instances, secrets, and VPC networks
 - Added direct deep-linking from Quick Access into Storage buckets and Secret details, plus actions to remove individual items or clear Quick Access
