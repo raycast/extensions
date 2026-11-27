@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add flypod MCP Server] - {PR_MERGE_DATE}
+## [Add flypod MCP Server] - 2026-11-27
 
 - Add flypod to the official registry: publish a folder of static files or Markdown at an HTTPS share link, then update, roll back, protect or delete it. Hosted Streamable HTTP server at https://flypod.dev/mcp with no sign-in needed, and OAuth 2.1 at https://flypod.dev/account/mcp to keep sites; a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
