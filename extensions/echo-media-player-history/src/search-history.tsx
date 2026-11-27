@@ -15,7 +15,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise, showFailureToast } from "@raycast/utils";
+import { usePromise, showFailureToast } from "@raycast/utils";
 import {
   EchoError,
   EchoItem,
@@ -42,12 +42,13 @@ export default function SearchHistory() {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
 
-  // Cached so reopening the command shows your history instantly, and the previous results stay
-  // on screen while a new search runs rather than flashing an empty list.
-  const { data, isLoading, error, revalidate } = useCachedPromise(
+  // Nothing saved from last time is shown first. Raycast keeps the selection on the row it was on, so
+  // when an old copy of the list was swapped for today's, the selected row moved far down and the
+  // first press of the down arrow jumped there. Echo is on this Mac and answers at once. Results
+  // already on screen still stay there while a new search runs.
+  const { data, isLoading, error, revalidate } = usePromise(
     (q: string, t: string) => fetchHistory(q, t),
     [query, type],
-    { keepPreviousData: true },
   );
 
   if (error) return <ErrorView error={error} onRetry={revalidate} />;
