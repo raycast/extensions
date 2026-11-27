@@ -1,6 +1,6 @@
 # Focus Stage Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Toggle Focus Stage: centers the focused window, covers everything else with a plain backdrop on all displays, hides the menu bar, and restores everything when toggled again
 - Glow around the focused window, "Focus Stage on" label and optional background grain
