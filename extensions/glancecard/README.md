@@ -42,7 +42,7 @@ Every tool only reads.
 
 ## Sign in
 
-Sign in with GitHub when the extension asks, or set a personal access token in the preferences: it needs no scope. The extension reads public data only, the same a card publishes, and writes nothing on GitHub: every change is a GitHub page you commit yourself. The star histories are kept on your Mac between reads, as the Action keeps them, so after the first read of a profile a read costs a request per repository.
+You need a GitHub account. Sign in with GitHub when the extension asks, or set a personal access token in the preferences: it needs no scope. The extension reads public data only, the same a card publishes, and writes nothing on GitHub: every change is a GitHub page you commit yourself. The star histories are kept on your Mac between reads, as the Action keeps them, so after the first read of a profile a read costs a request per repository.
 
 ## Preferences
 
