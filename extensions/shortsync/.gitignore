@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+npm-debug.log*
+
+# OS files
+.DS_Store
+
+# Raycast
+raycast-env.d.ts
+ray.config.json
