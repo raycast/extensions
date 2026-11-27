@@ -12,8 +12,9 @@ export async function openProjectInEditor(projectPath: string): Promise<void> {
 
 export async function openProjectInTerminal(projectPath: string): Promise<void> {
     const app: Application | undefined = preferences.terminalApp
-    if (!app?.path) throw new Error('Please configure your preferred terminal in extension preferences')
+    if (!app) throw new Error('Please configure your preferred terminal in extension preferences')
     if (process.platform !== 'win32') {
+        if (!app.path) throw new Error('Please configure your preferred terminal in extension preferences')
         await open(projectPath, app)
         return
     }

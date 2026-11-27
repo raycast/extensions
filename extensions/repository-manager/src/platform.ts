@@ -66,10 +66,15 @@ type TerminalLaunch = { command: string; args: string[] } | { script: string }
 
 export function getWindowsTerminalLaunch(app: Application, projectPath: string): TerminalLaunch {
     const executable = path.win32.basename(app.path).toLowerCase()
-    if (['wt.exe', 'windowsterminal.exe'].includes(executable) || /Microsoft\.WindowsTerminal/i.test(app.windowsAppId || '') || /^Windows Terminal$/i.test(app.name)) {
-        return { command: ['wt.exe', 'windowsterminal.exe'].includes(executable) ? app.path : 'wt.exe', args: ['new-tab', '--startingDirectory', projectPath] }
+    const isTerminalExecutable = ['wt.exe', 'windowsterminal.exe'].includes(executable)
+    const isTerminalPackage = /^Microsoft\.WindowsTerminal(?:Preview)?_/i.test(app.windowsAppId || '')
+    const isWindowsAppsPath = /(?:^|[\\/])WindowsApps[\\/]/i.test(app.path)
+    if (isTerminalPackage || isTerminalExecutable || /^Windows Terminal$/i.test(app.name)) {
+        const command = !isTerminalPackage && !isWindowsAppsPath && isTerminalExecutable ? app.path : 'wt.exe'
+        return { command, args: ['new-tab', '--startingDirectory', projectPath] }
     }
 
+    if (!app.path) throw new Error('Please configure your preferred terminal in extension preferences')
     const isPowerShell = ['powershell.exe', 'pwsh.exe'].includes(executable) || /^(Windows )?PowerShell(?: \d+(?:\.\d+)*)?$/i.test(app.name)
     const isCommandPrompt = executable === 'cmd.exe' || /^Command Prompt$/i.test(app.name)
     if (!isPowerShell && !isCommandPrompt) {

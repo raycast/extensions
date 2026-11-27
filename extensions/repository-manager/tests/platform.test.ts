@@ -85,3 +85,11 @@ test('PowerShell and Command Prompt launches use a literal working directory', (
 test('unsupported Windows terminals provide configuration guidance', () => {
     assert.throws(() => getWindowsTerminalLaunch({ name: 'Other Terminal', path: 'C:\\Apps\\other.exe' }, 'C:\\repo'), /Choose Windows Terminal/)
 })
+
+test('packaged Windows Terminal uses the alias, including a pathless app', () => {
+    const repo = "D:\\Projects\\O'Brien & Ω; repo"
+    const args = ['new-tab', '--startingDirectory', repo]
+    assert.deepEqual(getWindowsTerminalLaunch({ name: 'Terminal', path: '', windowsAppId: 'Microsoft.WindowsTerminal_8wekyb3d8bbwe!App' }, repo), { command: 'wt.exe', args })
+    assert.deepEqual(getWindowsTerminalLaunch({ name: 'Terminal', path: 'C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.0\\wt.exe' }, repo), { command: 'wt.exe', args })
+    assert.deepEqual(getWindowsTerminalLaunch({ name: 'Terminal', path: 'D:\\Portable\\wt.exe' }, repo), { command: 'D:\\Portable\\wt.exe', args })
+})
