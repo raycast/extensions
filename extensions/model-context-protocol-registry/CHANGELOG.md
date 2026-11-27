@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add GEOboom MCP Server] - {PR_MERGE_DATE}
+## [Add GEOboom MCP Server] - 2026-11-27
 
 - Add GEOboom to the official registry: run link building and mention outreach (prospecting, publisher threads, placements and link rechecks) from your AI assistant. Hosted Streamable HTTP server at https://api.geoboom.io/mcp with OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GEOboom account.
 
