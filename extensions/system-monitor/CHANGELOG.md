@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Fix Unit Rollover] - {PR_MERGE_DATE}
+## [Fix Unit Rollover] - 2026-11-27
 
 - Show sizes and rates that round up to 1024 in the next unit ("1 MB/s" instead of "1024 KB/s")
 
