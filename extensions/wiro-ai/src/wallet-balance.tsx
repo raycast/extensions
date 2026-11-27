@@ -1,5 +1,14 @@
-import { Color, Icon, launchCommand, LaunchType, MenuBarExtra, open, openExtensionPreferences } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import {
+  Color,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  open,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { credentials } from "./lib/preferences";
 import { getWallet, SITE_URL } from "./lib/wiro";
 
@@ -13,8 +22,9 @@ function dollars(amount: number): string {
 async function openCommand(name: string) {
   try {
     await launchCommand({ name, type: LaunchType.UserInitiated });
-  } catch (error) {
-    await showFailureToast(error, { title: "Could not open the command" });
+  } catch {
+    // The menu bar command runs in the background, where the Toast API is not available.
+    await showHUD("Could not open the command");
   }
 }
 
