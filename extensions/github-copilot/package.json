@@ -12,7 +12,8 @@
     "pedro_dcc",
     "xilopaint",
     "jakoss",
-    "slmnbruno"
+    "slmnbruno",
+    "intellectronica"
   ],
   "owner": "github",
   "access": "public",
@@ -97,8 +98,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "test": "tsc --project tsconfig.test.json && node --test tests/*.test.ts"
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS",
