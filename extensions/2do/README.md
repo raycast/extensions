@@ -60,7 +60,7 @@ Projects and checklists show progress at a glance. **Show Items** (⌘I) opens w
 
 ### Cancel Task
 
-By default, Cancel Task follows 2Do's convention: it adds the **Cancelled** tag and completes the task, so it shows in Done with an ✕ instead of a check. Change what it does in the extension's preferences:
+By default, Cancel Task follows this convention: it adds the **Cancelled** tag and completes the task, so it shows in Done with an ✕ instead of a check. Change what it does in the extension's preferences:
 
 - **Cancel Task:** Complete and Tag (default), Tag Only, Move to List and Complete, or Delete. Delete always asks first.
 - **Cancel Tag:** the tag to add (default "Cancelled"). It must already exist in 2Do; if it doesn't, Cancel Task says so. Add it in 2Do, or set this to the tag you use for cancelled tasks.
