@@ -130,8 +130,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "ray publish",
-    "test": "node -e \"require('esbuild').buildSync({entryPoints:['test/parser.test.ts'],bundle:true,platform:'node',format:'cjs',outfile:'.test-dist/parser.test.cjs'})\" && node --test .test-dist/parser.test.cjs"
+    "publish": "ray publish"
   },
   "dependencies": {
     "@raycast/api": "^2.11.1",
