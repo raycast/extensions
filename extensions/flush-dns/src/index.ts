@@ -1,9 +1,22 @@
 import { confirmAlert, showHUD } from "@raycast/api";
-import { execFileSync } from "node:child_process";
+import { runPowerShellScript } from "@raycast/utils";
+import { execFile, execFileSync } from "node:child_process";
 import { platform } from "node:os";
+import { promisify } from "node:util";
+import { formatErrorHud } from "./errorSummary";
 import { getMacOSCommandsForVersion } from "./macOSCommands";
 import { runWithPrivileges, type PrivilegedCommand } from "./sudoSupport";
-import { flushWindowsDns } from "./windowsSupport";
+import { createWindowsDnsFlusher } from "./windowsSupport";
+
+const flushWindowsDns = createWindowsDnsFlusher({
+  systemRoot: process.env.SystemRoot ?? "C:\\Windows",
+  execute: async (executable, args) => {
+    await promisify(execFile)(executable, [...args], { windowsHide: true });
+  },
+  runPowerShell: async (script, timeout) => {
+    await runPowerShellScript(script, { timeout });
+  },
+});
 
 export default async function main() {
   const osPlatform = platform();
@@ -64,27 +77,5 @@ async function getMacOSCommands(): Promise<readonly PrivilegedCommand[] | null> 
 
 async function handleExecutionError(error: unknown) {
   console.error("💥 Execution failed:", error);
-  await showHUD(`⚠️ ${getErrorSummary(error)}`.substring(0, 64));
-}
-
-function getErrorSummary(error: unknown): string {
-  if (typeof error !== "object" || error === null) {
-    return "Error flushing DNS cache";
-  }
-
-  const lines = (output: unknown) =>
-    String(output ?? "")
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-  // Command-line tools such as ipconfig print their errors on stdout, after a header.
-  const stderrLines = "stderr" in error ? lines(error.stderr) : [];
-  const stdoutLines = "stdout" in error ? lines(error.stdout) : [];
-
-  return (
-    stderrLines[0] ??
-    stdoutLines[stdoutLines.length - 1] ??
-    ("message" in error && typeof error.message === "string" ? error.message : "Error flushing DNS cache")
-  );
+  await showHUD(formatErrorHud(error));
 }
