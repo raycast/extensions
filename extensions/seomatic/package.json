@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "seomatic",
+  "title": "SEOmatic",
+  "description": "Ask SEOmatic about your site's SEO, check any page for AI answerability, review fixes waiting for approval, and search your Search Console pages and keywords.",
+  "icon": "icon.png",
+  "author": "seomatic",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask SEOmatic",
+      "description": "Ask a question about your site's SEO and get an answer from your real SEOmatic data.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "placeholder": "Which keywords are closest to page 1?",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "check-page",
+      "title": "Check Page",
+      "subtitle": "SEOmatic",
+      "description": "Score one public page for AI answerability and list the issues to fix. Free: uses no questions or credits.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "https://example.com/page",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "approvals",
+      "title": "Show Approvals",
+      "subtitle": "SEOmatic",
+      "description": "List the fixes waiting for your approval and open one in SEOmatic.",
+      "mode": "view"
+    },
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "subtitle": "SEOmatic",
+      "description": "Search your top pages from Google Search Console with clicks, impressions, CTR and position.",
+      "mode": "view"
+    },
+    {
+      "name": "search-keywords",
+      "title": "Search Keywords",
+      "subtitle": "SEOmatic",
+      "description": "Search your top search queries from Google Search Console with clicks, impressions, CTR and position.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "placeholder": "smk_live_...",
+      "description": "Your SEOmatic API key. Create one in the SEOmatic app under Settings > AI Agents > API Keys (https://app.seomatic.ai/dashboard/settings?tab=ai-agents). Creating a key needs the admin role on the workspace."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
