@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gridpin",
+  "title": "GridPin Offline Geocoder",
+  "description": "Turn an address into a point and a point into an address on your Mac, without a network or an API key.",
+  "icon": "extension-icon.png",
+  "author": "gridpin-reserve",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "geocode-address",
+      "title": "Geocode Address",
+      "subtitle": "GridPin",
+      "description": "Find the latitude and longitude of an address in a country sheet on this Mac.",
+      "mode": "view",
+      "keywords": [
+        "geocode",
+        "address",
+        "coordinates",
+        "latitude",
+        "longitude",
+        "offline"
+      ]
+    },
+    {
+      "name": "reverse-geocode",
+      "title": "Reverse Geocode",
+      "subtitle": "GridPin",
+      "description": "Find the nearest addresses to a latitude and longitude in a country sheet on this Mac.",
+      "mode": "view",
+      "keywords": [
+        "reverse geocode",
+        "coordinates",
+        "address",
+        "offline"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "country",
+      "title": "Default Country",
+      "description": "The code of the sheet to ask first, e.g. fr or us. Empty: the first downloaded sheet.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "fr"
+    },
+    {
+      "name": "gridpinPath",
+      "title": "GridPin Program",
+      "description": "Only if gridpin is not in /opt/homebrew/bin, /usr/local/bin or ~/.cargo/bin.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "sheetsFolder",
+      "title": "Sheets Folder",
+      "description": "Only if your sheets are not in the folder `gridpin sheets where` prints (GRIDPIN_HOME).",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
