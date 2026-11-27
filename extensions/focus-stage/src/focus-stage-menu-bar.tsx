@@ -1,5 +1,5 @@
-import { MenuBarExtra, openExtensionPreferences } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { MenuBarExtra, openExtensionPreferences, showHUD } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { stageStatus } from "swift:../swift";
 import { runToggle, stateDirectory } from "./lib/stage";
@@ -21,9 +21,10 @@ export default function Command() {
         optimisticUpdate: () => ({ active: outcome.active, app: outcome.app }),
         shouldRevalidateAfter: true,
       });
-      if (outcome.error) await showFailureToast(outcome.error, { title: "Focus Stage didn't start" });
+      // Menu bar commands can't show toasts; a HUD works here.
+      if (outcome.error) await showHUD(`Focus Stage didn't start: ${outcome.error}`);
     } catch (error) {
-      await showFailureToast(error, { title: "Focus Stage failed" });
+      await showHUD(`Focus Stage failed: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setToggling(false);
     }
