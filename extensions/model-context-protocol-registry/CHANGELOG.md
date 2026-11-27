@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add CodeDesign MCP Server] - 2026-11-26
+
+- Add CodeDesign to the official registry: AI website builder that designs a site from a short description, edits pages and text, adds pages, checks SEO issues, reads form leads and analytics, and publishes to your own domain. Hosted Streamable HTTP server at https://mcp.codedesign.ai/mcp with OAuth 2.1 sign-in (PKCE, dynamic client registration and client ID metadata documents), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.

@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "codedesign",
+    title: "CodeDesign",
+    description:
+      "Build and manage websites from your AI assistant: design a site from a short description, edit pages and text, add pages, check SEO issues, read form leads and analytics, and publish to your own domain. Every tool is annotated read-only or write, and deletes need the exact name. Hosted Streamable HTTP server at https://mcp.codedesign.ai/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with PKCE (dynamic client registration and client ID metadata documents), no API key to paste. A CodeDesign account is required.",
+    icon: "https://raw.githubusercontent.com/codedesignapp/mcp/main/icon-512.png",
+    homepage: "https://codedesign.ai/chatgpt-claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.codedesign.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.codedesign.ai/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
