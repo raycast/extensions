@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "consort",
+  "title": "Consort",
+  "description": "Control Consort stereo pairs, volume, balance, audio sources, and 1-click microphone sync. Requires the Consort macOS app.",
+  "icon": "extension-icon.png",
+  "author": "nicolas_gavrilenko",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "System",
+    "Productivity"
+  ],
+  "keywords": [
+    "stereo",
+    "airplay",
+    "bluetooth",
+    "speakers",
+    "audio",
+    "volume",
+    "homepod",
+    "sonos",
+    "sound",
+    "sync"
+  ],
+  "commands": [
+    {
+      "name": "control-consort",
+      "title": "Control Consort",
+      "description": "Inspect your active stereo pair, volume, balance, and audio source, and control Consort.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-audio-source",
+      "title": "Switch Audio Source",
+      "subtitle": "Consort",
+      "description": "Route all Mac audio or a specific app to your Consort stereo pair.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-stream",
+      "title": "Toggle Stereo Stream",
+      "subtitle": "Consort",
+      "description": "Start or stop Consort stereo streaming.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "subtitle": "Consort",
+      "description": "Mute or unmute Consort stereo output.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Increase Volume",
+      "subtitle": "Consort",
+      "description": "Increase Consort stereo volume by one step.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Decrease Volume",
+      "subtitle": "Consort",
+      "description": "Decrease Consort stereo volume by one step.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Consort",
+      "description": "Set Consort stereo volume to a specific percentage (0 to 100).",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "level",
+          "type": "text",
+          "placeholder": "0 to 100",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "swap-speakers",
+      "title": "Swap Left and Right Speakers",
+      "subtitle": "Consort",
+      "description": "Swap the Left and Right channels of your active stereo pair.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sync-audio",
+      "title": "Sync Audio",
+      "subtitle": "Consort",
+      "description": "Run 1-click microphone calibration to align speaker latency.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9",
+    "prettier": "^3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}
