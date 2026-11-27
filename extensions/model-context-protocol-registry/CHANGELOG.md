@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add SuliHuli MCP Server] - {PR_MERGE_DATE}
+
+- Add SuliHuli to the official registry: Find and compare electric vehicles by range, charging, battery, price, incentives and ownership cost. Figures carry a source and date. 10 read-only tools. Hosted remote Streamable HTTP server at https://sulihuli.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.

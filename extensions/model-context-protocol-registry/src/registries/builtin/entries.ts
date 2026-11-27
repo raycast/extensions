@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "sulihuli",
+    title: "SuliHuli",
+    description:
+      "Find and compare electric vehicles by range, charging, battery, price, incentives and ownership cost. Figures carry a source and date. 10 read-only tools. Hosted remote Streamable HTTP server at https://sulihuli.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/sulihuli/mcp/main/assets/logo-512.png",
+    homepage: "https://sulihuli.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://sulihuli.com/api/mcp"],
+    },
+    remoteUrl: "https://sulihuli.com/api/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
