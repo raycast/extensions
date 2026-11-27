@@ -1,0 +1,10 @@
+{
+  "server_id": "server-fixture-001",
+  "server_version": "2.7.0-fixture",
+  "schema_version": 51,
+  "min_supported_schema_version": 24,
+  "name": "Fixture Music Assistant",
+  "base_url": "http://music.example.test:8095",
+  "onboard_done": true,
+  "status": "running"
+}
