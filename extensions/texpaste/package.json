@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "texpaste",
+  "title": "TeXPaste",
+  "description": "Type LaTeX and paste it into Keynote as a crisp vector equation (PDF, SVG or PNG), with live preview, history, templates and custom macros.",
+  "icon": "icon.png",
+  "author": "royabhi028",
+  "categories": [
+    "Productivity",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tex",
+      "title": "Paste LaTeX Equation",
+      "subtitle": "TeXPaste",
+      "description": "Render LaTeX with a live preview and paste it as PDF, SVG or PNG.",
+      "keywords": [
+        "latex",
+        "tex",
+        "equation",
+        "math",
+        "keynote"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "pick-color",
+      "title": "Pick Equation Color",
+      "description": "Pick the equation color from anywhere on screen with the eyedropper.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "color",
+      "type": "textfield",
+      "required": false,
+      "default": "#000000",
+      "title": "Equation Color",
+      "description": "Hex color, e.g. #000000 or #FFFFFF. ⌘T toggles black/white."
+    },
+    {
+      "name": "fontSize",
+      "type": "textfield",
+      "required": false,
+      "default": "40",
+      "title": "Font Size (pt)",
+      "description": "Size the equation is pasted at."
+    },
+    {
+      "name": "pngScale",
+      "type": "dropdown",
+      "required": false,
+      "default": "4",
+      "title": "PNG Scale",
+      "description": "Resolution multiplier for PNG export.",
+      "data": [
+        {
+          "title": "2×",
+          "value": "2"
+        },
+        {
+          "title": "4×",
+          "value": "4"
+        },
+        {
+          "title": "8×",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "inlineStyle",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Math Style",
+      "label": "Use inline (text) style instead of display style",
+      "description": "Render equations in inline (text) style instead of display style."
+    },
+    {
+      "name": "autoPaste",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Enter Behaviour",
+      "label": "Auto-paste into the frontmost app (⌘⏎ copies only)",
+      "description": "Paste the equation into the frontmost app after copying it."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "mathjax-full": "3.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "^19.0.0",
+    "typescript": "5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
