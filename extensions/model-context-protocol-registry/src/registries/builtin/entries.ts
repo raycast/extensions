@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "webstory",
+    title: "Webstory",
+    description:
+      "Work on your Webstory stories from your AI assistant. Webstory makes story websites for brands and shops: full-screen reels of video, photos and designs that open like a social story on any phone. See your stories and how each one is doing (visitors, visits, how far people watched, button taps), make draft stories, add reels, change captions, titles and buttons, find and replace words, bring in photos and videos, make preview and share links, and read comments, chats and orders. Edits go to drafts: a story doesn't go live without a person's OK in Webstory. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Webstory account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/WebStory-App/webstory-mcp/main/assets/logo.png",
+    homepage: "https://docs.webstoryapp.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://webstoryapp.com/mcp"],
+    },
+    remoteUrl: "https://webstoryapp.com/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
