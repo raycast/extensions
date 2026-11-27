@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add flypod MCP Server] - 2026-11-27
+
+- Add flypod to the official registry: publish a folder of static files or Markdown at an HTTPS share link, then update, roll back, protect or delete it. Hosted Streamable HTTP server at https://flypod.dev/mcp with no sign-in needed, and OAuth 2.1 at https://flypod.dev/account/mcp to keep sites; a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Rename the UberLLM entry] - 2026-11-27
 
 - Rename the UberLLM entry to MartLLM (id `martllm`) and move its homepage, icon and remote server to martllm.com. Same service, accounts and API keys; the placeholder env var is now `MARTLLM_AUTH_HEADER`.
