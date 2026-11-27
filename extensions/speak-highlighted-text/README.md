@@ -2,7 +2,7 @@
 
 Speak Text supports Intel and Apple silicon Macs running macOS 13 or later with Raycast installed. The first reading downloads about 172 MB of model and runtime files. The player then reads English offline with Kokoro’s American English Heart voice. There is no API key or per-minute fee.
 
-Run **Speak Selected or Copied Text** from Raycast. The command reads the selection in the frontmost app. If the app provides no selected text, the command reads plain text from the clipboard. Allow Raycast Accessibility access if macOS asks. The floating window resizes to show the full current passage. Playback and speed controls sit beneath the text. Run the command again to replace the current reading. Close the window to stop.
+Run **Speak Selected or Copied Text** from Raycast. The command reads the selection in the frontmost app. If the app provides no selected text, the command reads plain text from the clipboard. Allow Raycast Accessibility access if macOS asks. The floating window resizes to show the full current passage. Drag the six-dot grip between the playback and speed controls to move the player. Run the command again to replace the current reading. Close the window to stop.
 
 Before speaking, the command removes Markdown formatting, reads link labels or bare domains, and shortens file paths to “path” plus the final name. This step runs locally on both selections and clipboard text.
 
@@ -16,26 +16,10 @@ Before speaking, the command removes Markdown formatting, reads link labels or b
 | Increase speed | = | Assign a hotkey to Increase Speech Speed |
 | Decrease speed | - | Assign a hotkey to Decrease Speech Speed |
 
-Assign global shortcuts in **Raycast Settings > Extensions > Speak Text**. The player remembers speeds from 0.5× to 2× in quarter steps. Changing speed preserves your playback position, including while paused. At the end, Space replays the passage.
+To start reading with **Hyper+S**, record Control+Option+Shift+Command+S for **Speak Selected or Copied Text**. Assign global shortcuts in **Raycast Settings > Extensions > Speak Text**. The player remembers speeds from 0.5× to 2× in quarter steps. Changing speed preserves your playback position, including while paused. At the end, Space replays the passage.
 
 The extension downloads checksum-verified releases from the sherpa-onnx project and keeps them in Raycast’s extension support folder. Selected text and generated audio stay on your Mac. Short sentences are grouped into passages of at least 96 characters, unless the entire selection is shorter. The reader favors paragraph and sentence endings, then clause punctuation. It aims for a shorter opening passage and gives later passages more room. The player keeps Kokoro loaded, prepares upcoming passages in memory, and queues them on one continuous audio stream. [Kokoro model](https://huggingface.co/hexgrad/Kokoro-82M) · [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)
 
+[Website and voice demo](https://speak.orbitlabs.studio)
+
 Maintained by Rami Maalouf. [rami-maalouf on GitHub](https://github.com/rami-maalouf)
-
-## Build from source
-
-Install Bun, Xcode with a macOS SDK, and Raycast. From this directory run:
-
-```sh
-bun install --frozen-lockfile
-bun run dev
-```
-
-The universal player included in the release is built from the Swift and C sources in `native/`. To rebuild it and package the extension:
-
-```sh
-bash native/build.sh
-bun run build
-mkdir -p dist
-bunx ray bundle -o dist/Speak-Text.rayext
-```

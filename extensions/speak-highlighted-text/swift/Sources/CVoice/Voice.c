@@ -1,5 +1,5 @@
 #include "Voice.h"
-#include "c-api.h"
+#include "vendor/c-api.h"
 #include <dlfcn.h>
 #include <limits.h>
 #include <stdio.h>

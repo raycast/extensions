@@ -1,3 +1,7 @@
 node_modules/
 raycast-env.d.ts
 dist/
+.raycast-swift-build/
+compiled_raycast_swift/
+.build/
+.swiftpm/

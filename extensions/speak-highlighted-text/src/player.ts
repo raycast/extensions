@@ -1,3 +1,5 @@
+// raycast builds the player from this package when it bundles the extension.
+import "swift:../swift";
 import { environment } from "@raycast/api";
 import { createHash } from "node:crypto";
 import {
@@ -13,7 +15,11 @@ import {
 import { join } from "node:path";
 
 export async function preparePlayer() {
-  const binary = join(environment.assetsPath, "SpeakPlayer");
+  const binary = join(
+    environment.assetsPath,
+    "compiled_raycast_swift",
+    "swift",
+  );
   const plist = join(environment.assetsPath, "PlayerInfo.plist");
   const installer = join(environment.assetsPath, "install-voice.sh");
   const digest = createHash("sha256")

@@ -1,7 +1,69 @@
 import AppKit
+import CVoice
 import Combine
 import AVFoundation
 import SwiftUI
+
+private let panelCornerRadius: CGFloat = 18
+
+private final class ReaderPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+}
+
+private struct PanelGlass: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    @ViewBuilder func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: panelCornerRadius, style: .continuous)
+        if reduceTransparency {
+            content.background(Color(nsColor: .windowBackgroundColor), in: shape)
+        } else if #available(macOS 26, *) {
+            content.glassEffect(.regular, in: shape)
+        } else {
+            content.background(.regularMaterial, in: shape)
+        }
+    }
+}
+
+private struct WindowGrip: NSViewRepresentable {
+    final class GripView: NSView {
+        override var mouseDownCanMoveWindow: Bool { false }
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+        override func resetCursorRects() {
+            super.resetCursorRects()
+            addCursorRect(bounds, cursor: .openHand)
+        }
+
+        override func mouseDown(with event: NSEvent) {
+            NSCursor.closedHand.push()
+            defer { NSCursor.pop() }
+            window?.performDrag(with: event)
+        }
+
+        override func draw(_ dirtyRect: NSRect) {
+            NSColor.secondaryLabelColor.setFill()
+            for x in [-5, 0, 5] {
+                for y in [-2.5, 2.5] {
+                    let dot = NSRect(x: bounds.midX + CGFloat(x) - 1.25,
+                                     y: bounds.midY + y - 1.25, width: 2.5, height: 2.5)
+                    NSBezierPath(ovalIn: dot).fill()
+                }
+            }
+        }
+    }
+
+    func makeNSView(context: Context) -> GripView {
+        let view = GripView()
+        view.toolTip = "Drag to move player"
+        view.setAccessibilityElement(true)
+        view.setAccessibilityRole(.handle)
+        view.setAccessibilityLabel("Move player")
+        return view
+    }
+
+    func updateNSView(_ view: GripView, context: Context) {}
+}
 
 struct PlayerView: View {
     @ObservedObject var reader: Reader
@@ -52,7 +114,7 @@ struct PlayerView: View {
                 if reader.state == .preparing || reader.state == .downloading {
                     Text(reader.state.rawValue).font(.caption).foregroundStyle(.secondary)
                 }
-                Spacer(minLength: 4)
+                WindowGrip().frame(minWidth: 24, maxWidth: .infinity).frame(height: 24)
                 Button { reader.changeSpeed(-1) } label: {
                     Label("Speak slower", systemImage: "minus").frame(width: 22, height: 24)
                 }.disabled(reader.step == 2).keyboardShortcut("-", modifiers: []).help("Slower (-)")
@@ -69,6 +131,7 @@ struct PlayerView: View {
         }
         .padding(.horizontal, 18).padding(.top, 16).padding(.bottom, 10)
         .frame(width: width).fixedSize()
+        .modifier(PanelGlass())
         .ignoresSafeArea()
     }
 }
@@ -104,19 +167,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 _ = rmdir(dir.path)
             }
             if panel == nil {
-                let window = NSPanel(contentRect: .zero, styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: false)
+                let window = ReaderPanel(contentRect: .zero, styleMask: [.borderless, .closable], backing: .buffered, defer: false)
                 window.title = "Speak Text"
-                window.titleVisibility = .hidden
-                window.titlebarAppearsTransparent = true
+                window.isOpaque = false
+                window.backgroundColor = .clear
+                window.hasShadow = true
                 window.isMovableByWindowBackground = true
-                for button in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
-                    window.standardWindowButton(button)?.isHidden = true
-                }
                 let view = PlayerView(reader: reader, close: { [weak window] in window?.close() })
                 let host = NSHostingController(rootView: view)
                 host.sizingOptions = []
                 if #available(macOS 13.3, *) { host.safeAreaRegions = [] }
                 window.contentViewController = host
+                host.view.wantsLayer = true
+                host.view.layer?.cornerRadius = panelCornerRadius
+                host.view.layer?.cornerCurve = .continuous
+                host.view.layer?.masksToBounds = true
                 let measure = { host.sizeThatFits(in: CGSize(width: 404, height: 2000)) }
                 window.setContentSize(measure())
                 sizing = reader.$excerpt.receive(on: DispatchQueue.main).sink { [weak window] _ in

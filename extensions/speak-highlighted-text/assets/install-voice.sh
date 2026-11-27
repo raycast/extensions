@@ -2,6 +2,9 @@
 set -euo pipefail
 umask 077
 root=$1
+# the shell keeps fd 9 open, so the lock lasts through installation.
+exec 9>"$root.lock"
+/usr/bin/perl -MFcntl=:flock -e 'open(my $lock, ">&=", 9) or die $!; flock($lock, LOCK_EX) or die $!'
 [[ -d "$root" ]] && exit 0
 stage=$(mktemp -d "$(dirname "$root")/voice-install-XXXXXX")
 trap 'rm -rf "$stage"' EXIT
