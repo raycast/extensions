@@ -9,7 +9,7 @@ import {
 } from "./lib/browser";
 import { PRIVACY_ACCESSIBILITY_URL, SearchEngineId } from "./lib/constants";
 import { readBrowserSettings } from "./lib/data";
-import { buildNavigableUrl, getDomain } from "./lib/utils";
+import { buildNavigableUrl, getDomain, looksLikeUrl } from "./lib/utils";
 
 export default async function NewTabCommand(props: LaunchProps<{ arguments: Arguments.NewTab }>) {
   if (!(await isSearchBrowserInstalled())) {
@@ -22,7 +22,7 @@ export default async function NewTabCommand(props: LaunchProps<{ arguments: Argu
   try {
     if (query) {
       const preferences = getPreferenceValues<Preferences>();
-      const settings = readBrowserSettings();
+      const settings = looksLikeUrl(query) ? null : readBrowserSettings();
       const { url, isSearch, engineName } = buildNavigableUrl(
         query,
         preferences.searchEngine as SearchEngineId | undefined,

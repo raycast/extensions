@@ -2,7 +2,7 @@ import { Tool, getPreferenceValues } from "@raycast/api";
 import { openUrlInSearch } from "../lib/browser";
 import { SearchEngineId } from "../lib/constants";
 import { readBrowserSettings } from "../lib/data";
-import { buildNavigableUrl } from "../lib/utils";
+import { buildNavigableUrl, looksLikeUrl } from "../lib/utils";
 
 type Input = {
   /** An HTTP(S) website URL or web search query to open in Search Browser. */
@@ -11,7 +11,7 @@ type Input = {
 
 function resolveSafeHttpTarget(rawInput: string) {
   const preferences = getPreferenceValues<Preferences>();
-  const settings = readBrowserSettings();
+  const settings = looksLikeUrl(rawInput) ? null : readBrowserSettings();
   const result = buildNavigableUrl(rawInput, preferences.searchEngine as SearchEngineId | undefined, settings);
   if (!/^https?:\/\//i.test(result.url)) {
     throw new Error("Only http:// and https:// URLs or web search queries are allowed.");

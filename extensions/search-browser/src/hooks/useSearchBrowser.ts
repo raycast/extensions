@@ -10,6 +10,12 @@ import {
 } from "../lib/data";
 import { BookmarkItem, BrowserSettingsSnapshot, HistoryEntry } from "../lib/types";
 
+function combineErrors(first: Error | null | undefined, second: Error | null | undefined): Error | null {
+  const messages = [first?.message, second?.message].filter((m): m is string => Boolean(m && m.trim()));
+  if (messages.length === 0) return null;
+  return new Error(messages.join(" · "));
+}
+
 export function useSearchInstalled() {
   return useCachedPromise(isSearchBrowserInstalled, [], {
     keepPreviousData: true,
@@ -18,7 +24,12 @@ export function useSearchInstalled() {
 
 export function useOpenTabs() {
   const [localSnapshot, setLocalSnapshot] = useState(() => readTabsLocalSnapshot());
-  const { data: liveData, isLoading, revalidate: revalidateLive } = usePromise(getOpenTabsWithFallback, []);
+  const {
+    data: liveData,
+    error: liveError,
+    isLoading,
+    revalidate: revalidateLive,
+  } = usePromise(getOpenTabsWithFallback, []);
 
   const revalidate = useCallback(() => {
     setLocalSnapshot(readTabsLocalSnapshot());
@@ -35,7 +46,7 @@ export function useOpenTabs() {
       remoteDevices: localSnapshot.remoteDevices,
       settings: localSnapshot.settings,
     },
-    error: localSnapshot.error,
+    error: combineErrors(localSnapshot.error, liveError),
     isLoading,
     revalidate,
   };
@@ -47,12 +58,7 @@ function loadBookmarksState(): {
 } {
   try {
     const bookmarks = readBookmarks();
-    let settings: BrowserSettingsSnapshot | null = null;
-    try {
-      settings = readBrowserSettings();
-    } catch {
-      settings = null;
-    }
+    const settings = readBrowserSettings();
     return { data: { bookmarks, settings }, error: null };
   } catch (err) {
     return {
@@ -78,12 +84,7 @@ function loadHistoryState(): {
 } {
   try {
     const history = readHistory();
-    let settings: BrowserSettingsSnapshot | null = null;
-    try {
-      settings = readBrowserSettings();
-    } catch {
-      settings = null;
-    }
+    const settings = readBrowserSettings();
     return { data: { history, settings }, error: null };
   } catch (err) {
     return {
@@ -105,7 +106,12 @@ export function useHistory() {
 
 export function useUnifiedSearchData() {
   const [localSnapshot, setLocalSnapshot] = useState(() => readLocalBrowserSnapshot());
-  const { data: liveData, isLoading, revalidate: revalidateLive } = usePromise(getOpenTabsWithFallback, []);
+  const {
+    data: liveData,
+    error: liveError,
+    isLoading,
+    revalidate: revalidateLive,
+  } = usePromise(getOpenTabsWithFallback, []);
 
   const revalidate = useCallback(() => {
     setLocalSnapshot(readLocalBrowserSnapshot());
@@ -124,7 +130,7 @@ export function useUnifiedSearchData() {
       history: localSnapshot.history,
       settings: localSnapshot.settings,
     },
-    error: localSnapshot.error,
+    error: combineErrors(localSnapshot.error, liveError),
     isLoading,
     revalidate,
   };

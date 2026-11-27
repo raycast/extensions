@@ -29,15 +29,14 @@ export default async function OpenUrlCommand(props: LaunchProps<{ arguments: Arg
     return;
   }
 
-  const preferences = getPreferenceValues<Preferences>();
-  const settings = readBrowserSettings();
-  const { url, isSearch, engineName } = buildNavigableUrl(
-    input,
-    preferences.searchEngine as SearchEngineId | undefined,
-    settings
-  );
-
   try {
+    const preferences = getPreferenceValues<Preferences>();
+    const settings = looksLikeUrl(input) ? null : readBrowserSettings();
+    const { url, isSearch, engineName } = buildNavigableUrl(
+      input,
+      preferences.searchEngine as SearchEngineId | undefined,
+      settings
+    );
     await openUrlInSearch(url);
     await showHUD(
       isSearch ? `Searching ${engineName} in Search Browser` : `Opened ${getDomain(url)} in Search Browser`

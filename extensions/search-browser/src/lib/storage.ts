@@ -135,20 +135,25 @@ export function readICloudFile(baseDir: string = SEARCH_DATA_DIR): RawICloudFile
 
 /**
  * Read Search Browser's own settings snapshot (e.g. default search engine) from icloud.json.
+ * Never throws so damaged or unreadable iCloud settings cannot block URL navigation.
  */
 export function readBrowserSettings(
   baseDir: string = SEARCH_DATA_DIR,
   icloud?: RawICloudFile | null
 ): BrowserSettingsSnapshot | null {
-  const data = icloud === undefined ? readICloudFile(baseDir) : icloud;
-  if (!data?.values?.settings) return null;
-  const decoded = decodeBase64Json<{ engine?: string; custom?: string; look?: string }>(data.values.settings);
-  if (!decoded) return null;
-  return {
-    engine: decoded.engine,
-    customSearchUrl: decoded.custom,
-    look: decoded.look,
-  };
+  try {
+    const data = icloud === undefined ? readICloudFile(baseDir) : icloud;
+    if (!data?.values?.settings) return null;
+    const decoded = decodeBase64Json<{ engine?: string; custom?: string; look?: string }>(data.values.settings);
+    if (!decoded) return null;
+    return {
+      engine: decoded.engine,
+      customSearchUrl: decoded.custom,
+      look: decoded.look,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**
