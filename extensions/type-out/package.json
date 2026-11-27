@@ -1,0 +1,85 @@
+{
+  "name": "type-out",
+  "title": "Type out",
+  "description": "Type out text character by character instead of pasting — for places where paste is disabled or discouraged",
+  "icon": "icon.png",
+  "author": "M4Marvin",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "keywords": ["type", "typing", "keystroke", "typewriter", "paste", "clipboard"],
+  "commands": [
+    {
+      "name": "type-out",
+      "title": "Type out Text",
+      "description": "Types out the given text or your clipboard character by character into the frontmost app",
+      "mode": "no-view",
+      "keywords": ["type", "keystroke", "clipboard"],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text to type (leave empty to use clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Type out from History",
+      "description": "Pick one of your recent clipboard entries and type it out character by character",
+      "mode": "view",
+      "keywords": ["clipboard", "history", "paste"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "charDelayMs",
+      "title": "Typing Speed",
+      "description": "Delay between characters, in milliseconds (5–1000)",
+      "type": "textfield",
+      "placeholder": "25",
+      "required": false,
+      "default": "25"
+    },
+    {
+      "name": "startDelayMs",
+      "title": "Start Delay",
+      "description": "Milliseconds to wait before typing starts, so focus settles on the target app",
+      "type": "textfield",
+      "placeholder": "300",
+      "required": false,
+      "default": "300"
+    },
+    {
+      "name": "pressReturn",
+      "title": "Press Return",
+      "description": "Press Return after the text finishes typing",
+      "type": "checkbox",
+      "label": "Press Return at the end",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3",
+    "react": "^19.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint src --max-warnings=0",
+    "fix-lint": "eslint src --fix",
+    "gen-icon": "node scripts/gen-icon.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
