@@ -1,6 +1,6 @@
 # Echo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Search Echo History: search everything you have played and pick it back up, with Echo's own actions.
 - Now Playing: a live line showing what is playing; Return plays or pauses it.
