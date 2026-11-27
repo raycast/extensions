@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fix-keyboard-layout-slovak",
+  "title": "Fix Keyboard Layout (Slovak)",
+  "description": "Fix text typed with the wrong keyboard layout – converts between English (US/ABC) and Slovak keyboards, e.g. \"m83 nov0 m]so\" → \"máš nové mäso\".",
+  "icon": "extension-icon.png",
+  "author": "matus-markusek",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "keyboard",
+    "layout",
+    "slovak",
+    "slovensky",
+    "diacritics",
+    "diakritika",
+    "qwerty",
+    "qwertz"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fix-layout",
+      "title": "Fix Keyboard Layout",
+      "subtitle": "Auto-detect",
+      "description": "Detect which layout the selected text was typed in and convert it to the other one.",
+      "mode": "no-view"
+    },
+    {
+      "name": "en-to-sk",
+      "title": "Convert English Layout to Slovak",
+      "subtitle": "EN → SK",
+      "description": "Text typed on the English keyboard that should have been Slovak (\"m83\" → \"máš\").",
+      "mode": "no-view"
+    },
+    {
+      "name": "sk-to-en",
+      "title": "Convert Slovak Layout to English",
+      "subtitle": "SK → EN",
+      "description": "Text typed on the Slovak keyboard that should have been English (\"it§s\" → \"it's\").",
+      "mode": "no-view"
+    },
+    {
+      "name": "preview-conversion",
+      "title": "Preview Keyboard Layout Conversion",
+      "subtitle": "EN ⇄ SK",
+      "description": "Type or paste text and see it converted in both directions, then paste or copy the result.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "slovakLayout",
+      "title": "Slovak Layout",
+      "description": "Which Slovak keyboard layout you use in macOS.",
+      "type": "dropdown",
+      "required": false,
+      "default": "qwerty",
+      "data": [
+        {
+          "title": "Slovak – QWERTY",
+          "value": "qwerty"
+        },
+        {
+          "title": "Slovak (QWERTZ)",
+          "value": "qwertz"
+        }
+      ]
+    },
+    {
+      "name": "keepNumbers",
+      "title": "Numbers",
+      "label": "Keep standalone numbers unchanged",
+      "description": "Words made only of digits (e.g. 2025, 10.5) are not converted.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "useClipboard",
+      "title": "Clipboard",
+      "label": "Convert clipboard when nothing is selected",
+      "description": "If no text is selected, convert the clipboard content and copy the result back to the clipboard.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
