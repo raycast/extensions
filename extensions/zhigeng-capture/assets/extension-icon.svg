@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#2563EB" />
+  <!-- Pen nib -->
+  <path d="M170 342 L120 392 L140 412 L190 372 L256 306 L220 270 Z" fill="#FFFFFF" opacity="0.95" />
+  <!-- Paper -->
+  <rect x="200" y="80" width="180" height="240" rx="12" fill="#FFFFFF" opacity="0.95" />
+  <!-- Text lines -->
+  <rect x="225" y="110" width="130" height="10" rx="5" fill="#93C5FD" />
+  <rect x="225" y="140" width="110" height="10" rx="5" fill="#93C5FD" />
+  <rect x="225" y="170" width="120" height="10" rx="5" fill="#93C5FD" />
+  <rect x="225" y="200" width="90" height="10" rx="5" fill="#93C5FD" />
+  <rect x="225" y="230" width="105" height="10" rx="5" fill="#93C5FD" />
+  <!-- Clock icon for quick capture -->
+  <circle cx="380" cy="180" r="40" fill="#F59E0B" />
+  <circle cx="380" cy="180" r="32" fill="none" stroke="#FFFFFF" stroke-width="5" />
+  <line x1="380" y1="180" x2="380" y2="160" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+  <line x1="380" y1="180" x2="395" y2="190" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+</svg>
