@@ -145,9 +145,17 @@ export default function Command() {
     try {
       // The saved items of a session with a lock code show once pass-cli says it isn't locked.
       if (!hasLoadedFromCache.current && options?.isUnlocked !== true) {
-        const blocked = await lockedSessionError();
+        // Session Locked shows at once when the session has most likely locked itself, until pass-cli says.
+        let showsLockDue = false;
+        const blocked = await lockedSessionError((locked) => {
+          if (!isLatest()) return;
+          showsLockDue = true;
+          setError(locked.type);
+        });
         if (!isLatest()) return;
         if (blocked) throw blocked;
+        // E.g. used in a terminal meanwhile: it isn't locked.
+        if (showsLockDue) setError(null);
       }
       const cachedItems = !hasLoadedFromCache.current ? (await getCachedItems())?.data : undefined;
       if (!isLatest()) return;

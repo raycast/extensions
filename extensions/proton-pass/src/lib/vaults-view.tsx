@@ -96,14 +96,23 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
 
     // Saved vaults wait for pass-cli to confirm the session, as in the item list: an ended one shows the login screen.
     const sessionCheck = hasLoadedFromCache.current || isUnlocked ? Promise.resolve(undefined) : endedSessionError();
+    // Session Locked shows at once when the session has most likely locked itself, until pass-cli says.
+    let showsLockDue = false;
+    const showLockDue = (locked: PassCliError) => {
+      if (!isLatest()) return;
+      showsLockDue = true;
+      setError(locked);
+    };
     const [cachedVaults, cachedItems, cachedSharing, cachedFolders, sessionEnded] = await Promise.all([
       getCachedVaults(),
       getCachedItems(),
       getCachedSharing(),
       getCachedFolders(),
-      waitForSessionCheck(sessionCheck),
+      waitForSessionCheck(sessionCheck, showLockDue),
     ]);
     if (!isLatest()) return;
+    // E.g. used in a terminal meanwhile: it isn't locked.
+    if (showsLockDue && !sessionEnded) setError(null);
     let isFresh = false;
     if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));

@@ -5105,9 +5105,11 @@ test("once unlocked, Get TOTP Code shows its items at once, their codes followin
 
 /**
  * pass-cli.ts with a session check that answers when told, the saved Has Lock Code as given, and its waits done when
- * told: `elapse` ends those of up to `ms`.
+ * told: `elapse` ends those of up to `ms`. `lock` gives the lock's saved delay, in seconds, and how long ago the
+ * extension last used the session.
  */
-function passCliWithSessionWaits(savedLockCode: boolean) {
+function passCliWithSessionWaits(savedLockCode: boolean, lock: { afterSeconds?: number; usedAgoMs?: number } = {}) {
+  const now = 1_800_000_000_000;
   let answer: (state: { state: string; hasLock: boolean }) => void = () => undefined;
   let toldLockCode: () => void = () => undefined;
   const saved: boolean[] = [];
@@ -5133,6 +5135,9 @@ function passCliWithSessionWaits(savedLockCode: boolean) {
         setSessionHasLock: async (hasLock: boolean) => {
           saved.push(hasLock);
         },
+        getSessionLockAfter: async () => lock.afterSeconds,
+        getSessionUsedAt: async () => (lock.usedAgoMs === undefined ? undefined : now - lock.usedAgoMs),
+        setSessionUsedAt: async () => undefined,
       },
       "./cli": { ensureCli: async () => "/fixture-cli" },
       "./core/adapter": {
@@ -5153,12 +5158,16 @@ function passCliWithSessionWaits(savedLockCode: boolean) {
         timers.push({ run, ms });
         return 0;
       },
+      Date: { now: () => now },
     },
   ) as unknown as {
     SESSION_CHECK_WAIT_MS: number;
     endedSessionError: () => Promise<PassCliError | undefined>;
-    waitForSessionCheck: (check: Promise<PassCliError | undefined>) => Promise<PassCliError | undefined>;
-    lockedSessionError: () => Promise<PassCliError | undefined>;
+    waitForSessionCheck: (
+      check: Promise<PassCliError | undefined>,
+      onLockDue?: (locked: PassCliError) => void,
+    ) => Promise<PassCliError | undefined>;
+    lockedSessionError: (onLockDue?: (locked: PassCliError) => void) => Promise<PassCliError | undefined>;
   };
   const elapse = async (ms: number) => {
     for (let round = 0; round < 5; round++) {
@@ -5262,6 +5271,43 @@ test("a session with a lock code waits for pass-cli up to 30 seconds, with Check
   assert.equal(plain.toasts(), "[]");
 });
 
+test("a session unused for longer than its lock's delay shows Session Locked after the usual wait, while pass-cli confirms", async () => {
+  // Unused for longer than its 5 minutes: Proton has most likely locked it, and pass-cli can take many seconds to say so.
+  const due = passCliWithSessionWaits(true, { afterSeconds: 300, usedAgoMs: 301_000 });
+  const shown: string[] = [];
+  const dueCheck = due.api.waitForSessionCheck(due.api.endedSessionError(), (locked) => shown.push(locked.type));
+  await due.elapse(due.api.SESSION_CHECK_WAIT_MS);
+  assert.deepEqual(shown, ["session_locked"]);
+  assert.equal(due.toasts(), "[]");
+  // pass-cli's answer still comes: here, used meanwhile in a terminal, the session is open and its items show.
+  assert.equal(await settledOf(dueCheck), false);
+  due.answer("open");
+  assert.equal(await dueCheck, undefined);
+
+  // Within the delay, or with no delay or use saved yet, the check is waited for, as before.
+  for (const lock of [{ afterSeconds: 300, usedAgoMs: 299_000 }, { afterSeconds: 300 }, { usedAgoMs: 301_000 }]) {
+    const waiting = passCliWithSessionWaits(true, lock);
+    const notShown: string[] = [];
+    const check = waiting.api.waitForSessionCheck(waiting.api.endedSessionError(), (locked) =>
+      notShown.push(locked.type),
+    );
+    await waiting.elapse(waiting.api.SESSION_CHECK_WAIT_MS);
+    assert.deepEqual(notShown, []);
+    assert.equal(waiting.toasts(), JSON.stringify([{ style: "animated", title: "Checking Session…", hidden: false }]));
+    waiting.answer("locked");
+    assert.equal((await check)?.type, "session_locked");
+  }
+
+  // Get TOTP Code shows it the same way.
+  const totp = passCliWithSessionWaits(true, { afterSeconds: 30, usedAgoMs: 31_000 });
+  const totpShown: string[] = [];
+  const totpCheck = totp.api.lockedSessionError((locked) => totpShown.push(locked.type));
+  await totp.elapse(totp.api.SESSION_CHECK_WAIT_MS);
+  assert.deepEqual(totpShown, ["session_locked"]);
+  totp.answer("locked");
+  assert.equal((await totpCheck)?.type, "session_locked");
+});
+
 test("a session whose lock code was removed stops waiting for the lock check at its next opening", async () => {
   const removed = passCliWithSessionWaits(true);
   const check = removed.api.endedSessionError();
@@ -5330,6 +5376,54 @@ test("Browse Items shows nothing of a locked session while pass-cli says so, how
   assert.equal(shownSaved, false);
   assert.equal(render().props.error, "session_locked");
   assert.equal(listings, 0);
+});
+
+test("Browse Items shows Session Locked at once when the session has most likely locked itself, then its items if it hasn't", async () => {
+  let shownSaved = false;
+  let answer: (error: PassCliError | undefined) => void = () => undefined;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: () =>
+        new Promise((resolve) => {
+          answer = resolve;
+        }),
+      // As pass-cli.ts does for a session unused for longer than its lock's delay.
+      waitForSessionCheck: (check: Promise<unknown>, onLockDue: (locked: PassCliError) => void) => {
+        onLockDue(sessionLocked());
+        return check;
+      },
+      listItems: async () => [],
+      listVaultsAndItems: async () => ({ vaults: [], items: [], failedVaults: [] }),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+      setCachedFolders: async () => undefined,
+    },
+    "./item-counts": {
+      ...itemCounts,
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(render().props.error, "session_locked");
+  assert.equal(shownSaved, false);
+
+  // E.g. used in a terminal meanwhile.
+  answer(undefined);
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(render().props.error, undefined);
+  assert.equal(shownSaved, true);
 });
 
 test("the vault list shows nothing of a locked session while pass-cli says so, however long it takes", async () => {

@@ -147,12 +147,19 @@ export function SearchItemsView({
     // wait until pass-cli says whether it's locked.
     const sessionCheck =
       hasLoadedFromCache.current || sessionConfirmed || isUnlocked ? Promise.resolve(undefined) : endedSessionError();
+    // Session Locked shows at once when the session has most likely locked itself, until pass-cli says.
+    let showsLockDue = false;
+    const showLockDue = (locked: PassCliError) => {
+      if (!isLatest()) return;
+      showsLockDue = true;
+      setError({ type: locked.type, message: locked.message });
+    };
     const [sharedItems, cachedVaults, cachedFolders, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
       getCachedFolders(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
-      waitForSessionCheck(sessionCheck),
+      waitForSessionCheck(sessionCheck, showLockDue),
     ]);
     const sharedHasVault = sharedItems?.data.some((item) => listedUnder(item) === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
@@ -168,6 +175,8 @@ export function SearchItemsView({
           }
         : sharedItems;
     if (!isLatest()) return;
+    // E.g. used in a terminal meanwhile: it isn't locked.
+    if (showsLockDue && !sessionEnded) setError(null);
     let isFresh = false;
     if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current && !sessionEnded) {
       // Show cached metadata once the session is confirmed, even when stale: listing everything can take

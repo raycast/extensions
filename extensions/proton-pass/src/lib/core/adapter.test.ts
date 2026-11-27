@@ -154,6 +154,22 @@ test("a session with a lock code is asked whether it's locked: info says only th
   });
 });
 
+test("the session check gives the lock's delay, and only commands on the account count as using the session", async () => {
+  const delays: (number | undefined)[] = [];
+  await createPassCliAdapter(fakeCommand("session:locked")).checkSession((seconds) => delays.push(seconds));
+  assert.deepEqual(delays, [300]);
+
+  let uses = 0;
+  const hooks = { onSessionUsed: () => void uses++ };
+  await createPassCliAdapter(fakeCommand("json:vaults-array"), {}, hooks).listVaults();
+  assert.equal(uses, 1);
+  // Not info, nor the lock check, which say nothing of what the session did: Proton's delay may have passed.
+  await createPassCliAdapter(fakeCommand("session:unlocked"), {}, hooks).checkSession();
+  // Nor a command refused because the session is locked.
+  await assert.rejects(createPassCliAdapter(fakeCommand("locked"), {}, hooks).listVaults());
+  assert.equal(uses, 1);
+});
+
 test("the session check reports a logged-out session as ended, and a locked one refused by info as locked", async () => {
   assert.deepEqual(await createPassCliAdapter(fakeCommand("session:logged-out")).checkSession(), {
     state: "ended",

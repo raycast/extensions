@@ -1,7 +1,14 @@
 import { environment, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
-import { clearCache, getSessionHasLock, setSessionHasLock } from "./cache";
+import {
+  clearCache,
+  getSessionHasLock,
+  getSessionLockAfter,
+  getSessionUsedAt,
+  setSessionHasLock,
+  setSessionUsedAt,
+} from "./cache";
 import { checkCliVersion, ensureCli, preferInstalledCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter, SessionCheck } from "./core/adapter";
 import { unlockCommandLine, UnlockOutcome } from "./core/unlock";
@@ -85,6 +92,17 @@ const loginDir = () => join(environment.supportPath, "login");
 /** The session check in flight, which every other command waits for: see endedSessionError. */
 let sessionCheck: Promise<unknown> | undefined;
 
+/** When this Raycast session last saved a use of the session: a listing runs many commands at once. */
+let usedAtSaved = 0;
+
+/** For waitForSessionCheck: when the extension last used the session, which starts its lock's delay again. */
+function saveSessionUse() {
+  const now = Date.now();
+  if (now - usedAtSaved < 1_000) return;
+  usedAtSaved = now;
+  setSessionUsedAt(now).catch(() => undefined);
+}
+
 async function getAdapter(): Promise<PassCliAdapter> {
   await sessionCheck?.catch(() => undefined);
   // A pass-cli command running while a login saves its session can make pass-cli delete that session.
@@ -97,6 +115,7 @@ async function getAdapter(): Promise<PassCliAdapter> {
     {
       env: { ...process.env, PATH: getEnhancedPath() },
     },
+    { onSessionUsed: saveSessionUse },
   );
 }
 
@@ -204,15 +223,36 @@ function answerWithin<T>(check: Promise<T>, ms: number): Promise<{ answer: T } |
   ]);
 }
 
+const lockedError = () => new PassCliError("Your pass-cli session is locked.", "session_locked");
+
+/**
+ * Whether Proton has most likely locked the session: the extension hasn't used it for longer than its lock's delay. It
+ * may have been used elsewhere meanwhile, e.g. in a terminal.
+ */
+async function isLockDue(): Promise<boolean> {
+  const [lockAfterSeconds, usedAt] = await Promise.all([getSessionLockAfter(), getSessionUsedAt()]);
+  if (lockAfterSeconds === undefined || usedAt === undefined) return false;
+  return Date.now() - usedAt >= lockAfterSeconds * 1000;
+}
+
 /**
  * endedSessionError's answer, for saved items to show or not: nothing after SESSION_CHECK_WAIT_MS, for them to show
  * anyway. A session with a lock code, as pass-cli said now or at an earlier opening, is waited for longer: until pass-cli
- * says whether it's locked, which takes a second command. Meanwhile, a toast says so, as the list shows nothing.
+ * says whether it's locked, which takes a second command. Meanwhile, a toast says so, as the list shows nothing. Unless
+ * the session has most likely locked itself since the extension last used it: `onLockDue` then gets the error to show
+ * at once, for the lock code to be typed while pass-cli answers, which can take many seconds after a while unused.
  */
-export async function waitForSessionCheck(check: Promise<PassCliError | undefined>): Promise<PassCliError | undefined> {
+export async function waitForSessionCheck(
+  check: Promise<PassCliError | undefined>,
+  onLockDue?: (locked: PassCliError) => void,
+): Promise<PassCliError | undefined> {
   const early = await answerWithin(check, SESSION_CHECK_WAIT_MS);
   if (early) return early.answer;
   if (!hasLockCode && !(await getSessionHasLock())) return undefined;
+  if (onLockDue && (await isLockDue())) {
+    onLockDue(lockedError());
+    return (await answerWithin(check, LOCK_CHECK_WAIT_MS - SESSION_CHECK_WAIT_MS))?.answer;
+  }
   // Not waited for: the answer mustn't wait for Raycast.
   const toast = Promise.resolve()
     .then(() => showToast({ style: Toast.Style.Animated, title: "Checking Session…" }))
@@ -226,9 +266,11 @@ export async function waitForSessionCheck(check: Promise<PassCliError | undefine
  * For Get TOTP Code, which shows its saved items without asking pass-cli first: endedSessionError, through
  * waitForSessionCheck, when the session has a lock code. Nothing otherwise, at once.
  */
-export async function lockedSessionError(): Promise<PassCliError | undefined> {
+export async function lockedSessionError(
+  onLockDue?: (locked: PassCliError) => void,
+): Promise<PassCliError | undefined> {
   if (USE_MOCK_DATA || !(await getSessionHasLock())) return undefined;
-  return waitForSessionCheck(endedSessionError());
+  return waitForSessionCheck(endedSessionError(), onLockDue);
 }
 
 async function checkSession(): Promise<SessionCheck> {
@@ -237,10 +279,10 @@ async function checkSession(): Promise<SessionCheck> {
     return { state: "open", hasLock: false };
   }
   const adapter = await getAdapter();
-  const found = await adapter.checkSession(() => {
+  const found = await adapter.checkSession((lockAfterSeconds) => {
     hasLockCode = true;
     // For the next opening, which then waits for the answer from the start.
-    setSessionHasLock(true).catch(() => undefined);
+    setSessionHasLock(true, lockAfterSeconds).catch(() => undefined);
   });
   hasLockCode = found.hasLock;
   if (!found.hasLock) await setSessionHasLock(false).catch(() => undefined);
@@ -263,7 +305,7 @@ export async function endedSessionError(): Promise<PassCliError | undefined> {
     const { state } = await check;
     if (state === "open") return undefined;
     // pass-cli's info answers for a locked session too: see SessionCheck.
-    if (state === "locked") return new PassCliError("Your pass-cli session is locked.", "session_locked");
+    if (state === "locked") return lockedError();
   } catch (error) {
     // Saved items belong to a locked session too, and show again once it's unlocked.
     if (error instanceof PassCliError && (PassCliError.isCliPath(error.type) || error.type === "session_locked")) {
