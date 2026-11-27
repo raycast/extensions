@@ -1,0 +1,334 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lancetta",
+  "title": "Lancetta",
+  "description": "View Claude Code and Codex quota, suggestions, sessions, tokens, and processes with the free Lancetta app for macOS.",
+  "icon": "extension-icon.png",
+  "author": "Undolog",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "claude",
+    "claude code",
+    "codex",
+    "quota",
+    "rate limit",
+    "usage",
+    "tokens",
+    "coding agents",
+    "ai"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-quota",
+      "title": "Show Quota",
+      "subtitle": "Lancetta",
+      "description": "Each coding agent's 5-hour and 7-day windows with Lancetta's charts and clock, per-model weeks, refusals and suggestions",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "display",
+          "title": "Show",
+          "description": "Whether a window shows what has been used or what is left. Follow Lancetta reads the app's own setting.",
+          "type": "dropdown",
+          "required": false,
+          "default": "lancetta",
+          "data": [
+            {
+              "title": "Follow Lancetta",
+              "value": "lancetta"
+            },
+            {
+              "title": "Used",
+              "value": "used"
+            },
+            {
+              "title": "Left",
+              "value": "left"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sessions",
+      "title": "Agent Sessions",
+      "subtitle": "Lancetta",
+      "description": "The Claude Code and Codex sessions on Lancetta's wall: working, waiting on you, done; open one in your terminal",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "terminal",
+          "title": "Terminal",
+          "description": "The app a session opens in",
+          "type": "appPicker",
+          "required": false,
+          "default": "com.apple.Terminal"
+        },
+        {
+          "name": "showDone",
+          "title": "Sessions",
+          "label": "Show done sessions",
+          "description": "List the latest sessions you are done with, below the open ones",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "token-usage",
+      "title": "Token Usage",
+      "subtitle": "Lancetta",
+      "description": "Claude Code's tokens per day and per project, from Lancetta's scan of its transcripts",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "days",
+          "title": "Period",
+          "description": "How many days the chart covers",
+          "type": "dropdown",
+          "required": false,
+          "default": "30",
+          "data": [
+            {
+              "title": "7 Days",
+              "value": "7"
+            },
+            {
+              "title": "14 Days",
+              "value": "14"
+            },
+            {
+              "title": "30 Days",
+              "value": "30"
+            },
+            {
+              "title": "90 Days",
+              "value": "90"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "codex-processes",
+      "title": "Codex Processes",
+      "subtitle": "Lancetta",
+      "description": "The Codex plugin's app-server trees running, the memory they hold, and the orphans Lancetta can reclaim",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-quota",
+      "title": "Get Quota",
+      "description": "Get how much of each coding agent's quota (Claude, Codex) is used and left in its 5-hour and 7-day windows, when each resets, whether the account is refusing requests, and Lancetta's suggestions, including whether the current pace runs out before the reset. Use it before answering whether a long agent run can start now."
+    },
+    {
+      "name": "get-sessions",
+      "title": "Get Sessions",
+      "description": "Get the Claude Code and Codex sessions on Lancetta's wall: the ones working and the ones waiting on the user (a question, an approval, a finished turn, a failure), or with which set to \"done\" the latest ones finished with. Use it when asked what is running, what needs an answer, or what was worked on."
+    },
+    {
+      "name": "get-token-usage",
+      "title": "Get Token Usage",
+      "description": "Get Claude Code's tokens per day and the projects that used the most, over the last few days. Use it for questions about how many tokens were used, when, or on which project. Codex's tokens are not available."
+    },
+    {
+      "name": "get-codex-processes",
+      "title": "Get Codex Processes",
+      "description": "Get the Codex plugin's app-server process trees running on this Mac, the memory each holds, and which are orphaned (their folder is gone). Use it when asked what Codex is holding in memory or whether anything can be cleaned up."
+    }
+  ],
+  "ai": {
+    "instructions": "- Lancetta reports each window as percent USED; leftPercent is what remains. A null percentage is unknown, never zero. notOnThisPlan means the plan has no such window (Claude's Ultra plan has no 5-hour window): there is nothing to wait for.\n- Read `blocked` first: when it is true the account is refusing requests now, whatever the percentages say. Mention freeResetsAvailable when it is above zero.\n- To answer whether a long run can start, lead with the matching suggestion in `advice` and quote its title: kind `spent` means the agent has already stopped, `stop` means the current pace runs out before the reset, `week` means the week is running out early, `room` means quota is about to go unused, `lapse` means a free reset is about to expire. Then give the window and when it resets.\n- When lancettaRunning is false or a reading is stale, say how old the numbers are.\n- Lancetta only reads quota: it cannot change limits, start agents or reset windows.\n- Sessions: lead with the ones waiting on the user (waitingOnYou), naming each and how long it has waited; the user opens one from the Agent Sessions command.\n- Tokens are Claude Code's only, without cache reads; say so when comparing with Codex.\n- Codex processes: report orphanedMemory; stopping them is done in Lancetta (Processes > Reclaim), never by this extension.",
+    "evals": [
+      {
+        "input": "@lancetta can I start a long Codex run now?",
+        "mocks": {
+          "get-quota": {
+            "lancettaVersion": "0.69.0",
+            "lancettaRunning": true,
+            "lastWritten": "1m ago",
+            "agents": [
+              {
+                "agent": "Codex",
+                "plan": "plus",
+                "readAgo": "1m",
+                "readingIsStale": false,
+                "blocked": true,
+                "blockedBy": null,
+                "fiveHourWindow": {
+                  "usedPercent": 0,
+                  "leftPercent": 100,
+                  "resetsAt": "2026-11-26T22:15:47.000Z",
+                  "resetsIn": "4h05m"
+                },
+                "sevenDayWindow": {
+                  "usedPercent": 100,
+                  "leftPercent": 0,
+                  "resetsAt": "2026-11-27T13:37:19.000Z",
+                  "resetsIn": "19h27m"
+                },
+                "perModelWindows": [],
+                "freeResetsAvailable": 1,
+                "problem": null
+              }
+            ],
+            "advice": [
+              {
+                "kind": "spent",
+                "tone": "warning",
+                "agent": "Codex",
+                "title": "Codex has stopped until tomorrow afternoon, in 19h27m.",
+                "steps": [
+                  "Use a free reset to start again now.",
+                  "Meanwhile, plan, review or write: work that needs no agent."
+                ],
+                "basis": "7 days: 100% used, it resets tomorrow afternoon.",
+                "when": "2026-11-27T13:37:19.000Z",
+                "mostUrgent": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-quota"
+          }
+        ]
+      },
+      {
+        "input": "@lancetta which agent sessions are waiting on me?",
+        "mocks": {
+          "get-sessions": {
+            "waitingOnYou": [
+              {
+                "name": "fix-login-flow",
+                "agent": "Claude",
+                "folder": "webapp",
+                "status": "asking",
+                "inThisStateFor": "12m",
+                "worked": "41m"
+              }
+            ],
+            "working": [
+              {
+                "name": "refactor-api",
+                "agent": "Codex",
+                "folder": "api",
+                "status": "working",
+                "inThisStateFor": "5m",
+                "worked": "1h10m"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-sessions"
+          }
+        ]
+      },
+      {
+        "input": "@lancetta how many Claude Code tokens did I use this week, and on which project?",
+        "mocks": {
+          "get-token-usage": {
+            "agent": "Claude Code",
+            "counted": "input + output + cache-creation tokens; cache reads excluded",
+            "asOf": "2026-11-26T17:53:13.000Z",
+            "freshness": "Counted up to 26/11/2026, 18:53.",
+            "total": "128.3M",
+            "totalExact": 128300000,
+            "perDay": [
+              {
+                "day": "2026-11-25",
+                "tokens": 27300000,
+                "readable": "27.3M"
+              },
+              {
+                "day": "2026-11-26",
+                "tokens": 12800000,
+                "readable": "12.8M"
+              }
+            ],
+            "topProjects": [
+              {
+                "project": "webapp",
+                "tokens": 61200000,
+                "readable": "61.2M"
+              },
+              {
+                "project": "api",
+                "tokens": 40100000,
+                "readable": "40.1M"
+              }
+            ],
+            "codex": "Not available from this extension: Codex's daily tokens come from its account, shown in Lancetta's Usage pane."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-token-usage"
+          }
+        ]
+      },
+      {
+        "input": "@lancetta are any Codex processes wasting memory?",
+        "mocks": {
+          "get-codex-processes": {
+            "trees": [
+              {
+                "folder": "old-branch",
+                "memory": "1.2 GB",
+                "children": 3,
+                "orphan": true
+              },
+              {
+                "folder": "api",
+                "memory": "640 MB",
+                "children": 2,
+                "orphan": false
+              }
+            ],
+            "totalMemory": "1.8 GB",
+            "orphanedMemory": "1.2 GB",
+            "howToReclaim": "Open Lancetta > Processes > Reclaim."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-codex-processes"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
