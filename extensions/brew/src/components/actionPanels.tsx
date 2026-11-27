@@ -30,6 +30,7 @@ import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
 import { InstallPreview, UpgradePreview } from "./installPreview";
 import { ensureTrusted } from "./trust";
+import { BusyAction, usePackageBusy } from "./busy";
 
 /**
  * Outdated only — the caller gates on it: an up-to-date package has no plan to
@@ -79,9 +80,13 @@ const PreviewInstallAction = (props: { item: Cask | Formula; onAction: (result: 
  */
 const InstallSlotAction = (props: { item: Cask | Formula; slot: ActionSlot; onAction: (result: boolean) => void }) => {
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  const busy = usePackageBusy(props.item);
   if (!slotRunsInTerminal(props.slot, preferences.runInTerminalByDefault)) {
     return <Actions.FormulaInstallAction formula={props.item} onAction={props.onAction} />;
   }
+  // A Terminal install beside a claimed operation is a second brew that loses
+  // the lock, as with Uninstall's slots below. The first slot keeps ↵ harmless.
+  if (busy) return props.slot === "first" ? <BusyAction label={busy} /> : null;
   return (
     <Action
       title={`Run Install in ${terminalName}`}
@@ -104,11 +109,16 @@ const UninstallSlotAction = (props: {
   onAction: (result: boolean) => void;
 }) => {
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  // Hidden while Install, Upgrade or Uninstall runs on this package: either
+  // slot would start a second brew that loses the lock. The row's ring and the
+  // toast already say what is running.
+  const busy = usePackageBusy(props.item);
   const pinned = props.pinned ?? props.item.pinned === true;
   const first = props.slot === "first";
   const shortcut: Keyboard.Shortcut = first
     ? Keyboard.Shortcut.Common.Remove
     : { modifiers: ["cmd", "shift"], key: "return" };
+  if (busy) return null;
   if (!slotRunsInTerminal(props.slot, preferences.runInTerminalByDefault, pinned)) {
     return (
       <Actions.FormulaUninstallAction
@@ -258,19 +268,13 @@ const ViewSection = (props: {
   onToggleDescription?: () => void;
   sortByPopularity?: boolean;
   onToggleSort?: () => void;
-  /**
-   * Panel-specific display toggles, e.g. Hide Dependencies on installed formulae.
-   * Typed off ActionPanel.Section: @raycast/api bundles its own @types/react
-   * copy, and a bare React.ReactNode is not assignable across the two.
-   */
-  children?: React.ComponentProps<typeof ActionPanel.Section>["children"];
 }) => {
   // The description only exists inside the detail sidebar, so with the sidebar
   // hidden the toggle has nothing to act on. "Sidebar", not "Details": the
   // latter read as a variant of the "Show Details" push action.
   const canToggleDescription = props.onToggleDescription != undefined && props.metadataPanelVisible === true;
 
-  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.children && !props.paging) {
+  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.paging) {
     return null;
   }
   return (
@@ -286,7 +290,6 @@ const ViewSection = (props: {
             onToggleDescription={props.onToggleDescription}
           />
         )}
-        {props.children}
         {props.onToggleSort && (
           <SortByPopularityAction
             sortByPopularity={props.sortByPopularity ?? false}
@@ -352,15 +355,11 @@ export function CaskActionPanel(props: {
   showDescription?: boolean;
   onToggleDescription?: () => void;
   metadataPanelVisible?: boolean;
-  /**
-   * Offer the Hide Dependencies filter. Installed-list only: nothing in the
-   * search results is filtered by `excludeDependencies`, so there the action
-   * would toggle a setting with no visible effect.
-   */
-  showDependenciesFilter?: boolean;
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  // Run Adopt in Terminal is `brew install --adopt`: hidden while the package is busy.
+  const busy = usePackageBusy(cask);
   const { major } = useBrewMajorVersion();
   // brew takes no cask lock on link/unlink, so nothing but this stops two
   // overlapping runs. `Action` has no disabled prop: drop the section instead.
@@ -497,7 +496,7 @@ export function CaskActionPanel(props: {
               shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
             />
           )}
-          {!blocked && (
+          {!blocked && !busy && (
             <Action
               title={`Run Adopt in ${terminalName}`}
               icon={terminalIcon}
@@ -584,15 +583,11 @@ export function FormulaActionPanel(props: {
   showDescription?: boolean;
   onToggleDescription?: () => void;
   metadataPanelVisible?: boolean;
-  /**
-   * Offer the Hide Dependencies filter. Installed-list only: nothing in the
-   * search results is filtered by `excludeDependencies`, so there the action
-   * would toggle a setting with no visible effect.
-   */
-  showDependenciesFilter?: boolean;
 }) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  // Run Adopt in Terminal is `brew install --adopt`: hidden while the package is busy.
+  const busy = usePackageBusy(formula);
 
   function installedActionPanel() {
     return (
@@ -667,9 +662,7 @@ export function FormulaActionPanel(props: {
           onToggleDescription={props.onToggleDescription}
           sortByPopularity={props.sortByPopularity}
           onToggleSort={props.onToggleSort}
-        >
-          {props.showDependenciesFilter ? <Actions.FormulaShowAllInstalled onAction={props.onAction} /> : null}
-        </ViewSection>
+        />
         <DebugSection obj={formula} />
       </ActionPanel>
     );
@@ -720,7 +713,7 @@ export function FormulaActionPanel(props: {
               shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
             />
           )}
-          {!blocked && (
+          {!blocked && !busy && (
             <Action
               title={`Run Adopt in ${terminalName}`}
               icon={terminalIcon}
@@ -859,6 +852,8 @@ export function OutdatedActionSections(
   const { outdated } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
   const pinned = props.pinned ?? outdated.pinned === true;
+  // Run Upgrade in Terminal beside a claimed operation would be a second brew.
+  const busy = usePackageBusy(outdated);
 
   return (
     <>
@@ -877,14 +872,16 @@ export function OutdatedActionSections(
             content={brewUpgradeCommand(outdated)}
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
-          <Action
-            title={`Run Upgrade in ${terminalName}`}
-            icon={terminalIcon}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-            onAction={async () => {
-              if (await ensureTrusted(outdated)) await runCommandInTerminal(brewUpgradeCommand(outdated));
-            }}
-          />
+          {!busy && (
+            <Action
+              title={`Run Upgrade in ${terminalName}`}
+              icon={terminalIcon}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              onAction={async () => {
+                if (await ensureTrusted(outdated)) await runCommandInTerminal(brewUpgradeCommand(outdated));
+              }}
+            />
+          )}
         </ActionPanel.Section>
       )}
       <ActionPanel.Section>

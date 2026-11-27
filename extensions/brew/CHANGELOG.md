@@ -1,5 +1,23 @@
 # Brew Changelog
 
+## [One action at a time per package] - 2026-11-26
+
+- Fixed: pressing Install, Upgrade or Uninstall again while it runs no longer starts a second Homebrew and fails with "Brew is Busy". The package's icon spins, Install and Upgrade read "Installing…" or "Upgrading…", and Uninstall is hidden until the list shows the result
+- Improved: the "Installing…" toast appears as soon as you press Install, instead of after the trust check for a package from a third-party tap
+- Improved: uninstalling a package that was already removed, from the Terminal or another command, says it was already uninstalled instead of reporting an error
+- Changed: when Uninstall refuses a pinned package, its toast offers Force Uninstall and Unpin as two separate actions, as its message says, instead of one action that did both
+
+## [Show Installed filters, and the version in use] - 2026-11-24
+
+- Changed: Show Installed's filter now offers Installed by You and Dependencies beside All, Formulae and Casks. It replaces Hide Dependencies (⌘D), which could leave dependencies hidden with nothing on screen saying so
+- Fixed: with an older version still installed beside a newer one, such as `rust`, rows in Show Installed and Search show the version Homebrew links rather than the leftover one, Show Installed dates the row by it, and Show in Finder opens that version's folder
+- Improved: rows show the version alone, without letters such as `(DO)`. The Outdated tag and the pin icon already say the same, and whether a package is a dependency shows in Show Installed's Dependencies section and in the sidebar's Version row
+- New: the sidebar shows when a package was installed, in Show Installed and in Search
+
+## [Unused tag and build dependencies] - 2026-11-24
+
+- Fixed: Show Installed no longer tags a dependency "Unused" while a package built from source needs it to build again, such as `rust` for a formula built with it. From Homebrew 7.0.16, Uninstall refuses to remove one
+
 ## [Homebrew 7.0.15 previews and pins] - 2026-11-21
 
 - Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package

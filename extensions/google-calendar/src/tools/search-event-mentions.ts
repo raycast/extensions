@@ -37,7 +37,6 @@ const searchEvents = withCache(
     const calendars = await getVisibleCalendars(accountKey);
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    // Without a query, show today and the coming week. A query also finds recent past meetings.
     const timeMin = query ? new Date(now.getTime() - 90 * DAY) : startOfToday;
     const timeMax = query ? new Date(now.getTime() + 365 * DAY) : new Date(startOfToday.getTime() + 8 * DAY);
 
@@ -59,7 +58,6 @@ const searchEvents = withCache(
 
     const fulfilled = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
     const failure = results.find((result) => result.status === "rejected");
-    // A calendar that fails on its own should not hide the others, but no answer at all is an error.
     if (fulfilled.length === 0 && failure) throw failure.reason;
     return fulfilled.flat();
   },

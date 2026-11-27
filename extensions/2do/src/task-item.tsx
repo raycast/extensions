@@ -12,6 +12,47 @@ const PRIORITY_TAGS = {
 
 const PARENT_ICONS = { project: Icon.Folder, checklist: Icon.CheckList };
 
+// 2Do stores "HH:mm"; show 12-hour times on the row (e.g. "5:00 PM").
+function formatTime(time?: string) {
+  if (!time) return;
+  const [h, m] = time.split(":").map(Number);
+  if (!Number.isInteger(h) || !Number.isInteger(m)) return time;
+  const period = h < 12 ? "AM" : "PM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+// Start uses a clock, due a flag, so the two dates stay distinct when both say e.g. "Today".
+function dateAccessories(task: Task) {
+  const label = (formatted: string, time?: string) => {
+    const shown = formatTime(time);
+    return shown ? `${formatted} ${shown}` : formatted;
+  };
+  return [
+    ...(task.presentation.start_date_formatted
+      ? [
+          {
+            icon: Icon.Clock,
+            text: label(task.presentation.start_date_formatted, task.start_time),
+            tooltip: `Start: ${label(task.presentation.start_date_formatted, task.start_time)}`,
+          },
+        ]
+      : []),
+    ...(task.presentation.due_date_formatted
+      ? [
+          {
+            icon: Icon.Flag,
+            text: {
+              value: label(task.presentation.due_date_formatted, task.due_time),
+              color: task.presentation.is_overdue ? Color.Red : undefined,
+            },
+            tooltip: `Due: ${label(task.presentation.due_date_formatted, task.due_time)}`,
+          },
+        ]
+      : []),
+  ];
+}
+
 // The ⌘L action for each 2Do action type.
 const RUN_ACTION: Record<string, { title: string; icon: Icon }> = {
   url: { title: "Open Link", icon: Icon.Link },
@@ -105,18 +146,8 @@ export function TaskItem({
               },
             ]
           : []),
-        ...t.tags.map((tag) => ({ tag: tag.title })),
         ...(t.priority !== "none" ? [{ tag: PRIORITY_TAGS[t.priority] }] : []),
-        ...(t.presentation.due_date_formatted
-          ? [
-              {
-                text: {
-                  value: t.presentation.due_date_formatted,
-                  color: t.presentation.is_overdue ? Color.Red : undefined,
-                },
-              },
-            ]
-          : []),
+        ...dateAccessories(t),
         ...(primary ? [{ icon: primary.icon, tooltip: `${primary.title}: ${primary.value}` }] : []),
         ...(repeat ? [{ icon: Icon.Repeat, tooltip: `Repeats: ${repeat}` }] : []),
         ...(t.starred ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []),

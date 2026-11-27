@@ -160,6 +160,19 @@ test("stderr structured failures win over stdout and prose is never classified",
   assert.equal(unavailable.message, "Connection suspended");
 });
 
+test("webcam stop targets the given call and asks for a Tuple update when the CLI lacks it", async () => {
+  fake("");
+  await tuple.stopWebcam("call-id");
+  assert.deepEqual(calls(), [["--format", "json", "webcam", "stop", "--call", "call-id"]]);
+  fake(`process.stderr.write('{"error":"unknown command \\\\"webcam\\\\" for \\\\"tuple\\\\""}'); process.exitCode = 1;`);
+  await assert.rejects(
+    tuple.stopWebcam("call-id"),
+    (error) => error.kind === TupleErrorKind.CapabilityUnavailable && /Update Tuple/.test(error.message),
+  );
+  fake(`process.stderr.write('{"error":"this app has no camera","error_code":501,"kind":"unsupported"}'); process.exitCode = 1;`);
+  await assert.rejects(tuple.stopWebcam("call-id"), (error) => error.message === "this app has no camera");
+});
+
 test("unanswered calls report the CLI failure without retrying", async () => {
   fake(`process.stderr.write('{"kind":"call_ended","error":"Person did not connect"}'); process.exitCode=2;`);
   await assert.rejects(tuple.startCall("person@example.com"), /Person did not connect/);
