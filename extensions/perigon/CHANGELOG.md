@@ -1,6 +1,6 @@
 # Perigon Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-27
 
 - Bundle the Perigon MCP server for Raycast AI with dynamic OAuth and two agent skills (News Research, Monitor Insights).
 - Add Search News, Search Stories, and My Monitors commands with Perigon OAuth (PKCE).
