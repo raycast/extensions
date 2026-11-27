@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "maps-agent",
+    title: "Maps Agent",
+    description:
+      "Google Business Profile and local SEO: guides, research, definitions, categories and a public profile audit. 10 tools: 8 read-only, plus requesting an audit and sending feedback. Hosted remote Streamable HTTP server at https://maps-agent.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/maps-agent/mcp/main/assets/icon.png",
+    homepage: "https://maps-agent.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://maps-agent.com/mcp"],
+    },
+    remoteUrl: "https://maps-agent.com/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Maps Agent MCP Server] - {PR_MERGE_DATE}
+
+- Add Maps Agent to the official registry: Google Business Profile and local SEO: guides, research, definitions, categories and a public profile audit. 10 tools: 8 read-only, plus requesting an audit and sending feedback. Hosted remote Streamable HTTP server at https://maps-agent.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
