@@ -1,28 +1,30 @@
 import { createAuthClient } from "better-auth/client";
-import { apiKeyClient } from "better-auth/client/plugins";
+import { apiKeyClient } from "@better-auth/api-key/client";
 import { getPreferenceValues } from "@raycast/api";
+import { sanitizeUrl } from "./utils/security";
 
 // Re-export types from better-auth
 export type { AuthClient } from "better-auth/client";
 
-// Get the auth base URL from preferences
 function getAuthBaseUrl(): string {
-  const { apiHost } = getPreferenceValues<{ apiHost: string }>();
-  return `${apiHost.replace(/\/$/, "")}/api/auth`;
+  const { apiHost } = getPreferenceValues<Preferences>();
+  return `${sanitizeUrl(apiHost)}/api/auth`;
 }
 
-// Create the auth client with API key plugin
-// Note: The client is created lazily to ensure preferences are available
-let _authClient: ReturnType<typeof createAuthClient> | null = null;
+// Create the auth client with API key plugin, recreating if apiHost changes
+let cachedBaseUrl: string | null = null;
+let cachedAuthClient: ReturnType<typeof createAuthClient> | null = null;
 
 export function getAuthClient() {
-  if (!_authClient) {
-    _authClient = createAuthClient({
-      baseURL: getAuthBaseUrl(),
+  const baseURL = getAuthBaseUrl();
+  if (!cachedAuthClient || cachedBaseUrl !== baseURL) {
+    cachedBaseUrl = baseURL;
+    cachedAuthClient = createAuthClient({
+      baseURL,
       plugins: [apiKeyClient()],
     });
   }
-  return _authClient;
+  return cachedAuthClient;
 }
 
 // Session management functions

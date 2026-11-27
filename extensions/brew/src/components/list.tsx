@@ -13,6 +13,7 @@ import {
   preferences,
 } from "../utils";
 import { CaskActionPanel, FormulaActionPanel, PagingSection } from "./actionPanels";
+import { usePackageBusyIcon } from "./busy";
 import { installStateIcon, STATUS_COLOR, UNINSTALLABLE_COLOR, UPDATE_AVAILABLE_COLOR } from "./palette";
 import { FormulaListItemDetail, CaskListItemDetail } from "./listItemDetail";
 import type { MetadataOptions } from "./packageMetadata";
@@ -280,7 +281,8 @@ export function FormulaListItem(props: {
 
   const uninstallable = installed ? undefined : uninstallableReason(formula, brewHost);
 
-  const icon = installStateIcon(installed, formulaOutdated, uninstallable);
+  const busyIcon = usePackageBusyIcon(formula);
+  const icon = busyIcon ?? installStateIcon(installed, formulaOutdated, uninstallable);
   const accessories: List.Item.Accessory[] = [];
   if (installed && formulaOutdated) {
     accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });
@@ -374,7 +376,8 @@ export function CaskListItem(props: {
 
   const uninstallable = installed ? undefined : uninstallableReason(cask, brewHost);
 
-  const icon = installStateIcon(installed, caskOutdated, uninstallable);
+  const busyIcon = usePackageBusyIcon(cask);
+  const icon = busyIcon ?? installStateIcon(installed, caskOutdated, uninstallable);
   const accessories: List.Item.Accessory[] = [];
   if (installed && caskOutdated) {
     accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });

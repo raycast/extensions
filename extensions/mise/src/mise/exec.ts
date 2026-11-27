@@ -46,7 +46,8 @@ export function miseJson<T>(
   args: string[],
   // stderr carries the warnings of a successful run, which some commands report nowhere else.
   parse: (raw: unknown, stderr: string) => T,
-  options: { signal?: AbortSignal } = {},
+  // Exit codes that still carry a report on stdout, such as the 1 `mise audit` exits with when it finds advisories.
+  options: { signal?: AbortSignal; okCodes?: number[] } = {},
 ): Promise<T> {
   const fullArgs = [...args, "--json"];
   const startedAt = Date.now();
@@ -64,7 +65,7 @@ export function miseJson<T>(
       (error, stdout, stderr) => {
         const code = error ? (typeof error.code === "number" ? error.code : null) : 0;
         report(fullArgs, code, startedAt);
-        if (error) {
+        if (error && !(code !== null && options.okCodes?.includes(code))) {
           reject(error.name === "AbortError" ? error : new MiseExitError(args, code, stderr || error.message));
           return;
         }

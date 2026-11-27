@@ -27,9 +27,10 @@ interface IAMViewProps {
   gcloudPath: string;
   resourceName?: string;
   resourceType?: string;
+  onProjectChange?: (projectId: string) => void;
 }
 
-export default function IAMView({ projectId, gcloudPath, resourceName, resourceType }: IAMViewProps) {
+export default function IAMView({ projectId, gcloudPath, resourceName, resourceType, onProjectChange }: IAMViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [principals, setPrincipals] = useState<IAMPrincipal[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -673,16 +674,21 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
       searchBarAccessory={
         <QuickProjectSwitcher
           gcloudPath={gcloudPath}
+          currentProjectId={projectId}
           onProjectSelect={(selectedProjectId) => {
             if (selectedProjectId !== projectId) {
-              push(
-                <IAMView
-                  projectId={selectedProjectId}
-                  gcloudPath={gcloudPath}
-                  resourceType={resourceType}
-                  resourceName={resourceName}
-                />,
-              );
+              if (onProjectChange && !resourceName) {
+                onProjectChange(selectedProjectId);
+              } else {
+                push(
+                  <IAMView
+                    projectId={selectedProjectId}
+                    gcloudPath={gcloudPath}
+                    resourceType={resourceType}
+                    resourceName={resourceName}
+                  />,
+                );
+              }
             }
           }}
         />

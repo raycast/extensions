@@ -11,9 +11,16 @@ export const formatBytes = (bytes: number): string => {
   const dm: number = decimals < 0 ? 0 : decimals;
   const sizes: string[] = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   // Fractional rates (sub-1 B/s) would index below the array; clamp to bytes.
-  const i: number = Math.min(Math.max(Math.floor(Math.log(bytes) / Math.log(k)), 0), sizes.length - 1);
+  let i: number = Math.min(Math.max(Math.floor(Math.log(bytes) / Math.log(k)), 0), sizes.length - 1);
+  let value = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  // 1048575 B is 1023.999 KB, which rounds to 1024: show it as the next unit instead
+  if (value >= k && i < sizes.length - 1) {
+    i += 1;
+    value = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+  }
+
+  return `${value} ${sizes[i]}`;
 };
 
 export const isObjectEmpty = (obj: object): boolean => {

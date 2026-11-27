@@ -31,7 +31,11 @@ import type { Cask, Nameable } from "../utils";
  * granted to the one package, never the whole tap — Manage Taps is where a
  * whole tap is trusted.
  */
-export async function ensureTrusted(item: Cask | Nameable): Promise<boolean> {
+export async function ensureTrusted(
+  item: Cask | Nameable,
+  /** Called once, just before this shows an alert or a failure toast of its own. */
+  opts?: { beforePrompt?: () => void },
+): Promise<boolean> {
   const tap = thirdPartyTapOf(item);
   if (!tap) return true;
   const name = brewName(item);
@@ -42,11 +46,13 @@ export async function ensureTrusted(item: Cask | Nameable): Promise<boolean> {
     if ((await brewPackageTrust(tap, fullName, cask)) !== "untrusted") return true;
   } catch (err) {
     // Fail closed: an unanswered trust question is not a yes.
+    opts?.beforePrompt?.();
     await showBrewFailureToast(`Could not check whether ${name} is trusted`, ensureError(err));
     return false;
   }
 
   const command = brewTapCommand("trust", cask ? "--cask" : "--formula", fullName);
+  opts?.beforePrompt?.();
   const confirmed = await confirmAlert({
     title: `Trust ${name}?`,
     message: [

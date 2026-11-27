@@ -50,6 +50,38 @@
       "title": "Decrease Volume",
       "description": "Lower Tutti's output volume by a fixed step.",
       "mode": "no-view"
+    },
+    {
+      "name": "set-brightness",
+      "title": "Set Brightness",
+      "description": "Set Tutti's brightness control group to a percentage. Requires Tutti 2.1.0 or later.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "level",
+          "type": "text",
+          "placeholder": "0–100",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "brightness-up",
+      "title": "Increase Brightness",
+      "description": "Raise Tutti's group brightness by 5 percentage points. Requires Tutti 2.1.0 or later.",
+      "mode": "no-view"
+    },
+    {
+      "name": "brightness-down",
+      "title": "Decrease Brightness",
+      "description": "Lower Tutti's group brightness by 5 percentage points. Requires Tutti 2.1.0 or later.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-input-mute",
+      "title": "Toggle Microphone Mute",
+      "description": "Mute or unmute the current default microphone. Requires Tutti 2.1.0 or later.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

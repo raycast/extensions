@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vite/
+.vite-hooks/
+.vp/
+coverage/
+raycast-env.d.ts
+*.rayext
+*.tsbuildinfo
+.DS_Store
+.env
+.env.*

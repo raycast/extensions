@@ -1,9 +1,9 @@
-import { Color, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
 import { useEvents, withGoogleAPIs } from "./lib/google";
 import { calendar_v3 } from "@googleapis/calendar";
 import { formatRecurrence } from "./lib/utils";
 import useCalendars from "./hooks/useCalendars";
-import { useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import EventActions from "./components/EventActions";
 import CalendarSelector from "./components/CalendarSelector";
 import { isBirthdaysView, resolvePickerCalendarId } from "./lib/event-types";
@@ -28,9 +28,13 @@ function getAccessories(event: calendar_v3.Schema$Event, showLocation: boolean) 
   }
 
   if (event.conferenceData) {
+    const solution = event.conferenceData.conferenceSolution;
     accessories.push({
-      icon: event.conferenceData.conferenceSolution?.iconUri ?? Icon.Video,
-      tooltip: `Conference: ${event.conferenceData.conferenceSolution?.name}`,
+      icon:
+        solution?.key?.type === "hangoutsMeet" || solution?.name === "Google Meet"
+          ? "meet.png"
+          : (solution?.iconUri ?? Icon.Video),
+      tooltip: `Conference: ${solution?.name}`,
     });
   }
 
@@ -113,10 +117,8 @@ export function getEventSection(date: Date, now = new Date()) {
   } else if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
     return `Rest of ${date.toLocaleString("default", { month: "long" })}`;
   } else if (date.getFullYear() === now.getFullYear()) {
-    // Group by month name
     return date.toLocaleString("default", { month: "long" });
   } else {
-    // Group by month and year
     return date.toLocaleString("default", { month: "long", year: "numeric" });
   }
 }
@@ -127,8 +129,26 @@ function Command(props: LaunchProps) {
   const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(
     resolvePickerCalendarId(calendarId) ?? null,
   );
-  const { data, isLoading, pagination, revalidate } = useEvents(selectedCalendarId);
-  const { data: calendars, isLoading: calendarsIsLoading, revalidate: revalidateCalendars } = useCalendars();
+  const [isMounted, setIsMounted] = useState(false);
+  const { data, isLoading, error: eventsError, pagination, revalidate } = useEvents(selectedCalendarId);
+  const {
+    data: calendars,
+    isLoading: calendarsIsLoading,
+    error: calendarsError,
+    revalidate: revalidateCalendars,
+  } = useCalendars();
+
+  // Cached Promise hooks return data and pagination before the native List mounts; populating the List too
+  // early can report selection state while the React fiber has no alternate and trigger an invalid state update.
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleCalendarChange = useCallback((newValue: string) => {
+    setSelectedCalendarId(newValue);
+  }, []);
+
+  const isDropdownReady = isMounted && !calendarsIsLoading;
 
   const selectedCalendar = useMemo(() => {
     const allCalendars = [...(calendars?.selected ?? []), ...(calendars?.unselected ?? [])];
@@ -166,7 +186,6 @@ function Command(props: LaunchProps) {
     return dateStr ? new Date(dateStr).getTime() : 0;
   };
 
-  // Sort sections by date
   const sectionOrder = Object.keys(sections).sort((a, b) => {
     if (a === "Today") return -1;
     if (b === "Today") return 1;
@@ -177,14 +196,13 @@ function Command(props: LaunchProps) {
 
     return getSectionTime(a) - getSectionTime(b);
   });
+  const loadError = eventsError ?? calendarsError;
 
   const formatEventTime = (event: calendar_v3.Schema$Event, section: string) => {
     const startDate = new Date(event.start?.dateTime ?? (event.start?.date ? `${event.start.date}T00:00:00` : ""));
     const endDate = new Date(event.end?.dateTime ?? (event.end?.date ? `${event.end.date}T00:00:00` : ""));
 
-    // For Today or Tomorrow, show only time
     if (section === "Today" || section === "Tomorrow") {
-      // Check if it's an all-day event
       if (event.start?.date) {
         return "All day";
       } else {
@@ -192,51 +210,81 @@ function Command(props: LaunchProps) {
       }
     }
 
-    // For month sections, show weekday and date
     return startDate.toLocaleDateString(undefined, { weekday: "long", day: "numeric" });
   };
 
   return (
     <List
       isLoading={isLoading || calendarsIsLoading}
-      pagination={pagination}
+      pagination={isMounted ? pagination : undefined}
+      searchBarPlaceholder="Search events…"
       searchBarAccessory={
-        <CalendarSelector
-          calendars={calendars ?? []}
-          onCalendarChange={setSelectedCalendarId}
-          storeValue={typeof calendarId === "undefined"}
-          defaultValue={resolvePickerCalendarId(calendarId)}
-        />
+        isDropdownReady ? (
+          <CalendarSelector
+            calendars={calendars}
+            onCalendarChange={handleCalendarChange}
+            storeValue={typeof calendarId === "undefined"}
+            defaultValue={resolvePickerCalendarId(calendarId)}
+          />
+        ) : undefined
       }
     >
-      {sectionOrder.map((section) => {
-        const events = sections[section];
-        if (!events?.length) return null;
-
-        return (
-          <List.Section key={section} title={section}>
-            {events.map((event) => (
-              <List.Item
-                key={event.id}
-                icon={getIcon(event)}
-                title={event.summary ?? "Untitled Event"}
-                subtitle={formatEventTime(event, section)}
-                accessories={getAccessories(event, showLocation)}
-                actions={
-                  <EventActions
-                    event={event}
-                    calendar={selectedCalendar}
-                    revalidate={() => {
-                      revalidate();
-                      revalidateCalendars();
-                    }}
-                  />
-                }
+      {isMounted && !isLoading && !calendarsIsLoading && sectionOrder.length === 0 && loadError && (
+        <List.EmptyView
+          title="Couldn't Load Events"
+          description={loadError.message || "Check your connection and try again."}
+          icon={Icon.XMarkCircle}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  revalidate();
+                  revalidateCalendars();
+                }}
               />
-            ))}
-          </List.Section>
-        );
-      })}
+            </ActionPanel>
+          }
+        />
+      )}
+      {isMounted && !isLoading && !calendarsIsLoading && sectionOrder.length === 0 && !loadError && (
+        <List.EmptyView
+          title="No Events"
+          description="No upcoming events found in this calendar."
+          icon={Icon.Calendar}
+        />
+      )}
+      {isMounted
+        ? sectionOrder.map((section) => {
+            const events = sections[section];
+            if (!events?.length) return null;
+
+            return (
+              <List.Section key={section} title={section}>
+                {events.map((event) => (
+                  <List.Item
+                    key={event.id}
+                    icon={getIcon(event)}
+                    title={event.summary ?? "Untitled Event"}
+                    subtitle={formatEventTime(event, section)}
+                    accessories={getAccessories(event, showLocation)}
+                    actions={
+                      <EventActions
+                        event={event}
+                        calendar={selectedCalendar}
+                        revalidate={() => {
+                          revalidate();
+                          revalidateCalendars();
+                        }}
+                      />
+                    }
+                  />
+                ))}
+              </List.Section>
+            );
+          })
+        : null}
     </List>
   );
 }

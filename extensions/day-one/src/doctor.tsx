@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
+import { homedir } from "node:os";
 import { basename } from "node:path";
 import {
   Action,
@@ -7,6 +8,7 @@ import {
   Clipboard,
   Color,
   confirmAlert,
+  environment,
   Icon,
   openExtensionPreferences,
   Keyboard,
@@ -43,14 +45,28 @@ import {
   INSTALL_COMMAND,
   IS_WINDOWS,
   isSearchModelDownloaded,
+  latestCliVersion,
   SEARCHES_BY_MEANING,
+  searchModelLocation,
 } from "./lib/cli";
 import { errorMessage, failToast, progressMessage, syncWithToast } from "./lib/feedback";
-import { canSignOut, MIN_CLI_VERSION, plural, SyncProgress } from "./lib/parse";
+import {
+  buildDoctorReport,
+  canSignOut,
+  gapIsSkippedEntries,
+  indexGap,
+  MIN_CLI_VERSION,
+  plural,
+  SyncProgress,
+  updateAvailable,
+} from "./lib/parse";
 import {
   agentSkillsInstalled,
   installAgentSkills,
+  abandonInstallWait,
   installCli,
+  InstallHandedOff,
+  isCliInstallRunning,
   legacyCliState,
   LegacyState,
   legacyMcpConfigs,
@@ -60,6 +76,7 @@ import {
   RENAMED_LEGACY_CLI_PATH,
   SKILLS_COMMAND,
   SKILLS_REPO_URL,
+  takeCliInstallNews,
   updateCli,
 } from "./lib/setup";
 import { isSyncRunning, readProgress, rebuildStatus, RebuildProgress, RebuildStatus, startRebuild } from "./lib/sync";
@@ -77,6 +94,8 @@ type Health = {
   telemetry?: TelemetryStatus;
   schedule?: ScheduleStatus;
   problems: string[];
+  /** When this check ran: the CLI's ages (last sync, …) count back from here, not from whenever Doctor renders. */
+  checkedAt: number;
 };
 
 async function loadHealth(): Promise<Health> {
@@ -87,10 +106,10 @@ async function loadHealth(): Promise<Health> {
     cli = await findCli(true);
   } catch (cliError) {
     log.warn("CLI not usable", { legacy, error: errorMessage(cliError) });
-    return { legacy, mcp, cliError, problems: [] };
+    return { legacy, mcp, cliError, problems: [], checkedAt: Date.now() };
   }
   // Every other check runs the CLI, which refuses to run while outdated; the CLI row offers the update.
-  if (cli.outdated) return { legacy, mcp, cli, problems: [] };
+  if (cli.outdated) return { legacy, mcp, cli, problems: [], checkedAt: Date.now() };
   const [account, report, journals, telemetry, schedule] = await Promise.allSettled([
     whoami(),
     runDoctor(),
@@ -125,6 +144,7 @@ async function loadHealth(): Promise<Health> {
     telemetry: value(telemetry),
     schedule: value(schedule),
     problems,
+    checkedAt: Date.now(),
   };
 }
 
@@ -174,6 +194,8 @@ type LocalState = {
   rebuild: RebuildStatus;
   modelDownloaded: boolean;
   skillsInstalled: boolean;
+  /** An install or update of the CLI is running, started here or in another Doctor window. */
+  cliInstalling: boolean;
 };
 
 /** What Doctor shows that lives in files on this computer, not in the CLI: read once per tick, not per render. */
@@ -183,6 +205,7 @@ function readLocalState(): LocalState {
     rebuild: rebuildStatus(),
     modelDownloaded: isSearchModelDownloaded(),
     skillsInstalled: agentSkillsInstalled(),
+    cliInstalling: isCliInstallRunning(),
   };
 }
 
@@ -190,10 +213,12 @@ export default function Command() {
   const { data, isLoading, revalidate } = usePromise(loadHealth, [], {
     onError: (error) => failToast(error, "Couldn't Check Day One"),
   });
+  // Separate from loadHealth so a slow registry never holds up the checks. null means npm couldn't be checked.
+  const { data: latest, revalidate: recheckLatest } = usePromise(latestCliVersion);
   const busy = useRef(false);
   const { push } = useNavigation();
   const [local, setLocal] = useState<LocalState>(readLocalState);
-  const { syncProgress, rebuild, modelDownloaded, skillsInstalled } = local;
+  const { syncProgress, rebuild, modelDownloaded, skillsInstalled, cliInstalling } = local;
 
   /** Re-reads this computer's state; a render happens only when something changed. */
   function refreshLocal(): LocalState {
@@ -202,17 +227,49 @@ export default function Command() {
     return next;
   }
 
+  // An install can end while this view watches (started here or by an earlier launch). Refs, because the tick is set up once.
+  const wasInstalling = useRef(false);
+  const wasRebuilding = useRef(false);
+  const recheck = useRef(() => {});
+  recheck.current = () => {
+    revalidate();
+    recheckLatest();
+  };
+
   // Show a sync or rebuild started anywhere (the Sync command, a saved entry, an earlier visit) while this view is open.
   useEffect(() => {
     const tick = () => {
-      const { rebuild } = refreshLocal();
+      const { rebuild, cliInstalling } = refreshLocal();
+      if (cliInstalling !== wasInstalling.current) log.debug("CLI install running", { running: cliInstalling });
+      // Whoever reports the result, this view checks the CLI again once it sees the install end.
+      if (wasInstalling.current && !cliInstalling) recheck.current();
+      wasInstalling.current = cliInstalling;
+      // A finished rebuild changes what the CLI's embedding_index check reports, so the Search Index row reloads.
+      const rebuilding = rebuild.state === "running";
+      if (wasRebuilding.current && !rebuilding) recheck.current();
+      wasRebuilding.current = rebuilding;
+      announceCliInstall();
       announceRebuild(rebuild);
       void showRebuildProgress(rebuild);
     };
     tick();
     const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      abandonInstallWait();
+    };
   }, []);
+
+  /** Reports an install or update that an earlier, closed Doctor started and couldn't report. */
+  function announceCliInstall() {
+    const news = takeCliInstallNews();
+    if (!news) return;
+    recheck.current();
+    const what = news.update ? "Update" : "Install";
+    if (news.ok)
+      void showToast({ style: Toast.Style.Success, title: `Day One CLI ${news.update ? "Updated" : "Installed"}` });
+    else void failToast(new Error(news.error), `Day One CLI ${what} Failed`);
+  }
 
   // While a rebuild runs and this view is open, one toast counts it up; the "Search Index Rebuilt" toast replaces it.
   const rebuildToast = useRef<Promise<Toast> | null>(null);
@@ -253,14 +310,37 @@ export default function Command() {
       toast.message = undefined;
       toast.primaryAction = extras.then;
       log.debug("action finished", { title: done });
-      revalidate();
     } catch (error) {
-      if (errorMessage(error) === "Canceled") {
+      if (error instanceof InstallHandedOff) {
+        await toast.hide();
+      } else if (errorMessage(error) === "Canceled") {
         toast.style = Toast.Style.Success;
         toast.title = "Canceled";
       } else {
         await failToast(error, `${title.replace(/…$/, "")} Failed`, toast);
       }
+    } finally {
+      busy.current = false;
+      // After a failure too: a failed update can still have changed the installed CLI.
+      recheck.current();
+    }
+  }
+
+  /** Check Again says what it found, so a check that changed nothing doesn't look like it never ran. */
+  async function checkAgain() {
+    if (busy.current) return;
+    busy.current = true;
+    const before = data && healthFingerprint(data) + latest;
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Checking Again…" });
+    try {
+      const [next, nextLatest] = await Promise.all([revalidate(), recheckLatest()]);
+      // usePromise resolves with the error after its onError has already shown it.
+      if ((next as unknown) instanceof Error) return void (await toast.hide());
+      toast.style = Toast.Style.Success;
+      toast.title = "Checked Again";
+      toast.message = healthFingerprint(next) + nextLatest === before ? "No new changes" : "Updated with the latest";
+    } catch (error) {
+      await failToast(error, "Couldn't Check Again", toast);
     } finally {
       busy.current = false;
     }
@@ -272,10 +352,55 @@ export default function Command() {
     revalidate();
   };
 
-  const reportAction = data?.report && (
+  /** The CLI's report plus this extension's own checks; offered even when the CLI's doctor couldn't run. */
+  function doctorReport(health: Health): object {
+    const model = searchModelLocation();
+    return buildDoctorReport(
+      health.report,
+      {
+        raycast_version: environment.raycastVersion,
+        platform: `${process.platform}-${process.arch}`,
+        cli: health.cli
+          ? {
+              path: health.cli.path,
+              version: health.cli.version,
+              minimum: MIN_CLI_VERSION,
+              outdated: health.cli.outdated,
+            }
+          : { error: health.cliError === undefined ? "not found" : errorMessage(health.cliError) },
+        latest_cli_on_npm: latest === undefined ? "checking" : (latest ?? "unknown"),
+        cli_install_running: cliInstalling,
+        legacy_mac_cli: health.legacy,
+        legacy_mcp_configs: health.mcp.length,
+        signed_in: health.account?.signedIn ?? null,
+        plan: health.account?.plan ?? null,
+        journals: health.journals?.length ?? null,
+        search: SEARCHES_BY_MEANING
+          ? {
+              model_dir: model.dir,
+              model_dir_from: model.source,
+              model_downloaded: modelDownloaded,
+              index_rebuild:
+                rebuild.state === "done"
+                  ? { state: "done", finished_at: new Date(rebuild.finishedAt).toISOString() }
+                  : rebuild.state === "failed"
+                    ? { state: "failed", error: errorMessage(rebuild.error) }
+                    : { state: rebuild.state },
+            }
+          : { by_meaning: false },
+        sync: { running: syncProgress !== null, background: health.schedule ?? null },
+        telemetry: health.telemetry ?? null,
+        agent_skills_installed: skillsInstalled,
+        problems: health.problems,
+      },
+      homedir(),
+    );
+  }
+
+  const reportAction = data && (
     <Action.CopyToClipboard
       title="Copy Doctor Report"
-      content={JSON.stringify(data.report, null, 2)}
+      content={JSON.stringify(doctorReport(data), null, 2)}
       shortcut={Keyboard.Shortcut.Common.Copy}
     />
   );
@@ -286,7 +411,7 @@ export default function Command() {
         title="Check Again"
         icon={Icon.ArrowClockwise}
         shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={revalidate}
+        onAction={checkAgain}
       />
       {reportAction}
     </ActionPanel.Section>
@@ -305,6 +430,15 @@ export default function Command() {
   const lastSyncAge = detail(report, "sync", "last_success_age_seconds");
   const entries = detail(report, "local_scale", "entries");
   const outbox = Number(detail(report, "outbox", "total") ?? 0);
+  const newerCli = cli && latest !== undefined ? updateAvailable(cli.version, latest) : null;
+  const cliIsLatest = Boolean(cli && latest && !newerCli);
+  const updateCliAction = (
+    <Action
+      title={newerCli ? `Update to ${newerCli}` : "Update for Me"}
+      icon={Icon.Download}
+      onAction={() => run("Updating Day One CLI…", updateCli, "Day One CLI Updated")}
+    />
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter checks…">
@@ -348,17 +482,28 @@ export default function Command() {
           <List.Item
             icon={cli.outdated ? warn : ok}
             title={cli.outdated ? "Update the Day One CLI" : "Day One CLI Installed"}
-            subtitle={cli.outdated ? `Version ${MIN_CLI_VERSION} or newer is needed` : `Version ${cli.version}`}
-            accessories={[{ text: cli.version, tooltip: cli.path }]}
+            subtitle={
+              cliInstalling
+                ? `Updating from version ${cli.version}…`
+                : cli.outdated
+                  ? `Version ${MIN_CLI_VERSION} or newer is needed`
+                  : cliIsLatest
+                    ? `Version ${cli.version}, the latest`
+                    : `Version ${cli.version}`
+            }
+            accessories={[
+              newerCli
+                ? { tag: { value: `${newerCli} available`, color: Color.Blue }, tooltip: cli.path }
+                : { text: cli.version, tooltip: cli.path },
+            ]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Update for Me"
-                  icon={Icon.Download}
-                  onAction={() => run("Updating Day One CLI…", updateCli, "Day One CLI Updated")}
-                />
+                {/* The update leads only when there is one (or the CLI is too old to run); up to date, it isn't offered.
+                    When npm couldn't be checked it sits below the docs, out of the ⌘⏎ slot, since it runs a global install. */}
+                {!cliInstalling && (cli.outdated || newerCli) && updateCliAction}
                 <Action.ShowInFinder path={cli.path} shortcut={Keyboard.Shortcut.Common.Open} />
                 <Action.OpenInBrowser title="Open CLI Docs" url={CLI_DOCS_URL} />
+                {!cliInstalling && !cli.outdated && !newerCli && !cliIsLatest && updateCliAction}
                 {common}
               </ActionPanel>
             }
@@ -368,19 +513,23 @@ export default function Command() {
             icon={todo}
             title="Install the Day One CLI"
             subtitle={
-              data.legacy === "present"
-                ? "Rename the legacy CLI first"
-                : data.cliError && errorMessage(data.cliError).includes("preferences")
-                  ? errorMessage(data.cliError)
-                  : `Runs ${INSTALL_COMMAND}`
+              cliInstalling
+                ? "Installing…"
+                : data.legacy === "present"
+                  ? "Rename the legacy CLI first"
+                  : data.cliError && errorMessage(data.cliError).includes("preferences")
+                    ? errorMessage(data.cliError)
+                    : `Runs ${INSTALL_COMMAND}`
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Install for Me"
-                  icon={Icon.Download}
-                  onAction={() => run("Installing Day One CLI…", installCli, "Day One CLI Installed")}
-                />
+                {!cliInstalling && (
+                  <Action
+                    title="Install for Me"
+                    icon={Icon.Download}
+                    onAction={() => run("Installing Day One CLI…", installCli, "Day One CLI Installed")}
+                  />
+                )}
                 <Action.CopyToClipboard title="Copy Install Command" content={INSTALL_COMMAND} />
                 <Action.OpenInBrowser title="Open CLI Docs" url={CLI_DOCS_URL} />
                 {data.cliError !== undefined && (
@@ -533,9 +682,13 @@ export default function Command() {
         {cli && signedIn && SEARCHES_BY_MEANING && modelDownloaded && (
           <SearchIndexItem
             rebuild={rebuild}
+            gap={indexGap(report?.checks.find((c) => c.check === "embedding_index")?.details)}
+            lastSyncAt={typeof lastSyncAge === "number" ? data.checkedAt - lastSyncAge * 1000 : null}
             onRebuild={async () => {
               try {
                 await startRebuild();
+                // So the tick rechecks when it ends, even if it ends before the next tick sees it running.
+                wasRebuilding.current = true;
                 log.info("search index rebuild started");
                 await showRebuildProgress(refreshLocal().rebuild);
               } catch (error) {
@@ -634,14 +787,14 @@ export default function Command() {
           actions={
             <ActionPanel>
               {skillsInstalled ? (
-                <Action.Push title="See How to Use Them" icon={Icon.Book} target={<AgentSkillsHelp />} />
+                <Action.Push title="View README" icon={Icon.Book} target={<AgentSkillsHelp />} />
               ) : (
                 <Action
                   title="Install for Me"
                   icon={Icon.Download}
                   onAction={() =>
                     run("Installing Agent Skills…", installAgentSkills, "Agent Skills Installed", {
-                      then: { title: "See How to Use Them", onAction: () => push(<AgentSkillsHelp />) },
+                      then: { title: "View README", onAction: () => push(<AgentSkillsHelp />) },
                     })
                   }
                 />
@@ -653,7 +806,7 @@ export default function Command() {
                   onAction={() => run("Updating Agent Skills…", installAgentSkills, "Agent Skills Updated")}
                 />
               ) : (
-                <Action.Push title="See How to Use Them" icon={Icon.Book} target={<AgentSkillsHelp />} />
+                <Action.Push title="View README" icon={Icon.Book} target={<AgentSkillsHelp />} />
               )}
               <Action.CopyToClipboard title="Copy Install Command" content={SKILLS_COMMAND} />
               <Action.OpenInBrowser title="Open Skills Repository" url={SKILLS_REPO_URL} />
@@ -723,8 +876,23 @@ export default function Command() {
   );
 }
 
+/** Keys in a check that change on every run without anything having changed. */
+const VOLATILE = /^(generated_at|invocation_id|checkedAt)$|_age_seconds$|_age_ms$/;
+
+/** Everything a check found, minus the parts that change on every run, so "No new changes" is true. */
+function healthFingerprint(health: Health): string {
+  return JSON.stringify(
+    { ...health, cliError: health.cliError === undefined ? undefined : errorMessage(health.cliError) },
+    (key, value) => (VOLATILE.test(key) ? undefined : value),
+  );
+}
+
 function SearchIndexItem(props: {
   rebuild: RebuildStatus;
+  /** Entries missing from the index or indexed with old text, per the CLI's doctor; null when it didn't say. */
+  gap: number | null;
+  /** When the last sync finished, from the CLI's doctor; null when unknown. */
+  lastSyncAt: number | null;
   onRebuild: () => void;
   actions: ReactNode;
   whileRunning: ReactNode;
@@ -764,15 +932,43 @@ function SearchIndexItem(props: {
       />
     );
   }
+  const skippedGap =
+    props.gap !== null &&
+    props.gap > 0 &&
+    gapIsSkippedEntries(props.gap, rebuild.state === "done" ? rebuild : null, props.lastSyncAt);
+  if (props.gap && !skippedGap) {
+    return (
+      <List.Item
+        icon={warn}
+        title="Rebuild the Search Index"
+        subtitle={
+          props.gap === 1
+            ? "1 entry is missing or out of date, so search by meaning can miss it"
+            : `${plural(props.gap, "entry", "entries")} are missing or out of date, so search by meaning can miss them`
+        }
+        actions={
+          <ActionPanel>
+            {rebuildAction}
+            {props.actions}
+          </ActionPanel>
+        }
+      />
+    );
+  }
   const recent = rebuild.state === "done" && Date.now() - rebuild.finishedAt < 24 * 60 * 60 * 1000;
   return (
     <List.Item
       icon={ok}
       title="Search Index"
       subtitle={
-        recent
-          ? `Rebuilt ${ago((Date.now() - rebuild.finishedAt) / 1000)} · ${plural(rebuild.recalculated, "entry", "entries")}`
-          : "Rebuild it if a search misses an entry you know is there"
+        skippedGap && rebuild.state === "done"
+          ? // The CLI skips these when rebuilding yet still counts them missing, so rebuilding again wouldn't help.
+            `Rebuilt ${ago((Date.now() - rebuild.finishedAt) / 1000)} · ${plural(props.gap ?? 0, "entry", "entries")} can't be indexed`
+          : recent
+            ? `Rebuilt ${ago((Date.now() - rebuild.finishedAt) / 1000)} · ${plural(rebuild.recalculated, "entry", "entries")}`
+            : props.gap === 0
+              ? "Every entry can be found by meaning"
+              : "Rebuild it if a search misses an entry you know is there"
       }
       actions={
         <ActionPanel>

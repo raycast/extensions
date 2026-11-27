@@ -31,7 +31,7 @@ function journalCount(run: RunRecord): number {
   return run.meta?.journals ?? 1;
 }
 
-function sumField(stdout: string, key: "scanned" | "recalculated"): number {
+function sumField(stdout: string, key: "scanned" | "recalculated" | "skipped"): number {
   return [...stdout.matchAll(new RegExp(`"${key}":\\s*(\\d+)`, "g"))].reduce((n, m) => n + Number(m[1]), 0);
 }
 
@@ -132,7 +132,7 @@ export type RebuildProgress = { journalsDone: number; journals: number; entriesD
 export type RebuildStatus =
   | { state: "idle" }
   | { state: "running"; startedAt: number; progress: RebuildProgress }
-  | { state: "done"; finishedAt: number; recalculated: number }
+  | { state: "done"; finishedAt: number; recalculated: number; skipped: number }
   | { state: "failed"; error: unknown };
 
 /** The CLI reports no progress inside a journal, so the count moves a journal at a time. */
@@ -153,7 +153,12 @@ export function rebuildStatus(): RebuildStatus {
   if (rebuildJob.isRunning()) return { state: "running", startedAt: run.startedAt, progress };
   const finishedAt = mtime(rebuildJob.files().out) || run.startedAt;
   if (progress.journals > 0 && progress.journalsDone >= progress.journals) {
-    return { state: "done", finishedAt, recalculated: sumField(stdout, "recalculated") };
+    return {
+      state: "done",
+      finishedAt,
+      recalculated: sumField(stdout, "recalculated"),
+      skipped: sumField(stdout, "skipped"),
+    };
   }
   const stderr = lastErrorLine(safeRead(rebuildJob.files().log));
   return { state: "failed", error: new DayOneCliError(stderr || "The rebuild stopped before it finished") };
