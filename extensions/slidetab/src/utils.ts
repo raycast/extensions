@@ -36,21 +36,21 @@ export async function isSlideTabInstalled(): Promise<boolean> {
 }
 
 export async function runSlideTabCommand(path: SlideTabRoute, hudMessage?: string): Promise<boolean> {
-  const installed = await isSlideTabInstalled();
-  if (!installed) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "SlideTab.app is not installed",
-      message: "Install SlideTab in /Applications to use trackpad window switching.",
-      primaryAction: {
-        title: "Get SlideTab",
-        onAction: () => open(DOWNLOAD_URL),
-      },
-    });
-    return false;
-  }
-
   try {
+    const installed = await isSlideTabInstalled();
+    if (!installed) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "SlideTab.app is not installed",
+        message: "Install SlideTab in /Applications to use trackpad window switching.",
+        primaryAction: {
+          title: "Get SlideTab",
+          onAction: () => open(DOWNLOAD_URL),
+        },
+      });
+      return false;
+    }
+
     await open(`slidetab://${path}`, BUNDLE_ID);
     if (hudMessage) {
       await showHUD(hudMessage);
