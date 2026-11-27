@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "explainshell",
   "title": "Shell Command Explainer",
-  "description": "Match each argument of a shell command to its man page help text, using explainshell.com",
+  "description": "Match each argument of a shell command to its man page help text, using explainshell.com.",
   "icon": "icon.png",
   "author": "benjaminkifle",
   "platforms": [
@@ -40,7 +40,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/parse.test.ts"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

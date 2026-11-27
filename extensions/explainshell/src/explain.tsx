@@ -6,9 +6,24 @@ import { detailMarkdown, Explanation, explainUrl, parseExplainPage, plainHelp, T
 // One color per program in the line, reused if there are more than seven. Shell syntax is grey.
 const GROUP_COLORS = [Color.Blue, Color.Green, Color.Orange, Color.Purple, Color.Magenta, Color.Yellow, Color.Red];
 
+// The SVG picture takes literal colours: Raycast resolves its own palette names in the Markdown
+// renderer, but an SVG `fill` cannot follow the theme, so these are mid-tones that stay readable on
+// both the light and the dark pane. The list icons keep the theme-aware Color tokens above.
+const GROUP_HEX = ["#2f7de1", "#2f9e58", "#c96f06", "#9061d9", "#d6408f", "#a87c00", "#d94a4a"];
+const SHELL_HEX = "#8e8e93";
+
+// `group` is "shell" or "commandN", so anything else indexes NaN and is drawn as shell syntax.
+// That covers "shell" itself and cached results from a version whose tokens had no `group`.
+const groupIndex = (token: Token) => Number(token.group?.replace("command", ""));
+
 function tokenColor(token: Token): Color {
-  const index = Number(token.group.replace("command", ""));
-  return token.group === "shell" ? Color.SecondaryText : GROUP_COLORS[index % 7];
+  const index = groupIndex(token);
+  return Number.isNaN(index) ? Color.SecondaryText : GROUP_COLORS[index % 7];
+}
+
+function tokenFill(token: Token): string {
+  const index = groupIndex(token);
+  return Number.isNaN(index) ? SHELL_HEX : GROUP_HEX[index % 7];
 }
 
 function tokenIcon(token: Token) {
@@ -69,7 +84,7 @@ export default function Command() {
             key={index}
             title={token.text}
             icon={tokenIcon(token)}
-            detail={<List.Item.Detail markdown={detailMarkdown(data?.command ?? command, tokens, token, tokenColor)} />}
+            detail={<List.Item.Detail markdown={detailMarkdown(data?.command ?? command, tokens, token, tokenFill)} />}
             actions={
               <ActionPanel>
                 {token.help && <Action.CopyToClipboard title="Copy Help Text" content={plainHelp(token.help)} />}
