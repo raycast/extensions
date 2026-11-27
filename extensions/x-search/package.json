@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "x-search",
+  "title": "X Search",
+  "description": "Search X posts by word, hashtag, account, date, and engagement, or type your own search query, and open the results on x.com.",
+  "icon": "extension-icon-flat.png",
+  "author": "raulg",
+  "categories": [
+    "Web"
+  ],
+  "keywords": [
+    "x",
+    "twitter",
+    "tweet",
+    "x.com",
+    "posts",
+    "hashtag",
+    "social media"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "advanced-search",
+      "title": "Advanced Search",
+      "description": "Fill in X's advanced search and open it on x.com.",
+      "mode": "view",
+      "keywords": [
+        "x",
+        "twitter",
+        "tweet",
+        "hashtag",
+        "query"
+      ]
+    },
+    {
+      "name": "quick-search",
+      "title": "Quick Search",
+      "description": "Type a search query and open it on x.com.",
+      "mode": "no-view",
+      "keywords": [
+        "x",
+        "twitter",
+        "tweet",
+        "query"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search Query",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "resultsTab",
+      "title": "Preferred Tab",
+      "description": "The results tab a search opens unless you choose another.",
+      "type": "dropdown",
+      "required": false,
+      "default": "top",
+      "data": [
+        {
+          "title": "Top",
+          "value": "top"
+        },
+        {
+          "title": "Latest",
+          "value": "latest"
+        }
+      ]
+    },
+    {
+      "name": "browser",
+      "title": "Preferred Browser",
+      "description": "Choose a web browser. Every installed application is listed, and one that cannot open the search link does not open it. Leave this empty to use your system browser.",
+      "placeholder": "System browser",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.14.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.16.0",
+    "eslint-plugin-import-x": "^4.18.1",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit"
+  }
+}
