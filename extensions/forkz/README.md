@@ -20,7 +20,7 @@ or download it from the
 | Run Synclet | Run a saved sync |
 | Open Smart Folder | Run a saved search |
 | Open Workspace | Open a saved set of tabs |
-| Open Finder Folder | Show the items selected in Finder, or the front Finder window's folder, in forkz |
+| Open Finder Folder | Show the item selected in Finder (the first, if several are), or the front Finder window's folder, in forkz |
 | Search Files | Search a folder by name or contents, kind, size, and date |
 
 The lists come from forkz's settings on your Mac: names, folders, and

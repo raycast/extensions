@@ -60,7 +60,7 @@
       "name": "open-finder-folder",
       "title": "Open Finder Folder",
       "subtitle": "forkz",
-      "description": "Show the items selected in Finder, or the front Finder window's folder, in forkz.",
+      "description": "Show the item selected in Finder (the first, if several are), or the front Finder window's folder, in forkz.",
       "mode": "no-view"
     },
     {

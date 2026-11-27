@@ -6,7 +6,7 @@ export default function Command() {
     <NamedList
       pick={(settings) => settings.synclets}
       link="synclet"
-      verb="Run in Forkz"
+      verb="Run in forkz"
       icon={Icon.ArrowClockwise}
       empty="No synclets"
       hint="Save one in forkz's Sync Folders window with Save as Synclet."

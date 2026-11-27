@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, usePromise } from "@raycast/utils";
 import { homedir } from "os";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { openLink } from "./forkz";
 
 /** forkz's kinds (as forkz://search names them). */
@@ -34,20 +34,24 @@ interface Values {
   days: string;
 }
 
-export default function Command() {
-  const [folder, setFolder] = useState<string[]>([homedir()]);
-  // Where Finder is, as the folder to search (else home).
-  useEffect(() => {
-    runAppleScript(
+/** The folder of Finder's front window, if there is one. */
+async function frontFinderFolder(): Promise<string | undefined> {
+  try {
+    const path = await runAppleScript(
       'tell application "Finder" to if (count of Finder windows) > 0 then return POSIX path of (target of front Finder window as alias)',
-    )
-      .then((path) => {
-        if (path.trim()) {
-          setFolder([path.trim()]);
-        }
-      })
-      .catch(() => undefined);
-  }, []);
+    );
+    return path.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export default function Command() {
+  // The folder chosen in the form; until then, where Finder is (else home).
+  // A late answer from Finder never replaces a folder the user chose.
+  const [chosen, setChosen] = useState<string[]>();
+  const { data: finder } = usePromise(frontFinderFolder);
+  const folder = chosen ?? [finder ?? homedir()];
 
   async function search(values: Values) {
     const parameters: Record<string, string> = { path: values.folder[0] ?? homedir() };
@@ -67,7 +71,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search in Forkz" icon={Icon.MagnifyingGlass} onSubmit={search} />
+          {/* eslint-disable-next-line @raycast/prefer-title-case -- forkz is the app's name, lowercase */}
+          <Action.SubmitForm title="Search in forkz" icon={Icon.MagnifyingGlass} onSubmit={search} />
         </ActionPanel>
       }
     >
@@ -80,7 +85,7 @@ export default function Command() {
         canChooseDirectories
         canChooseFiles={false}
         value={folder}
-        onChange={setFolder}
+        onChange={setChosen}
       />
       <Form.Dropdown id="kind" title="Kind" defaultValue="">
         {KINDS.map(([value, title]) => (

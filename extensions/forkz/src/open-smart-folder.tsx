@@ -6,7 +6,7 @@ export default function Command() {
     <NamedList
       pick={(settings) => settings.smartFolders}
       link="smart-folder"
-      verb="Open in Forkz"
+      verb="Open in forkz"
       icon={Icon.MagnifyingGlass}
       empty="No smart folders"
       hint="Save a search in forkz with Save as a smart folder in the sidebar."

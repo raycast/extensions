@@ -6,7 +6,7 @@ export default function Command() {
     <NamedList
       pick={(settings) => settings.workspaces}
       link="workspace"
-      verb="Open in Forkz"
+      verb="Open in forkz"
       icon={Icon.AppWindowGrid2x2}
       empty="No workspaces"
       hint="Save the open tabs in forkz with Window > Workspaces > Save Workspace."

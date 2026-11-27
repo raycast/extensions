@@ -11,12 +11,21 @@ function lastPart(path: string): string {
 
 /** Folders to open in forkz (recent folders, favorites). */
 export function PlaceList(props: { pick: (settings: Settings) => Place[]; empty: string; noun: string }) {
-  const { data, isLoading, error } = usePromise(readSettings);
+  const { data, isLoading, error, revalidate } = usePromise(readSettings);
   const places = data ? props.pick(data) : [];
   return (
     <List isLoading={isLoading} searchBarPlaceholder={`Search ${props.noun}`}>
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="forkz's settings could not be read" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="forkz's settings could not be read"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.EmptyView icon={Icon.Folder} title={props.empty} />
       )}
@@ -30,7 +39,8 @@ export function PlaceList(props: { pick: (settings: Settings) => Place[]; empty:
           keywords={[place.path, place.site?.name ?? ""]}
           actions={
             <ActionPanel>
-              <Action title="Open in Forkz" icon={Icon.ArrowRight} onAction={() => openPlace(place)} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case -- forkz is the app's name, lowercase */}
+              <Action title="Open in forkz" icon={Icon.ArrowRight} onAction={() => openPlace(place)} />
               {!place.site && <Action.ShowInFinder path={place.path} />}
               <Action.CopyToClipboard title="Copy Path" content={place.path} />
             </ActionPanel>
@@ -51,12 +61,21 @@ export function NamedList(props: {
   hint: string;
   noun: string;
 }) {
-  const { data, isLoading, error } = usePromise(readSettings);
+  const { data, isLoading, error, revalidate } = usePromise(readSettings);
   const items = data ? props.pick(data) : [];
   return (
     <List isLoading={isLoading} searchBarPlaceholder={`Search ${props.noun}`}>
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="forkz's settings could not be read" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="forkz's settings could not be read"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.EmptyView icon={props.icon} title={props.empty} description={props.hint} />
       )}

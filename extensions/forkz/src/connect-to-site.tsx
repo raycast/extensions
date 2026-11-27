@@ -4,11 +4,20 @@ import { address, readSites } from "./data";
 import { openLink } from "./forkz";
 
 export default function Command() {
-  const { data, isLoading, error } = usePromise(readSites);
+  const { data, isLoading, error, revalidate } = usePromise(readSites);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search sites">
       {error ? (
-        <List.EmptyView icon={Icon.Warning} title="forkz's sites could not be read" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="forkz's sites could not be read"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.EmptyView
           icon={Icon.Globe}
@@ -28,7 +37,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Connect in Forkz"
+                // eslint-disable-next-line @raycast/prefer-title-case -- forkz is the app's name, lowercase
+                title="Connect in forkz"
                 icon={Icon.ArrowRight}
                 onAction={() => openLink("connect", { site: site.name })}
               />
