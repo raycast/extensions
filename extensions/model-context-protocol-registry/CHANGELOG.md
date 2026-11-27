@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add BetaDrop MCP Server] - 2026-11-27
+
+- Add BetaDrop to the official registry: publish iOS and Android beta builds and share an over-the-air install link from your AI assistant, check uploads, list builds, read install stats and tester feedback, re-point standing links, and manage registered iPhone UDIDs, webhooks and API tokens. 23 tools. Hosted Streamable HTTP server at https://mcp.betadrop.app with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A local stdio server (`npx -y @betadrop/mcp`, 28 tools) is added as BetaDrop (Local).
+
 ## [Add Figment Mac hosting MCP Server] - 2026-11-27
 
 - Add Figment Mac hosting to the official registry: rent a Mac in the cloud by the hour or the day from your AI agent (plans and prices, prepaid credit through a Stripe link, order, SSH and screen access, stop). 8 tools. Hosted Streamable HTTP server at https://figment.so/api/mcp with an API key from its account tool, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
