@@ -190,7 +190,7 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
                                 <Action
                                     title="Copy Short Hash"
                                     icon={Icon.Clipboard}
-                                    shortcut={projectShortcut('c', ['shift'])}
+                                    shortcut={projectShortcut('c', ['opt', 'shift'])}
                                     onAction={async () => {
                                         Clipboard.copy(commit.shortHash)
                                         await showToast({
