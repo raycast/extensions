@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tuios",
+  "title": "Tuios",
+  "description": "See every tuios agent, jump to it in Ghostty, WezTerm or any terminal, answer its prompts, message it, start new ones and move panes between sessions.",
+  "icon": "icon.png",
+  "author": "devansh_gulhane",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "agents",
+      "title": "Search Agents",
+      "subtitle": "tuios",
+      "description": "Every agent in every tuios session: jump, approve, deny, message, move.",
+      "mode": "view"
+    },
+    {
+      "name": "panes",
+      "title": "Jump to Pane",
+      "subtitle": "tuios",
+      "description": "Search every tuios pane, agent or not, by name, title, program or folder, and jump to it.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Pane",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "jump-waiting",
+      "title": "Jump to Agent Needing Me",
+      "subtitle": "tuios",
+      "description": "Focus the agent that has waited longest and bring its terminal forward.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-agent",
+      "title": "Start Agent",
+      "subtitle": "tuios",
+      "description": "Project → where (session and tab) → first prompt. Enter moves on, ⌘Enter starts at once with defaults.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "project",
+          "placeholder": "Project",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "placeholder": "First Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "defaultAgent",
+      "title": "Default Agent",
+      "description": "The agent command Start Agent uses, as you would type it.",
+      "type": "textfield",
+      "default": "claude",
+      "required": false,
+      "placeholder": "claude"
+    },
+    {
+      "name": "agentChoices",
+      "title": "Other Agents",
+      "description": "Comma-separated agent commands offered in the prompt step.",
+      "type": "textfield",
+      "default": "codex, gemini",
+      "required": false,
+      "placeholder": "codex, gemini"
+    },
+    {
+      "name": "defaultSession",
+      "title": "Default Session",
+      "description": "Where Start Agent opens agents. Empty: the session you used last.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "main"
+    },
+    {
+      "name": "projectRoots",
+      "title": "Project Folders",
+      "description": "Comma-separated folders whose git repos Start Agent offers.",
+      "type": "textfield",
+      "default": "~/Developer, ~/Projects, ~/code, ~/src",
+      "required": false,
+      "placeholder": "~/Projects, ~/code"
+    },
+    {
+      "name": "fallbackTerminal",
+      "title": "Terminal for Detached Sessions",
+      "description": "Opened (running tuios attach) when a session is not showing in any terminal.",
+      "type": "dropdown",
+      "default": "Terminal",
+      "required": false,
+      "data": [
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        },
+        {
+          "title": "WezTerm",
+          "value": "WezTerm"
+        },
+        {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Alacritty",
+          "value": "Alacritty"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        },
+        {
+          "title": "Terminal (macOS)",
+          "value": "Terminal"
+        }
+      ]
+    },
+    {
+      "name": "tuiosPath",
+      "title": "tuios Path",
+      "description": "Leave empty to find it in Homebrew, ~/.local/bin or ~/go/bin.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/tuios"
+    }
+  ]
+}
