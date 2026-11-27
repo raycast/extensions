@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "christian-pure",
+  "title": "Christian Pure Verses and Prayers",
+  "description": "Today's Bible verse and prayer, a verse for how you feel, and short prayers to pray aloud before a meal, a Bible study or a meeting.",
+  "icon": "icon.png",
+  "author": "christianpure",
+  "categories": ["Productivity", "Fun"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "todays-verse",
+      "title": "Today's Verse",
+      "subtitle": "Christian Pure",
+      "description": "Read today's Bible verse with a short note, then copy or paste it.",
+      "mode": "view"
+    },
+    {
+      "name": "todays-prayer",
+      "title": "Today's Prayer",
+      "subtitle": "Christian Pure",
+      "description": "Read today's prayer, then copy or paste it.",
+      "mode": "view"
+    },
+    {
+      "name": "verse-for-feeling",
+      "title": "Verse for How You Feel",
+      "subtitle": "Christian Pure",
+      "description": "Choose a feeling and find a Bible verse for it.",
+      "mode": "view"
+    },
+    {
+      "name": "prayer-for-occasion",
+      "title": "Prayer for an Occasion",
+      "subtitle": "Christian Pure",
+      "description": "Short prayers to pray aloud before a meal, at a Bible study, a church service, a meeting, school or sports, or a funeral.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.20.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
