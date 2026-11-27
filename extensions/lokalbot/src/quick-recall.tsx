@@ -1,15 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  Toast,
-  showToast,
-  open,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import type { LaunchProps } from "@raycast/api";
-import { CliMissingError, runCli, runCliPath } from "./cli";
+import { CliMissingError, revealMeeting, runCli } from "./cli";
 
 interface SearchHit {
   match_kind: string;
@@ -18,33 +10,11 @@ interface SearchHit {
   snippet: string;
 }
 
-/** Strip markdown heading hashes and collapse whitespace for list display. */
 function cleanSnippet(snippet: string): string {
   return snippet
     .replace(/^#+\s*/gm, "")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-async function reveal(meetingId: string) {
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Locating meeting…",
-  });
-  try {
-    const folder = await runCliPath("path", meetingId);
-    if (folder) {
-      await open(folder);
-      toast.hide();
-    } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "No files found for this meeting";
-    }
-  } catch (err) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Could not reveal in Finder";
-    toast.message = err instanceof Error ? err.message : String(err);
-  }
 }
 
 export default function Command(
@@ -92,9 +62,9 @@ export default function Command(
       ) : hits !== null && hits.length === 0 ? (
         <List.EmptyView title={`No matches for “${query}”`} />
       ) : (
-        hits?.map((hit) => (
+        hits?.map((hit, index) => (
           <List.Item
-            key={`${hit.meeting_id}-${hit.match_kind}`}
+            key={`${hit.meeting_id}-${hit.match_kind}-${index}`}
             title={hit.meeting_title}
             subtitle={cleanSnippet(hit.snippet)}
             accessories={[{ tag: hit.match_kind }]}
@@ -104,7 +74,7 @@ export default function Command(
                 <Action
                   title="Reveal in Finder"
                   icon={Icon.Finder}
-                  onAction={() => reveal(hit.meeting_id)}
+                  onAction={() => revealMeeting(hit.meeting_id)}
                 />
                 <Action.CopyToClipboard
                   title="Copy Snippet"
