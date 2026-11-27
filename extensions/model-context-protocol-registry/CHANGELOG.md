@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Arsen MCP Server] - {PR_MERGE_DATE}
+
+- Add Arsen MCP to the official registry with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Requires an Arsen account and OAuth sign-in.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
