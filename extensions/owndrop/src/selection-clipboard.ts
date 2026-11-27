@@ -11,6 +11,8 @@ async function windowsSelection(mode: "select" | "copy" | "select-and-copy", fil
       "-NoProfile",
       "-NonInteractive",
       "-STA",
+      "-ExecutionPolicy",
+      "Bypass",
       "-File",
       path.join(environment.assetsPath, "selection-windows.ps1"),
       "-Mode",

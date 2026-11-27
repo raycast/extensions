@@ -1,3 +1,4 @@
+import path from "node:path";
 import {
   closeMainWindow,
   Clipboard,
@@ -5,9 +6,18 @@ import {
   getSelectedFinderItems,
   getSelectedText,
   showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { dropFileFromPath, dropText } from "./api";
+import { containsSetupCredential, dropFileFromPath, dropText, normalizeLocalPath } from "./api";
 import { copySelectedFiles, copySelectedExplorerFiles } from "./selection-clipboard";
+
+function uploadErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : "";
+  if (containsSetupCredential(message)) return "Check your OwnDrop connection details.";
+  const localPath = (error as NodeJS.ErrnoException | undefined)?.path;
+  return (localPath ? message.replaceAll(localPath, path.basename(localPath)) : message) || "Unknown upload error.";
+}
 
 export default async function Command() {
   if (process.platform !== "darwin" && process.platform !== "win32") {
@@ -36,21 +46,34 @@ export default async function Command() {
       }
       if (!explorer) await copySelectedFiles(files);
       copied = true;
-      let succeeded = 0;
+      const failures: string[] = [];
       for (const [index, file] of files.entries()) {
         await showHUD(`Copied ${files.length} files · Uploading ${index + 1}/${files.length}...`);
         try {
           await dropFileFromPath(file);
-          succeeded++;
-        } catch {
-          // Attempt every selected file, and leave the full local copy intact.
+        } catch (error) {
+          const name = path.basename(normalizeLocalPath(file));
+          failures.push(`${name}: ${uploadErrorMessage(error)}`);
         }
       }
-      await showHUD(`Copied ${files.length} files · Dropped ${succeeded} · Failed ${files.length - succeeded}`);
+      if (failures.length) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Copied locally · Dropped ${files.length - failures.length} of ${files.length}`,
+          message: failures.join("\n"),
+        });
+      } else {
+        await showHUD(`Copied and dropped ${files.length} ${files.length === 1 ? "file" : "files"}`);
+      }
     } else {
       const text = await getSelectedText();
       if (!text.trim()) {
         await showHUD("Select text or files first");
+        return;
+      }
+      if (containsSetupCredential(text)) {
+        await Clipboard.copy(text, { concealed: true });
+        await showHUD("Copied privately · Paste into OwnDrop preferences");
         return;
       }
       await Clipboard.copy(text);
@@ -59,11 +82,19 @@ export default async function Command() {
       await dropText(text);
       await showHUD("Copied and dropped");
     }
-  } catch {
+  } catch (error) {
     if (readingExplorer) {
       await showHUD("Could not read File Explorer selection. Keep Explorer active and retry the hotkey.");
       return;
     }
-    await showHUD(copied ? "Copied locally · Drop failed" : "Could not copy selection · Nothing dropped");
+    if (copied) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Copied locally · Drop failed",
+        message: uploadErrorMessage(error),
+      });
+    } else {
+      await showHUD("Could not copy selection · Nothing dropped");
+    }
   }
 }
