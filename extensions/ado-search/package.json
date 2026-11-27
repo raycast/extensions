@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
   "title": "Azure DevOps Repositories Search",
-  "description": "Search Azure DevOps repositories, pipelines, pull requests and work items, browse and plan sprint work items, create work items, and see open pull requests in the menu bar.",
+  "description": "Search Azure DevOps repositories, pipelines and pull requests, manage your work items and sprints, and create work items.",
   "icon": "Azure-DevOps.png",
   "author": "willem_van_lent",
   "contributors": [

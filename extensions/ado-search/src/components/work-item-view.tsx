@@ -39,6 +39,7 @@ import {
   ProcessedImage,
 } from "../lib/attachments";
 import { readAppSettings } from "../lib/app-settings";
+import { getWorkItems, toWorkItem } from "../lib/sprint-api";
 import { WorkItemExtraActions } from "./sprint/ExtraActions";
 
 export function useProcessedDescription(description: string | undefined): ProcessedDescription | null {
@@ -133,10 +134,14 @@ export function getBranchName(item: WorkItem): string {
 export function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: (updated: WorkItem) => void }) {
   const [current, setCurrent] = useState<WorkItem>(item);
 
-  const { data: comments } = useCachedPromise(getWorkItemComments, [current.project, current.id], {
-    initialData: [] as string[],
-    keepPreviousData: false,
-  });
+  const { data: comments, revalidate: reloadComments } = useCachedPromise(
+    getWorkItemComments,
+    [current.project, current.id],
+    {
+      initialData: [] as string[],
+      keepPreviousData: false,
+    },
+  );
 
   const richHtmls = [current.description, current.acceptanceCriteria, current.reproSteps, ...(comments ?? [])];
   const richKey = `${current.id}|${crypto.createHash("sha1").update(richHtmls.filter(Boolean).join("\u0000")).digest("hex")}`;
@@ -210,6 +215,17 @@ export function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: 
   const handleSelfUpdated = (updated: WorkItem) => {
     setCurrent(updated);
     onUpdated?.(updated);
+  };
+
+  // After a comment or a move to another sprint: show the item as it is now, and hand that to the list.
+  const reloadCurrent = async () => {
+    reloadComments();
+    try {
+      const [fresh] = await getWorkItems([current.id]);
+      if (fresh) handleSelfUpdated(toWorkItem(fresh));
+    } catch {
+      /* keep what is shown; the action itself already reported its result */
+    }
   };
 
   const handleChildUpdated = (updated: WorkItem) => {
@@ -292,7 +308,7 @@ export function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: 
                   shortcut={{ modifiers: ["cmd", "opt"], key: "." }}
                 />
               </ActionPanel.Section>
-              <WorkItemExtraActions item={current} onDone={() => onUpdated?.(current)} />
+              <WorkItemExtraActions item={current} onDone={reloadCurrent} />
             </ActionPanel>
           }
         />

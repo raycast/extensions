@@ -29,8 +29,16 @@ export function htmlToText(html?: string): string {
     .trim();
 }
 
+/** Backlog item types of the standard processes, used until the team's backlog settings are loaded. */
 export const STORY_TYPES = ["User Story", "Product Backlog Item", "Feature", "Epic", "Requirement"];
-export const isStory = (type: string) => STORY_TYPES.includes(type);
+
+/** Backlog item types from the team's backlog settings (e.g. "Issue" in the Basic process). */
+let backlogTypes: string[] | undefined;
+export function setBacklogTypes(types: string[]) {
+  backlogTypes = types;
+}
+
+export const isStory = (type: string) => (backlogTypes ?? STORY_TYPES).includes(type);
 
 /** Same state colors Azure DevOps uses in the web UI (Agile, Scrum and Basic processes). */
 const STATE_COLORS: Record<string, string> = {

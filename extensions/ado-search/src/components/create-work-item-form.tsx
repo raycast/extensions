@@ -167,7 +167,11 @@ export function CreateWorkItemForm({
   useEffect(() => {
     setArea("");
   }, [project]);
-  const { data: iterations } = useCachedPromise(getIterations, [], { execute: sprintsAvailable });
+  const {
+    data: iterations,
+    isLoading: loadingIterations,
+    error: iterationsError,
+  } = useCachedPromise(getIterations, [], { execute: sprintsAvailable });
   const currentSprint = (iterations ?? []).find((i) => i.timeFrame === "current")?.path ?? "";
   const effectiveIteration = sprintMode === "current" ? currentSprint : sprintMode === "none" ? "" : iterationPath;
   const { data: stories, isLoading: loadingStories } = useCachedPromise(getStories, [effectiveIteration], {
@@ -211,6 +215,19 @@ export function CreateWorkItemForm({
     }
     if (!type) {
       showToast({ style: Toast.Style.Failure, title: "Pick a work item type" });
+      return;
+    }
+    // Default Sprint = current: never fall back to the project's default iteration without saying so.
+    if (sprintsAvailable && sprintMode === "current" && !currentSprint) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: loadingIterations ? "Still loading the current sprint" : "No current sprint found",
+        message: loadingIterations
+          ? "Try again in a moment."
+          : iterationsError
+            ? iterationsError.message
+            : "The team has no sprint for today. Change Default Sprint in the command preferences.",
+      });
       return;
     }
     const parsedParent = parentId.trim() ? Number(parentId.trim()) : undefined;
@@ -293,8 +310,9 @@ export function CreateWorkItemForm({
 
   return (
     <Form
-      isLoading={loadingProjects || loadingTypes || submitting}
-      navigationTitle={navigationTitle}
+      isLoading={loadingProjects || loadingTypes || (sprintMode === "current" && loadingIterations) || submitting}
+      // The command's root view keeps Raycast's command title.
+      navigationTitle={standalone ? undefined : navigationTitle}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" icon={Icon.Plus} onSubmit={handleSubmit} />
@@ -367,10 +385,14 @@ export function CreateWorkItemForm({
           id="sprintParent"
           title="Parent"
           info="Backlog items of the selected sprint"
-          value={(stories ?? []).some((st) => String(st.id) === parentId.trim()) ? parentId.trim() : ""}
+          value={parentId.trim()}
           onChange={setParentId}
         >
           <Form.Dropdown.Item value="" title={loadingStories ? "Loading…" : "— (no parent)"} />
+          {/* A parent the form was opened with that isn't in this sprint stays visible and selected. */}
+          {parentId.trim() && !(stories ?? []).some((st) => String(st.id) === parentId.trim()) && (
+            <Form.Dropdown.Item value={parentId.trim()} title={`#${parentId.trim()} (not in this sprint)`} />
+          )}
           {(stories ?? []).map((st) => (
             <Form.Dropdown.Item key={st.id} value={String(st.id)} title={`#${st.id} ${st.title}`} />
           ))}

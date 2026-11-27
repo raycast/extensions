@@ -11,7 +11,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { WorkItem } from "./azure-devops";
 import { CommitInfo, Comment, Iteration, LinkedPullRequest, Relations, SprintItem } from "./sprint-types";
-import { setStateColors } from "./sprint-utils";
+import { STORY_TYPES, setBacklogTypes, setStateColors } from "./sprint-utils";
 
 const API = "api-version=7.1";
 const COMMENTS_API = "api-version=7.1-preview.4";
@@ -226,8 +226,46 @@ export function toWorkItem(it: SprintItem): WorkItem {
   };
 }
 
+interface BacklogTypes {
+  /** Requirement level, where Tasks go: User Story, Product Backlog Item, Requirement or Issue. */
+  requirement: string[];
+  /** Requirement and portfolio levels (Feature, Epic…): what the sprint view groups tasks under. */
+  all: string[];
+}
+
+let backlogTypesPromise: Promise<BacklogTypes> | undefined;
+
+/**
+ * Work item types of the team's backlogs, from its backlog settings, so any process works (Basic's backlog
+ * items are "Issue"). Falls back to the standard processes' types if the settings can't be read.
+ */
+export function getBacklogTypes(): Promise<BacklogTypes> {
+  const { base, project, team } = prefs();
+  backlogTypesPromise ??= request<{
+    requirementBacklog?: { workItemTypes?: { name: string }[] };
+    portfolioBacklogs?: { workItemTypes?: { name: string }[] }[];
+  }>(`${base}/${project}${team}/_apis/work/backlogconfiguration?${API}`)
+    .then((res) => {
+      const requirement = (res.requirementBacklog?.workItemTypes ?? []).map((t) => t.name);
+      const portfolio = (res.portfolioBacklogs ?? []).flatMap((b) => (b.workItemTypes ?? []).map((t) => t.name));
+      if (requirement.length === 0) throw new Error("No requirement backlog");
+      return { requirement, all: [...requirement, ...portfolio] };
+    })
+    .catch(() => {
+      backlogTypesPromise = undefined; // look again next time
+      return { requirement: STORY_TYPES.filter((t) => t !== "Feature" && t !== "Epic"), all: STORY_TYPES };
+    })
+    .then((types) => {
+      setBacklogTypes(types.all);
+      return types;
+    });
+  return backlogTypesPromise;
+}
+
 export async function getWorkItems(ids: number[]): Promise<SprintItem[]> {
   if (ids.length === 0) return [];
+  // Know which types are backlog items before the rows are drawn (it decides grouping and New Task's parent).
+  await getBacklogTypes();
   // Organization-level endpoint: items can come from any project (My Work Items spans projects).
   const { base } = prefs();
   const fields = await fieldList();
@@ -463,12 +501,14 @@ export async function getAreas(project: string): Promise<string[]> {
   return out;
 }
 
-/** Backlog items of a sprint (User Stories, PBIs, Requirements, Features), to pick a parent from. */
+/** Requirement-level backlog items of a sprint (User Stories, PBIs, Requirements or Issues), to pick a parent from. */
 export async function getStories(iterationPath: string): Promise<SprintItem[]> {
   if (!iterationPath) return [];
+  const { requirement } = await getBacklogTypes();
+  const types = requirement.map((t) => `'${esc(t)}'`).join(",");
   const ids = await wiql(
     `SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @project AND [System.IterationPath] = '${esc(iterationPath)}' ` +
-      `AND [System.WorkItemType] IN ('User Story','Product Backlog Item','Requirement','Feature') AND [System.State] <> 'Removed' ORDER BY [System.Id] ASC`,
+      `AND [System.WorkItemType] IN (${types}) AND [System.State] <> 'Removed' ORDER BY [System.Id] ASC`,
   );
   return getWorkItems(ids);
 }

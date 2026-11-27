@@ -50,8 +50,9 @@ export function SprintActions({ item, onDone, extra, parent, inDetail = false }:
             target={
               <NewTaskForm
                 iterationPath={item.iterationPath}
-                // Under the selected story, or under the same story as the selected task.
-                parentId={isStory(item.type) ? item.id : item.sprintParentId}
+                // Under the selected story, or under the same parent as the selected task. sprintParentId only
+                // exists in the sprint list; details and search results have the item's own parent.
+                parentId={isStory(item.type) ? item.id : item.sprintParentId ?? item.parentId}
                 onCreated={onDone}
               />
             }
