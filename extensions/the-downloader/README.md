@@ -29,7 +29,9 @@ Chat About Link's settings also set the **Answer Style** (Balanced, Short with a
 
 In Raycast AI Chat, mention **@the-downloader** to download videos, read any link (`read-link`: a video's timestamped transcript, a post's caption or an article) or get its details and statistics (`get-link-info`). The extension also includes three Skills: **Summarize Link**, **Study Notes** and **Performance Check**.
 
-Privacy: when `read-link` or `get-link-info` can't read an article (it blocks apps, is gone or needs JavaScript), they look up its saved copy on the Internet Archive automatically, which sends the link to archive.org. In Chat About Link that only happens when you choose **Read Archived Copy**.
+Type **@** in the AI Chat composer and choose **Recent Links** to mention a link you downloaded or chatted about before: its transcript, caption or article is attached to your message, so you don't need to paste the link again.
+
+Privacy: when `read-link`, `get-link-info` or a mentioned Recent Link can't read an article (it blocks apps, is gone or needs JavaScript), they look up its saved copy on the Internet Archive automatically, which sends the link to archive.org. In Chat About Link that only happens when you choose **Read Archived Copy**.
 
 ## What you need
 

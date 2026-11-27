@@ -1,5 +1,12 @@
 # The Downloader Changelog
 
+## [Recent Links in AI Chat] - {PR_MERGE_DATE}
+
+- **Recent Links** — type `@` in Raycast AI Chat and choose Recent Links to mention a link you downloaded or chatted about. Its transcript, caption or article is attached to the message, from the same cache Chat About Link and `read-link` use.
+- **Raycast AI Model** — GPT-6.2 Sol joins the list.
+- gallery-dl's links point to Codeberg, where its development moved.
+- Updated to Raycast API 2.14 (the Node.js 26 runtime), execa 10 and TypeScript 6.
+
 ## [Initial Release] - 2026-10-29
 
 Download videos, audio, image galleries, Spotify music and complete webpages from Raycast, and chat with AI about any video, post or article. The Downloader started from [Video Downloader](https://www.raycast.com/vimtor/video-downloader) by vimtor and its contributors.

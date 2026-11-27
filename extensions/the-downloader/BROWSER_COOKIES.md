@@ -56,7 +56,7 @@ A Chromium-fork profile by full path (macOS):
 chromium:/Users/you/Library/Application Support/Thorium/Default
 ```
 
-Anything you put here is passed straight to gallery-dl's `--cookies-from-browser`, so gallery-dl's docs are the source of truth: https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorcookies
+Anything you put here is passed straight to gallery-dl's `--cookies-from-browser`, so gallery-dl's docs are the source of truth (see `extractor.*.cookies`): https://codeberg.org/mikf/gallery-dl/src/branch/master/docs/configuration.rst
 
 ### Finding your profile
 

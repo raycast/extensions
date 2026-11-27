@@ -93,7 +93,7 @@ export const TOOL_INFO: Record<ToolId, ToolInfo> = {
   "gallery-dl": {
     name: "gallery-dl",
     purpose: "Downloads image galleries from Reddit, Instagram, Pinterest and more",
-    homepage: "https://github.com/mikf/gallery-dl",
+    homepage: "https://codeberg.org/mikf/gallery-dl",
   },
   deno: {
     name: "Deno",

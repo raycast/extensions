@@ -159,6 +159,10 @@
               "value": "anthropic-claude-haiku-5-5"
             },
             {
+              "title": "GPT-6.2 Sol",
+              "value": "openai-gpt-6.2-sol"
+            },
+            {
               "title": "GPT-6.1 Sol",
               "value": "openai-gpt-6.1-sol"
             },
@@ -373,6 +377,14 @@
       "name": "get-link-info",
       "title": "Get Link Info",
       "description": "Gets only a link's details and statistics, without its text: title, author or channel, site, date, views, likes, comments, engagement rates, chapters, tags, description and a video's caption languages. Use it only for questions about how a link is doing or what it is, not for summaries or its content (use read-link for those)"
+    },
+    {
+      "name": "recent-links",
+      "title": "Recent Links",
+      "description": "The links you downloaded or chatted about, to mention with @ in Raycast AI Chat. Picking one attaches what it says: a video's transcript, a post's caption or an article",
+      "functionalities": [
+        "AI mention search"
+      ]
     }
   ],
   "preferences": [
@@ -736,6 +748,7 @@
       "required": false
     }
   ],
+  "resourceProvider": "read-mention",
   "ai": {
     "instructions": "Match the language of the user's message, not of the tool output: an English message gets an English reply, a German one German, a Czech one Czech. After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. To summarize a link or answer anything about what it says, call read-link once — it returns the details too, so don't also call get-link-info. Call get-link-info only for how a link is doing (views, likes, comments) or basic facts about it. When answering from a video's transcript, show when things are said: the timestamp itself is the link text, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows — never hide the link behind other words — and every point of a video summary gets its timestamp. For posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports.",
     "skills": [
@@ -930,21 +943,21 @@
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@raycast/api": "^2.9.0",
+    "@raycast/api": "^2.14.0",
     "@raycast/utils": "^2.3.3",
-    "execa": "^9.6.1",
-    "linkedom": "^0.18.13",
+    "execa": "^10.2.1",
+    "linkedom": "^0.18.15",
     "srt-parser-2": "^1.2.3",
     "validator": "^13.15.35"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "@types/validator": "^13.15.10",
-    "eslint": "^10.11.0",
-    "prettier": "^3.9.9",
-    "typescript": "^5.9.3"
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

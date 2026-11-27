@@ -12,9 +12,9 @@ In the **Download** command you can also grab just a video's **thumbnail** image
 
 ## Image galleries
 
-Handled by [gallery-dl](https://github.com/mikf/gallery-dl) — Reddit, Imgur, Pixiv, DeviantArt, Flickr, Instagram and hundreds more.
+Handled by [gallery-dl](https://codeberg.org/mikf/gallery-dl) — Reddit, Imgur, Pixiv, DeviantArt, Flickr, Instagram and hundreds more.
 
-Full list: <https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md>
+Full list: <https://codeberg.org/mikf/gallery-dl/src/branch/master/docs/supportedsites.md>
 
 ## Music
 
