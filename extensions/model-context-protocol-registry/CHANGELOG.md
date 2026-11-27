@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Infograph MCP Server] - {PR_MERGE_DATE}
+## [Add Infograph MCP Server] - 2026-11-27
 
 - Add Infograph to the official registry: ask questions about your own business data and build live dashboards from it. Infograph syncs your apps, databases and spreadsheets into one private data lake, and the server lets your AI run read-only SQL across all of it. Hosted Streamable HTTP server at https://app.infograph.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Works with a free Infograph account.
 
