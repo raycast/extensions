@@ -15,7 +15,7 @@ import { execFile } from "child_process";
 import { promisify } from "util";
 import { ProjectDropdown } from "./components/ProjectDropdown";
 import { CacheManager, RecentResource, ResourceType, ServiceCounts } from "./utils/CacheManager";
-import { authenticateWithBrowser, fetchResourceCounts } from "./gcloud";
+import { authenticateWithBrowser, clearCommandCache, fetchResourceCounts } from "./gcloud";
 import { clearTokenCache } from "./utils/gcpApi";
 import { detectGcloudPath, getInstallInstructions, getPlatform } from "./utils/gcloudDetect";
 import DoctorView from "./components/DoctorView";
@@ -88,7 +88,6 @@ interface GoogleCloudHubProps {
 
 export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps = {}) {
   const configuredGcloudPath = getPreferenceValues<Preferences>().gcloudPath;
-  const [viewMode, setViewMode] = useState<ViewMode>(initialService || "hub");
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -266,23 +265,41 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         showToast({ style: Toast.Style.Failure, title: "No project selected" });
         return;
       }
-      setViewMode(serviceId);
+      push(
+        <ServiceViewContainer
+          serviceId={serviceId}
+          initialProjectId={selectedProject}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />,
+      );
     },
-    [selectedProject],
+    [selectedProject, gcloudPath, push, handleProjectChange],
   );
 
-  const handleRecentResourceSelect = useCallback((resource: RecentResource) => {
-    // Navigate to the service view for this resource type
-    setSelectedProject(resource.projectId);
-    CacheManager.saveSelectedProject(resource.projectId);
-    setViewMode(resource.type);
-  }, []);
+  const handleRecentResourceSelect = useCallback(
+    (resource: RecentResource) => {
+      handleProjectChange(resource.projectId);
+      push(
+        <ServiceViewContainer
+          serviceId={resource.type}
+          initialProjectId={resource.projectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />,
+      );
+    },
+    [gcloudPath, push, handleProjectChange],
+  );
 
   function authenticate() {
     push(
       <AuthenticationView
         gcloudPath={gcloudPath}
         onAuthenticated={() => {
+          clearTokenCache();
+          clearCommandCache();
+          setSessionExpired(false);
           setIsAuthenticated(true);
           CacheManager.saveAuthStatus(true, "");
           pop();
@@ -295,10 +312,12 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     const toast = await showToast({ style: Toast.Style.Animated, title: "Logging out..." });
     try {
       await execFilePromise(gcloudPath, ["auth", "revoke", "--all", "--quiet"], { timeout: 15000 });
-      CacheManager.clearAuthCache();
-      CacheManager.clearProjectCache();
+      clearTokenCache();
+      clearCommandCache();
+      CacheManager.clearAllCaches();
       setIsAuthenticated(false);
       setSelectedProject(null);
+      setServiceCounts(null);
       toast.style = Toast.Style.Success;
       toast.title = "Logged out";
     } catch {
@@ -377,28 +396,16 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     );
   }
 
-  // Service views
-  if (viewMode !== "hub" && selectedProject) {
-    switch (viewMode) {
-      case "compute":
-        return <ComputeInstancesView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "storage":
-        return <StorageBucketView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "cloudrun":
-        return <CloudRunView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "cloudfunctions":
-        return <CloudFunctionsView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "cloudsql":
-        return <CloudSqlView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "iam":
-        return <IAMView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "network":
-        return <NetworkView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "secrets":
-        return <SecretListView projectId={selectedProject} gcloudPath={gcloudPath} />;
-      case "logs":
-        return <LogsView projectId={selectedProject} gcloudPath={gcloudPath} />;
-    }
+  // Direct service view if launched with an initialService prop
+  if (initialService && initialService !== "hub" && selectedProject) {
+    return (
+      <ServiceViewContainer
+        serviceId={initialService}
+        initialProjectId={selectedProject}
+        gcloudPath={gcloudPath}
+        onProjectChange={handleProjectChange}
+      />
+    );
   }
 
   // Main Hub View
@@ -515,6 +522,108 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
 }
 
 // Helper components and functions
+
+interface ServiceViewContainerProps {
+  serviceId: ResourceType;
+  initialProjectId: string;
+  gcloudPath: string;
+  onProjectChange: (projectId: string) => void;
+}
+
+/**
+ * Wraps a pushed service view so in-service project switches update projectId in-place
+ * (without stacking duplicate views on the navigation stack) while keeping the Hub's
+ * selected project in sync when the user presses Esc to go back.
+ */
+function ServiceViewContainer({ serviceId, initialProjectId, gcloudPath, onProjectChange }: ServiceViewContainerProps) {
+  const [currentProjectId, setCurrentProjectId] = useState(initialProjectId);
+
+  const handleProjectChange = useCallback(
+    (newProjectId: string) => {
+      if (!newProjectId || newProjectId === currentProjectId) return;
+      setCurrentProjectId(newProjectId);
+      onProjectChange(newProjectId);
+    },
+    [currentProjectId, onProjectChange],
+  );
+
+  switch (serviceId) {
+    case "compute":
+      return (
+        <ComputeInstancesView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "storage":
+      return (
+        <StorageBucketView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "cloudrun":
+      return (
+        <CloudRunView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "cloudfunctions":
+      return (
+        <CloudFunctionsView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "cloudsql":
+      return (
+        <CloudSqlView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "iam":
+      return (
+        <IAMView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "network":
+      return (
+        <NetworkView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "secrets":
+      return (
+        <SecretListView
+          key={currentProjectId}
+          projectId={currentProjectId}
+          gcloudPath={gcloudPath}
+          onProjectChange={handleProjectChange}
+        />
+      );
+    case "logs":
+      return <LogsView key={currentProjectId} projectId={currentProjectId} gcloudPath={gcloudPath} />;
+  }
+}
 
 interface AuthenticationViewProps {
   gcloudPath: string;
