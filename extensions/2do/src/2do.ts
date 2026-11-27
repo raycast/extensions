@@ -480,6 +480,133 @@ export function repeatRule(task: Task) {
   return rule;
 }
 
+export type CancelPrefs = {
+  cancelBehavior: "complete-and-tag" | "tag" | "move" | "delete";
+  cancelTag: string;
+  cancelList: string;
+};
+
+export async function findTag(title: string) {
+  const { tags } = await twoDo<{ tags: Tag[] }>("list_tags");
+  return tags.find((t) => sameTitle(t.title, title));
+}
+
+// Tags named in preferences are never created, so a missing one is an error saying how to fix it.
+export async function requireTag(title: string, fix: string): Promise<Tag> {
+  const tag = await findTag(title);
+  if (!tag) throw new Error(`No 2Do tag named "${title.trim()}". ${fix}`);
+  return tag;
+}
+
+// Completes `task` and returns the ID of the completed occurrence. For a repeating task, 2Do keeps the
+// open task (moved to its next date) and adds a completed copy, which only a search by title finds.
+// 2Do's search finds nothing without a list to search in, so it searches the task's list.
+async function completeOccurrence(task: Task) {
+  const { task: after } = await twoDo<{ task: Task }>("complete_task", { task_id: task.task_id });
+  if (after.completed) return after.task_id;
+  const { tasks } = await twoDo<{ tasks: Task[] }>("query_tasks", {
+    list_id: task.list_id,
+    search: task.title,
+    include_completed: true,
+    paused_filter: "include",
+  });
+  const [copy] = tasks
+    .filter((t) => t.completed && t.title === task.title && t.task_id !== task.task_id)
+    .sort((a, b) => (b.completion_date ?? "").localeCompare(a.completion_date ?? ""));
+  if (!copy)
+    throw new Error("Completed this occurrence, but couldn't find it to finish cancelling. Check 2Do's Done view.");
+  return copy.task_id;
+}
+
+// 2Do's own convention is a completed task carrying a "Cancelled" tag. The task is completed first,
+// then only the completed occurrence is tagged, moved, or deleted, so a repeating task's next
+// occurrence stays untouched. The tag or list isn't created, so a missing one is an error naming
+// the preference, raised before anything changes.
+export async function cancelTask(task: Task, p: CancelPrefs) {
+  const needsTag = p.cancelBehavior === "complete-and-tag" || p.cancelBehavior === "tag";
+  const tag = needsTag
+    ? await requireTag(
+        p.cancelTag,
+        "Add it in 2Do, or set Cancel Tag in the extension's settings to the tag you use for cancelled tasks.",
+      )
+    : undefined;
+  let target: List | undefined;
+  if (p.cancelBehavior === "move") {
+    if (!p.cancelList.trim()) throw new Error("Set the Cancel List preference to the list cancelled tasks move to.");
+    const { list } = await twoDo<{ list: List[] }>("list_lists");
+    target = list.find((l) => sameTitle(l.title, p.cancelList));
+    if (!target) throw new Error(`No 2Do list named "${p.cancelList}". Check the Cancel List preference.`);
+  }
+  if (p.cancelBehavior === "delete" && !isRepeating(task)) {
+    await twoDo("delete_task", { task_id: task.task_id });
+    return;
+  }
+  const taskId = p.cancelBehavior === "tag" ? task.task_id : await completeOccurrence(task);
+  if (tag) await twoDo("update_task", { task_id: taskId, tag_update: { operation: "append", tag_ids: [tag.tag_id] } });
+  if (target) await twoDo("move_task", { task_id: taskId, list_id: target.list_id });
+  if (p.cancelBehavior === "delete") await twoDo("delete_task", { task_id: taskId });
+}
+
+// Completes a project or checklist. 2Do completes its open items along with it; with `cancelItems`,
+// they're cancelled first, each per the Cancel Task preferences.
+export async function completeParent(parent: Task, cancelItems: boolean, p: CancelPrefs) {
+  if (cancelItems) {
+    const { tasks } = await twoDo<{ tasks: Task[] }>("list_subtasks", { task_id: parent.task_id });
+    for (const item of tasks.filter((t) => !t.completed)) await cancelTask(item, p);
+  }
+  await twoDo("complete_task", { task_id: parent.task_id });
+}
+
+export function isCancelled(task: Task, p: CancelPrefs) {
+  return task.completed && (task.tags.some((t) => sameTitle(t.title, p.cancelTag)) || inCancelList(task, p));
+}
+
+// A completed task in the Cancel List was cancelled by moving it there.
+export function inCancelList(task: Task, p: CancelPrefs) {
+  return (
+    task.completed && p.cancelBehavior === "move" && !!p.cancelList.trim() && sameTitle(task.list_title, p.cancelList)
+  );
+}
+
+// Marks a completed task not done, undoing a cancel: the cancel tag comes off, and with `listId`, the
+// task moves there (out of the Cancel List, since where it came from isn't recorded).
+export async function reopenTask(task: Task, p: CancelPrefs, listId?: string) {
+  await twoDo("uncomplete_task", { task_id: task.task_id });
+  await clearCancelMark(task, p, listId);
+}
+
+// On an already-completed task, apply the cancel mark (tag or Cancel List) without completing again.
+// Delete has no mark to apply — callers hide Mark as Cancelled Instead for that preference.
+export async function applyCancelMark(task: Task, p: CancelPrefs) {
+  if (p.cancelBehavior === "delete") {
+    throw new Error(
+      "Cancel Task is set to Delete, which has no cancelled mark. Change the preference, or delete the task from 2Do.",
+    );
+  }
+  if (p.cancelBehavior === "complete-and-tag" || p.cancelBehavior === "tag") {
+    const tag = await requireTag(
+      p.cancelTag,
+      "Add it in 2Do, or set Cancel Tag in the extension's settings to the tag you use for cancelled tasks.",
+    );
+    await twoDo("update_task", { task_id: task.task_id, tag_update: { operation: "append", tag_ids: [tag.tag_id] } });
+    return;
+  }
+  if (!p.cancelList.trim()) throw new Error("Set the Cancel List preference to the list cancelled tasks move to.");
+  const { list } = await twoDo<{ list: List[] }>("list_lists");
+  const target = list.find((l) => sameTitle(l.title, p.cancelList));
+  if (!target) throw new Error(`No 2Do list named "${p.cancelList}". Check the Cancel List preference.`);
+  if (target.list_id !== task.list_id) await twoDo("move_task", { task_id: task.task_id, list_id: target.list_id });
+}
+
+// Strip the cancel mark from a completed task, leaving it completed. With `listId`, move it there
+// (out of the Cancel List).
+export async function clearCancelMark(task: Task, p: CancelPrefs, listId?: string) {
+  const tag = task.tags.find((t) => sameTitle(t.title, p.cancelTag));
+  if (tag)
+    await twoDo("update_task", { task_id: task.task_id, tag_update: { operation: "remove", tag_ids: [tag.tag_id] } });
+  if (listId && listId !== task.list_id) await twoDo("move_task", { task_id: task.task_id, list_id: listId });
+}
+
 // Scope values are 2Do collection ids ("list:<id>", "smart-list:<id>"), "paused-tag:<id>", or "focus:<name>".
 export function scopeArgs(scope: string) {
   const [kind, id] = scope.split(":");

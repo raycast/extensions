@@ -40,6 +40,50 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "cancelBehavior",
+      "title": "Cancel Task",
+      "description": "What the Cancel Task action does.",
+      "type": "dropdown",
+      "required": false,
+      "default": "complete-and-tag",
+      "data": [
+        {
+          "title": "Complete and Tag",
+          "value": "complete-and-tag"
+        },
+        {
+          "title": "Tag Only",
+          "value": "tag"
+        },
+        {
+          "title": "Move to List and Complete",
+          "value": "move"
+        },
+        {
+          "title": "Delete",
+          "value": "delete"
+        }
+      ]
+    },
+    {
+      "name": "cancelTag",
+      "title": "Cancel Tag",
+      "description": "The 2Do tag that marks a cancelled task. It must already exist in 2Do.",
+      "type": "textfield",
+      "required": false,
+      "default": "Cancelled"
+    },
+    {
+      "name": "cancelList",
+      "title": "Cancel List",
+      "description": "The 2Do list cancelled tasks move to, for \"Move to List and Complete\".",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
