@@ -4,7 +4,8 @@ import { useState } from "react";
 import { ListEmptyView } from "./components/ListEmptyView";
 import { RecentSearchListItem } from "./components/RecentSearchListItem";
 import { SuggestionListItem } from "./components/SuggestionListItem";
-import { MARKETPLACE_IDS, MAX_RECENT_SEARCHES } from "./constants";
+import { MARKETPLACE_IDS, RECENT_SEARCHES_KEY } from "./constants";
+import { addRecentSearch } from "./search";
 
 interface Preferences {
   top_level_domain: string;
@@ -16,7 +17,7 @@ interface AutocompleteResponse {
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [recentSearches, setRecentSearches] = useCachedState<string[]>("recentSearches", []);
+  const [recentSearches, setRecentSearches] = useCachedState<string[]>(RECENT_SEARCHES_KEY, []);
 
   const preferences: Preferences = getPreferenceValues();
   const tld = preferences.top_level_domain;
@@ -34,8 +35,7 @@ export default function Command() {
   });
 
   const handleSearchOpen = (text: string) => {
-    const updatedSearches = [text, ...recentSearches.filter((item) => item !== text)].slice(0, MAX_RECENT_SEARCHES);
-    setRecentSearches(updatedSearches);
+    setRecentSearches((searches) => addRecentSearch(searches, text));
   };
 
   const handleRemoveSearchItem = (text: string) => {

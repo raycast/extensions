@@ -2,8 +2,12 @@ import type { Device, DeviceState, DeviceStateInfo } from "@j3lte/govee-lan-cont
 import { GoveeDeviceEventTypes } from "@j3lte/govee-lan-controller";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { showFailureToast } from "@raycast/utils";
+
 const useDevice = (device: Device) => {
   const deviceRef = useRef<Device>(device);
+  // A light can switch from its cloud copy to LAN while listed; follow it without a new row.
+  deviceRef.current = device;
 
   const [onOff, setOnOff] = useState<boolean>(false);
   const [brightness, setBrightnessValue] = useState<number>(0);
@@ -13,37 +17,42 @@ const useDevice = (device: Device) => {
   const turnOn = useCallback(() => {
     const updatePromise = async () => {
       await deviceRef.current.turnOn();
-      await deviceRef.current.sync();
       setOnOff(true);
     };
-    updatePromise();
+    updatePromise().catch((err) => showFailureToast(err));
   }, [deviceRef.current, setOnOff]);
 
   const turnOff = useCallback(() => {
     const updatePromise = async () => {
       await deviceRef.current.turnOff();
-      await deviceRef.current.sync();
       setOnOff(false);
     };
-    updatePromise();
+    updatePromise().catch((err) => showFailureToast(err));
   }, [deviceRef.current, setOnOff]);
 
   const toggle = useCallback(() => {
-    if (onOff) {
-      turnOff();
-    } else {
-      turnOn();
+    const dev = deviceRef.current as unknown as { isCloud?: boolean; refresh?: () => Promise<void>; isOn: boolean };
+    if (!dev.isCloud || !dev.refresh) {
+      // LAN lights report their state every 2 s, so the known state is current.
+      if (onOff) turnOff();
+      else turnOn();
+      return;
     }
+    // Cloud lights are only read when the list opens; ask first so a light switched from
+    // elsewhere (Govee app, Stream Deck) toggles the right way. If the read fails, use what we know.
+    dev
+      .refresh()
+      .catch(() => undefined)
+      .then(() => (dev.isOn ? turnOff() : turnOn()));
   }, [onOff, turnOn, turnOff]);
 
   const setBrightness = useCallback(
     (brightness: number) => {
       const updatePromise = async () => {
         await deviceRef.current.setBrightness(brightness);
-        await deviceRef.current.sync();
         setBrightnessValue(brightness);
       };
-      updatePromise();
+      updatePromise().catch((err) => showFailureToast(err));
     },
     [deviceRef.current, setBrightnessValue],
   );
@@ -52,16 +61,15 @@ const useDevice = (device: Device) => {
     (color: { r: number; g: number; b: number }) => {
       const updatePromise = async () => {
         await deviceRef.current.setColor(color);
-        await deviceRef.current.sync();
         setColorValue(color);
       };
-      updatePromise();
+      updatePromise().catch((err) => showFailureToast(err));
     },
     [deviceRef.current, setColorValue],
   );
 
   useEffect(() => {
-    const device = deviceRef.current;
+    setIpAddr(device.ipAddr);
 
     const updateState = (state?: DeviceState & DeviceStateInfo) => {
       const onOff = state?.onOff ?? device.isOn;
@@ -84,9 +92,9 @@ const useDevice = (device: Device) => {
     return () => {
       device.off(GoveeDeviceEventTypes.StateChange, updateState);
       device.off(GoveeDeviceEventTypes.IpChange, ipChange);
-      device.destroy();
+      // No device.destroy(): devices belong to the shared controller and outlive this list item.
     };
-  }, []);
+  }, [device]);
 
   return {
     dev: deviceRef.current,

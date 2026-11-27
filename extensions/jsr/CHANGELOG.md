@@ -1,5 +1,9 @@
 # JSR Changelog
 
+## [Security update] - {PR_MERGE_DATE}
+
+- Fixed a security issue in a component the extension relies on
+
 ## [Improvements] - 2026-05-18
 
 - Update dependencies

@@ -4,9 +4,7 @@ import {
   Color,
   Detail,
   Icon,
-  LaunchType,
   Toast,
-  launchCommand,
   showToast,
   Keyboard,
 } from "@raycast/api";
@@ -21,6 +19,8 @@ import {
   setAutomatic,
   setPercent,
 } from "macos-fan-control-client";
+import { sensorLabel, triggerDetail, triggerLabel } from "./labels";
+import { openCommand } from "./launch";
 
 // Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
 // calmer cadence than the fans themselves change.
@@ -45,7 +45,10 @@ function markdown(
   const cooling = status.cooling
     ? `\n## Cooldown\n\nHolding **${Math.round(status.cooling.percent)}%** until the hottest sensor is below **${Math.round(status.cooling.below)} °C**.\n`
     : "";
-  return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}${cooling}`;
+  const trigger = status.trigger
+    ? `\n## Thermal Trigger\n\n**${triggerLabel(status.trigger)}** — ${triggerDetail(status.trigger)} · ${sensorLabel(status.trigger.sensor)}.\n`
+    : "";
+  return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}${cooling}${trigger}`;
 }
 
 export default function Command() {
@@ -112,6 +115,22 @@ export default function Command() {
                 />
               </Detail.Metadata.TagList>
             ) : null}
+            {data.trigger ? (
+              <Detail.Metadata.TagList title="Trigger">
+                <Detail.Metadata.TagList.Item
+                  text={
+                    data.trigger.state === "holding"
+                      ? `holding ${Math.round(data.trigger.percent)}%`
+                      : `armed at ${Math.round(data.trigger.on)} °C`
+                  }
+                  color={
+                    data.trigger.state === "holding"
+                      ? Color.Orange
+                      : Color.Purple
+                  }
+                />
+              </Detail.Metadata.TagList>
+            ) : null}
           </Detail.Metadata>
         ) : null
       }
@@ -128,10 +147,7 @@ export default function Command() {
             icon={Icon.Snowflake}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
             onAction={() =>
-              launchCommand({
-                name: "cool-until",
-                type: LaunchType.UserInitiated,
-              })
+              openCommand("cool-until", "Could not open Cool Until Below")
             }
           />
           {data?.cooling ? (
@@ -140,6 +156,22 @@ export default function Command() {
               icon={Icon.XMarkCircle}
               shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
               onAction={() => apply(setAutomatic, "Fans on automatic")}
+            />
+          ) : null}
+          <Action
+            title="Thermal Trigger…"
+            icon={Icon.Temperature}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            onAction={() =>
+              openCommand("thermal-trigger", "Could not open Thermal Trigger")
+            }
+          />
+          {data?.trigger ? (
+            <Action
+              title="Cancel Trigger"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={() => apply(setAutomatic, "Trigger cancelled")}
             />
           ) : null}
           <Action

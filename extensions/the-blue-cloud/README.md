@@ -6,9 +6,9 @@
 
 This is the **unofficial** Raycast Extension for [Dropbox](https://dropbox.com) allowing you to List Files, Search Files, Download Files, and more.
 
-By default, the Extension uses OAuth. However, if you prefer to use your own access token e.g. if OAuth is not working, follow the steps in the next section:
+By default, the Extension uses OAuth. However, if you prefer to use your own access token e.g. if *OAuth* is not working, follow the steps in the next section:
 
-## How to get access_token
+## How to get "Access Token"
 
 1. `Navigate` to [App Console](https://www.dropbox.com/developers/apps)
 2. `Click` "Create app"
@@ -23,15 +23,15 @@ By default, the Extension uses OAuth. However, if you prefer to use your own acc
     - files.metadata.read
     - files.content.read
 7. `Click` "Submit"
-8. Go back to Settings of the App
-9. Click `Generate` under "Generated access token"
+8. `Go back` to Settings of the App
+9. `Click` "Generate access token" under "Generated access token"
 10. `Copy` token
-11. `Open` Extension Prefernces of the Dropbox Raycast Extension
+11. `Open` Extension Preferences of _The Blue Cloud Raycast Extension_
 12. `Enter` this token in Preferences
 
-## 📥 Downlaoading
+## 📥 Downloading
 
-In order to download files from the convenience of Raycast, set a "Download Directory" in `Preferences` (if it is not set, you will be asked to set one when downloding for first time)
+In order to download files from the convenience of Raycast, set a "Download Directory" in `Preferences` (if it is not set, you will be asked to set one when downloading for first time)
 
 > TIP: Make sure Raycast has permission to access the directory you choose
 

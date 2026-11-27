@@ -12,7 +12,9 @@ export class HardcoverClient {
 
   constructor() {
     const preferences = getPreferenceValues<Preferences>();
-    this.apiKey = preferences.api_key;
+    const key = preferences.api_key;
+    // For backward compatibility, as Hardcover used to generate the API key with the "Bearer" prefix
+    this.apiKey = key.startsWith("Bearer ") ? key : `Bearer ${key}`;
   }
 
   public async post<T>(query: string, variables?: object): Promise<T> {

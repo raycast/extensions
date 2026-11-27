@@ -14,9 +14,11 @@ const MAX_PR_PAGES = 6;
 const COMMENT_PAGE_SIZE = 100;
 const MAX_COMMENT_PAGES = 5;
 const TRUSTED_ASSOCIATIONS = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
-const LABELLED_URL = /canary[^:\n]*:\s*(https?:\/\/[^\s)>\]]+)/i;
+// "Canary available at: <url>" in a comment, or a markdown link "[SaaS Canary](<url>)" in the PR description.
+const LABELLED_URL = /\[[^\]\n]*canary[^\]\n]*\]\((https?:\/\/[^\s)>\]]+)|canary[^:\n]*:\s*(https?:\/\/[^\s)>\]]+)/i;
 const VERSION_TIMEOUT_MS = 10_000;
 const DEFAULT_VERSION_PATH = "/build-info.json";
+const MAX_VERSION_FOLDERS = 4;
 const COMMIT = /^[0-9a-f]{7,40}$/i;
 const COMMIT_KEYS = ["commit", "sha", "gitCommit", "revision", "version"];
 
@@ -67,6 +69,7 @@ interface GqlPr {
   headRefName: string;
   updatedAt: string;
   headRefOid: string;
+  body: string;
   comments: GqlComments;
 }
 
@@ -79,7 +82,7 @@ query($q: String!, $after: String) {
     pageInfo { hasNextPage endCursor }
     nodes {
       ... on PullRequest {
-        id number title url isDraft headRefName updatedAt headRefOid
+        id number title url isDraft headRefName updatedAt headRefOid body
         comments(last: ${COMMENT_PAGE_SIZE}) {
           pageInfo { hasPreviousPage startCursor }
           nodes { ...CommentFields }
@@ -116,14 +119,17 @@ function Command() {
     repo,
     { urlPrefix, extraUrlPrefix, commentAuthor },
   ]);
+  // The list cached by an older version of the extension may lack newer fields; skip those entries until the fetch
+  // that is already running replaces them.
+  const prs = useMemo(() => (data ?? []).filter((pr) => typeof pr.headRefOid === "string"), [data]);
 
   // Checked after the list is shown, so a slow or sleeping canary doesn't hold back the pull requests.
   const targets = useMemo(
     () =>
-      (data ?? []).flatMap((pr) =>
+      prs.flatMap((pr) =>
         pr.canaryUrl ? [{ number: pr.number, canaryUrl: pr.canaryUrl, headRefOid: pr.headRefOid }] : [],
       ),
-    [data],
+    [prs],
   );
   const commitPath = checkCanaryCommit ? versionPath.trim() || DEFAULT_VERSION_PATH : "";
   const {
@@ -150,7 +156,7 @@ function Command() {
           description={isLoading ? undefined : `No open PRs authored by you in ${repo}`}
         />
       )}
-      {(data ?? []).map((pr) => (
+      {prs.map((pr) => (
         <List.Item
           key={pr.number}
           title={pr.title}
@@ -225,27 +231,49 @@ async function fetchCanaryCommits(targets: CanaryTarget[], versionPath: string):
   return Object.fromEntries(results);
 }
 
-// Asks the canary itself which commit it runs, e.g. /build-info.json → {"version":"d2e2463"}.
+// Asks the canary itself which commit it runs, e.g. /build-info.json → {"version":"d2e2463"}. A canary served under a
+// path (https://host/pr-1/login/user) keeps the file in its own folder, so each folder of the canary URL is tried,
+// deepest first, down to the host root.
 async function fetchCanaryCommit(canaryUrl: string, versionPath: string, headRefOid: string): Promise<CanaryCommit> {
   const head = headRefOid.slice(0, 7);
   try {
     const canary = new URL(canaryUrl);
-    const url = new URL(versionPath, canary.origin);
-    if (url.origin !== canary.origin || !/^https?:$/.test(url.protocol)) {
+    const urls = canaryFolders(canary).map(
+      (folder) => new URL(versionPath.replace(/^\/+/, ""), canary.origin + folder),
+    );
+    if (urls.some((url) => url.origin !== canary.origin) || !/^https?:$/.test(canary.protocol)) {
       return { head, error: "Canary Version Path must be a path on the canary's own host" };
     }
     // The link comes from a PR comment, so never let it point these automatic requests at this computer or its network.
-    if (await isPrivateHost(url.hostname)) {
-      return { head, error: `Not checked: ${url.hostname} is a local or private-network address` };
+    if (await isPrivateHost(canary.hostname)) {
+      return { head, error: `Not checked: ${canary.hostname} is a local or private-network address` };
     }
-    const response = await fetch(url, { signal: AbortSignal.timeout(VERSION_TIMEOUT_MS) });
-    if (!response.ok) return { head, error: `${url} responded ${response.status}`, status: response.status };
-    const version = findCommit(await response.text());
-    if (!version) return { head, error: `No commit found in ${url}` };
-    return { head, version, isLatest: headRefOid.toLowerCase().startsWith(version.toLowerCase()) };
+
+    const signal = AbortSignal.timeout(VERSION_TIMEOUT_MS);
+    const misses: string[] = [];
+    let status: number | undefined;
+    for (const url of urls) {
+      const response = await fetch(url, { signal });
+      status = response.ok ? undefined : response.status;
+      const version = response.ok ? findCommit(await response.text()) : undefined;
+      if (version) return { head, version, isLatest: headRefOid.toLowerCase().startsWith(version.toLowerCase()) };
+      misses.push(`${url.pathname} ${response.ok ? "has no commit" : `responded ${response.status}`}`);
+    }
+    // The host root decides the status: deeper folders that don't exist often answer 403 on static hosting.
+    return { head, error: `${canary.host}: ${misses.join(", ")}`, status };
   } catch (e) {
     return { head, error: e instanceof Error ? e.message : String(e) };
   }
+}
+
+// Folders of the canary URL, deepest first and ending with the host root. The whole path counts as a folder too, since a
+// link like /pr-1 can name the preview itself: /pr-1/login/user → /pr-1/login/user/, /pr-1/login/, /pr-1/, /.
+function canaryFolders(canary: URL): string[] {
+  const segments = canary.pathname
+    .split("/")
+    .filter(Boolean)
+    .slice(0, MAX_VERSION_FOLDERS - 1);
+  return segments.map((_, i) => `/${segments.slice(0, segments.length - i).join("/")}/`).concat("/");
 }
 
 async function isPrivateHost(hostname: string): Promise<boolean> {
@@ -294,15 +322,15 @@ function findCommit(body: string): string | undefined {
   }
 }
 
-// Green when the canary runs the latest commit (or its commit is unknown), yellow when it runs an older one,
-// red when the canary refuses the request (403).
+// Green when the canary runs the latest commit (or the check hasn't answered yet), yellow when it runs an older one,
+// orange when its commit couldn't be read, red when the canary refuses the request (403).
 function canaryAccessory({ canaryUrl, headRefOid }: PullRequest, commit?: CanaryCommit): List.Item.Accessory {
   if (!canaryUrl) return { tag: { value: "no canary", color: Color.SecondaryText } };
   // A result for an earlier commit of this PR is stale until the check reruns.
   if (!commit || commit.head !== headRefOid.slice(0, 7)) return { tag: { value: "canary", color: Color.Green } };
   if ("error" in commit) {
     return {
-      tag: { value: "canary", color: commit.status === 403 ? Color.Red : Color.Green },
+      tag: { value: "canary", color: commit.status === 403 ? Color.Red : Color.Orange },
       tooltip: `Couldn't read the canary's commit: ${commit.error}`,
     };
   }
@@ -361,14 +389,17 @@ async function toPullRequest(
   matchers: Matchers,
   isTrusted: (comment: GqlComment) => boolean,
 ): Promise<PullRequest> {
-  let canaryUrl: string | undefined;
-  let extraUrl: string | undefined;
+  // CI may keep the preview links in the PR description, which it rewrites in place, so that is checked first. Only the
+  // author (you) and people with write access can edit it.
+  const description = [{ body: pr.body ?? "" }];
+  let canaryUrl = findUrl(description, matchers.urlPrefix, LABELLED_URL);
+  let extraUrl = matchers.extraUrlPrefix ? findUrl(description, matchers.extraUrlPrefix) : undefined;
   let comments = pr.comments;
 
   // Newest comment wins (a redeploy posts a fresh URL); older pages are only fetched while no canary was found.
-  for (let page = 0; ; page++) {
+  for (let page = 0; !canaryUrl || (matchers.extraUrlPrefix && !extraUrl); page++) {
     const newestFirst = comments.nodes.filter(isTrusted).reverse();
-    canaryUrl = findUrl(newestFirst, matchers.urlPrefix, LABELLED_URL);
+    canaryUrl ??= findUrl(newestFirst, matchers.urlPrefix, LABELLED_URL);
     if (!extraUrl && matchers.extraUrlPrefix) extraUrl = findUrl(newestFirst, matchers.extraUrlPrefix);
     if (canaryUrl || !comments.pageInfo.hasPreviousPage || page + 1 >= MAX_COMMENT_PAGES) break;
 
@@ -410,13 +441,14 @@ function normalizeLogin(login: string): string {
     .replace(/\[bot\]$/, "");
 }
 
-function findUrl(commentsNewestFirst: GqlComment[], prefix: string, labelled?: RegExp): string | undefined {
+function findUrl(commentsNewestFirst: { body: string }[], prefix: string, labelled?: RegExp): string | undefined {
   for (const { body } of commentsNewestFirst) {
     if (prefix) {
       const url = body.match(/https?:\/\/[^\s)>\]]+/g)?.find((u) => u.startsWith(prefix));
       if (url) return url;
     } else if (labelled) {
-      const url = body.match(labelled)?.[1];
+      const match = body.match(labelled);
+      const url = match?.[1] ?? match?.[2];
       if (url) return url;
     }
   }

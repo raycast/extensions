@@ -1,4 +1,3 @@
-/** Event types returned by Google Calendar when `eventTypes` is omitted from events.list. */
 export const ALL_LISTABLE_EVENT_TYPES = [
   "default",
   "focusTime",
@@ -10,7 +9,6 @@ export const ALL_LISTABLE_EVENT_TYPES = [
 
 export type ListableEventType = (typeof ALL_LISTABLE_EVENT_TYPES)[number];
 
-/** Regular schedule types — excludes contact birthdays that live on primary. */
 export const SCHEDULE_EVENT_TYPES: ListableEventType[] = [
   "default",
   "focusTime",
@@ -19,7 +17,6 @@ export const SCHEDULE_EVENT_TYPES: ListableEventType[] = [
   "fromGmail",
 ];
 
-/** Virtual List Events picker value — not a Google calendar ID. */
 export const BIRTHDAYS_VIEW_CALENDAR_ID = "birthdays";
 
 export function isContactsBirthdaysCalendar(calendarId?: string | null): boolean {
@@ -31,13 +28,12 @@ export function isBirthdaysView(calendarId?: string | null): boolean {
   return calendarId === BIRTHDAYS_VIEW_CALENDAR_ID || isContactsBirthdaysCalendar(calendarId);
 }
 
-/** Map a Contacts birthdays calendar onto the virtual List Events Birthdays picker value. */
 export function resolvePickerCalendarId(calendarId?: string | null): string | undefined {
   if (!calendarId) return undefined;
   return isContactsBirthdaysCalendar(calendarId) ? BIRTHDAYS_VIEW_CALENDAR_ID : calendarId;
 }
 
-/** Google calendar to query; the virtual Birthdays view reads birthday events on primary. */
+/** The Birthdays picker is virtual; Google stores those events on the primary calendar. */
 export function resolveCalendarIdForEventsList(calendarId?: string | null): string {
   if (!calendarId || calendarId === BIRTHDAYS_VIEW_CALENDAR_ID) {
     return "primary";

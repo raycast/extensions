@@ -36,15 +36,11 @@ export interface EventWriteInput {
   eventType?: EventType;
   birthdayType?: "birthday";
   focusTimeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   focusTimeChatStatus?: "available" | "doNotDisturb";
   focusTimeDeclineMessage?: string;
   outOfOfficeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   outOfOfficeDeclineMessage?: string;
   workingLocationType?: "homeOffice" | "officeLocation" | "customLocation";
   workingLocationLabel?: string;
@@ -135,11 +131,16 @@ function buildAttendees(
     add(parseEmails(value, label), properties);
   };
 
-  applyField(input.attendees, "attendee email", {}, (attendee) => !attendee.optional && !attendee.resource);
+  applyField(
+    input.attendees,
+    "attendee email",
+    { optional: false, resource: false },
+    (attendee) => !attendee.optional && !attendee.resource,
+  );
   applyField(
     input.requiredAttendees,
     "required attendee email",
-    {},
+    { optional: false, resource: false },
     (attendee) => !attendee.optional && !attendee.resource,
   );
   applyField(input.optionalAttendees, "optional attendee email", { optional: true, resource: false }, (attendee) =>

@@ -50,11 +50,15 @@ export function detachedJob(
     return !startedLater(run);
   }
 
-  /** Starts the command, truncating the previous run's files. Callers check `isRunning()` first. */
+  /**
+   * Starts the command, truncating the previous run's files. Callers check `isRunning()` first.
+   * `command` runs something other than the CLI (installing it, say), so the CLI isn't looked up.
+   */
   async function start(
     args: string[],
-    options: { script?: string; meta?: Record<string, number> } = {},
+    options: { script?: string; meta?: Record<string, number>; command?: [file: string, argv: string[]] } = {},
   ): Promise<void> {
+    if (options.command) return spawnDetached(...options.command, options.meta);
     const cli = await findUsableCli();
     if (isDemo()) {
       const output = demoJobOutput(name);
@@ -74,6 +78,10 @@ export function detachedJob(
     const [command, argv] = options.script
       ? ["/bin/sh", ["-c", options.script, "sh", cli.path, ...args]]
       : [cli.path, args];
+    spawnDetached(command, argv, options.meta);
+  }
+
+  function spawnDetached(command: string, argv: string[], meta?: Record<string, number>): void {
     const { pid, log: logFile, out } = files();
     mkdirSync(dir(), { recursive: true });
     const errFd = openSync(logFile, "w");
@@ -81,10 +89,7 @@ export function detachedJob(
     try {
       const child = spawn(command, argv, { detached: true, stdio: ["ignore", outFd, errFd], ...cliSpawnOptions() });
       if (!child.pid) throw new DayOneCliError("Couldn't start the Day One CLI");
-      writeFileSync(
-        pid,
-        JSON.stringify({ pid: child.pid, startedAt: Date.now(), meta: options.meta } satisfies RunRecord),
-      );
+      writeFileSync(pid, JSON.stringify({ pid: child.pid, startedAt: Date.now(), meta } satisfies RunRecord));
       child.unref();
       log.debug(`${name} started`, { pid: child.pid });
     } finally {

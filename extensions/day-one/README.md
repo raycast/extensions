@@ -69,7 +69,7 @@ Raycast AI can search your entries, read one (up to 100,000 characters), and lis
 
 ## Agent Skills
 
-Run Doctor can install [Day One's agent skills](https://github.com/bloom/dayone-cli-skills), which teach AI coding tools such as Claude Code, Codex, and Cursor to use the CLI. After installing, choose **See How to Use Them** for example prompts.
+Run Doctor can install [Day One's agent skills](https://github.com/bloom/dayone-cli-skills), which teach AI coding tools such as Claude Code, Codex, and Cursor to use the CLI. After installing, choose **View README** for example prompts, or **Remove Agent Skills** to uninstall them.
 
 ## Coming From Version 1
 
