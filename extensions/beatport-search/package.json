@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beatport-search",
+  "title": "Beatport Search",
+  "description": "Find artists, tracks, remixes and indexed chart positions on Beatport with keyless web search.",
+  "icon": "extension-icon.png",
+  "author": "chapati23",
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Beatport",
+      "description": "Search for a Beatport artist or track.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@raycast/api": "^2.14.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt's not allowed to publish a Raycast extension to npm\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
