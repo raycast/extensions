@@ -1,5 +1,31 @@
-import { IssueSearchItem, IssueRequest, PatchedIssueRequest, StateLite } from "@makeplane/plane-node-sdk";
-import { planeClient } from "./auth";
+import { Issue, IssueFromJSON, IssueSearchItem, IssueRequest, PatchedIssueRequest } from "@makeplane/plane-node-sdk";
+import { planeClient, requirePlaneClient } from "./auth";
+import { planeRequest, toPage, workspacePath } from "./request";
+import type { RawLabelLite, RawPaginated, RawUserLite, RawWorkItem, WorkItemSummary } from "./types";
+import {
+  getAssigneeIds,
+  getExpandedAssignees,
+  getExpandedLabels,
+  getLabelIds,
+  toWorkItemSummary,
+} from "../helpers/work-item-summary";
+
+/** Fields requested when scanning many work items (keeps payloads small). */
+export const WORK_ITEM_SCAN_FIELDS = [
+  "id",
+  "name",
+  "sequence_id",
+  "project",
+  "state",
+  "priority",
+  "assignees",
+  "labels",
+  "created_by",
+  "created_at",
+  "updated_at",
+  "start_date",
+  "target_date",
+].join(",");
 
 export async function createWorkItem(projectId: string, workItemRequest: IssueRequest) {
   const response = await planeClient?.workItemsApi.createWorkItem({
@@ -10,42 +36,81 @@ export async function createWorkItem(projectId: string, workItemRequest: IssueRe
   return response;
 }
 
-export async function getWorkItem(workItemId: string, projectId: string) {
-  const response = await planeClient?.workItemsApi.retrieveWorkItem({
-    pk: workItemId,
-    projectId,
-    slug: planeClient?.workspaceSlug,
+/** Work item from the SDK model, plus the assignee/label fields SDK 0.1.3 drops. */
+export type WorkItemDetailData = Issue & {
+  assignees: string[];
+  labels: string[];
+  assigneeDetails: RawUserLite[];
+  labelDetails: RawLabelLite[];
+};
+
+export async function getWorkItem(workItemId: string, projectId: string): Promise<WorkItemDetailData> {
+  const raw = await planeRequest<RawWorkItem>(workspacePath("projects", projectId, "work-items", workItemId), {
+    query: { expand: "assignees,labels" },
   });
-  return response;
+  return {
+    ...IssueFromJSON(raw),
+    assignees: getAssigneeIds(raw),
+    labels: getLabelIds(raw),
+    assigneeDetails: getExpandedAssignees(raw),
+    labelDetails: getExpandedLabels(raw),
+  };
+}
+
+/** `GET workspaces/{slug}/issues/{PROJ}-{N}/` via the SDK. */
+export async function getWorkItemByIdentifier(projectIdentifier: string, sequenceId: number): Promise<Issue> {
+  const client = requirePlaneClient();
+  return client.workItemsApi.getWorkspaceWorkItem({
+    slug: client.workspaceSlug,
+    projectIdentifier: projectIdentifier.toUpperCase(),
+    issueIdentifier: sequenceId,
+  });
+}
+
+export async function listProjectWorkItemsRaw({
+  projectId,
+  cursor,
+  perPage = 100,
+  orderBy,
+  expand,
+  fields,
+}: {
+  projectId: string;
+  cursor?: string;
+  perPage?: number;
+  orderBy?: string;
+  expand?: string;
+  fields?: string;
+}): Promise<RawPaginated<RawWorkItem>> {
+  return planeRequest<RawPaginated<RawWorkItem>>(workspacePath("projects", projectId, "work-items"), {
+    query: { per_page: perPage, cursor, order_by: orderBy, expand, fields },
+  });
 }
 
 export async function getProjectWorkItems({
-  projectId,
-  perPage = 100,
+  project,
+  perPage = 50,
   cursor,
 }: {
-  projectId: string;
+  project: { id: string; identifier: string; name?: string };
   perPage?: number;
   cursor?: string;
 }) {
-  const response = await planeClient?.workItemsApi.listWorkItems({
-    projectId,
-    slug: planeClient?.workspaceSlug,
+  const client = requirePlaneClient();
+  const response = await listProjectWorkItemsRaw({
+    projectId: project.id,
     perPage,
     cursor,
+    orderBy: "-updated_at",
     expand: "state",
   });
-
-  const results = (response?.results || []).map((workItem) => ({
-    ...workItem,
-    state: workItem.state as StateLite,
-  }));
-
-  return {
-    data: results,
-    hasMore: !!response?.nextPageResults,
-    cursor: response?.nextCursor,
-  };
+  return toPage(response, (raw) =>
+    toWorkItemSummary(raw, {
+      projectIdentifier: project.identifier,
+      projectName: project.name,
+      workspaceSlug: client.workspaceSlug,
+    }),
+  );
 }
 
 export async function searchWorkItems({
@@ -68,6 +133,17 @@ export async function searchWorkItems({
   });
 
   return response?.issues || [];
+}
+
+export function searchItemToSummary(item: IssueSearchItem): WorkItemSummary {
+  return {
+    id: item.id,
+    name: item.name,
+    projectId: item.projectId,
+    projectIdentifier: item.projectIdentifier,
+    sequenceId: item.sequenceId,
+    workspaceSlug: item.workspaceSlug,
+  };
 }
 
 export async function updateWorkItem({

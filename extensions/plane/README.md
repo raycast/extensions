@@ -7,8 +7,22 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 ### 🚀 Core Commands
 
 - **Create Work Item** - Create new work items with comprehensive details
-- **Search Work Items** - Search and filter work items across all projects
+- **Search Work Items** - Search work items across all projects by title or ID
 - **Search Projects** - View projects and their work items
+- **My Work Items** - Work items assigned to you or created by you (plus subscribed and mentions on servers that support them), grouped by state
+- **Open Work Item** - Open `ENG-123` or a Plane URL (argument, or read from the clipboard)
+- **Quick Create Work Item** - Create a work item from the root search with a title and optional description
+- **Quick Add Comment** - Comment on a work item by ID without opening it
+- **Assigned Work Items** (menu bar) - Count and list of your open assigned work items, refreshed every 15 minutes
+- **My Open Work Items** - Your open assigned count in root search, e.g. "12 open · 2 urgent · 1 overdue · 3 due today", without opening anything. Refreshes every 15 minutes (run it once to start); opening it shows My Work Items
+- **Active Cycles** - Cycles running today across your projects, with progress
+- **Search Modules** - A project's modules and their work items
+- **Intake** - Triage intake items: accept, decline, snooze, or mark as duplicate
+- **Search Pages** - Workspace and project pages (Plane Cloud and Commercial, see below)
+
+### 🤖 AI Tools
+
+Ask `@plane` in Raycast AI to list your work items, search, show `ENG-123`, create or update work items (state, priority, assignees, dates by name), add comments, and list projects, states, or members. Every write asks for confirmation first.
 
 ### ✨ Work Item Management
 
@@ -29,11 +43,13 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
   - Markdown support in descriptions
   - Start date and due date selection
 
-- **Quick Actions** on work items:
+- **Quick Actions** on every work item row and in the detail view:
   - Edit work item (⌘⇧E)
-  - Update state (⌘⇧S)
-  - Update priority (⌘⇧P)
-  - View detailed work item information
+  - Update state (⌘⇧S) and priority (⌘⇧P), applied optimistically
+  - Assign to me (⌘⇧A) and add a comment (⌘⇧M)
+  - Copy identifier (⌘⇧I), URL (⌘⇧C), or Markdown link (⌘⇧L)
+  - Change workspace (⌘⇧W)
+- **Work item detail** shows assignees, labels, cycle, module, dates, and the latest comments
 
 ### 🔍 Search & Discovery
 
@@ -73,11 +89,32 @@ For both **Plane Cloud** and **Self-Hosted** instances:
    - For self-hosted instances, also provide:
      - **API Base Path** (e.g., `https://your-plane.com`)
      - **App Base URL** (e.g., `https://your-plane.com`)
+   - Trailing slashes are fine, and so is a pasted `https://your-plane.com/api/v1`; the extension normalizes both.
 
 3. Set your workspace:
    - Run any Plane command
    - Enter your **workspace slug** when prompted
-   - You can find your workspace slug in your Plane URL: `plane.so/your-workspace-slug`
+   - You can find your workspace slug in your Plane URL: `plane.so/your-workspace-slug` (pasting the URL works too)
+   - To switch later, use **Change Workspace** (⌘⇧W) from any list. OAuth users can pick any workspace that installed the Raycast app.
+
+### Self-Hosted (Community Edition) Notes
+
+- Plane Community Edition only has the v1 API. It has no "assigned to me" filter, so **My Work Items**, the menu bar, and the `list-my-work-items` AI tool scan your projects' most recently updated work items (up to 20 projects × 300 items, 3 requests at a time) and filter locally, unless the server offers one of the faster backends below. Results are cached.
+- Plane allows 60 API requests per minute per key. If you hit the limit, wait a minute and retry.
+- Community Edition has no public pages API, so **Search Pages** shows a notice instead of a list.
+- If a command reports "Check API Base Path", make sure the preference points at your Plane host (e.g. `https://plane.example.com`).
+
+## Backends
+
+**My Work Items**, the **Assigned Work Items** menu bar, and the `list-my-work-items` AI tool pick the fastest way your server offers, per API base path and workspace. The list shows which one it used in the section subtitle (e.g. "via API v2"); the menu bar shows it in its tooltip.
+
+1. **Plane API v2** (Plane Cloud, Commercial): detected with `GET /api/v2/users/me/`. Uses `GET /api/v2/workspaces/{slug}/work-items/?assignee_id=…` for **Assigned**. v2 has no created-by filter, so **Created** uses the next backend.
+2. **Server-side v1 filters** (a Community Edition patched to add them): used only when `GET /api/v1/workspaces/{slug}/work-items/` answers with the header `X-Plane-Work-Item-Filters: 1`. Adds the **Subscribed** and **Mentions** views; only the filters the server lists in `X-Plane-Work-Item-Filter-Params` are sent.
+3. **Project scan**: the stock v1 fallback described above. Assigned and Created only.
+
+Detection results are cached per server and workspace: 24 hours when a faster backend is found, 1 hour when it isn't, so a server that gains API v2 or the filters is picked up within the hour. Rate limits and network errors during detection aren't cached, and every failure falls back silently. If a fast backend later answers 404 or 400, its cached result is dropped and the next backend is used. With API v2, **Search Pages** uses the v2 pages endpoints; other commands stay on v1, which Plane Cloud also serves.
+
+With a filtered backend, open work items are listed workspace-wide (up to 500 per view) plus the 50 most recently updated completed or cancelled ones.
 
 ## Usage
 

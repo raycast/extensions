@@ -1,8 +1,6 @@
 import { Configuration, OAuthApi } from "@makeplane/plane-node-sdk";
-import { getPreferenceValues } from "@raycast/api";
 import { PlaneOAuthAppInstallation } from "@makeplane/plane-node-sdk/dist/oauth/models";
-
-const preferences = getPreferenceValues();
+import { getApiBasePath } from "../helpers/urls";
 
 export const getAppInstallations = async ({
   accessToken,
@@ -11,7 +9,7 @@ export const getAppInstallations = async ({
 }): Promise<PlaneOAuthAppInstallation[]> => {
   const config = new Configuration({
     accessToken,
-    basePath: preferences.API_BASE_PATH,
+    basePath: getApiBasePath(),
   });
   const oauthApi = new OAuthApi(config);
   const installations = await oauthApi.getAppInstallations(accessToken);
