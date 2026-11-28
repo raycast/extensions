@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iconpik",
+  "title": "IconPik",
+  "description": "Search, preview, and copy brand SVG icons from iconpik.com.",
+  "icon": "extension-icon.png",
+  "author": "iconpik",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Brand Icons",
+      "subtitle": "IconPik",
+      "description": "Search brand SVG icons, copy SVG markup, and open icons in your browser.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-icon",
+      "title": "Copy Brand Icon",
+      "subtitle": "IconPik",
+      "description": "Copy a brand SVG icon by name.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "github, vercel, openai...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultVariant",
+      "title": "Default Variant",
+      "description": "Which icon variant to copy by default",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "Default (Brand Color)",
+          "value": "default"
+        },
+        {
+          "title": "Mono",
+          "value": "mono"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@babel/generator": "^7.29.15",
+    "@babel/types": "^7.29.15",
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3",
+    "@svgr/hast-util-to-babel-ast": "^8.0.0",
+    "svg-parser": "^2.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/babel__generator": "^7.27.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/svg-parser": "^2.0.6",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "^5.0.12",
+    "picomatch": "^4.0.4",
+    "flatted": "^3.4.2"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
