@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "again",
+  "title": "Again",
+  "description": "Pick one small thing a day and keep it in your menu bar.",
+  "icon": "extension-icon.png",
+  "author": "carlomakes",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "one thing",
+    "focus",
+    "adhd",
+    "daily",
+    "small step"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "today",
+      "title": "Pick Today's Thing",
+      "description": "Pick one thing for today, answer how it went, or make it smaller.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "thing",
+          "type": "text",
+          "placeholder": "One thing",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show Today's Thing",
+      "description": "Keep today's one thing in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showTitle",
+          "type": "checkbox",
+          "label": "Show today's thing in the menu bar",
+          "description": "Turn off to show only the icon. The menu bar is the first place macOS hides things when it is full.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "eveningNudge",
+          "type": "checkbox",
+          "label": "Change the icon in the evening if today is still open",
+          "description": "After 6 p.m. the circle gets three dots and the tooltip says it is still open. Same quiet gray, no sound, no notification.",
+          "default": true,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --no-warnings test/logic.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
