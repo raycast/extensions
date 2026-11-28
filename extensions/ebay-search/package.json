@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ebay-search",
+  "title": "eBay Search",
+  "description": "Search active and sold eBay listings in your browser using typed queries or selected text.",
+  "icon": "extension-icon.png",
+  "author": "alexi.build",
+  "license": "MIT",
+  "categories": [
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search eBay",
+      "subtitle": "eBay",
+      "description": "Search your eBay marketplace in the browser",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-sold",
+      "title": "Search Sold Items on eBay",
+      "subtitle": "eBay",
+      "description": "Search sold listings in your eBay marketplace",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Sold Items",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-select-text",
+      "title": "Search Selected Text on eBay",
+      "subtitle": "eBay",
+      "description": "Search eBay for text selected in the frontmost app",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "useClipboardFallback",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use Clipboard Fallback",
+          "description": "Use clipboard text when there is no selected text."
+        }
+      ]
+    },
+    {
+      "name": "search-sold-selected-text",
+      "title": "Search Sold Items on eBay for Selected Text",
+      "subtitle": "eBay",
+      "description": "Search eBay sold listings for text selected in the frontmost app",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "useClipboardFallback",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use Clipboard Fallback",
+          "description": "Use clipboard text when there is no selected text."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "marketplace",
+      "title": "Marketplace",
+      "description": "Choose the eBay site to search.",
+      "type": "dropdown",
+      "required": false,
+      "default": "US",
+      "data": [
+        {
+          "title": "United States",
+          "value": "US"
+        },
+        {
+          "title": "Canada",
+          "value": "CA"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "react": "^19.3.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
