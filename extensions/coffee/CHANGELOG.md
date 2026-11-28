@@ -1,14 +1,19 @@
 # Coffee Changelog
 
-## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
+## [Keep preventing disk sleep in sessions without a time limit] - {PR_MERGE_DATE}
+
+- On macOS, **Prevent disk sleep** stopped working 5 seconds into sessions without a time limit, such as Caffeinate, Toggle Caffeinate, Caffeinate While, the menu bar's Indefinitely, and caffeination when Raycast starts. It now lasts for the whole session. If one was already running when you updated, start it again to apply the fix.
+- With any of the sleep options on, these sessions no longer turn on a display that's already off when they start, for example when Raycast starts while you're away. **Prevent display sleep** still keeps the display awake once it's on.
+
+## [Menu bar error messages no longer break the menu] - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
 
-## [Fix] Recover the session lock after Raycast unloads a command - 2026-11-10
+## [Recover the session lock after Raycast unloads a command] - 2026-11-10
 
 - Recover the session lock within seconds when Raycast unloads a command that holds it, instead of failing every Coffee command until Raycast restarts ([#33234](https://github.com/raycast/extensions/issues/33234)).
 
-## [Fix] Preserve sessions during validation and schedule expiry - 2026-11-03
+## [Preserve sessions during validation and schedule expiry] - 2026-11-03
 
 - Reject invalid durations before replacing an active Coffee session, including requests from AI tools.
 - Stop the observed scheduled session without affecting a newer manual session on macOS or Windows.
@@ -16,12 +21,12 @@
 - Offer a confirmed "Stop Likely Coffee Session…" menu item for a session that appears to predate the update, without adopting terminal `caffeinate` processes; it follows the Decaffeinate schedule rules when no Coffee session is running.
 - Keep the menu bar populated while it refreshes instead of briefly showing an empty menu.
 
-## [Fix] Avoid blank window in Caffeinate For - 2026-11-03
+## [Avoid blank window in Caffeinate For] - 2026-11-03
 
 - Run Caffeinate For without opening a view and close the launcher before process tracking starts.
 - Clear root search for fresh duration arguments on the next run, while preserving startup and background-refresh ordering.
 
-## [Fix] Recognize Coffee-owned caffeination - 2026-11-03
+## [Recognize Coffee-owned caffeination] - 2026-11-03
 
 - Track macOS sessions by persisted process ID and creation time, including across Raycast relaunches.
 - Label external caffeination separately and preserve it when starting, replacing, or stopping Coffee.
@@ -54,13 +59,14 @@
 ## [Fix] - 2026-09-15
 
 - Restore inline hours, minutes, and seconds arguments for `Caffeinate for ...` and use an invisible view to reset command state after submission.
+
 ## [Fix] - 2026-09-14
 
 - Converted the `Caffeinate for ...` command from inline arguments back to a Form so its state isn't persisted between invocations.
 
 ## [Enhancement] - 2026-08-30
 
-- Add reason to `Caffeinate Status`, showing 4 types, examples: 
+- Add reason to `Caffeinate Status`, showing 4 types, examples:
   - `Caffeinate Until`: until 2:00 PM
   - `Caffeinate For ...`: 42m left
   - `Caffeinate While`: while Slack is running
@@ -155,15 +161,15 @@
 - Added pause, resume, and delete functionality for schedules
 - Created README documentation
 
-## [Update] – 2024-07-18
+## [Update] - 2024-07-18
 
 - Updated HUD show time to improve user experience.
 
-## [Update] – 2024-05-24
+## [Update] - 2024-05-24
 
 - Fixed an issue that caused the extension to crash when the `Caffeinate Status` command was disabled.
 
-## [Update] – 2024-05-19
+## [Update] - 2024-05-19
 
 - Replaced the form in the `Caffeinate For` command with arguments in the root search.
 - Replaced the emojis in the `Caffeinate Status` command with Unicode characters for enhanced design consistency.
