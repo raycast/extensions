@@ -1,5 +1,11 @@
 # Media Converter Changelog
 
+## [AV1 video support, lossless Trim in Edit Media, and Windows FFmpeg fixes] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Windows FFmpeg detection now checks `PATH`, scans WinGet's `Packages` directory without wildcard paths, resolves the real `AppData\Local` path via `os.homedir()` under MSIX, and recognizes FFmpeg git-master version strings (`N-…`).
+
 ## [Fix WebP and AVIF with FFmpeg builds missing encoders] - 2026-11-11
 
 - AVIF images now use libsvtav1 when FFmpeg has no libaom-av1, as in Homebrew's `ffmpeg` formula, instead of failing
