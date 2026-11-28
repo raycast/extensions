@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ConversorSEPA and GenerateSEPA MCP Servers] - {PR_MERGE_DATE}
+
+- Add ConversorSEPA (Spanish) and GenerateSEPA (English, German, French, Dutch) to the official registry: validate IBANs, SEPA creditor identifiers and SEPA direct debit XML, generate IBANs and GiroCodes, and search the SEPA help center with no sign-in; sign in with OAuth 2.1 to create SEPA credit transfer and direct debit XML files and mandates. Hosted Streamable HTTP servers with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
