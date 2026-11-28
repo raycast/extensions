@@ -1,9 +1,10 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
-import { findFFmpegPath } from "./ffmpeg";
+import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "./ffmpeg";
 import { probeDurationSec, runFFmpegWithProgress, type ProgressInfo } from "./ffmpegRun";
 import { inspectMedia } from "./mediaProbe";
-import { formatProcessForDisplay, type ProcessSpec } from "./process";
+import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
 import { getMediaType, type AllOutputExtension } from "../types/media";
 import { recordEditHistory } from "./historyRecording";
 
@@ -41,14 +42,54 @@ export async function editMedia(inputPath: string, request: EditRequest, options
   const hasVideo = inspection.streams.some((stream) => stream.type === "video");
   const outputExtension = editOutputExtension(inputPath, request);
   const outputPath = uniqueEditPath(inputPath, outputExtension, options.outputDir);
-  const spec = buildEditProcessSpec(ffmpeg.path, inputPath, outputPath, request, { hasAudio, hasVideo });
+  let effectiveInputPath = inputPath;
+  let tempHeicPng: string | null = null;
+  if (path.extname(inputPath).toLowerCase() === ".heic" && request.operation === "resize-crop") {
+    if (!supportsHeicInput(ffmpeg.version)) {
+      throw new Error(
+        `HEIC input requires macOS or FFmpeg ${MIN_FFMPEG_HEIC_INPUT_VERSION}+ (found FFmpeg v${ffmpeg.version}).`,
+      );
+    }
+    tempHeicPng = path.join(os.tmpdir(), `${path.basename(inputPath, path.extname(inputPath))}_edit_${Date.now()}.png`);
+    const decodeSpec: ProcessSpec =
+      process.platform === "darwin"
+        ? { command: "sips", args: ["--setProperty", "format", "png", inputPath, "--out", tempHeicPng] }
+        : {
+            command: ffmpeg.path,
+            args: ["-i", inputPath, "-frames:v", "1", "-compression_level", "1", "-y", tempHeicPng],
+          };
+    try {
+      await runProcess(decodeSpec, options.signal);
+      effectiveInputPath = tempHeicPng;
+    } catch (error) {
+      if (fs.existsSync(tempHeicPng)) {
+        try {
+          fs.unlinkSync(tempHeicPng);
+        } catch {
+          /* ignore temp cleanup error */
+        }
+      }
+      throw error;
+    }
+  }
+  const spec = buildEditProcessSpec(ffmpeg.path, effectiveInputPath, outputPath, request, { hasAudio, hasVideo });
   const duration = inspection.durationSec ?? (await probeDurationSec(ffmpeg.path, inputPath)) ?? undefined;
   console.log(`Executing FFmpeg edit command: ${formatProcessForDisplay(spec)}`);
-  await runFFmpegWithProgress(spec, {
-    totalDurationSec: request.operation === "speed" && duration !== undefined ? duration / request.speed : duration,
-    onProgress: options.onProgress,
-    signal: options.signal,
-  });
+  try {
+    await runFFmpegWithProgress(spec, {
+      totalDurationSec: request.operation === "speed" && duration !== undefined ? duration / request.speed : duration,
+      onProgress: options.onProgress,
+      signal: options.signal,
+    });
+  } finally {
+    if (tempHeicPng && fs.existsSync(tempHeicPng)) {
+      try {
+        fs.unlinkSync(tempHeicPng);
+      } catch {
+        /* ignore temp cleanup error */
+      }
+    }
+  }
   try {
     await recordEditHistory({
       input: inputPath,

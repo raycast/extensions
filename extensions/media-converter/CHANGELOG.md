@@ -2,6 +2,10 @@
 
 ## [AV1 video support, lossless Trim in Edit Media, and Windows FFmpeg fixes] - {PR_MERGE_DATE}
 
+### Added
+
+- `.heic` image input support on Windows and Linux when FFmpeg 7.0+ is installed (converting to JPG, PNG, WebP, TIFF, or AVIF, and resizing/cropping in **Edit Media**).
+
 ### Fixed
 
 - Windows FFmpeg detection now checks `PATH`, scans WinGet's `Packages` directory without wildcard paths, resolves the real `AppData\Local` path via `os.homedir()` under MSIX, and recognizes FFmpeg git-master version strings (`N-…`).

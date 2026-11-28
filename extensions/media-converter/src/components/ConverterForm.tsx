@@ -23,6 +23,7 @@ import { getAllPresets, findPreset } from "../utils/presets";
 import { PresetEditorForm } from "./PresetEditorForm";
 import { enqueueConversionJobs } from "../utils/queue";
 import { resolveTargetSizeQuality, supportsTargetSize } from "../utils/targetSize";
+import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "../utils/ffmpeg";
 import {
   OUTPUT_VIDEO_EXTENSIONS,
   OUTPUT_AUDIO_EXTENSIONS,
@@ -88,15 +89,18 @@ type LaunchContext = {
 export function ConverterForm({
   initialFiles = [],
   launchContext,
+  ffmpegVersion,
 }: {
   initialFiles?: string[];
   launchContext?: LaunchContext;
+  ffmpegVersion?: number | null;
 } = {}) {
   const preferences = getPreferenceValues<Preferences>();
   const prefill = launchContext?.prefill;
   const initialInputFiles = prefill?.inputs ?? initialFiles ?? [];
   const initialInputKey = initialInputFiles.join("\0");
 
+  const [detectedFfmpegVersion, setDetectedFfmpegVersion] = useState<number | null | undefined>(ffmpegVersion);
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
   const [currentFiles, setCurrentFiles] = useState<string[]>(initialInputFiles);
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(prefill?.outputFormat ?? null);
@@ -136,6 +140,24 @@ export function ConverterForm({
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    if (ffmpegVersion !== undefined) {
+      setDetectedFfmpegVersion(ffmpegVersion);
+      return;
+    }
+    findFFmpegPath()
+      .then((found) => {
+        if (!cancelled) setDetectedFfmpegVersion(found?.version ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setDetectedFfmpegVersion(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ffmpegVersion]);
+
+  useEffect(() => {
     if (initialInputFiles.length === 0) {
       if (appliedInitialInputKey.current === null) {
         appliedInitialInputKey.current = initialInputKey;
@@ -145,15 +167,21 @@ export function ConverterForm({
       return;
     }
 
+    const hasHeicInitial =
+      process.platform !== "darwin" && initialInputFiles.some((file) => path.extname(file).toLowerCase() === ".heic");
+    if (hasHeicInitial && detectedFfmpegVersion === undefined) {
+      return;
+    }
+
     if (hasUserSelectedFiles.current || appliedInitialInputKey.current === initialInputKey) {
       return;
     }
 
     appliedInitialInputKey.current = initialInputKey;
     handleFileSelect(initialInputFiles);
-  }, [initialInputKey]);
+  }, [initialInputKey, detectedFfmpegVersion]);
 
-  const handleFileSelect = (files: string[], options: { markAsUserSelection?: boolean } = {}) => {
+  const handleFileSelect = async (files: string[], options: { markAsUserSelection?: boolean } = {}) => {
     if (options.markAsUserSelection) {
       hasUserSelectedFiles.current = true;
     }
@@ -166,9 +194,21 @@ export function ConverterForm({
     }
 
     try {
+      let resolvedFfmpegVersion = detectedFfmpegVersion;
+      const hasHeicFile =
+        process.platform !== "darwin" && files.some((file) => path.extname(file).toLowerCase() === ".heic");
+      if (hasHeicFile && resolvedFfmpegVersion === undefined) {
+        const found = await findFFmpegPath();
+        resolvedFfmpegVersion = found?.version ?? null;
+        setDetectedFfmpegVersion(resolvedFfmpegVersion);
+      }
+
+      const canDecodeHeic = supportsHeicInput(resolvedFfmpegVersion);
       let primaryFileType: MediaType | null = null;
+      let skippedUnsupportedHeic = false;
       for (const file of files) {
-        if (path.extname(file) === ".heic" && process.platform !== "darwin") {
+        if (path.extname(file).toLowerCase() === ".heic" && !canDecodeHeic) {
+          skippedUnsupportedHeic = true;
           continue;
         }
         const type = getMediaType(path.extname(file));
@@ -179,10 +219,16 @@ export function ConverterForm({
       }
 
       if (!primaryFileType) {
+        const heicMessage =
+          typeof resolvedFfmpegVersion === "number"
+            ? `HEIC input requires macOS or FFmpeg ${MIN_FFMPEG_HEIC_INPUT_VERSION}+ (found FFmpeg v${resolvedFfmpegVersion}).`
+            : `HEIC input requires macOS or FFmpeg ${MIN_FFMPEG_HEIC_INPUT_VERSION}+.`;
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid selection",
-          message: "No valid media files selected. Please select video, image, or audio files.",
+          message: skippedUnsupportedHeic
+            ? heicMessage
+            : "No valid media files selected. Please select video, image, or audio files.",
           secondaryAction: {
             title: "See supported formats",
             shortcut: { modifiers: ["cmd"], key: "o" },
@@ -197,16 +243,54 @@ export function ConverterForm({
         return;
       }
 
-      const processedFiles = files.filter((file) => {
-        return getMediaType(path.extname(file)) === primaryFileType;
-      });
+      const processedFiles: string[] = [];
+      const differentTypeFiles: string[] = [];
+      const differentTypes = new Set<MediaType>();
+      const unsupportedFiles: string[] = [];
+      let unsupportedHeicCount = 0;
+
+      for (const file of files) {
+        const ext = path.extname(file).toLowerCase();
+        if (ext === ".heic" && !canDecodeHeic) {
+          unsupportedFiles.push(file);
+          unsupportedHeicCount++;
+          continue;
+        }
+        const type = getMediaType(ext);
+        if (type === primaryFileType) {
+          processedFiles.push(file);
+        } else if (type) {
+          differentTypeFiles.push(file);
+          differentTypes.add(type);
+        } else {
+          unsupportedFiles.push(file);
+        }
+      }
 
       if (processedFiles.length < files.length) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid files in selection",
-          message: `Kept ${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}. ${files.length - processedFiles.length} other file${files.length - processedFiles.length > 1 ? "s" : ""} from your selection were invalid or of a different type and have been discarded.`,
-        });
+        const keptLabel = `${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}`;
+        const otherTypesLabel = Array.from(differentTypes).join("/");
+        if (differentTypeFiles.length > 0 && unsupportedFiles.length === 0) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Cannot mix media types",
+            message: `Kept ${keptLabel}. Remove ${processedFiles.length === 1 ? "it" : "them"} first to convert ${otherTypesLabel} files.`,
+          });
+        } else if (unsupportedFiles.length > 0 && differentTypeFiles.length === 0) {
+          const heicHint =
+            unsupportedHeicCount > 0 ? ` (HEIC input requires macOS or FFmpeg ${MIN_FFMPEG_HEIC_INPUT_VERSION}+)` : "";
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Unsupported files removed",
+            message: `Kept ${keptLabel}. Skipped ${unsupportedFiles.length} unsupported file${unsupportedFiles.length > 1 ? "s" : ""}${heicHint}.`,
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Some files were skipped",
+            message: `Kept ${keptLabel}. Skipped ${differentTypeFiles.length} ${otherTypesLabel} file${differentTypeFiles.length > 1 ? "s" : ""} (cannot mix media types) and ${unsupportedFiles.length} unsupported file${unsupportedFiles.length > 1 ? "s" : ""}.`,
+          });
+        }
       }
 
       setCurrentFiles(processedFiles);

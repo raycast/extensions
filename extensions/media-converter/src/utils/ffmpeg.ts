@@ -5,6 +5,8 @@ import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { runProcess } from "./process";
 import * as ffmpegStatic from "./ffmpeg-static";
 
+export const MIN_FFMPEG_HEIC_INPUT_VERSION = 7.0;
+
 type FFmpegInfo = { path: string; version: number };
 
 let cachedFFmpeg: { key: string; info: FFmpegInfo } | null = null;
@@ -13,6 +15,18 @@ let inFlightFFmpegLookup: { key: string; promise: Promise<FFmpegInfo | null> } |
 export function clearFFmpegCache(): void {
   cachedFFmpeg = null;
   inFlightFFmpegLookup = null;
+}
+
+/**
+ * macOS can decode HEIC via `sips`; Windows and Linux can decode tiled HEIC
+ * directly once FFmpeg 7.0+ is available.
+ */
+export function supportsHeicInput(
+  ffmpegVersion: number | null | undefined,
+  platform: NodeJS.Platform = process.platform,
+): boolean {
+  if (platform === "darwin") return true;
+  return typeof ffmpegVersion === "number" && ffmpegVersion >= MIN_FFMPEG_HEIC_INPUT_VERSION;
 }
 
 export function findWinGetFFmpegPaths(localAppData: string): string[] {

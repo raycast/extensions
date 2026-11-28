@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { findFFmpegPath } from "./ffmpeg";
+import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "./ffmpeg";
 import { buildAvifArgs, getAvailableEncoders, missingEncoderError, pickAvifEncoder } from "./encoders";
 import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
 import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
@@ -221,14 +221,26 @@ export async function convertMedia<T extends AllOutputExtension>(
             }
           }
         } else {
-          // If the input file is HEIC and the output format is not HEIC, convert to PNG first
+          let decodedHeicDirectly = false;
+          // If the input file is HEIC and the output format is not HEIC:
+          // - macOS uses `sips` to pre-convert HEIC to PNG.
+          // - Windows/Linux with FFmpeg 7.0+ decodes HEIC natively (pre-decoding to PNG only for
+          //   PNG-8 palettegen, because FFmpeg cannot chain `-vf` onto tiled HEIC's internal graph).
           if (extension === ".heic") {
+            if (!supportsHeicInput(ffmpegPath.version)) {
+              throw new Error(
+                `HEIC input requires macOS or FFmpeg ${MIN_FFMPEG_HEIC_INPUT_VERSION}+ (found FFmpeg v${ffmpegPath.version}).`,
+              );
+            }
             if (returnCommandString) {
               // For command string, use original file (assuming user handles preprocessing)
               processedInputPath = filePath;
-            } else {
+              if (process.platform !== "darwin") {
+                decodedHeicDirectly = true;
+              }
+            } else if (process.platform === "darwin") {
               try {
-                const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
+                const tempFileName = `${path.basename(filePath, path.extname(filePath))}_temp_${Date.now()}.png`;
                 tempHeicFile = path.join(os.tmpdir(), tempFileName);
 
                 await runProcess(
@@ -247,6 +259,30 @@ export async function convertMedia<T extends AllOutputExtension>(
                 }
                 throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
               }
+            } else if (currentOutputFormat === ".png" && imageQuality[".png"] === "png-8") {
+              try {
+                const tempFileName = `${path.basename(filePath, path.extname(filePath))}_temp_${Date.now()}.png`;
+                tempHeicFile = path.join(os.tmpdir(), tempFileName);
+
+                await runProcess(
+                  {
+                    command: ffmpegPath.path,
+                    args: ["-i", filePath, "-frames:v", "1", "-compression_level", "1", "-y", tempHeicFile],
+                  },
+                  signal,
+                );
+
+                processedInputPath = tempHeicFile;
+              } catch (error) {
+                console.error(`Error pre-processing HEIC file with FFmpeg: ${filePath}`, error);
+                if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+                  fs.unlinkSync(tempHeicFile);
+                }
+                throw new Error(`Failed to decode HEIC file with FFmpeg: ${String(error)}`);
+              }
+            } else {
+              processedInputPath = filePath;
+              decodedHeicDirectly = true;
             }
           }
 
@@ -335,6 +371,9 @@ export async function convertMedia<T extends AllOutputExtension>(
               ffmpegArgs.push(...buildAvifArgs(avifEncoder, Number(imageQuality[".avif"])));
               break;
             }
+          }
+          if (decodedHeicDirectly) {
+            ffmpegArgs.push("-frames:v", "1");
           }
           ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
           const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };

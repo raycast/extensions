@@ -30,7 +30,7 @@
 | Media Type | Supported Input Formats                                                                                                                            | Supported Output Formats                 |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | Video      | MOV, MP4, AVI, MKV, MPG, WEBM, TS, MPEG, VOB, M2TS, MTS, M4V, FLV, 3GP, ASF, WMV, RMVB, OGV, MXF, NUT, DV, GXF, RM, CDXL, WTV, M3U8, MPD, SEG, TXD | MP4, AVI, MKV, MOV, MPG, WEBM, **GIF**   |
-| Image      | JPG, JPEG, PNG, WEBP, HEIC (MacOS), TIFF, TIF, AVIF, BMP, PCX, TGA, RAS, SGI, PPM, PGM, PBM, PNM, XBM, XPM, ICO, JP2, J2K, PCD, CIN, WBMP, XFACE   | JPG, PNG, WEBP, HEIC (MacOS), TIFF, AVIF |
+| Image      | JPG, JPEG, PNG, WEBP, HEIC (macOS, or Windows/Linux with FFmpeg 7+), TIFF, TIF, AVIF, BMP, PCX, TGA, RAS, SGI, PPM, PGM, PBM, PNM, XBM, XPM, ICO, JP2, J2K, PCD, CIN, WBMP, XFACE   | JPG, PNG, WEBP, HEIC (macOS), TIFF, AVIF |
 | Audio      | MP3, AAC, WAV, M4A, FLAC, AIF, AIFF, OGG, OGA, ALAC, WMA, OPUS, AMR, CAF, AU, SND, APE, DSF, DFF, MPC, WV, SPX, XA, RA                             | MP3, AAC, WAV, FLAC, M4A                 |
 
 ## Usage

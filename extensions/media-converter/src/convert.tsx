@@ -21,6 +21,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   const [hasSeenHelloPage, setHasSeenHelloPage] = useState<boolean | null>(null);
   const [initialFinderFiles, setInitialFinderFiles] = useState<string[]>([]);
   const [ffmpegLostMessage, setFFmpegLostMessage] = useState<string | null>(null);
+  const [ffmpegVersion, setFFmpegVersion] = useState<number | null | undefined>(undefined);
 
   // Load hello page status and selected Finder items
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
           if (storedFFmpegPath) {
             // Check if the previously configured FFmpeg is still available
             const currentFFmpeg = await findFFmpegPath();
+            setFFmpegVersion(currentFFmpeg?.version ?? null);
             if (!currentFFmpeg) {
               // FFmpeg was configured before but is now lost
               // Mark that FFmpeg was lost for future reference
@@ -76,6 +78,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
             // No stored FFmpeg path, but user has seen hello page before
             // Check if FFmpeg is now available (user installed it at a commonPath since)
             const currentFFmpeg = await findFFmpegPath();
+            setFFmpegVersion(currentFFmpeg?.version ?? null);
             if (currentFFmpeg) {
               // FFmpeg was found! Show success toast
               await showToast({
@@ -107,5 +110,11 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
     return <HelloPage onContinue={() => setHasSeenHelloPage(true)} lostFFmpegMessage={ffmpegLostMessage} />;
   }
 
-  return <ConverterForm initialFiles={initialFinderFiles} launchContext={props.launchContext} />;
+  return (
+    <ConverterForm
+      initialFiles={initialFinderFiles}
+      launchContext={props.launchContext}
+      ffmpegVersion={ffmpegVersion}
+    />
+  );
 }
