@@ -7,8 +7,14 @@ on:
       - "extensions/**/metadata/**"
     branches: [main, master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   metadata-images:
+    # The Merge PR workflow pushes a maintenance commit right before merging. Don't re-check it.
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Resolve sparse checkout paths

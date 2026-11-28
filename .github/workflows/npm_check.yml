@@ -11,40 +11,75 @@ on:
       - "extensions/**"
     branches: [main, master]
 
+concurrency:
+  # Keep manual runs apart from automatic ones so a manual run can't cancel the PR's own check.
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
 jobs:
   setup:
     name: Get Extensions
-    runs-on: macos-latest
+    # The Merge PR workflow pushes a maintenance commit right before merging. Don't re-check it.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
     outputs:
       extension_dirs: ${{ steps.get_changed_extensions_json.outputs.extension_dirs }}
+      check_ref: ${{ steps.get_pr_number.outputs.check_ref }}
     steps:
+      # A manual run starts from a branch (usually main), not the PR, so look up the PR's head
+      # commit and check that everywhere.
       - name: Get PR number
         id: get_pr_number
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
         run: |
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "check_ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
           else
-            echo "pr_number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            head_sha=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq .head.sha)
+            echo "check_ref=$head_sha" >> "$GITHUB_OUTPUT"
           fi
       - name: Get changed extensions
         id: get_changed_extensions
-        uses: raycast/github-actions/get-changed-extensions@master
+        uses: raycast/github-actions/get-changed-extensions@v1.18.0
         with:
-          pull_request_number: "${{ steps.get_pr_number.outputs.pr_number }}"      
+          pull_request_number: "${{ steps.get_pr_number.outputs.pr_number }}"
       - name: to JSON
         id: get_changed_extensions_json
         env:
+          GH_TOKEN: ${{ github.token }}
           CHANGED_EXTENSIONS: ${{ steps.get_changed_extensions.outputs.paths }}
+          CHECK_REF: ${{ steps.get_pr_number.outputs.check_ref }}
         run: |
+          set -euo pipefail
           changed_extensions="$CHANGED_EXTENSIONS"
           repo_path="${GITHUB_WORKSPACE}/"
           # Remove the repository path from each path and convert to JSON array
           relative_paths=$(echo "$changed_extensions" | sed "s|$repo_path||g" | tr ',' '\n')
-          json_array=$(echo "$relative_paths" | jq -R -s -c 'split("\n")[:-1]')
+          # Keep only folders that exist at the commit being checked: a PR that deletes or renames an
+          # extension lists the old folder too. No folders left gives [] and the check job is skipped.
+          # A bad ref also returns 404 below, so make sure it exists first.
+          gh api "repos/$GITHUB_REPOSITORY/commits/$CHECK_REF" --silent
+          kept=""
+          while IFS= read -r dir; do
+            [[ -z "$dir" ]] && continue
+            if out=$(gh api "repos/$GITHUB_REPOSITORY/contents/${dir%/}?ref=$CHECK_REF" --silent 2>&1); then
+              kept+="$dir"$'\n'
+            elif [[ "$out" == *"HTTP 404"* ]]; then
+              echo "Skipping $dir: not in $CHECK_REF"
+            else
+              echo "::error::Couldn't check $dir at $CHECK_REF: $out"
+              exit 1
+            fi
+          done <<< "$relative_paths"
+          json_array=$(printf '%s' "$kept" | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "extension_dirs=$json_array" >> "$GITHUB_OUTPUT"
   check-extensions:
     name: ${{ matrix.extension_dir }}
     needs: setup
+    if: needs.setup.outputs.extension_dirs != '[]'
     runs-on: macos-latest
     strategy:
       matrix:
@@ -53,13 +88,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ needs.setup.outputs.check_ref }}
           sparse-checkout: ${{ matrix.extension_dir }}
+      # Dependency checks are advisory; leave the test step's failure behavior unchanged.
       - name: Check extension
         continue-on-error: true
         working-directory: ${{ matrix.extension_dir }}
         run: |
           npm install -g npm-check
-          npm ci
+          # Retry once so a registry hiccup doesn't fail the check.
+          npm ci || { echo "::warning::npm ci failed, retrying once..."; sleep 10; npm ci; }
 
           set +e
           npm-check

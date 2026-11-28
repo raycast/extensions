@@ -27,36 +27,59 @@ on:
       - "extensions/**"
     branches: [main, master]
 
+# Only PR checks are cancelled by a newer push. Publish and manual runs always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   extensions_build_publish:
-    if: github.repository == 'raycast/extensions'
+    # Skip PR checks for the maintenance commit the Merge PR workflow pushes right before merging.
+    if: github.repository == 'raycast/extensions' && !(github.event_name == 'pull_request' && github.actor == 'github-actions[bot]')
     name: "${{ github.event_name == 'push' && 'Publish' || (github.event_name == 'pull_request' && 'Check' || github.event_name == 'workflow_dispatch' && inputs.command || github.event_name ) }}"
     runs-on: macos-26
     steps:
       - name: Setup Xcode
         uses: raycast/github-actions/setup-xcode@xcode-26.4.x
-      - uses: actions/checkout@v7
-        with:
-          path: github_utils
-          sparse-checkout: |
-            .github
-      # This makes sure that the problems found while validating the extensions are shown in the PR diff
-      - name: Register Problem Matcher for Ray CLI
-        run: echo "##[add-matcher]github_utils/.github/ray.matcher.json"
-      - name: Generate 'allow_owners_only_for_extensions'
+      # Read the two .github files this job needs through the API. A git checkout here fetched the
+      # whole repo tree a second time (the Ray CLI action fetches it again) and took up to 15 minutes.
+      # PR checks read them from the base commit so a PR can't change the rules it is checked against.
+      - name: Load Ray CLI config
         id: allow_owners_only_for_extensions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CONFIG_REF: ${{ github.event.pull_request.base.sha || github.sha }}
         run: |
-          file_path="${{ github.workspace }}/github_utils/.github/public_raycast_extensions.txt"
-          if [[ -f "$file_path" ]]; then
-            echo "value<<EOF" >> "$GITHUB_OUTPUT"
-            while IFS= read -r line; do
-              echo "$line" >> "$GITHUB_OUTPUT"
-            done < "$file_path"
-            echo "EOF" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          read_file() {
+            local attempt
+            for attempt in 1 2 3; do
+              if gh api -H "Accept: application/vnd.github.raw+json" \
+                "repos/$GITHUB_REPOSITORY/contents/$1?ref=$CONFIG_REF" > "$2"; then
+                return 0
+              fi
+              echo "Couldn't read $1, retrying ($attempt/3)..." >&2
+              sleep 5
+            done
+            echo "::error::Couldn't read $1 at $CONFIG_REF."
+            return 1
+          }
+
+          # Shows the problems found while validating the extensions in the PR diff.
+          read_file .github/ray.matcher.json "$RUNNER_TEMP/ray.matcher.json"
+          echo "##[add-matcher]$RUNNER_TEMP/ray.matcher.json"
+
+          # Required: an empty list would let anyone change owners-only extensions.
+          read_file .github/public_raycast_extensions.txt "$RUNNER_TEMP/public_raycast_extensions.txt"
+          if ! LC_ALL=C grep -q '[^[:space:]]' "$RUNNER_TEMP/public_raycast_extensions.txt"; then
+            echo "::error::.github/public_raycast_extensions.txt at $CONFIG_REF is empty or contains only whitespace."
+            exit 1
           fi
-      - name: Cleanup github_utils
-        run: |
-          rm -rf ${{ github.workspace }}/github_utils
+          {
+            echo "value<<EOF"
+            printf '%s\n' "$(cat "$RUNNER_TEMP/public_raycast_extensions.txt")"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
       - name: Run Ray CLI
         id: ray_cli
         uses: raycast/github-actions/ray@v1.18.0
@@ -103,7 +126,7 @@ jobs:
 
       - name: Notify Failure to Slack
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
@@ -112,7 +135,7 @@ jobs:
             <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Action logs> | <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|Commit: ${{ env.SHORT_SHA }}>
       - name: Notify Success to Slack
         if: success() && github.event_name == 'workflow_dispatch'
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "good"
