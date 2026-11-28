@@ -18,6 +18,7 @@ import {
   launchCommand,
   open,
   showHUD,
+  showInFinder,
   showToast,
 } from "@raycast/api";
 import { CARD_W, historyCardSvg } from "../lib/charts.js";
@@ -27,13 +28,18 @@ import {
   HistoryFilter,
   clearHistory,
   groupByDay,
+  historyCsv,
   loadHistory,
   matchesFilter,
   removeFromHistory,
+  removeManyFromHistory,
+  totalBytes,
 } from "../lib/history.js";
 import { KIND_COLOR, KIND_ICON, canChat, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
 import { siteName } from "../lib/media-info.js";
 import { markdownImage } from "../lib/svg.js";
+import { uniqueFilePath } from "../lib/unique-path.js";
+import { downloadPath } from "../utils.js";
 import { ChatAboutLinkAction } from "./chat-action.js";
 
 const FILTERS: { value: HistoryFilter; title: string; icon: Icon }[] = [
@@ -114,6 +120,30 @@ function detailMarkdown(e: HistoryEntry): string {
     lines,
   });
   return `${markdownImage(card, `card-${e.id}`, CARD_W)}${error}`;
+}
+
+/** Write the listed downloads to a file in the download folder. */
+async function exportHistory(entries: HistoryEntry[], format: "csv" | "json") {
+  try {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const day = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    fs.mkdirSync(downloadPath, { recursive: true });
+    const target = uniqueFilePath(downloadPath, `The Downloader History ${day}`, format);
+    fs.writeFileSync(target, format === "csv" ? historyCsv(entries) : `${JSON.stringify(entries, null, 2)}\n`, "utf-8");
+    await showToast({
+      style: Toast.Style.Success,
+      title: "History Exported",
+      message: `${plural(entries.length, "download")} · ${path.basename(target)}`,
+      primaryAction: {
+        title: process.platform === "win32" ? "Show in Explorer" : "Show in Finder",
+        onAction: () => showInFinder(target),
+      },
+      secondaryAction: { title: "Open", onAction: () => open(target) },
+    });
+  } catch (error) {
+    await showToast({ style: Toast.Style.Failure, title: "Couldn't export the History", message: errorText(error) });
+  }
 }
 
 /** Open the Download command, with a link to download again or empty for a new one. */
@@ -208,6 +238,13 @@ export function DownloadHistory() {
   }, []);
 
   const visible = (entries ?? []).filter((e) => matchesFilter(e, filter));
+  // What an export holds: the filter's entries, narrowed by the words typed in
+  // the search. Raycast's own search is fuzzy, so this is close to the list, not exactly it.
+  const words = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+  const exported = visible.filter((e) => {
+    const text = [titleOf(e), e.uploader, e.source, hostOf(e.url), e.format, kindTitle(e.kind)].join(" ").toLowerCase();
+    return words.every((word) => text.includes(word));
+  });
   const groups = groupByDay(visible);
   // The detail pane shows type, size and date, and the narrow list beside it would cut them off.
   const split = showingDetail && visible.length > 0;
@@ -216,6 +253,26 @@ export function DownloadHistory() {
     localChanges.current++;
     try {
       setEntries(await removeFromHistory(entry.id));
+      await showToast({ style: Toast.Style.Success, title: "Removed from History" });
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't remove from History", message: errorText(error) });
+    }
+  }
+
+  // Entries whose file was moved or deleted since the download.
+  const missing = (entries ?? []).filter((e) => exists.get(e.id) === false);
+
+  async function removeMissing() {
+    const confirmed = await confirmAlert({
+      title: `Remove ${plural(missing.length, "Missing Download")}?`,
+      message: "Their files were moved or deleted. Only the list changes.",
+      icon: Icon.Trash,
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    localChanges.current++;
+    try {
+      setEntries(await removeManyFromHistory(missing.map((e) => e.id)));
       await showToast({ style: Toast.Style.Success, title: "Removed from History" });
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Couldn't remove from History", message: errorText(error) });
@@ -296,7 +353,13 @@ export function DownloadHistory() {
           key={group.title}
           title={group.title}
           // Raycast filters the search after this, so a count would include entries it hides.
-          subtitle={searchText ? undefined : plural(group.entries.length, "download")}
+          subtitle={
+            searchText
+              ? undefined
+              : [plural(group.entries.length, "download"), formatBytes(totalBytes(group.entries)).replace("—", "")]
+                  .filter(Boolean)
+                  .join(" · ")
+          }
         >
           {group.entries.map((e) => {
             const fileExists = exists.get(e.id);
@@ -434,12 +497,32 @@ export function DownloadHistory() {
                         shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={() => remove(e)}
                       />
+                      {missing.length > 0 && (
+                        <Action
+                          title="Remove Missing Downloads…"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          onAction={removeMissing}
+                        />
+                      )}
                       <Action
                         title="Clear History…"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         shortcut={Keyboard.Shortcut.Common.RemoveAll}
                         onAction={clearAll}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action
+                        title="Export List as CSV"
+                        icon={Icon.Download}
+                        onAction={() => exportHistory(exported, "csv")}
+                      />
+                      <Action
+                        title="Export List as JSON"
+                        icon={Icon.Download}
+                        onAction={() => exportHistory(exported, "json")}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>

@@ -33,14 +33,18 @@ function statusLabel(s: DownloadSnapshot): { text: string; icon: { source: Icon;
       return { text: "Stopped", icon: { source: Icon.Stop, tintColor: Color.SecondaryText } };
     default: {
       const percent = s.percent !== undefined && s.stage !== "process" ? ` ${Math.floor(s.percent)}%` : "";
-      const text =
+      const step =
         s.stage === "prepare"
           ? "Preparing…"
           : s.stage === "process"
             ? "Finishing…"
             : s.items > 0
               ? `Downloading · ${s.items}`
-              : `Downloading${percent}`;
+              : s.cutting && !percent
+                ? "Cutting the clip…"
+                : `Downloading${percent}`;
+      // A playlist leads with the video it is on.
+      const text = s.listIndex && s.listTotal && s.listTotal > 1 ? `${s.listIndex} of ${s.listTotal} · ${step}` : step;
       return { text, icon: { source: Icon.CircleProgress, tintColor: Color.Blue } };
     }
   }

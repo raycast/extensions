@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  BrowserExtension,
   Clipboard,
   LaunchProps,
   LaunchType,
@@ -25,10 +26,12 @@ import { needsRosetta, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
 import { SPOTDL_SETUP_GUIDE_URL } from "./lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "./lib/monolith.js";
-import { savePageAsMarkdown } from "./lib/page-markdown.js";
+import { MarkdownSaveResult, archiveNote, savePageAsMarkdown } from "./lib/page-markdown.js";
 import { isMarkdownMode, saveModeLabel } from "./lib/filetype.js";
 import { progressMessage } from "./lib/format.js";
 import { DownloadKind, DownloadSession } from "./lib/download-session.js";
+import { hostOf } from "./lib/kinds.js";
+import { pickLink } from "./lib/url.js";
 import { entryFromSnapshot, recordDownload } from "./lib/history.js";
 import {
   downloadPath,
@@ -137,17 +140,50 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
   await keepToastActionsAlive(await download(props));
 }
 
+/**
+ * The link to download when none was typed: the one in the clipboard, else the
+ * browser's active tab (when the Raycast browser extension is there). Only a
+ * whole http(s) link counts.
+ */
+async function linkAtHand(): Promise<string | undefined> {
+  let clipboard: string | undefined;
+  try {
+    clipboard = await Clipboard.readText();
+  } catch {
+    /* clipboard unavailable */
+  }
+  const copied = pickLink([clipboard]);
+  if (copied) return copied;
+  if (!environment.canAccess(BrowserExtension)) return undefined;
+  try {
+    return pickLink([(await BrowserExtension.getTabs()).find((tab) => tab.active)?.url]);
+  } catch {
+    return undefined;
+  }
+}
+
 /** Run the download; resolves with the toast left on screen, whose actions may still be used. */
 async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }>): Promise<Toast | undefined> {
   // Trimmed: a pasted link often ends with a space or a newline.
-  const rawUrl = (props.arguments.url ?? "").trim();
+  const typed = (props.arguments.url ?? "").trim();
+  const rawUrl = typed || (await linkAtHand()) || "";
 
+  if (!rawUrl) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No Link to Download",
+      message: "Type a URL, or copy a link first.",
+    });
+    return undefined;
+  }
   if (!isValidUrl(rawUrl)) {
     await showToast({ style: Toast.Style.Failure, title: "Invalid URL", message: rawUrl });
     return undefined;
   }
   // Prefix https:// for scheme-less input before any runner sees it.
   const url = normalizeUrl(rawUrl);
+  // A link that wasn't typed is named in the toast, so it's clear what is being downloaded.
+  const from = typed ? "" : ` from ${hostOf(url)}`;
 
   const {
     cookiesFromBrowser,
@@ -166,7 +202,11 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
     await ensureFreshTools(["gallery-dl"]);
 
     const browser = resolveBrowser(cookiesFromBrowser, cookiesFromBrowserCustom);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Gallery", message: "0 files" });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Downloading Gallery${from}`,
+      message: "0 files",
+    });
 
     if (browser.warning) {
       toast.style = Toast.Style.Failure;
@@ -348,12 +388,12 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
       await ensureFreshTools(["monolith"]);
     }
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Saving Webpage" });
+    const toast = await showToast({ style: Toast.Style.Animated, title: `Saving Webpage${from}` });
     const { signal } = attachStop(toast);
     const session = track("website", url, saveModeLabel(webpageSaveMode));
     let outcome: { filePath?: string; error?: unknown } = {};
     try {
-      const { filePath } = markdown
+      const saved: MarkdownSaveResult | { filePath: string; archive?: undefined } = markdown
         ? await savePageAsMarkdown(url, downloadPath, { signal })
         : await runMonolithSave(monolithPath, {
             url,
@@ -362,10 +402,12 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
             idleMs: getIdleTimeoutMs(),
             abortSignal: signal,
           });
+      const { filePath } = saved;
       outcome = { filePath };
       toast.style = Toast.Style.Success;
       toast.title = "Saved";
-      toast.message = path.basename(filePath);
+      // A page the site wouldn't show was read from the Internet Archive: say so.
+      toast.message = [path.basename(filePath), archiveNote(saved.archive)].filter(Boolean).join(" · ");
       toast.primaryAction = { title: "Open Folder", onAction: () => showInFinder(filePath) };
       toast.secondaryAction = undefined;
     } catch (error) {
@@ -420,7 +462,7 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
     });
   }
 
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Video", message: "0%" });
+  const toast = await showToast({ style: Toast.Style.Animated, title: `Downloading Video${from}`, message: "0%" });
   const { signal } = attachStop(toast);
   const session = track(
     config.videoMediaType === "audio" ? "audio" : "video",

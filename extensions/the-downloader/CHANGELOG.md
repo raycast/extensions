@@ -3,6 +3,12 @@
 ## [Markdown Pages, Recent Links and More Video Options] - {PR_MERGE_DATE}
 
 - **Webpages as Markdown** — a third Save Mode next to Complete and Lightweight: the article's text, links, images, lists, code and tables as one `.md` file, with the title, source, author and dates on top for notes apps such as Obsidian. It needs no monolith, and when monolith is missing the set-up screen offers it.
+- **Playlists and Channels** — a playlist or channel link lists its videos in the form: pick the ones you want, or leave it empty for all of them. They are saved into a folder named after the playlist, numbered in its order, and the live view shows which video it is on (2 of 5). A playlist with a private or deleted video still saves the rest and says what was left out.
+- **Clip** — download only part of a video or its audio: `1:30-2:45`, `90-120` or `1:30-` (to the end). The cut is exact, and the file's name carries the clip's times.
+- **Subtitles** — put a caption track the video has inside the file, or save it next to the video as `.srt`.
+- **Copy Page as Markdown** (⌘⇧C in the form) — the article on the clipboard instead of in a file. Saving or copying a page that blocks apps (HTTP 403, 429) or is gone (404, 410) uses the Internet Archive's latest copy and says so, in the toast and in the file's front matter.
+- **Fast Download Without a URL** — takes the link in your clipboard, or the browser tab you're on, so it works from a hotkey.
+- **Download History** — export the list as CSV or JSON, remove the entries whose files are gone, and see each day's total size.
 - **Recent Links** — type `@` in Raycast AI Chat and choose Recent Links to mention a link you downloaded or chatted about. Its transcript, caption or article is attached to the message, from the same cache Chat About Link and `read-link` use.
 - **Video: Metadata** — optionally write the title, channel, date and chapters into the file, with the thumbnail as cover art.
 - **Video: SponsorBlock** — optionally cut sponsored segments out of YouTube downloads.
@@ -34,6 +40,7 @@
   - Download History shows why it couldn't be read, with Try Again, instead of looking empty, and checks for missing files without slowing the list.
   - Transcript downloads use Video: Browser Cookies too, so a members-only video's captions can be saved.
   - The links in this extension's Store page lead to its guides on GitHub instead of a missing page.
+  - Stopping a Markdown save shows Cancelled instead of a failure.
 - gallery-dl's links point to Codeberg, where its development moved.
 - Updated to Raycast API 2.14 (the Node.js 26 runtime), execa 10 and TypeScript 6.
 

@@ -1,6 +1,9 @@
 import * as fs from "node:fs";
 import { htmlToMarkdown } from "./html-markdown.js";
+import { LinkLoadError } from "./link-context.js";
 import { webpageFilename } from "./monolith.js";
+import { AbortError } from "./run.js";
+import { loadArchivedArticle } from "./sources/archive.js";
 import { PageArticle, loadPageArticle } from "./sources/page.js";
 import { uniqueFilePath } from "./unique-path.js";
 
@@ -47,7 +50,8 @@ const yaml = (value: string) => JSON.stringify(value.replace(/\s+/g, " ").trim()
 /**
  * The page as a Markdown document: YAML front matter (title, source, site,
  * author, dates — what Obsidian and static-site tools read), the title as a
- * heading, then the article. `saved` is the local calendar date.
+ * heading, then the article. `saved` is the local calendar date. A page read
+ * from the Internet Archive says so: `archived` is the day that copy was made.
  */
 export function pageMarkdown(page: PageArticle, now = new Date()): string {
   const { ctx } = page;
@@ -60,6 +64,8 @@ export function pageMarkdown(page: PageArticle, now = new Date()): string {
     ctx.author ? `author: ${yaml(ctx.author)}` : undefined,
     ctx.publishedAt ? `published: ${ctx.publishedAt}` : undefined,
     `saved: ${saved}`,
+    ctx.archive ? `archived: ${ctx.archive.savedOn}` : undefined,
+    ctx.archive ? `archive: ${yaml(ctx.archive.viewUrl)}` : undefined,
   ].filter(Boolean);
   const body = htmlToMarkdown(page.articleHtml, ctx.url);
   // Some articles repeat their headline as the first heading.
@@ -67,36 +73,93 @@ export function pageMarkdown(page: PageArticle, now = new Date()): string {
   return `---\n${front.join("\n")}\n---\n\n${heading}${body}`;
 }
 
-export type MarkdownSaveResult = { filePath: string; title: string };
+/** A page as Markdown. `archive` is set when it was read from the Internet Archive's copy. */
+export type PageMarkdown = {
+  markdown: string;
+  title: string;
+  /** The page's own address, also for an archived copy. */
+  url: string;
+  archive?: { viewUrl: string; savedOn: string };
+};
+
+/** What a toast adds for a page that came from the Internet Archive; empty for a live page. */
+export function archiveNote(archive: PageMarkdown["archive"]): string {
+  return archive ? `From the Internet Archive's copy saved ${archive.savedOn}.` : "";
+}
+
+/** The page's live error without its advice to try the archive, for when the archive was tried too. */
+function withoutArchiveAdvice(message: string): string {
+  const end = message.indexOf(").");
+  return end === -1 ? message : message.slice(0, end + 2);
+}
 
 /**
- * Fetch `url` and save its article as Markdown in `folder`. The file is named
- * after the title, numbered when that name is taken, and created exclusively
- * so two saves started together can't write the same file. Rejects when the
- * page has no readable text (a login, a JavaScript app): there's nothing to
- * convert, and the Complete mode keeps such a page as it is.
+ * The live page's article, or — when the site turned the reader away (HTTP 403
+ * or 429) or the page is gone (404, 410) — the Internet Archive's latest copy
+ * of it. A login, a paywall or a legal block never falls back: page.ts offers
+ * no archive for those, as that is the site's own decision.
+ */
+async function loadArticle(url: string, signal?: AbortSignal): Promise<PageArticle> {
+  try {
+    return await loadPageArticle(url, { signal });
+  } catch (error) {
+    if (!(error instanceof LinkLoadError) || error.fix !== "archive") throw error;
+    try {
+      return await loadArchivedArticle(url, { signal });
+    } catch (archiveError) {
+      if (signal?.aborted) throw archiveError;
+      const why = archiveError instanceof Error ? archiveError.message : String(archiveError);
+      throw new Error(`${withoutArchiveAdvice(error.message)} ${why}`);
+    }
+  }
+}
+
+/**
+ * Fetch `url` and write its article as Markdown. Rejects when the page has no
+ * readable text (a login, a JavaScript app): there's nothing to convert, and
+ * the Complete mode keeps such a page as it is.
+ */
+export async function loadPageMarkdown(url: string, options: { signal?: AbortSignal } = {}): Promise<PageMarkdown> {
+  let page: PageArticle;
+  try {
+    page = await loadArticle(url, options.signal);
+  } catch (error) {
+    // Stop is a cancel, not a failure: the reader's own "request was stopped" would show as one.
+    if (options.signal?.aborted) throw new AbortError();
+    throw error;
+  }
+  if (!page.articleHtml) {
+    throw new Error(
+      `${page.ctx.note ?? "Couldn't read this page's text."} Markdown needs readable text — choose the Complete save mode to keep the page as it is.`,
+    );
+  }
+  return { markdown: pageMarkdown(page), title: page.ctx.title, url: page.ctx.url, archive: page.ctx.archive };
+}
+
+export type MarkdownSaveResult = { filePath: string; title: string; archive?: PageMarkdown["archive"] };
+
+/**
+ * Fetch `url` and save its article as Markdown in `folder` (see
+ * `loadPageMarkdown`). The file is named after the title, numbered when that
+ * name is taken, and created exclusively so two saves started together can't
+ * write the same file.
  */
 export async function savePageAsMarkdown(
   url: string,
   folder: string,
   options: { signal?: AbortSignal } = {},
 ): Promise<MarkdownSaveResult> {
-  const page = await loadPageArticle(url, { signal: options.signal });
-  if (!page.articleHtml) {
-    throw new Error(
-      `${page.ctx.note ?? "Couldn't read this page's text."} Markdown needs readable text — choose the Complete save mode to keep the page as it is.`,
-    );
-  }
-  const markdown = pageMarkdown(page);
+  const page = await loadPageMarkdown(url, options);
+  const { markdown } = page;
   fs.mkdirSync(folder, { recursive: true });
-  const base = markdownBasename(page.ctx.title, page.ctx.url);
+  const base = markdownBasename(page.title, page.url);
   // lstat, not existsSync: a broken symlink with the name would fail the exclusive create forever.
   const taken = (p: string) => fs.lstatSync(p, { throwIfNoEntry: false }) !== undefined;
   for (;;) {
     const filePath = uniqueFilePath(folder, base, "md", taken);
     try {
       fs.writeFileSync(filePath, markdown, { flag: "wx" });
-      return { filePath, title: page.ctx.title };
+      return { filePath, title: page.title, archive: page.archive };
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
     }

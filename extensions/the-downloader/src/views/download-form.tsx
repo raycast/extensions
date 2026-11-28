@@ -38,12 +38,20 @@ import {
 import { composeVideoFormat } from "../lib/video-format.js";
 import {
   LiveStreamError,
+  PLAYLIST_PICK_LIMIT,
+  PlaylistInfo,
+  clipTemplateIn,
+  fetchPlaylist,
   fetchVideoInfo,
   isLiveStream,
+  isPlaylistProbe,
   outputTemplateIn,
+  playlistTemplateIn,
   runThumbnailDownload,
   runVideoDownload,
 } from "../lib/ytdlp.js";
+import { clipLabel, parseClip } from "../lib/clip.js";
+import { parseSubtitleValue, subtitleTracks, subtitleValue } from "../lib/subtitles.js";
 import { getVideoExtras } from "../lib/config.js";
 import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
@@ -54,12 +62,12 @@ import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { ABOUT_URL, SPOTDL_SETUP_GUIDE_URL, SUPPORTED_SITES_URL } from "../lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "../lib/monolith.js";
-import { savePageAsMarkdown } from "../lib/page-markdown.js";
+import { MarkdownSaveResult, archiveNote, loadPageMarkdown, savePageAsMarkdown } from "../lib/page-markdown.js";
 import { DownloadInit, DownloadSession, trackRunningDownload } from "../lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "../lib/history.js";
 import { QUALITY_VALUES, QualityValue, estimateQuality, maxHeight, qualityTitle } from "../lib/estimate.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
-import { formatClock, progressMessage } from "../lib/format.js";
+import { formatClock, plural, progressMessage } from "../lib/format.js";
 import extractTranscript from "../transcript.js";
 import {
   downloadPath,
@@ -136,9 +144,17 @@ const FORMAT_TITLE: Record<string, string> = {
 
 const formatTitle = (value: string) => FORMAT_TITLE[value] ?? value.toUpperCase();
 
-/** Mirror a finished toast onto the download view and record it in the history. */
-function succeedSession(session: DownloadSession, toast: Toast, filePath?: string) {
-  session.succeed({ filePath: filePath || undefined, title: toast.title, message: toast.message });
+/**
+ * Mirror a finished toast onto the download view and record it in the history.
+ * `list` is for a playlist: how many videos it saved, and the folder they are in.
+ */
+function succeedSession(
+  session: DownloadSession,
+  toast: Toast,
+  filePath?: string,
+  list?: { items: number; folder: string },
+) {
+  session.succeed({ filePath: filePath || undefined, title: toast.title, message: toast.message, ...list });
   void recordDownload(entryFromSnapshot(session.getSnapshot()));
 }
 
@@ -207,6 +223,31 @@ function failToast(toast: Toast, error: unknown): boolean {
   return true;
 }
 
+/** Put the page's article on the clipboard as Markdown, without saving a file. */
+async function copyPageAsMarkdown(url: string) {
+  const controller = new AbortController();
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Reading Page",
+    primaryAction: { title: "Stop", onAction: () => controller.abort() },
+  });
+  try {
+    const page = await loadPageMarkdown(url, { signal: controller.signal });
+    await Clipboard.copy(page.markdown);
+    toast.style = Toast.Style.Success;
+    toast.title = "Copied as Markdown";
+    toast.message = [page.title, archiveNote(page.archive)].filter(Boolean).join(" · ");
+    toast.primaryAction = undefined;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    toast.style = Toast.Style.Failure;
+    toast.title = error instanceof AbortError ? "Cancelled" : "Couldn't Read the Page";
+    toast.message = error instanceof AbortError ? undefined : errorSummary(message);
+    toast.primaryAction =
+      error instanceof AbortError ? undefined : { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+  }
+}
+
 type DownloadFormProps = { initialUrl: string };
 
 export function DownloadForm({ initialUrl }: DownloadFormProps) {
@@ -222,6 +263,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const [container, setContainer] = useState<string>(prefs.videoContainer);
   // Controlled because the Markdown mode needs no monolith: the tool check follows it.
   const [saveMode, setSaveMode] = useState<string>(prefs.webpageSaveMode);
+  // Controlled so a mistyped time shows under the field, and so a new link starts without the last one's clip.
+  const [clipText, setClipText] = useState("");
   const [refresh, setRefresh] = useState(0);
   // Ref (not state) so a rapid second submit sees the flag synchronously — a
   // re-render would race with the click. Refs update inside the same event
@@ -239,6 +282,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   // every re-run and aborts the prior one, so editing the URL or dismissing the
   // form kills the in-flight yt-dlp metadata child instead of orphaning it.
   const metaAbortable = useRef<AbortController>(null);
+  // The same for the playlist's list of videos.
+  const listAbortable = useRef<AbortController>(null);
 
   useEffect(() => {
     return () => {
@@ -338,6 +383,40 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       );
   const ytdlpBound = resolveTool(source, filetype) === "yt-dlp";
 
+  // A playlist or channel link (the probe read its first video): list its
+  // videos, so some can be picked instead of downloading all of them.
+  const playlistLink = isPlaylistProbe(video);
+  const { data: listed, isLoading: listLoading } = usePromise(
+    async (u: string, fetchIt: boolean): Promise<{ url: string; list?: PlaylistInfo } | undefined> => {
+      if (!fetchIt) return undefined;
+      const denoPath = getDenoPath();
+      try {
+        const list = await fetchPlaylist(
+          getytdlPath(),
+          u,
+          prefs.forceIpv4,
+          fs.existsSync(denoPath) ? denoPath : undefined,
+          {
+            signal: listAbortable.current?.signal,
+            timeoutMs: getIdleTimeoutMs(),
+            cookiesFromBrowser: detectSource(u) === "video" ? getVideoExtras().cookiesFromBrowser : undefined,
+          },
+        );
+        return { url: u, list };
+      } catch (error) {
+        if (error instanceof AbortError) throw error;
+        // Without the list the whole playlist is downloaded, as the form says then.
+        return { url: u };
+      }
+    },
+    [url, playlistLink],
+    { onError: () => undefined, abortable: listAbortable },
+  );
+  const listReady = playlistLink && !listLoading && listed?.url === url;
+  const playlist = listReady ? listed?.list : undefined;
+  // Video and Audio take the playlist; Transcript and Image read its first video.
+  const asPlaylist = playlistLink && ytdlpBound && (filetype === "video" || filetype === "audio");
+
   // The required tools must all exist; otherwise the form is replaced by the Installer.
   const missingTool = useMemo(
     () =>
@@ -365,19 +444,25 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   // Only the current URL's metadata counts: while a new one loads, `video` is the
   // previous link's. A live link submitted before its probe ends is still refused
   // by yt-dlp itself (see `buildVideoDownloadArgs`).
-  const liveStream = !metaLoading && !!video && isLiveStream(video);
+  // A playlist whose first video is live still has the others (yt-dlp skips the live one).
+  const liveStream = !metaLoading && !!video && isLiveStream(video) && !asPlaylist;
 
   /** Start a download view for this submit. yt-dlp metadata, when fetched, fills in the title and details. */
-  function openSession(init: Omit<DownloadInit, "title" | "meta">, withMeta: boolean): DownloadSession {
+  function openSession(
+    init: Omit<DownloadInit, "title" | "meta">,
+    withMeta: boolean,
+    /** A playlist is shown under its own name, not its first video's title and length. */
+    listTitle?: string,
+  ): DownloadSession {
     // While a new URL's metadata is still loading, `video` belongs to the previous URL.
     const meta = withMeta && !metaLoading ? video : undefined;
     const session = new DownloadSession({
       ...init,
-      title: meta?.title,
+      title: listTitle ?? meta?.title,
       meta: meta
         ? {
             uploader: meta.uploader ?? meta.channel ?? undefined,
-            duration: meta.duration || undefined,
+            duration: listTitle ? undefined : meta.duration || undefined,
             thumbnail: meta.thumbnail ?? undefined,
             source: meta.extractor_key ?? undefined,
           }
@@ -431,9 +516,25 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   let statusText = "Paste a link to download.";
   let detailsText = "";
   const metaReady = ytdlpBound && !!video && !metaLoading;
+  const listTitle = playlist?.title ?? video?.playlist_title ?? video?.playlist ?? "Playlist";
   if (validUrl) {
     // While a new URL's metadata loads, `video` still belongs to the previous URL.
-    if (metaReady && video) {
+    if (metaReady && video && asPlaylist) {
+      statusLabel = "Playlist";
+      statusText = listTitle;
+      const count = playlist?.lists
+        ? `${playlist.lists.length} lists`
+        : playlist
+          ? playlist.truncated
+            ? `more than ${PLAYLIST_PICK_LIMIT} videos`
+            : plural(playlist.entries.length, "video")
+          : video.playlist_count
+            ? plural(video.playlist_count, "video")
+            : undefined;
+      detailsText = [video.uploader ?? video.channel, count, "saved into a folder of its own"]
+        .filter(Boolean)
+        .join(" · ");
+    } else if (metaReady && video) {
       statusLabel = "Title";
       statusText = video.title;
       const best = qualityName(maxHeight(video));
@@ -473,13 +574,19 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       ? ["These options were checked against this link.", unavailableNote].filter(Boolean).join(" ")
       : filetypeGuidance(source);
 
+  // A playlist's sizes can't be told from its first video.
   const estimates =
-    metaReady && video
+    metaReady && video && !asPlaylist
       ? (Object.fromEntries(QUALITY_VALUES.map((q) => [q, estimateQuality(video, q, container)])) as Record<
           QualityValue,
           ReturnType<typeof estimateQuality>
         >)
       : undefined;
+
+  // Part of one video, or a caption track of it: neither applies to a whole playlist.
+  const mediaFiletype = ytdlpBound && (filetype === "video" || filetype === "audio");
+  const { clip, error: clipError } = mediaFiletype && !asPlaylist ? parseClip(clipText, video?.duration) : {};
+  const tracks = metaReady && video && !playlistLink ? subtitleTracks(video) : [];
 
   const urlError =
     url && !validUrl
@@ -516,6 +623,15 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       await showToast({ style: Toast.Style.Failure, title: "Live streams are not supported" });
       return;
     }
+    if (clipError) {
+      await showToast({ style: Toast.Style.Failure, title: "Clip", message: clipError });
+      return;
+    }
+    // Not yet: with no list to pick from, this would start the whole playlist.
+    if (asPlaylist && !listReady) {
+      await showToast({ style: Toast.Style.Failure, title: "Still listing the playlist's videos…" });
+      return;
+    }
 
     submitInFlight.current = true;
     try {
@@ -541,7 +657,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       const { signal, done } = startAbortable(toast, session);
       session.working();
       try {
-        const { filePath } = markdown
+        const saved: MarkdownSaveResult | { filePath: string; archive?: undefined } = markdown
           ? await savePageAsMarkdown(submitUrl, folder, { signal })
           : await runMonolithSave(getMonolithPath(), {
               url: submitUrl,
@@ -550,9 +666,11 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               idleMs: getIdleTimeoutMs(),
               abortSignal: signal,
             });
+        const { filePath } = saved;
         toast.style = Toast.Style.Success;
         toast.title = "Webpage Saved";
-        toast.message = path.basename(filePath);
+        // A page the site wouldn't show was read from the Internet Archive: say so.
+        toast.message = [path.basename(filePath), archiveNote(saved.archive)].filter(Boolean).join(" · ");
         toast.primaryAction = { title: "Open Folder", onAction: () => showInFinder(filePath) };
         toast.secondaryAction = { title: "Open File", onAction: () => open(filePath) };
         succeedSession(session, toast, filePath);
@@ -820,30 +938,53 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       });
       return;
     }
+    // The picked videos of a playlist (none picked: all of them), a clip, a caption track.
+    const picked = ((values.playlistItems as string[] | undefined) ?? []).map(Number).filter(Number.isInteger);
+    const list = asPlaylist ? { items: picked } : undefined;
+    const cut = list ? undefined : clip;
+    const wanted = ft === "video" && !list && !cut ? parseSubtitleValue(values.subtitles) : undefined;
+    // Only a track this link offered: the dropdown's value could be an earlier link's.
+    const subtitles =
+      wanted && tracks.some((t) => t.code === wanted.code && t.automatic === wanted.automatic) ? wanted : undefined;
+    const noun = ft === "audio" ? "file" : "video";
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: ft === "audio" ? "Downloading Audio" : "Downloading Video",
+      title: list ? "Downloading Playlist" : ft === "audio" ? "Downloading Audio" : "Downloading Video",
       message: "0%",
     });
-    const exact = ft === "video" && values.exactFormat && values.exactFormat !== "auto";
-    const formatLabel =
+    const exact = ft === "video" && !list && values.exactFormat && values.exactFormat !== "auto";
+    const formatLabel = [
       ft === "audio"
         ? formatTitle(String(values.audioFmt ?? prefs.audioFormat))
         : exact
           ? `Format ${String(values.exactFormat).split("#")[0]}`
-          : `${QUALITY_TITLE[String(values.quality ?? prefs.videoQuality)] ?? "Best"} · ${formatTitle(String(values.container ?? prefs.videoContainer))}`;
+          : `${QUALITY_TITLE[String(values.quality ?? prefs.videoQuality)] ?? "Best"} · ${formatTitle(String(values.container ?? prefs.videoContainer))}`,
+      cut ? `Clip ${clipLabel(cut)}` : undefined,
+      subtitles ? "Subtitles" : undefined,
+      list ? (picked.length > 0 ? `${plural(picked.length, noun)} picked` : "Whole playlist") : undefined,
+    ]
+      .filter(Boolean)
+      .join(" · ");
     const session = openSession(
       { kind: ft === "audio" ? "audio" : "video", url: submitUrl, folder, format: formatLabel },
       true,
+      list ? listTitle : undefined,
     );
     const { signal, done } = startAbortable(toast, session);
     try {
-      const { filePath } = await runVideoDownload(
+      const { filePath, files, total, failure } = await runVideoDownload(
         getytdlPath(),
         {
           url: submitUrl,
           format,
-          outputTemplate: outputTemplateIn(folder),
+          outputTemplate: list
+            ? playlistTemplateIn(folder)
+            : cut
+              ? clipTemplateIn(folder, cut)
+              : outputTemplateIn(folder),
+          clip: cut,
+          subtitles,
+          playlist: list,
           ffmpegPath: getffmpegPath(),
           denoPath: fs.existsSync(denoPath) ? denoPath : undefined,
           idleMs: getIdleTimeoutMs(),
@@ -859,6 +1000,32 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           if (event.type === "progress") toast.message = progressMessage(session.getSnapshot()) || toast.message;
         },
       );
+      if (list && files.length === 0) {
+        // Exit 0 with nothing saved (every video filtered out) is no success.
+        toast.style = Toast.Style.Failure;
+        toast.title = "Nothing downloaded";
+        toast.message = "yt-dlp found no videos to download in this playlist.";
+        toast.primaryAction = undefined;
+        toast.secondaryAction = undefined;
+        failSession(session, toast);
+        return;
+      }
+      if (list && (files.length > 1 || failure)) {
+        // The playlist's own folder, which yt-dlp named; a link with several lists
+        // (a channel's tabs) has one for each, inside the chosen folder.
+        const folders = new Set(files.map((file) => path.dirname(file)));
+        const listFolder = folders.size === 1 ? path.dirname(files[0]) : folder;
+        toast.style = Toast.Style.Success;
+        toast.title = "Playlist Downloaded";
+        // Some videos of a playlist are often private or gone: say how many were saved, and why not all.
+        toast.message = failure
+          ? `${files.length}${total ? ` of ${total}` : ""} ${noun}s saved. ${errorSummary(failure, 200)}`
+          : plural(files.length, noun);
+        toast.primaryAction = { title: "Open Folder", onAction: () => open(listFolder) };
+        toast.secondaryAction = failure ? { title: "Copy Error", onAction: () => Clipboard.copy(failure) } : undefined;
+        succeedSession(session, toast, undefined, { items: files.length, folder: listFolder });
+        return;
+      }
       toast.style = Toast.Style.Success;
       toast.title = "Downloaded";
       toast.message = filePath ? path.basename(filePath) : undefined;
@@ -888,7 +1055,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   return (
     <Form
-      isLoading={metaLoading}
+      isLoading={metaLoading || (playlistLink && listLoading)}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Download} title="Download" onSubmit={handleSubmit} />
@@ -899,6 +1066,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
                 title="Preview Media"
                 shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                 target={<MediaPreview video={video} url={normalizeUrl(url)} />}
+              />
+            )}
+            {validUrl && filetype === "website" && (
+              <Action
+                icon={Icon.Clipboard}
+                title="Copy Page as Markdown"
+                shortcut={Keyboard.Shortcut.Common.Copy}
+                onAction={() => copyPageAsMarkdown(normalizeUrl(url))}
               />
             )}
             {validUrl && source !== "spotify" && <ChatAboutLinkAction url={normalizeUrl(url)} />}
@@ -943,7 +1118,12 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         value={url}
         error={urlError}
         // Trimmed, so a pasted link's trailing space or newline doesn't make it invalid.
-        onChange={(value) => setUrl(value.trim())}
+        onChange={(value) => {
+          const next = value.trim();
+          // A clip belongs to the video it was typed for.
+          if (next !== url) setClipText("");
+          setUrl(next);
+        }}
         placeholder="https://www.youtube.com/watch?v=ykaj0pS4A1A"
       />
       {validUrl && (
@@ -999,13 +1179,46 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
                 <Form.Dropdown.Item value="mkv" title="MKV" />
                 <Form.Dropdown.Item value="webm" title="WebM" />
               </Form.Dropdown>
-              {prefs.exactFormatSelection && (
+              {prefs.exactFormatSelection && !asPlaylist && (
                 <Form.Dropdown id="exactFormat" title="Exact Format" defaultValue="auto">
                   <Form.Dropdown.Item value="auto" title="Auto — use Quality + Container above" />
                   {video &&
                     getVideoFormats(video).map((f) => (
                       <Form.Dropdown.Item key={f.format_id} value={getFormatValue(f)} title={getFormatTitle(f)} />
                     ))}
+                </Form.Dropdown>
+              )}
+              {/* Not with a clip: the captions would keep the whole video's timing. */}
+              {tracks.length > 0 && !asPlaylist && !clip && (
+                <Form.Dropdown
+                  id="subtitles"
+                  // A new link starts at None: its tracks are its own.
+                  key={`subtitles-${url}`}
+                  title="Subtitles"
+                  defaultValue="none"
+                  info="Captions this video has. In the Video puts them inside the file, to switch on in the player. As a File saves an .srt next to it."
+                >
+                  <Form.Dropdown.Item value="none" title="None" />
+                  <Form.Dropdown.Section title="In the Video">
+                    {tracks.map((track) => (
+                      <Form.Dropdown.Item
+                        key={subtitleValue(track, true)}
+                        value={subtitleValue(track, true)}
+                        title={track.title}
+                        icon={Icon.SpeechBubble}
+                      />
+                    ))}
+                  </Form.Dropdown.Section>
+                  <Form.Dropdown.Section title="As a File (.srt)">
+                    {tracks.map((track) => (
+                      <Form.Dropdown.Item
+                        key={subtitleValue(track, false)}
+                        value={subtitleValue(track, false)}
+                        title={track.title}
+                        icon={Icon.Document}
+                      />
+                    ))}
+                  </Form.Dropdown.Section>
                 </Form.Dropdown>
               )}
             </>
@@ -1029,6 +1242,49 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               <Form.Dropdown.Item value="flac" title="FLAC" />
               {source !== "spotify" && <Form.Dropdown.Item value="wav" title="WAV" />}
             </Form.Dropdown>
+          )}
+
+          {mediaFiletype && !asPlaylist && (
+            <Form.TextField
+              id="clip"
+              title="Clip"
+              value={clipText}
+              onChange={setClipText}
+              error={clipError}
+              placeholder="Whole video — or 1:30-2:45"
+              info="Download only part of it: start-end, such as 1:30-2:45, 90-120 (seconds) or 1:30- (to the end). The cut is exact, so a long clip takes a while to encode, and subtitles and SponsorBlock are left out of it. Leave empty for the whole video."
+            />
+          )}
+
+          {asPlaylist && listReady && playlist && playlist.entries.length > 0 && (
+            <Form.TagPicker
+              id="playlistItems"
+              // A new link starts with nothing picked.
+              key={`playlist-${url}`}
+              title="Videos"
+              placeholder={`All ${playlist.truncated ? "" : `${playlist.entries.length} `}videos`}
+              info={`Leave empty to download the whole playlist, or pick the videos you want.${playlist.truncated ? ` Only the first ${PLAYLIST_PICK_LIMIT} are listed.` : ""}`}
+            >
+              {playlist.entries.map((entry) => (
+                <Form.TagPicker.Item
+                  key={entry.index}
+                  value={String(entry.index)}
+                  title={`${entry.index}. ${entry.title}${entry.duration ? ` (${formatClock(entry.duration)})` : ""}`}
+                />
+              ))}
+            </Form.TagPicker>
+          )}
+          {asPlaylist && listReady && playlist?.lists && (
+            <Form.Description
+              title="Videos"
+              text={`This link holds ${playlist.lists.length} lists (${playlist.lists.slice(0, 4).join(", ")}${playlist.lists.length > 4 ? "…" : ""}), and all of them will be downloaded. To pick single videos, paste one list's own link — a channel's Videos tab, say.`}
+            />
+          )}
+          {asPlaylist && listReady && !playlist && (
+            <Form.Description
+              title="Videos"
+              text="Couldn't list this playlist's videos, so all of them will be downloaded."
+            />
           )}
 
           {filetype === "website" && (

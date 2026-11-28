@@ -57,7 +57,7 @@
       "name": "fast-download",
       "title": "Fast Download",
       "subtitle": "The Downloader",
-      "description": "Paste a URL and download it instantly using your saved defaults — no form.",
+      "description": "Download a URL instantly using your saved defaults — no form. Without a URL, it takes the link in your clipboard, or the browser tab you're on.",
       "mode": "no-view",
       "keywords": [
         "quick",
@@ -68,8 +68,8 @@
         {
           "name": "url",
           "type": "text",
-          "placeholder": "URL",
-          "required": true
+          "placeholder": "URL or Clipboard",
+          "required": false
         }
       ]
     },

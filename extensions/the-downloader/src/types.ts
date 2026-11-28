@@ -31,6 +31,10 @@ export type Video = {
   thumbnails?: unknown[] | null;
   /** Set when the entry came from a playlist or channel link (the probe reads its first entry). */
   playlist_index?: number | null;
+  /** The playlist's name and size, on an entry that came from one. */
+  playlist_title?: string | null;
+  playlist?: string | null;
+  playlist_count?: number | null;
   extractor_key?: string | null;
   description?: string | null;
   view_count?: number | null;

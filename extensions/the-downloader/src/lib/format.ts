@@ -55,9 +55,19 @@ export function wrapText(text: string, maxChars: number, maxLines: number): stri
   return lines;
 }
 
-/** One-line progress for a toast: `42% · 5.20 MB/s · 0:12 left`, skipping whatever yt-dlp didn't report. */
-export function progressMessage(p: { percent?: number; speed?: number; eta?: number }): string {
+/**
+ * One-line progress for a toast: `42% · 5.20 MB/s · 0:12 left`, skipping
+ * whatever yt-dlp didn't report. A playlist leads with the video it is on: `2 of 5 · 42%`.
+ */
+export function progressMessage(p: {
+  percent?: number;
+  speed?: number;
+  eta?: number;
+  listIndex?: number;
+  listTotal?: number;
+}): string {
   const parts: string[] = [];
+  if (p.listIndex && p.listTotal && p.listTotal > 1) parts.push(`${p.listIndex} of ${p.listTotal}`);
   if (p.percent !== undefined) parts.push(`${Math.floor(p.percent)}%`);
   if (p.speed !== undefined) parts.push(formatSpeed(p.speed));
   if (p.eta !== undefined) parts.push(`${formatClock(p.eta)} left`);

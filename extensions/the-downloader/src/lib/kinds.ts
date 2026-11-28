@@ -40,9 +40,9 @@ export function kindTitle(kind: DownloadKind): string {
   return KIND_TITLE[kind];
 }
 
-/** What a gallery or Spotify download counts. */
+/** What a download of several things counts: a gallery's files, Spotify's tracks, a playlist's videos. */
 export function itemNoun(kind: DownloadKind): string {
-  return kind === "spotify" ? "track" : "file";
+  return kind === "spotify" ? "track" : kind === "video" ? "video" : "file";
 }
 
 export function hostOf(url: string): string {

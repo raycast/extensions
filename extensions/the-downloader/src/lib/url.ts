@@ -26,3 +26,16 @@ export function isValidUrl(url: string): boolean {
 export function normalizeUrl(url: string): string {
   return /^[a-z][a-z0-9+.-]*:\/\//i.test(url) ? url : `https://${url}`;
 }
+
+/**
+ * The first of `texts` that is a whole http(s) link, trimmed. For a link taken
+ * without the user typing it (the clipboard, a browser tab): the scheme is
+ * required there, so a copied `notes.md` or `example.com` isn't downloaded as one.
+ */
+export function pickLink(texts: (string | undefined | null)[]): string | undefined {
+  for (const text of texts) {
+    const candidate = text?.trim();
+    if (candidate && /^https?:\/\//i.test(candidate) && isValidUrl(candidate)) return candidate;
+  }
+  return undefined;
+}
