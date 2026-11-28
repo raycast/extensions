@@ -8,7 +8,7 @@
 - **Video: SponsorBlock** — optionally cut sponsored segments out of YouTube downloads.
 - **Video: Browser Cookies** — optionally give yt-dlp the browser chosen under Cookies from Browser, for age-restricted, private or members-only videos. The Custom Browser Spec takes a Firefox container (`firefox::Work`).
 - **FLAC and WAV** audio for videos, next to MP3, M4A and Opus.
-- **No Video? Said Up Front** — when Video, Audio or Transcript is picked for a page yt-dlp finds nothing on (a Wikipedia article, say), the form says so before the download and offers Save as Webpage Instead. A link it can't read for another reason shows why, and the download can still be tried.
+- **Filetype Checked Against the Link** — the form asks yt-dlp what each link holds and offers only what it can give: no Video for an audio-only track, no Audio for a silent clip, no Transcript without captions, no Image without a thumbnail, and only Website for a page with no media (a Wikipedia article, say), whatever the site. A webpage with a video also offers Image and Transcript. The Filetype info says what was left out and why; a link yt-dlp can't read for another reason shows why, and the download can still be tried.
 - **Raycast AI Model** — GPT-6.2 Sol joins the list.
 - **Fixes**
   - Force IPv4 now applies to the download, the thumbnail and the transcript, not only to the preview.

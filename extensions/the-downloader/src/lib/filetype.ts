@@ -1,4 +1,4 @@
-import { SourceType } from "../types.js";
+import { SourceType, Video } from "../types.js";
 import { ToolId } from "./tools.js";
 import { needsJsRuntime } from "./detect.js";
 
@@ -67,6 +67,77 @@ const SUPPORTED: Record<SourceType, Filetype[]> = {
 /** The filetypes a detected source supports, in dropdown order. */
 export function supportedFiletypes(source: SourceType): Filetype[] {
   return SUPPORTED[source] ?? FILETYPES;
+}
+
+/** What yt-dlp found when the form probed the link: its details, or nothing it can download. */
+export type LinkProbe = { kind: "media"; video: Video } | { kind: "no-media" };
+
+/** A filetype the source usually offers but this link can't give, and why. */
+export type UnavailableFiletype = { filetype: Filetype; reason: string };
+
+/** True when some of the source's filetypes run yt-dlp, so probing the link with it tells what's possible. */
+export function probesWithYtdlp(source: SourceType): boolean {
+  return supportedFiletypes(source).some((ft) => resolveTool(source, ft) === "yt-dlp");
+}
+
+/**
+ * What the probed media can't give, by filetype. Only explicit evidence
+ * counts: a format list where every format lacks video (or sound), no caption
+ * tracks, no thumbnail. A result without formats (a playlist, an extractor
+ * that lists none) rules nothing out.
+ */
+function mediaGaps(video: Video): Partial<Record<Filetype, string>> {
+  const formats = video.formats ?? [];
+  if (formats.length === 0) return {};
+  const gaps: Partial<Record<Filetype, string>> = {};
+  if (formats.every((f) => f.vcodec === "none")) gaps.video = "the link has audio only";
+  if (formats.every((f) => f.acodec === "none")) gaps.audio = "the video has no sound";
+  const captions =
+    Object.keys(video.subtitles ?? {}).filter((lang) => lang !== "live_chat").length +
+    Object.keys(video.automatic_captions ?? {}).length;
+  if (captions === 0) gaps.transcript = "the video has no captions";
+  if (!video.thumbnail && !video.thumbnails?.length) gaps.image = "the video has no thumbnail";
+  return gaps;
+}
+
+/**
+ * The Filetype options for this link, once yt-dlp has probed it: the source's
+ * filetypes minus what the link can't give, plus what the probe proved it can
+ * (a webpage with a video with captions also offers Image and Transcript). A
+ * page with no media can still be saved as a webpage, whatever the site.
+ * Without a probe, or if nothing would be left, the source's own list stands.
+ */
+export function probedFiletypes(
+  source: SourceType,
+  probe: LinkProbe | undefined,
+): { options: Filetype[]; unavailable: UnavailableFiletype[] } {
+  const base = supportedFiletypes(source);
+  if (!probe || !probesWithYtdlp(source)) return { options: base, unavailable: [] };
+  const usesYtdlp = (ft: Filetype) => resolveTool(source, ft) === "yt-dlp";
+  const unavailable: UnavailableFiletype[] = [];
+  let candidates: Filetype[];
+  if (probe.kind === "no-media") {
+    for (const ft of base.filter(usesYtdlp)) {
+      unavailable.push({ filetype: ft, reason: "yt-dlp finds no video or audio on this page" });
+    }
+    candidates = [...base.filter((ft) => !usesYtdlp(ft)), "website"];
+  } else {
+    const gaps = mediaGaps(probe.video);
+    candidates = FILETYPES.filter((ft) => base.includes(ft) || usesYtdlp(ft)).filter((ft) => {
+      const reason = gaps[ft];
+      if (!reason) return true;
+      if (base.includes(ft)) unavailable.push({ filetype: ft, reason });
+      return false;
+    });
+  }
+  const options = FILETYPES.filter((ft) => candidates.includes(ft));
+  return options.length > 0 ? { options, unavailable } : { options: base, unavailable: [] };
+}
+
+/** The filetype to show: the user's pick when the link offers it, else the source default, else the first option. */
+export function chooseFiletype(options: Filetype[], picked: Filetype | undefined, fallback: Filetype): Filetype {
+  if (picked && options.includes(picked)) return picked;
+  return options.includes(fallback) ? fallback : (options[0] ?? fallback);
 }
 
 /**

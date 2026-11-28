@@ -19,18 +19,21 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { Video } from "../types.js";
 import { detectSource } from "../lib/detect.js";
 import {
   Filetype,
-  clampFiletype,
+  LinkProbe,
+  chooseFiletype,
   defaultFiletype,
   filetypeGuidance,
   installedAlternatives,
   isMarkdownMode,
+  probedFiletypes,
+  probesWithYtdlp,
   requiredTools,
   resolveTool,
   saveModeLabel,
-  supportedFiletypes,
 } from "../lib/filetype.js";
 import { composeVideoFormat } from "../lib/video-format.js";
 import {
@@ -46,7 +49,7 @@ import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
 import { GalleryDownloadError, isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
-import { AbortError, errorSummary, isNoMediaError, NO_MEDIA_MESSAGE } from "../lib/run.js";
+import { AbortError, errorSummary, isNoMediaError } from "../lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { ABOUT_URL, SPOTDL_SETUP_GUIDE_URL, SUPPORTED_SITES_URL } from "../lib/docs.js";
@@ -266,16 +269,70 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   const validUrl = isValidUrl(url);
   const source = useMemo(() => detectSource(url), [url]);
+
+  // Probe every link whose source has yt-dlp filetypes — whatever is picked —
+  // so the Filetype dropdown offers only what this link can give: no Video for
+  // an audio-only track, no Transcript without captions, only Website for a
+  // page with no media (a Wikipedia article). Deno is optional here: without
+  // it a YouTube probe may fail, which only leaves the options unfiltered.
+  const shouldFetchMeta = useMemo(
+    () => validUrl && probesWithYtdlp(source) && fs.existsSync(getytdlPath()),
+    [validUrl, source, refresh],
+  );
+
+  const {
+    data: probed,
+    isLoading: metaLoading,
+    revalidate: refetchMeta,
+  } = usePromise(
+    async (u: string, fetchIt: boolean): Promise<{ url: string; video?: Video; error?: Error } | undefined> => {
+      if (!fetchIt) return undefined;
+      const denoPath = getDenoPath();
+      try {
+        const data = await fetchVideoInfo(
+          getytdlPath(),
+          u,
+          prefs.forceIpv4,
+          fs.existsSync(denoPath) ? denoPath : undefined,
+          {
+            signal: metaAbortable.current?.signal,
+            timeoutMs: getIdleTimeoutMs(),
+            cookiesFromBrowser: getVideoExtras().cookiesFromBrowser,
+          },
+        );
+        return { url: u, video: { ...data, title: sanitizeVideoTitle(data.title) } };
+      } catch (error) {
+        if (error instanceof AbortError) throw error;
+        return { url: u, error: error instanceof Error ? error : new Error(String(error)) };
+      }
+    },
+    [url, shouldFetchMeta],
+    { onError: () => undefined, abortable: metaAbortable },
+  );
+  // Only this link's finished probe counts: while a new one runs, `probed` is the previous link's.
+  const probe = shouldFetchMeta && !metaLoading && probed?.url === url ? probed : undefined;
+  const video = probe?.video;
+  const probeFailure = probe?.error;
+  const noMedia = !!probeFailure && isNoMediaError(probeFailure.message);
+  const linkProbe: LinkProbe | undefined = video
+    ? { kind: "media", video }
+    : noMedia
+      ? { kind: "no-media" }
+      : undefined;
+  const { options: filetypeOptions, unavailable } = probedFiletypes(source, linkProbe);
+
   // Keep Filetype valid for the URL: the source default until the user picks
-  // one, and even then a type the source supports (e.g. Video was picked, then
-  // a Pinterest link is pasted, which only supports Image). Derived on every
+  // one, and even then a type this link offers (e.g. Video was picked, then a
+  // Pinterest link is pasted, which only supports Image). Derived on every
   // render — an effect lagged one render behind a new link, so the dropdown
   // briefly held a type the link doesn't offer.
   const filetype = !validUrl
     ? pickedFiletype
-    : filetypeTouched
-      ? clampFiletype(source, pickedFiletype, audioPreferred)
-      : defaultFiletype(source, audioPreferred);
+    : chooseFiletype(
+        filetypeOptions,
+        filetypeTouched ? pickedFiletype : undefined,
+        defaultFiletype(source, audioPreferred),
+      );
   const ytdlpBound = resolveTool(source, filetype) === "yt-dlp";
 
   // The required tools must all exist; otherwise the form is replaced by the Installer.
@@ -286,48 +343,6 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         : undefined,
     [source, filetype, url, validUrl, saveMode, refresh],
   );
-
-  // yt-dlp metadata — fetched only for a yt-dlp-bound selection with its tools present.
-  const shouldFetchMeta = ytdlpBound && validUrl && !missingTool;
-
-  const {
-    data: probed,
-    error: metaError,
-    isLoading: metaLoading,
-    revalidate: refetchMeta,
-  } = usePromise(
-    async (u: string, fetchIt: boolean) => {
-      if (!fetchIt) return undefined;
-      const denoPath = getDenoPath();
-      const data = await fetchVideoInfo(
-        getytdlPath(),
-        u,
-        prefs.forceIpv4,
-        fs.existsSync(denoPath) ? denoPath : undefined,
-        {
-          signal: metaAbortable.current?.signal,
-          timeoutMs: getIdleTimeoutMs(),
-          cookiesFromBrowser: getVideoExtras().cookiesFromBrowser,
-        },
-      );
-      return { ...data, title: sanitizeVideoTitle(data.title) };
-    },
-    [url, shouldFetchMeta],
-    { onError: () => undefined, abortable: metaAbortable },
-  );
-  // A failed probe leaves the previous link's details in `data`: they don't count.
-  const video = metaError ? undefined : probed;
-  // The probe's answer, so the form says before the download that yt-dlp has
-  // nothing to fetch here (a Wikipedia article with Video picked) or couldn't
-  // read the link — instead of the download view failing after it starts.
-  const probeFailure =
-    shouldFetchMeta && !metaLoading && metaError && !(metaError instanceof AbortError) ? metaError : undefined;
-  const noMedia = !!probeFailure && isNoMediaError(probeFailure.message);
-  const websiteOffered = validUrl && supportedFiletypes(source).includes("website");
-  const switchToWebsite = () => {
-    setFiletypeTouched(true);
-    setFiletype("website");
-  };
   // Outdated tools are the usual cause of failed downloads (yt-dlp's HTTP 403s,
   // gallery-dl's broken extractors), so the first time the form needs a set of
   // tools, check them, offer to update, and re-fetch the metadata once an update
@@ -428,14 +443,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       ]
         .filter(Boolean)
         .join(" · ");
-    } else if (ytdlpBound && metaLoading) {
-      statusText = "Fetching details…";
+    } else if (shouldFetchMeta && metaLoading) {
+      statusText = ytdlpBound ? "Fetching details…" : "Checking what this link offers…";
     } else if (noMedia) {
-      statusText = websiteOffered
-        ? NO_MEDIA_MESSAGE
-        : "No video or audio at this link that yt-dlp can download. Check the link, or try another one.";
-    } else if (probeFailure) {
+      statusText = "No video or audio on this page, so it can only be saved as a webpage.";
+    } else if (probeFailure && ytdlpBound) {
       statusText = `Couldn't read this link's details: ${errorSummary(probeFailure.message, 200)} The download may still work.`;
+    } else if (video && !ytdlpBound && filetypeOptions.some((ft) => resolveTool(source, ft) === "yt-dlp")) {
+      statusText = `This page has a video${video.title ? ` (“${video.title}”)` : ""}. Choose it under Filetype to download it.`;
     } else if (ytdlpBound) {
       statusText = "Ready to download.";
     } else {
@@ -443,6 +458,17 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       statusText = filetypeGuidance(source);
     }
   }
+
+  // What the Filetype info says: the source's guidance until the probe is in,
+  // then what this link offers and why the rest isn't there.
+  const unavailableNote = unavailable.length
+    ? `Not available for this link: ${unavailable.map((u) => `${FILETYPE_TITLE[u.filetype]} (${u.reason})`).join(", ")}.`
+    : "";
+  const filetypeInfo = noMedia
+    ? "yt-dlp finds no video or audio on this page, so it can only be saved as a webpage."
+    : video
+      ? ["These options were checked against this link.", unavailableNote].filter(Boolean).join(" ")
+      : filetypeGuidance(source);
 
   const estimates =
     metaReady && video
@@ -485,25 +511,6 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
     if (liveStream && (ft === "video" || ft === "audio" || ft === "transcript")) {
       await showToast({ style: Toast.Style.Failure, title: "Live streams are not supported" });
-      return;
-    }
-    // The probe already found nothing to download: say so here, before an empty
-    // download view. Only for the link and type it probed.
-    if (noMedia && resolveTool(src, ft) === "yt-dlp" && normalizeUrl(url) === submitUrl) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No Video on This Page",
-        message: websiteOffered ? "Choose Website to save the page instead." : "yt-dlp found nothing to download here.",
-        primaryAction: websiteOffered
-          ? {
-              title: "Save as Webpage Instead",
-              onAction: (toast) => {
-                switchToWebsite();
-                void toast.hide();
-              },
-            }
-          : undefined,
-      });
       return;
     }
 
@@ -875,9 +882,6 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       isLoading={metaLoading}
       actions={
         <ActionPanel>
-          {noMedia && websiteOffered && filetype !== "website" && (
-            <Action icon={FILETYPE_ICON.website} title="Save as Webpage Instead" onAction={switchToWebsite} />
-          )}
           <Action.SubmitForm icon={Icon.Download} title="Download" onSubmit={handleSubmit} />
           <ActionPanel.Section>
             {metaReady && video && (
@@ -939,8 +943,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             id="filetype"
             title="Filetype"
             value={filetype}
-            info={filetypeGuidance(source)}
-            error={noMedia && ytdlpBound ? "No video on this page" : undefined}
+            info={filetypeInfo}
             onChange={(next) => {
               // Only a real pick counts: if Raycast reports the type shown for a new
               // link (Image for Pinterest), the user's own choice must stay, so
@@ -950,7 +953,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               setFiletypeTouched(true);
             }}
           >
-            {supportedFiletypes(source).map((ft) => (
+            {filetypeOptions.map((ft) => (
               <Form.Dropdown.Item key={ft} value={ft} title={FILETYPE_TITLE[ft]} icon={FILETYPE_ICON[ft]} />
             ))}
           </Form.Dropdown>

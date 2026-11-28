@@ -28,6 +28,7 @@ export type Video = {
   uploader?: string | null;
   channel?: string | null;
   thumbnail?: string | null;
+  thumbnails?: unknown[] | null;
   extractor_key?: string | null;
   description?: string | null;
   view_count?: number | null;
