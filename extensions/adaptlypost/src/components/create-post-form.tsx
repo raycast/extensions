@@ -1,17 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Form,
-  Icon,
-  Image,
-  Keyboard,
-  openExtensionPreferences,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Image, Keyboard, useNavigation } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { api } from "../lib/api";
+import { LoadFailedActions, loadErrorHint } from "./load-error-view";
 import { APP_URL } from "../lib/client";
 import { runWithToast } from "../lib/feedback";
 import {
@@ -118,11 +108,8 @@ export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCr
       actions={
         <ActionPanel>
           {accountsNotice && <Action.OpenInBrowser title="Open Connectors" url={CONNECTORS_URL} />}
-          {loadFailed ? (
-            <>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
-              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-            </>
+          {loadFailed && error ? (
+            <LoadFailedActions error={error} onRetry={revalidate} />
           ) : (
             <Action.SubmitForm title="Create Post" icon={Icon.Upload} onSubmit={handleSubmit} />
           )}
@@ -139,10 +126,7 @@ export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCr
       }
     >
       {loadFailed && error && (
-        <Form.Description
-          title="Could Not Load Accounts"
-          text={`${error.message}\n\nRetry, or check your API key in the extension preferences.`}
-        />
+        <Form.Description title="Could Not Load Accounts" text={`${error.message}\n\n${loadErrorHint(error)}`} />
       )}
       {accountsNotice && <Form.Description title="No Accounts to Post To" text={accountsNotice} />}
       <Form.TextArea title="Text" placeholder="What do you want to say?" {...itemProps.text} />
