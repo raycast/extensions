@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Evidence MCP Server] - {PR_MERGE_DATE}
+
+- Add Evidence to the official registry: search official public and licensed data (company registries, health, education, the economy, jobs, public spending, elections and population), plan joins, run read-only SQL at the source and download results as CSV or Parquet. Hosted Streamable HTTP server at https://mcp.evidence.so/mcp with OAuth 2.1 sign-in (dynamic client registration) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free to search and describe.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.

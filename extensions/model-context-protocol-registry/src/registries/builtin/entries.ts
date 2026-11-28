@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "evidence",
+    title: "Evidence",
+    description:
+      "Search the catalog of official public and licensed data (company registries, health, education, the economy, jobs, public spending, elections and population), read what each table means, plan joins, estimate and run read-only SQL at the source, and download results as CSV or Parquet. Deepest for Brazil (CNPJ, DATASUS, IBGE, INEP, TSE), plus the United States (Census ACS, NCES) and world datasets (UN population, trade, OECD). Official server run by Evidence. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration; sign in with Google) or an Evidence API key sent as a Bearer token; searching and describing datasets is free. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/evidencehq/evidence-mcp/main/assets/logo.png",
+    homepage: "https://evidence.so/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.evidence.so/mcp"],
+    },
+    remoteUrl: "https://mcp.evidence.so/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
