@@ -62,7 +62,14 @@ import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { ABOUT_URL, SPOTDL_SETUP_GUIDE_URL, SUPPORTED_SITES_URL } from "../lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "../lib/monolith.js";
-import { MarkdownSaveResult, archiveNote, loadPageMarkdown, savePageAsMarkdown } from "../lib/page-markdown.js";
+import {
+  MarkdownSaveResult,
+  archiveNote,
+  imagesNote,
+  loadPageMarkdown,
+  obsidianUrl,
+  savePageAsMarkdown,
+} from "../lib/page-markdown.js";
 import { DownloadInit, DownloadSession, trackRunningDownload } from "../lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "../lib/history.js";
 import { QUALITY_VALUES, QualityValue, estimateQuality, maxHeight, qualityTitle } from "../lib/estimate.js";
@@ -83,6 +90,7 @@ import {
   getffprobePath,
   getytdlPath,
   isValidUrl,
+  markdownPath,
   normalizeUrl,
   sanitizeVideoTitle,
 } from "../utils.js";
@@ -92,6 +100,7 @@ import { ChatAboutLinkAction } from "./chat-action.js";
 import { MediaPreview } from "./media-preview.js";
 import Installer from "./installer.js";
 import Updater from "./updater.js";
+import { Doctor } from "./doctor.js";
 
 // Rendered only by the Download command, so it also sees that command's own settings (Exact Format Selection).
 const prefs = getPreferenceValues<Preferences.Index>();
@@ -248,9 +257,12 @@ async function copyPageAsMarkdown(url: string) {
   }
 }
 
-type DownloadFormProps = { initialUrl: string };
+type DownloadFormProps = {
+  initialUrl: string;
+  /** The Clip field's text, for a link opened with a moment to download. */ initialClip?: string;
+};
 
-export function DownloadForm({ initialUrl }: DownloadFormProps) {
+export function DownloadForm({ initialUrl, initialClip }: DownloadFormProps) {
   const audioPreferred = prefs.videoMediaType === "audio";
   const { push } = useNavigation();
 
@@ -264,7 +276,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   // Controlled because the Markdown mode needs no monolith: the tool check follows it.
   const [saveMode, setSaveMode] = useState<string>(prefs.webpageSaveMode);
   // Controlled so a mistyped time shows under the field, and so a new link starts without the last one's clip.
-  const [clipText, setClipText] = useState("");
+  const [clipText, setClipText] = useState(initialClip ?? "");
   const [refresh, setRefresh] = useState(0);
   // Ref (not state) so a rapid second submit sees the flag synchronously — a
   // re-render would race with the click. Refs update inside the same event
@@ -588,6 +600,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const { clip, error: clipError } = mediaFiletype && !asPlaylist ? parseClip(clipText, video?.duration) : {};
   const tracks = metaReady && video && !playlistLink ? subtitleTracks(video) : [];
 
+  const toMarkdownFolder = filetype === "website" && isMarkdownMode(saveMode) && markdownPath !== downloadPath;
+
   const urlError =
     url && !validUrl
       ? "Enter a valid URL"
@@ -657,8 +671,11 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       const { signal, done } = startAbortable(toast, session);
       session.working();
       try {
-        const saved: MarkdownSaveResult | { filePath: string; archive?: undefined } = markdown
-          ? await savePageAsMarkdown(submitUrl, folder, { signal })
+        const saved: MarkdownSaveResult | { filePath: string; archive?: undefined; images?: undefined } = markdown
+          ? await savePageAsMarkdown(submitUrl, folder, {
+              signal,
+              localImages: Boolean(values.localImages ?? prefs.markdownImages),
+            })
           : await runMonolithSave(getMonolithPath(), {
               url: submitUrl,
               outputPath: reserveWebpagePath(folder, submitUrl),
@@ -670,9 +687,15 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.style = Toast.Style.Success;
         toast.title = "Webpage Saved";
         // A page the site wouldn't show was read from the Internet Archive: say so.
-        toast.message = [path.basename(filePath), archiveNote(saved.archive)].filter(Boolean).join(" · ");
+        toast.message = [path.basename(filePath), imagesNote(saved.images), archiveNote(saved.archive)]
+          .filter(Boolean)
+          .join(" · ");
         toast.primaryAction = { title: "Open Folder", onAction: () => showInFinder(filePath) };
-        toast.secondaryAction = { title: "Open File", onAction: () => open(filePath) };
+        // A note saved into an Obsidian vault opens there.
+        const inObsidian = markdown ? obsidianUrl(filePath) : undefined;
+        toast.secondaryAction = inObsidian
+          ? { title: "Open in Obsidian", onAction: () => open(inObsidian) }
+          : { title: "Open File", onAction: () => open(filePath) };
         succeedSession(session, toast, filePath);
       } catch (error) {
         // The Markdown mode runs no tool, so there's none to suggest updating.
@@ -1103,6 +1126,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               }}
               target={<Updater />}
             />
+            <Action.Push icon={Icon.Heartbeat} title="Check Tools" target={<Doctor />} />
             <Action.OpenInBrowser icon={Icon.Info} title="About This Extension" url={ABOUT_URL} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -1300,14 +1324,25 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               <Form.Dropdown.Item value="markdown" title="Markdown (article text)" />
             </Form.Dropdown>
           )}
+          {filetype === "website" && isMarkdownMode(saveMode) && (
+            <Form.Checkbox
+              id="localImages"
+              title="Images"
+              label="Save images next to the file"
+              defaultValue={prefs.markdownImages}
+              info="Downloads the article's images into an assets folder beside the .md file, so the note works offline. Off: images stay links to the web."
+            />
+          )}
 
           <Form.FilePicker
             id="destination"
+            // Markdown notes have a folder of their own (Webpage: Markdown Folder), when one is set.
+            key={toMarkdownFolder ? "destination-markdown" : "destination"}
             title="Folder"
             allowMultipleSelection={false}
             canChooseDirectories
             canChooseFiles={false}
-            defaultValue={[downloadPath]}
+            defaultValue={[toMarkdownFolder ? markdownPath : downloadPath]}
           />
         </>
       )}

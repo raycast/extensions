@@ -86,6 +86,19 @@
       ]
     },
     {
+      "name": "doctor",
+      "title": "Check Tools",
+      "subtitle": "The Downloader",
+      "description": "See which tools The Downloader found, their versions and paths, test a link, and copy diagnostics for a bug report.",
+      "mode": "view",
+      "keywords": [
+        "doctor",
+        "diagnostics",
+        "troubleshoot",
+        "versions"
+      ]
+    },
+    {
       "name": "chat-link",
       "title": "Chat About Link",
       "subtitle": "The Downloader",
@@ -699,6 +712,22 @@
           "value": "markdown"
         }
       ]
+    },
+    {
+      "name": "markdownImages",
+      "title": "Webpage: Markdown Images",
+      "label": "Save images next to the file",
+      "description": "When a webpage is saved as Markdown, download its images into an assets folder beside the .md file, so the note works offline. Off: images stay links to the web.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "markdownFolder",
+      "title": "Webpage: Markdown Folder",
+      "description": "Where webpages saved as Markdown go, such as a folder in your Obsidian vault. Empty: the Download Folder.",
+      "type": "directory",
+      "required": false
     },
     {
       "name": "networkIdleTimeoutSec",

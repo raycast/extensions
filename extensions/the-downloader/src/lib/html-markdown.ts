@@ -136,11 +136,18 @@ function imageSource(el: Element, base: string | undefined): string | undefined 
   return undefined;
 }
 
+/**
+ * Set while `htmlToMarkdown` runs (it is synchronous): what an image's address
+ * is written as. For saving a page's images next to it, where the Markdown
+ * points at the saved copies.
+ */
+let writeImage: ((url: string) => string) | undefined;
+
 function image(el: Element, base: string | undefined): string {
   const src = imageSource(el, base);
   if (!src) return "";
   const alt = escapeText((el.getAttribute("alt") ?? "").replace(/\s+/g, " ").trim());
-  return `![${alt}](${src})`;
+  return `![${alt}](${writeImage ? writeImage(src) : src})`;
 }
 
 /** Inline Markdown of one node. */
@@ -339,12 +346,25 @@ function blocksOf(el: Element, base: string | undefined): string[] {
 /**
  * Convert article HTML to Markdown. Relative links and images are resolved
  * against `baseUrl`; anything that isn't http(s) or mailto loses its link.
+ * `options.image` is called with each image's absolute address and returns
+ * what to write in its place (text that is safe inside Markdown's `(...)`).
  */
-export function htmlToMarkdown(html: string, baseUrl?: string): string {
+export function htmlToMarkdown(
+  html: string,
+  baseUrl?: string,
+  options: { image?: (url: string) => string } = {},
+): string {
   const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`);
   const body = document.body as unknown as Element | null;
   if (!body) return "";
-  const markdown = blocksOf(body, baseUrl)
+  let blocks: string[];
+  writeImage = options.image;
+  try {
+    blocks = blocksOf(body, baseUrl);
+  } finally {
+    writeImage = undefined;
+  }
+  const markdown = blocks
     .join("\n\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim()

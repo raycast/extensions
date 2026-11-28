@@ -7,6 +7,9 @@
 - **Clip** — download only part of a video or its audio: `1:30-2:45`, `90-120` or `1:30-` (to the end). The cut is exact, and the file's name carries the clip's times.
 - **Subtitles** — put a caption track the video has inside the file, or save it next to the video as `.srt`.
 - **Copy Page as Markdown** (⌘⇧C in the form) — the article on the clipboard instead of in a file. Saving or copying a page that blocks apps (HTTP 403, 429) or is gone (404, 410) uses the Internet Archive's latest copy and says so, in the toast and in the file's front matter.
+- **Markdown Images and Folder** — optionally save a page's images into an `assets` folder beside the `.md` file, so the note works offline (Webpage: Markdown Images, or the Images checkbox in the form). Webpage: Markdown Folder sends Markdown saves to a folder of their own, such as your Obsidian vault; a note saved inside a vault gets Open in Obsidian.
+- **Download a Moment** — in Chat About Link, an answer's timestamps open the Download form with that part of the video filled in as the clip.
+- **Check Tools** — a new command that lists every tool The Downloader uses with its version, where it was found and whether it runs, reads a test link, and copies diagnostics for a bug report (without your home folder's name or any secret).
 - **Fast Download Without a URL** — takes the link in your clipboard, or the browser tab you're on, so it works from a hotkey.
 - **Download History** — export the list as CSV or JSON, remove the entries whose files are gone, and see each day's total size.
 - **Recent Links** — type `@` in Raycast AI Chat and choose Recent Links to mention a link you downloaded or chatted about. Its transcript, caption or article is attached to the message, from the same cache Chat About Link and `read-link` use.

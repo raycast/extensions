@@ -1,6 +1,9 @@
 import * as fs from "node:fs";
+import * as path from "node:path";
 import { htmlToMarkdown } from "./html-markdown.js";
 import { LinkLoadError } from "./link-context.js";
+import { imageExtension } from "./link-images.js";
+import { safeFetch } from "./safe-fetch.js";
 import { webpageFilename } from "./monolith.js";
 import { AbortError } from "./run.js";
 import { loadArchivedArticle } from "./sources/archive.js";
@@ -52,8 +55,9 @@ const yaml = (value: string) => JSON.stringify(value.replace(/\s+/g, " ").trim()
  * author, dates — what Obsidian and static-site tools read), the title as a
  * heading, then the article. `saved` is the local calendar date. A page read
  * from the Internet Archive says so: `archived` is the day that copy was made.
+ * `image`, when given, decides what each image's address is written as.
  */
-export function pageMarkdown(page: PageArticle, now = new Date()): string {
+export function pageMarkdown(page: PageArticle, now = new Date(), image?: (url: string) => string): string {
   const { ctx } = page;
   const pad = (n: number) => String(n).padStart(2, "0");
   const saved = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
@@ -67,7 +71,7 @@ export function pageMarkdown(page: PageArticle, now = new Date()): string {
     ctx.archive ? `archived: ${ctx.archive.savedOn}` : undefined,
     ctx.archive ? `archive: ${yaml(ctx.archive.viewUrl)}` : undefined,
   ].filter(Boolean);
-  const body = htmlToMarkdown(page.articleHtml, ctx.url);
+  const body = htmlToMarkdown(page.articleHtml, ctx.url, { image });
   // Some articles repeat their headline as the first heading.
   const heading = /^# (.+)\n/.exec(body)?.[1]?.trim() === ctx.title.trim() ? "" : `# ${ctx.title.trim()}\n\n`;
   return `---\n${front.join("\n")}\n---\n\n${heading}${body}`;
@@ -115,17 +119,17 @@ async function loadArticle(url: string, signal?: AbortSignal): Promise<PageArtic
 }
 
 /**
- * Fetch `url` and write its article as Markdown. Rejects when the page has no
- * readable text (a login, a JavaScript app): there's nothing to convert, and
- * the Complete mode keeps such a page as it is.
+ * The article of `url`, live or archived (see `loadArticle`). Rejects when the
+ * page has no readable text (a login, a JavaScript app): there's nothing to
+ * convert, and the Complete mode keeps such a page as it is.
  */
-export async function loadPageMarkdown(url: string, options: { signal?: AbortSignal } = {}): Promise<PageMarkdown> {
+async function loadReadableArticle(url: string, signal?: AbortSignal): Promise<PageArticle> {
   let page: PageArticle;
   try {
-    page = await loadArticle(url, options.signal);
+    page = await loadArticle(url, signal);
   } catch (error) {
     // Stop is a cancel, not a failure: the reader's own "request was stopped" would show as one.
-    if (options.signal?.aborted) throw new AbortError();
+    if (signal?.aborted) throw new AbortError();
     throw error;
   }
   if (!page.articleHtml) {
@@ -133,35 +137,162 @@ export async function loadPageMarkdown(url: string, options: { signal?: AbortSig
       `${page.ctx.note ?? "Couldn't read this page's text."} Markdown needs readable text — choose the Complete save mode to keep the page as it is.`,
     );
   }
+  return page;
+}
+
+/** Fetch `url` and write its article as Markdown (see `loadReadableArticle`). Images stay links to the web. */
+export async function loadPageMarkdown(url: string, options: { signal?: AbortSignal } = {}): Promise<PageMarkdown> {
+  const page = await loadReadableArticle(url, options.signal);
   return { markdown: pageMarkdown(page), title: page.ctx.title, url: page.ctx.url, archive: page.ctx.archive };
 }
 
-export type MarkdownSaveResult = { filePath: string; title: string; archive?: PageMarkdown["archive"] };
+/** The folder, beside a note, that holds the images of the notes saved there: `assets/<note name>/`. */
+export const ASSETS_FOLDER = "assets";
+/** Most images saved for one page; the rest stay links to the web. */
+export const MAX_PAGE_IMAGES = 80;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+/** Stop fetching more once a page's images add up to this. */
+const MAX_PAGE_IMAGE_BYTES = 200 * 1024 * 1024;
+const IMAGE_FETCHES = 4;
+
+/**
+ * A Markdown link to a file beside the note: relative, each part
+ * percent-encoded, so spaces and brackets in a title can't end the link.
+ */
+export function assetLink(parts: string[]): string {
+  return parts.map((part) => encodeURIComponent(part).replace(/\(/g, "%28").replace(/\)/g, "%29")).join("/");
+}
+
+/**
+ * Download `urls` into `dir`, a few at a time, through the guarded reader (so
+ * never from the local network). Returns each saved image's file name by its
+ * address. One that fails, is too big or isn't an image the way its bytes say
+ * (an SVG, an error page) is left out, and stays a link to the web.
+ */
+export async function saveImages(
+  urls: string[],
+  dir: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<Map<string, string>> {
+  const list = urls.slice(0, MAX_PAGE_IMAGES);
+  const saved = new Map<string, string>();
+  let bytes = 0;
+  let next = 0;
+  const worker = async () => {
+    while (next < list.length && bytes < MAX_PAGE_IMAGE_BYTES && !options.signal?.aborted) {
+      const index = next++;
+      try {
+        const response = await safeFetch(list[index], {
+          signal: options.signal,
+          accept: ["image/"],
+          maxBytes: MAX_IMAGE_BYTES,
+        });
+        const extension = imageExtension(response.body);
+        if (!extension) continue;
+        bytes += response.body.length;
+        // Numbered by the image's place on the page, whichever download ends first.
+        const name = `image-${String(index + 1).padStart(2, "0")}.${extension}`;
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, name), response.body);
+        saved.set(list[index], name);
+      } catch {
+        /* this image stays a link to the web */
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: IMAGE_FETCHES }, worker));
+  if (options.signal?.aborted) throw new AbortError();
+  return saved;
+}
+
+export type MarkdownSaveResult = {
+  filePath: string;
+  title: string;
+  archive?: PageMarkdown["archive"];
+  /** With `localImages`: how many of the page's images were saved beside the note. */
+  images?: { saved: number; total: number };
+};
+
+/** What a toast adds about the saved images: `12 images saved`, `9 of 12 images saved`; empty when none were asked for. */
+export function imagesNote(images: MarkdownSaveResult["images"]): string {
+  if (!images || images.total === 0) return "";
+  const noun = `image${images.total === 1 ? "" : "s"}`;
+  return images.saved === images.total
+    ? `${images.total} ${noun} saved`
+    : `${images.saved} of ${images.total} ${noun} saved`;
+}
 
 /**
  * Fetch `url` and save its article as Markdown in `folder` (see
  * `loadPageMarkdown`). The file is named after the title, numbered when that
  * name is taken, and created exclusively so two saves started together can't
  * write the same file.
+ *
+ * With `localImages`, the page's images are saved into `assets/<file name>/`
+ * beside it and the Markdown points at those copies, so the note reads the
+ * same offline and after the site changes. Stop removes the note and what was
+ * fetched for it.
  */
 export async function savePageAsMarkdown(
   url: string,
   folder: string,
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; localImages?: boolean } = {},
 ): Promise<MarkdownSaveResult> {
-  const page = await loadPageMarkdown(url, options);
-  const { markdown } = page;
+  const page = await loadReadableArticle(url, options.signal);
+  const now = new Date();
+  const urls: string[] = [];
+  const markdown = pageMarkdown(page, now, (address) => {
+    if (!urls.includes(address)) urls.push(address);
+    return address;
+  });
   fs.mkdirSync(folder, { recursive: true });
-  const base = markdownBasename(page.title, page.url);
+  const base = markdownBasename(page.ctx.title, page.ctx.url);
   // lstat, not existsSync: a broken symlink with the name would fail the exclusive create forever.
   const taken = (p: string) => fs.lstatSync(p, { throwIfNoEntry: false }) !== undefined;
+  let filePath: string;
   for (;;) {
-    const filePath = uniqueFilePath(folder, base, "md", taken);
+    filePath = uniqueFilePath(folder, base, "md", taken);
     try {
       fs.writeFileSync(filePath, markdown, { flag: "wx" });
-      return { filePath, title: page.title, archive: page.archive };
+      break;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
     }
   }
+  const result: MarkdownSaveResult = { filePath, title: page.ctx.title, archive: page.ctx.archive };
+  if (!options.localImages || urls.length === 0) return result;
+
+  const name = path.basename(filePath, ".md");
+  const dir = path.join(folder, ASSETS_FOLDER, name);
+  try {
+    const saved = await saveImages(urls, dir, { signal: options.signal });
+    if (saved.size > 0) {
+      const local = (address: string) => {
+        const file = saved.get(address);
+        return file ? assetLink([ASSETS_FOLDER, name, file]) : address;
+      };
+      fs.writeFileSync(filePath, pageMarkdown(page, now, local));
+    }
+    return { ...result, images: { saved: saved.size, total: urls.length } };
+  } catch (error) {
+    // Stopped (or the disk gave out): no note left pointing at images that aren't there.
+    fs.rmSync(filePath, { force: true });
+    fs.rmSync(dir, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+/**
+ * The link that opens `filePath` in Obsidian, when it lies inside a vault (a
+ * folder with `.obsidian` in it, here or above); otherwise undefined.
+ */
+export function obsidianUrl(filePath: string): string | undefined {
+  let dir = path.dirname(filePath);
+  for (let depth = 0; depth < 20; depth++) {
+    if (fs.existsSync(path.join(dir, ".obsidian"))) return `obsidian://open?path=${encodeURIComponent(filePath)}`;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return undefined;
 }

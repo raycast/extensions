@@ -26,7 +26,7 @@ import { needsRosetta, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
 import { SPOTDL_SETUP_GUIDE_URL } from "./lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "./lib/monolith.js";
-import { MarkdownSaveResult, archiveNote, savePageAsMarkdown } from "./lib/page-markdown.js";
+import { MarkdownSaveResult, archiveNote, imagesNote, savePageAsMarkdown } from "./lib/page-markdown.js";
 import { isMarkdownMode, saveModeLabel } from "./lib/filetype.js";
 import { progressMessage } from "./lib/format.js";
 import { DownloadKind, DownloadSession } from "./lib/download-session.js";
@@ -44,6 +44,7 @@ import {
   getffprobePath,
   getytdlPath,
   isValidUrl,
+  markdownPath,
   normalizeUrl,
 } from "./utils.js";
 
@@ -94,8 +95,8 @@ function attachStop(toast: Toast): { signal: AbortSignal } {
 }
 
 /** Track a download without a view, so it lands in the Download History like the form's do. */
-function track(kind: DownloadKind, url: string, format?: string): DownloadSession {
-  return new DownloadSession({ kind, url, folder: downloadPath, format });
+function track(kind: DownloadKind, url: string, format?: string, folder = downloadPath): DownloadSession {
+  return new DownloadSession({ kind, url, folder, format });
 }
 
 /** Record the outcome the toast now shows. Cancelled downloads are not recorded. */
@@ -193,6 +194,7 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
     spotifyClientSecret,
     spotifyUserAuth,
     webpageSaveMode,
+    markdownImages,
   } = getPreferenceValues<ExtensionPreferences>();
   const type = detectSource(url);
 
@@ -390,11 +392,13 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
 
     const toast = await showToast({ style: Toast.Style.Animated, title: `Saving Webpage${from}` });
     const { signal } = attachStop(toast);
-    const session = track("website", url, saveModeLabel(webpageSaveMode));
+    // Markdown notes go to their own folder when one is set (Webpage: Markdown Folder).
+    const folder = markdown ? markdownPath : downloadPath;
+    const session = track("website", url, saveModeLabel(webpageSaveMode), folder);
     let outcome: { filePath?: string; error?: unknown } = {};
     try {
-      const saved: MarkdownSaveResult | { filePath: string; archive?: undefined } = markdown
-        ? await savePageAsMarkdown(url, downloadPath, { signal })
+      const saved: MarkdownSaveResult | { filePath: string; archive?: undefined; images?: undefined } = markdown
+        ? await savePageAsMarkdown(url, folder, { signal, localImages: !!markdownImages })
         : await runMonolithSave(monolithPath, {
             url,
             outputPath: reserveWebpagePath(downloadPath, url),
@@ -407,7 +411,9 @@ async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }
       toast.style = Toast.Style.Success;
       toast.title = "Saved";
       // A page the site wouldn't show was read from the Internet Archive: say so.
-      toast.message = [path.basename(filePath), archiveNote(saved.archive)].filter(Boolean).join(" · ");
+      toast.message = [path.basename(filePath), imagesNote(saved.images), archiveNote(saved.archive)]
+        .filter(Boolean)
+        .join(" · ");
       toast.primaryAction = { title: "Open Folder", onAction: () => showInFinder(filePath) };
       toast.secondaryAction = undefined;
     } catch (error) {

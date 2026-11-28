@@ -50,6 +50,12 @@ export function expandTilde(p: string): string {
 export const downloadPath = expandTilde(prefs.downloadPath);
 
 /**
+ * Where webpages saved as Markdown go: the Webpage: Markdown Folder preference
+ * (a notes folder, an Obsidian vault), or the download folder when it's empty.
+ */
+export const markdownPath = prefs.markdownFolder?.trim() ? expandTilde(prefs.markdownFolder.trim()) : downloadPath;
+
+/**
  * Resolve the watchdog idle window for child-process spawns. Reads
  * `networkIdleTimeoutSec` from preferences and falls back to 120 seconds when
  * the value is missing, non-numeric, or non-positive — defensive because the

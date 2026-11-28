@@ -36,6 +36,7 @@ import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { chatKey, deleteChat, findChat, saveChat } from "../lib/chat-store.js";
 import { maxHeight } from "../lib/estimate.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
+import { answerMoments, clipLabel, clipText } from "../lib/clip.js";
 import { ChatTurn, answerQuestion, bodyForSave, contextForExport, conversationMarkdown } from "../lib/link-chat.js";
 import {
   LinkContext,
@@ -199,9 +200,9 @@ async function saveFile(name: string, content: string, ext: string) {
   }
 }
 
-/** The Download command with this link filled in. */
-function openDownload(url: string) {
-  launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url } }).catch((error) =>
+/** The Download command with this link filled in, and its Clip field when `clip` is given. */
+function openDownload(url: string, clip?: string) {
+  launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url, clip } }).catch((error) =>
     showToast({
       style: Toast.Style.Failure,
       title: "Couldn't open Download",
@@ -308,6 +309,24 @@ function turnMarkdown(turn: Turn, ctx: LinkContext | undefined): string {
           ? `\n\n---\n_${turn.engineTitle}${took}_`
           : "";
   return `${question}\n\n${body}${footer}`;
+}
+
+/** The moments an answer points at, each opening the Download form with that clip filled in. */
+function MomentActions({ answer, duration, url }: { answer: string; duration?: number; url: string }) {
+  const moments = answerMoments(answer, duration || undefined);
+  if (moments.length === 0) return null;
+  return (
+    <ActionPanel.Submenu title="Download a Moment" icon={Icon.Crop}>
+      {moments.map((moment) => (
+        <Action
+          key={moment.start}
+          title={clipLabel(moment)}
+          icon={Icon.Download}
+          onAction={() => openDownload(url, clipText(moment))}
+        />
+      ))}
+    </ActionPanel.Submenu>
+  );
 }
 
 function turnIcon(turn: Turn) {
@@ -826,6 +845,9 @@ export function LinkChat({ url, initialQuestion, root }: { url: string; initialQ
                     onAction={() => setSearchText(turn.question)}
                   />
                   {turn.error && <Action.CopyToClipboard title="Copy Error" content={turn.error} />}
+                  {ctx?.kind === "video" && turn.status === "done" && (
+                    <MomentActions answer={turn.answer} duration={ctx.video?.duration} url={url} />
+                  )}
                   {commonActions}
                 </ActionPanel>
               }

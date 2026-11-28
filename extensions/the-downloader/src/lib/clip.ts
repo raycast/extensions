@@ -74,3 +74,49 @@ export function clipSuffix(clip: Clip): string {
     seconds === undefined ? missing : formatClock(seconds).replace(/:/g, ".");
   return ` [${stamp(clip.start, "0.00")}-${stamp(clip.end, "end")}]`;
 }
+
+/** The clip as the Clip field takes it: `1:30-2:45`, `1:30-`. */
+export function clipText(clip: Clip): string {
+  const side = (seconds: number | undefined) => (seconds === undefined ? "" : formatClock(seconds));
+  return `${side(clip.start)}-${side(clip.end)}`;
+}
+
+/** How long a moment is when the answer names only where it starts. */
+export const MOMENT_SECONDS = 60;
+/** A following timestamp ends the moment only when it is this close; further away it's another topic. */
+const MOMENT_MAX_SECONDS = 300;
+/** Moments offered for one answer. */
+export const MAX_MOMENTS = 12;
+
+const STAMP = String.raw`\d{1,2}(?::\d{2}){1,2}`;
+const MOMENT_RE = new RegExp(String.raw`\[(${STAMP})(?:\s*[–—-]\s*(${STAMP}))?\]`, "g");
+
+/**
+ * The moments an AI answer points at (`[1:30]`, `[4:25–6:02]`), as clips to
+ * download, in the video's order. A range is taken as written. A single
+ * timestamp runs to the answer's next one when that is within five minutes,
+ * else for a minute. `duration` (seconds), when known, drops timestamps past
+ * the end and stops a clip at it.
+ */
+export function answerMoments(answer: string, duration?: number): Required<Clip>[] {
+  const found: { start: number; end?: number }[] = [];
+  for (const match of answer.matchAll(MOMENT_RE)) {
+    const start = parseTimestamp(match[1]);
+    const end = match[2] ? parseTimestamp(match[2]) : undefined;
+    if (start === undefined || Number.isNaN(start)) continue;
+    if (duration && start >= duration) continue;
+    const known = found.find((moment) => moment.start === start);
+    const range = end !== undefined && !Number.isNaN(end) && end > start ? end : undefined;
+    // The same moment named twice: a written range beats a guessed end.
+    if (known) known.end ??= range;
+    else found.push({ start, end: range });
+  }
+  found.sort((a, b) => a.start - b.start);
+  return found.slice(0, MAX_MOMENTS).map((moment, i) => {
+    const next = found[i + 1]?.start;
+    const guessed =
+      next !== undefined && next - moment.start <= MOMENT_MAX_SECONDS ? next : moment.start + MOMENT_SECONDS;
+    const end = moment.end ?? guessed;
+    return { start: moment.start, end: duration ? Math.min(end, duration) : end };
+  });
+}
