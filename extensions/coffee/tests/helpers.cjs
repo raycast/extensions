@@ -43,6 +43,16 @@ function createHarness(options = {}) {
   after(() => rmSync(supportPath, { recursive: true, force: true }));
   const storage = options.storage ?? new Map();
   const table = new Map();
+  // Offsets added to the wall clock (Date) and to the clock that counts time asleep (process.hrtime).
+  const clock = { wallMs: 0, monotonicMs: 0 };
+  class ShiftedDate extends Date {
+    constructor(...args) {
+      super(...(args.length ? args : [Date.now() + clock.wallMs]));
+    }
+    static now() {
+      return Date.now() + clock.wallMs;
+    }
+  }
   const createdAt = "Wed Oct 21 10:00:00 2026";
   const addProcess = (pid, values = {}) => {
     const row = { pid, uid: 501, createdAt, executable: "/usr/bin/caffeinate", ...values };
@@ -56,6 +66,7 @@ function createHarness(options = {}) {
     pid: 100,
     ppid: 99,
     getuid: () => 501,
+    hrtime: { bigint: () => process.hrtime.bigint() + BigInt(clock.monotonicMs) * 1_000_000n },
     kill: mock.fn((pid) => {
       if (!table.delete(pid)) throw Object.assign(new Error("Process exited"), { code: "ESRCH" });
     }),
@@ -70,23 +81,24 @@ function createHarness(options = {}) {
     queueMicrotask(() => child.emit("spawn"));
     return child;
   };
+  const ps = (executable, args, options, callback) => {
+    assert.equal(executable, "/bin/ps");
+    const pidIndex = args.indexOf("-p");
+    const rows = [...table.values()].filter((p) => pidIndex < 0 || p.pid === Number(args[pidIndex + 1]));
+    const output = args.includes("args=")
+      ? rows.map((p) => p.args ?? p.executable).join("\n")
+      : rows.map((p) => `${p.pid} ${p.uid} ${p.createdAt} ${p.executable}`).join("\n");
+    queueMicrotask(() =>
+      callback(rows.length ? null : Object.assign(new Error("No process"), { code: 1 }), output, ""),
+    );
+  };
   const processes = {
     spawn: mock.fn(makeChild),
     execFileSync: mock.fn((executable) => {
       if (executable === "/usr/bin/lsappinfo") return "pid=99";
       assert.fail(`Unexpected synchronous process query: ${executable}`);
     }),
-    execFile: mock.fn((executable, args, options, callback) => {
-      assert.equal(executable, "/bin/ps");
-      const pidIndex = args.indexOf("-p");
-      const rows = [...table.values()].filter((p) => pidIndex < 0 || p.pid === Number(args[pidIndex + 1]));
-      const output = args.includes("args=")
-        ? rows.map((p) => p.args ?? p.executable).join("\n")
-        : rows.map((p) => `${p.pid} ${p.uid} ${p.createdAt} ${p.executable}`).join("\n");
-      queueMicrotask(() =>
-        callback(rows.length ? null : Object.assign(new Error("No process"), { code: 1 }), output, ""),
-      );
-    }),
+    execFile: mock.fn(ps),
   };
   const preferences = { preventDisplay: true, preventSystem: true, preventDisk: true, ...options.preferences };
   const api = {
@@ -123,11 +135,13 @@ function createHarness(options = {}) {
     windowsStopCaffeinateIfMatches: mock.fn(async () => false),
   };
   const dependencies = { "@raycast/api": api, "node:child_process": processes, "./windowsApi": windows };
-  const context = { process: fakeProcess };
+  const context = { process: fakeProcess, Date: ShiftedDate };
   const load = (filename, extra = {}) => loadSource(filename, { ...dependencies, ...extra }, context);
   return {
     api,
     processes,
+    ps,
+    clock,
     fakeProcess,
     storage,
     table,

@@ -117,6 +117,79 @@ test("natural expiry or watched-app exit clears ownership and never reuses its r
   assert.equal(h.storage.has(key), false);
 });
 
+test("a duration ends on time after the Mac sleeps, whatever the wall clock says", async () => {
+  const h = createHarness();
+  h.addProcess(900);
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet, undefined, "-t 600", {
+    kind: "for",
+    endsAt: new Date(Date.now() + 600_000).toISOString(),
+  });
+  h.clock.wallMs += 3_600_000;
+  assert.equal((await utils.getCaffeinationState()).isManaged, true);
+  // The Mac sleeps for 15 minutes, and caffeinate's -t timer stops with it.
+  h.clock.wallMs += 900_000;
+  h.clock.monotonicMs += 900_000;
+  const state = await utils.getCaffeinationState();
+  assert.equal(state.isManaged, false);
+  assert.equal(state.externalCount, 1);
+  assert.deepEqual(
+    h.fakeProcess.kill.mock.calls.map(({ arguments: args }) => Array.from(args)),
+    [[200, "SIGTERM"]],
+  );
+  assert.equal(h.storage.has(key), false);
+  assert.ok(h.table.has(900));
+});
+
+for (const [name, reason, saveWithoutMonotonicStart] of [
+  ["Caffeinate Until", () => ({ kind: "until", until: new Date(Date.now() + 600_000).toISOString() }), false],
+  ["a schedule", () => ({ kind: "schedule", day: "monday", from: "09:00", to: "17:00" }), false],
+  [
+    "a duration saved by an earlier version",
+    () => ({ kind: "for", endsAt: new Date(Date.now() + 600_000).toISOString() }),
+    true,
+  ],
+]) {
+  test(`${name} ends once the wall clock passes its end`, async () => {
+    const h = createHarness();
+    const utils = h.load("utils.ts");
+    await utils.startCaffeinate(quiet, undefined, "-t 600", reason());
+    if (saveWithoutMonotonicStart) {
+      const { monotonicStartMs, ...saved } = session(h);
+      assert.equal(typeof monotonicStartMs, "number");
+      h.storage.set(key, JSON.stringify(saved));
+    }
+    h.clock.monotonicMs += 660_000;
+    assert.equal((await utils.getCaffeinationState()).isManaged, true);
+    h.clock.wallMs += 660_000;
+    assert.equal((await utils.getCaffeinationState()).isManaged, false);
+    assert.equal(h.fakeProcess.kill.mock.callCount(), 1);
+    assert.equal(h.storage.has(key), false);
+  });
+}
+
+test("a clock set back while Coffee rechecks an ended session keeps it running", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  await utils.startCaffeinate(quiet, undefined, "-t 600", {
+    kind: "until",
+    until: new Date(Date.now() + 600_000).toISOString(),
+  });
+  const saved = h.storage.get(key);
+  h.clock.wallMs = 660_000;
+  let inspections = 0;
+  h.processes.execFile.mock.mockImplementation((executable, args, options, callback) => {
+    // The second inspection of PID 200 is the recheck right before the signal.
+    if (args.includes("200") && ++inspections === 2) h.clock.wallMs = 0;
+    h.ps(executable, args, options, callback);
+  });
+  const state = await utils.getCaffeinationState();
+  assert.equal(inspections, 2);
+  assert.equal(state.isManaged, true);
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
+  assert.equal(h.storage.get(key), saved);
+});
+
 for (const failure of ["denied", "malformed"]) {
   test(`a ${failure} process inspection preserves tracking and never signals any PID`, async () => {
     const h = createHarness();
