@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tiny-dev-tools",
+  "version": "1.0.0",
+  "title": "Tiny Dev Tools",
+  "description": "A tiny developer toolbox: timestamp, URL/JSON/Base64 codecs, hash, JWT, case converter, password generator, JSON-to-types. Zero runtime dependencies.",
+  "icon": "icon.png",
+  "author": "caitale",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@raycast/api": "^1.94.0"
+  },
+  "commands": [
+    {
+      "title": "Timestamp",
+      "name": "timestamp",
+      "description": "Convert Unix timestamps and dates bidirectionally: auto-detect s/ms/µs, relative time, multi-format output",
+      "mode": "view"
+    },
+    {
+      "title": "URL Codec",
+      "name": "url-codec",
+      "description": "URL encode & decode: encodeURIComponent, encodeURI, single or smart multi-round decoding with auto mode",
+      "mode": "view"
+    },
+    {
+      "title": "JSON Format",
+      "name": "json-format",
+      "description": "Format & validate JSON: indent, minify, sort keys, clear error position; auto-load from selection or clipboard",
+      "mode": "view"
+    },
+    {
+      "title": "Base64",
+      "name": "base64",
+      "description": "Base64 encode & decode: UTF-8 safe, URL-safe tolerant, missing padding accepted; smart mode on paste",
+      "mode": "view"
+    },
+    {
+      "title": "Hash",
+      "name": "hash",
+      "description": "Hash any text: MD5, SHA-1, SHA-256, SHA-512, HMAC-SHA256 with \"text || key\" syntax",
+      "mode": "view"
+    },
+    {
+      "title": "Password Generator",
+      "name": "password-generator",
+      "description": "Generate random passwords & passphrases: CSPRNG, strength estimation, three presets, adjustable length",
+      "mode": "view"
+    },
+    {
+      "title": "JWT Decoder",
+      "name": "jwt-decoder",
+      "description": "Decode JWTs: claims listing, humanized time claims, expiry status, verify HS256/RS256/ES256 locally",
+      "mode": "view"
+    },
+    {
+      "title": "Case Converter",
+      "name": "case-converter",
+      "description": "Convert identifier casing: camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, dot.case side by side",
+      "mode": "view"
+    },
+    {
+      "title": "JSON to Types",
+      "name": "json-to-types",
+      "description": "Generate type definitions from JSON: TypeScript, Java, Go and Python, paste-ready output",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.3.0",
+    "react": "^19.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "json",
+    "base64",
+    "hash",
+    "jwt",
+    "case",
+    "timestamp",
+    "url",
+    "converter",
+    "password",
+    "types",
+    "typescript",
+    "decoder"
+  ]
+}
