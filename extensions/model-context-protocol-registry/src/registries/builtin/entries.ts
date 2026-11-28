@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "transformer-gg",
+    title: "Transformer.gg",
+    description:
+      "Book sponsored posts from X creators, from a dashboard or an AI agent. Paste a website and get a list of X creators who fit what you sell, each with a suggested price. Send offers in a few clicks. Sending is free. The card is charged only when a creator accepts, and the money is held until the post is live with X's Paid partnership label and the team confirms it. Creators keep 80%. Hosted Streamable HTTP server at https://transformer.gg/mcp. OAuth sign-in, or an optional Bearer workspace key for a headless agent. Raycast connects directly over HTTP. Other clients use the local mcp-remote proxy, which requires Node.js. Free to join. Transformer.gg is part of North Bay Ventures (North Bay Opco I, Inc., Miami, Florida). The founder is Jon Oringer, who founded Shutterstock.",
+    icon: "https://transformer.gg/assets/transformer-512.png",
+    homepage: "https://transformer.gg/?utm_source=raycast&utm_medium=referral&utm_campaign=backlinks&utm_content=listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://transformer.gg/mcp"],
+    },
+    remoteUrl: "https://transformer.gg/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
