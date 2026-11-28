@@ -150,7 +150,12 @@ const SCHEMES: Record<string, string> = {
 };
 
 /** Cloud drives signed in to in the browser: shown by name. */
-const SERVICES: Record<string, string> = { box: "Box", dropbox: "Dropbox", "google-drive": "Google Drive" };
+const SERVICES: Record<string, string> = {
+  box: "Box",
+  dropbox: "Dropbox",
+  "google-drive": "Google Drive",
+  onedrive: "OneDrive",
+};
 
 /** A site's address for the list ("sftp://deploy@example.com/var/www"). */
 export function address(site: Site): string {

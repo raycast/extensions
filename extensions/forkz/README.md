@@ -14,7 +14,7 @@ or download it from the
 
 | Command | What it does |
 | --- | --- |
-| Connect to Site | Pick a saved site (SFTP, FTP, WebDAV, S3, Azure, Box, Dropbox, Google Drive, and more) and connect to it |
+| Connect to Site | Pick a saved site (SFTP, FTP, WebDAV, S3, Azure, Box, Dropbox, Google Drive, OneDrive, and more) and connect to it |
 | Recent Folders | Open a folder forkz showed lately, on the Mac or on a server |
 | Favorites | Open a folder from forkz's sidebar |
 | Run Synclet | Run a saved sync |
