@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>com.ramimaalouf.raycast.speakplayer</string>
+<key>CFBundleExecutable</key><string>SpeakPlayer</string>
+<key>CFBundleName</key><string>Speak Text</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>LSUIElement</key><true/>
+<key>CFBundleDocumentTypes</key><array><dict><key>CFBundleTypeRole</key><string>Viewer</string><key>LSItemContentTypes</key><array><string>public.plain-text</string></array></dict></array>
+</dict></plist>
