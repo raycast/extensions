@@ -4719,7 +4719,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-suno",
-    title: "Suno by Ace Data Cloud",
+    title: "Suno",
     description:
       "Generate and extend songs, separate stems and retrieve the finished tracks. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/l3ffw7.jpg",
@@ -4732,7 +4732,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-nano-banana",
-    title: "Nano Banana by Ace Data Cloud",
+    title: "Nano Banana",
     description:
       "Generate images from text or edit a reference image, then retrieve the result. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/859plc.jpg",
@@ -4745,7 +4745,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-gpt-image",
-    title: "GPT Image by Ace Data Cloud",
+    title: "GPT Image",
     description:
       "Generate and edit images with the image-only profile and retrieve completed results. A connected Ace Data Cloud account is required. Usage is billed to that account. Install uv to run the local image-only server.",
     icon: "https://cdn.acedata.cloud/uploads/plugin-gpt-image-dify-b525d3451af82c229d95.png",
@@ -4760,7 +4760,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-seedance",
-    title: "Seedance by Ace Data Cloud",
+    title: "Seedance",
     description:
       "Generate a video from text or an image and retrieve the finished clip. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/9q90dl.png",
@@ -4773,7 +4773,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-seedream",
-    title: "Seedream by Ace Data Cloud",
+    title: "Seedream",
     description:
       "Create, edit or decompose images and retrieve the generated files. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/9egrbn.png",
@@ -4786,7 +4786,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-kling",
-    title: "Kling by Ace Data Cloud",
+    title: "Kling",
     description:
       "Create or extend videos, build storyboards and check task results. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/qpbbbb.jpg",
@@ -4799,7 +4799,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-veo",
-    title: "Veo by Ace Data Cloud",
+    title: "Veo",
     description:
       "Create video from a text prompt or reference image and retrieve the result. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/8nxyy9.jpg",
@@ -4812,7 +4812,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-hailuo",
-    title: "Hailuo by Ace Data Cloud",
+    title: "Hailuo",
     description:
       "Animate an image or generate a video from text and check task progress. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/0qg4gp.png",
@@ -4825,7 +4825,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-fish",
-    title: "Fish Audio by Ace Data Cloud",
+    title: "Fish Audio",
     description:
       "Turn a script into speech and discover the available speech models. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/uploads/plugin-fish-audio-raycast-48efe1dc469487d521b2.png",
@@ -4838,7 +4838,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-serp",
-    title: "Google Search by Ace Data Cloud",
+    title: "Google Search",
     description:
       "Find web, image, news, map and video results with location and language options. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/27e11e555d.png",
@@ -4851,7 +4851,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-aichat",
-    title: "AI Chat by Ace Data Cloud",
+    title: "AI Chat",
     description:
       "Discover supported models and start or continue a conversation. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/uploads/plugin-aichat-model-provider-3e2c6e2d1a61a549dae2.png",
@@ -4864,7 +4864,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-flux",
-    title: "FLUX by Ace Data Cloud",
+    title: "FLUX",
     description:
       "Generate or edit images from prompts and retrieve completed tasks. A connected Ace Data Cloud account is required. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/ogm2oa.png",
@@ -4877,7 +4877,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-happyhorse",
-    title: "HappyHorse by Ace Data Cloud",
+    title: "HappyHorse",
     description:
       "Generate and edit videos using prompts, images or reference media, then retrieve the finished clips. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/2841e8c719.png",
@@ -4890,7 +4890,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-wan",
-    title: "Wan by Ace Data Cloud",
+    title: "Wan",
     description:
       "Create Wan videos from prompts or images and look up previous generation tasks. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/a033884259.png",
@@ -4903,7 +4903,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-luma",
-    title: "Luma by Ace Data Cloud",
+    title: "Luma",
     description:
       "Create Luma videos from text or images, extend a clip, and retrieve results. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/ahjfwi.png",
@@ -4916,7 +4916,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-minimax",
-    title: "MiniMax by Ace Data Cloud",
+    title: "MiniMax",
     description:
       "Generate MiniMax videos from text, images or audio and check the status of each task. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/2440b75bb8.png",
@@ -4929,7 +4929,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-producer",
-    title: "Producer by Ace Data Cloud",
+    title: "Producer",
     description:
       "Write lyrics, generate and extend songs, and retrieve audio results from Producer. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/id0mz5.jpg",
@@ -4942,7 +4942,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-tripo",
-    title: "Tripo by Ace Data Cloud",
+    title: "Tripo",
     description:
       "Generate and texture 3D models with Tripo, rig a model, and check its task status. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata2.cloud/tripo/catalog/tripo-icon-a80c573eb58a.png",
@@ -4955,7 +4955,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-qwen-image",
-    title: "Qwen Image by Ace Data Cloud",
+    title: "Qwen Image",
     description:
       "Generate or edit images with Qwen Image and retrieve completed tasks. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/uploads/ecosystem-qwen-image-20a1e4fe844e2007e9fb.png",
@@ -4968,7 +4968,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-grok",
-    title: "Grok by Ace Data Cloud",
+    title: "Grok",
     description:
       "Chat with Grok or generate videos from text and images. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/p1ge98.png",
@@ -4981,7 +4981,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-glm",
-    title: "GLM by Ace Data Cloud",
+    title: "GLM",
     description:
       "List available GLM models and send chat messages. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/uploads/71c11f3e-043a-4974-833d-a346d489a232",
@@ -4994,7 +4994,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-image-to-text",
-    title: "Image to Text by Ace Data Cloud",
+    title: "Image to Text",
     description:
       "Recognize text in images and retrieve earlier recognition results. Install uv and connect an Ace Data Cloud application key. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/uploads/ad333990-ea8e-4889-83c5-67385fc8d7b0",
@@ -5009,7 +5009,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-digital-human",
-    title: "Digital Human by Ace Data Cloud",
+    title: "Digital Human",
     description:
       "Create avatar videos from media you have permission to use and retrieve completed video tasks. Install uv and connect an Ace Data Cloud application key. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/uploads/1083534c-b49d-4242-899e-b0d9190dddbc",
@@ -5024,7 +5024,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-maestro",
-    title: "Maestro by Ace Data Cloud",
+    title: "Maestro",
     description:
       "Create videos with Maestro, list recent tasks, and retrieve an existing result. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/uploads/c05acf25-8990-4004-9a29-6fa6865ed66f",
@@ -5037,7 +5037,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-short-url",
-    title: "Short URL by Ace Data Cloud",
+    title: "Short URL",
     description: "Create short links for individual URLs or a batch of URLs. Sign in with an Ace Data Cloud account.",
     icon: "https://cdn.acedata.cloud/uploads/plugin-shorturl-raycast-770511373c58e4d298e4.png",
     homepage: "https://github.com/AceDataCloud/ShortURLMCP",
@@ -5049,7 +5049,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   },
   {
     name: "ace-web-extractor",
-    title: "Web Extractor by Ace Data Cloud",
+    title: "Web Extractor",
     description:
       "Extract content from a web page or render it first, then retrieve the result. Sign in with an Ace Data Cloud account. Usage is billed to that account.",
     icon: "https://cdn.acedata.cloud/0442b4af2f.png",
