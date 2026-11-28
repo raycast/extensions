@@ -297,7 +297,7 @@ async function* stream(
   function* parse(line: string): Generator<string, boolean> {
     if (!line.startsWith("data:")) return false; // also skips Anthropic's "event:" lines: the JSON carries the type
     const data = line.slice(5).trim();
-    if (data === "[DONE]") return true;
+    if (data === "[DONE]") return (finished = true);
     let event;
     try {
       event = JSON.parse(data);

@@ -455,11 +455,10 @@ function ResultDetail(request: LLMRequest) {
     .split("\n")
     .map((l) => `> ${l}`)
     .join("\n");
-  const markdown = llm.error
-    ? `## ⚠️ Error\n\n\`\`\`\n${llm.error}\n\`\`\``
-    : isLookup
-      ? card
-      : `${quoted}\n\n---\n\n${result}`;
+  // Images are removed from the whole page, the original text included: it is pasted by anyone.
+  const markdown = stripImages(
+    llm.error ? `## ⚠️ Error\n\n\`\`\`\n${llm.error}\n\`\`\`` : isLookup ? card : `${quoted}\n\n---\n\n${result}`,
+  );
 
   const metadata = !llm.error && !isLookup && (
     <Detail.Metadata>

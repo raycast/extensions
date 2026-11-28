@@ -46,14 +46,14 @@ Translates between English and your Native Language, in whichever direction the 
 
 Drafts a reply to the selected message. Select the last few messages for more context. The reply is in an editable field, so you can touch it up before sending.
 
-- **Idea:** type the point you want to make, in any language, for example *"not yet, will send at 9am"*, and press ↵. The reply is rewritten around it. Each idea revises the current version, your edits included.
+- **Idea:** type the point you want to make, in any language, for example *"not yet, will send at 9am"*, and press ⌘↵. The reply is rewritten around it. Each idea revises the current version, your edits included.
 - **Command setting: Reply Language.** *Match their language* (default) replies in the language of the message; *Always English* replies in English whatever the message is in. Find it in Raycast Settings → Extensions → AI Buddy → Buddy Draft Reply.
 
 ![Buddy Draft Reply: a reply rewritten from an idea typed in Vietnamese](media/draft-reply.png)
 
 | In the result | |
 |---|---|
-| ↵ (⌘↵ from the reply field) | Copy the reply, or apply the idea once one is typed |
+| ⌘↵ | Copy the reply, or apply the idea once one is typed |
 | ⌘B | Continue with Translate, to check the reply in your language |
 | ⌘R | Start over |
 
@@ -62,14 +62,14 @@ Drafts a reply to the selected message. Select the last few messages for more co
 Rewrites your English draft into correct, natural English, and lists **Lessons**: each mistake it fixed and the grammar rule behind it, explained in your language.
 
 - Select the draft in the chat box and press the hotkey. **Replace Draft** pastes the polished version over the draft, which is still selected.
-- **Idea:** ask for a change, for example *"add a point"* or *"more polite"*, and press ↵.
+- **Idea:** ask for a change, for example *"add a point"* or *"more polite"*, and press ⌘↵.
 - **Command setting: Quick Replace** (off by default). The hotkey replaces the selected draft right away, with no window and no lessons; a small HUD says *Polished* or *Already good*. ⌘Z in the app undoes it. If you switch apps or change the selection while it works, the result is copied instead of pasted. Find it in Raycast Settings → Extensions → AI Buddy → Buddy Polish English, or press ⌘⇧R on this buddy in AI Buddy.
 
 ![Buddy Polish English: the polished draft and its lesson (Native Language: Vietnamese)](media/polish-lessons.png)
 
 | In the result | |
 |---|---|
-| ↵ (⌘↵ from the text field) | Replace the draft, or apply the idea once one is typed |
+| ⌘↵ | Replace the draft, or apply the idea once one is typed |
 | ⌘⇧C | Copy |
 | ⌘B | Continue with Translate, to read the result in your language |
 | ⌘R | Start over |
