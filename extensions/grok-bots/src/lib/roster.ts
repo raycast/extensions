@@ -55,6 +55,9 @@ const MESSAGE_TEXT_LIMIT = 4000;
 const BASE32 = "abcdefghijklmnopqrstuvwxyz234567";
 
 export function defaultDataDir(): string {
+  if (process.platform === "win32") {
+    return path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "Grok Bot");
+  }
   return path.join(os.homedir(), "Library", "Application Support", "Grok Bot");
 }
 

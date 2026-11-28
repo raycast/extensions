@@ -213,7 +213,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.ChatWi
                       <Action.Push
                         title={webhook ? "Edit Webhook…" : "Set up Webhook…"}
                         icon={Icon.Bolt}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+                        }}
                         target={<WebhookForm bot={bot} webhook={webhook} onSaved={webhooks.revalidate} />}
                       />
                       {webhook && (
@@ -233,7 +236,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.ChatWi
                       )}
                       <Action.CreateQuicklink
                         title={`Create Quicklink for ${bot.firstName}`}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "l" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+                        }}
                         quicklink={{ name: `Ask ${bot.displayName}`, link: quicklinkFor(bot) }}
                       />
                     </ActionPanel.Section>

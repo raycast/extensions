@@ -5,12 +5,15 @@ import {
   getPreferenceValues,
   open,
   PopToRootType,
+  popToRoot,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
 import { runAppleScript } from "@raycast/utils";
 import type { Bot } from "./roster";
 import { postWebhook, type Webhook } from "./webhooks";
@@ -88,7 +91,13 @@ export async function deliver(bot: Bot, prompt: string, options: DeliverOptions)
 
   // Close Raycast first: closing it later hands focus back to the previous app,
   // which would pull Grok Bot out of the front before the send keystroke.
-  await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  // On Windows, popping to root right away ends the command before it can press Enter,
+  // so the view is suspended and popped once the prompt has been handled.
+  const isWindows = process.platform === "win32";
+  await closeMainWindow({
+    clearRootSearch: true,
+    popToRootType: isWindows ? PopToRootType.Suspended : PopToRootType.Immediate,
+  });
   await open(promptLink(bot.id, text));
   try {
     const trace = await pressSend(text, options.sendOnModEnter);
@@ -111,6 +120,7 @@ export async function deliver(bot: Bot, prompt: string, options: DeliverOptions)
       await showHUD("Prompt is in Grok Bot, but auto-send didn't press Return. Details are in auto-send.log.");
     }
   }
+  if (isWindows) await popToRoot({ clearSearchBar: true });
   return true;
 }
 
@@ -149,6 +159,153 @@ function withoutWhitespace(text: string): string {
  * Returns a short trace for auto-send.log. The trace never includes the box's text.
  */
 async function pressSend(text: string, withCommand: boolean): Promise<string> {
+  return process.platform === "win32"
+    ? pressSendWindows(withoutWhitespace(text), withCommand)
+    : pressSendMacOS(text, withCommand);
+}
+
+const execFileAsync = promisify(execFile);
+
+/**
+ * Windows version of the AppleScript below, using UI Automation from PowerShell.
+ * The expected text goes in through an environment variable, so it never has to be escaped.
+ * Errors are written as one plain line to stderr; the trace goes to stdout.
+ */
+const WINDOWS_PRESS_SEND_SCRIPT = `
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+function Fail($message) { [Console]::Error.WriteLine($message); exit 1 }
+try {
+  Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Windows.Forms
+  Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public static class GrokBotsWindow {
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+  // Windows only lets a background process take the foreground right after an input event, so send
+  // one first. F24 is used because practically no app binds it (Alt would open menus).
+  public static void Activate(IntPtr hWnd) {
+    keybd_event(0x87, 0, 0, UIntPtr.Zero);
+    keybd_event(0x87, 0, 2, UIntPtr.Zero);
+    SetForegroundWindow(hWnd);
+  }
+}
+"@
+} catch { Fail $_.Exception.Message }
+
+$expected = $env:GROK_BOTS_EXPECTED
+$withCommand = $env:GROK_BOTS_MOD_ENTER -eq '1'
+$trace = ''
+
+$grok = $null
+for ($i = 0; $i -lt 100; $i++) {
+  $grok = @(Get-Process -Name 'Grok Bot' -ErrorAction SilentlyContinue)
+  if ($grok | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero }) { break }
+  Start-Sleep -Milliseconds 100
+}
+$window = $grok | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
+if (-not $window) { Fail "Grok Bot didn't open" }
+$grokIds = @($grok | ForEach-Object { [uint32]$_.Id })
+
+function Test-Front {
+  $foregroundId = [uint32]0
+  [GrokBotsWindow]::GetWindowThreadProcessId([GrokBotsWindow]::GetForegroundWindow(), [ref]$foregroundId) | Out-Null
+  return $grokIds -contains $foregroundId
+}
+
+# Make sure Grok Bot, not the app you were in, has the keyboard.
+$waited = 0
+for (; $waited -lt 50; $waited++) {
+  if (Test-Front) { break }
+  if ($waited % 5 -eq 0) {
+    $hwnd = $window.MainWindowHandle
+    if ([GrokBotsWindow]::IsIconic($hwnd)) { [GrokBotsWindow]::ShowWindow($hwnd, 9) | Out-Null }
+    [GrokBotsWindow]::Activate($hwnd)
+  }
+  Start-Sleep -Milliseconds 100
+}
+$trace += "front after $($waited / 10)s; "
+if (-not (Test-Front)) { Fail "Grok Bot didn't come to the front | $trace" }
+
+# The focused element and its text without whitespace, or $null when it isn't a readable Grok Bot element.
+function Read-FocusedBox {
+  $element = [System.Windows.Automation.AutomationElement]::FocusedElement
+  if (-not $element -or -not ($grokIds -contains [uint32]$element.Current.ProcessId)) { return $null }
+  $boxText = $null
+  $pattern = $null
+  if ($element.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$pattern)) {
+    $boxText = $pattern.Current.Value
+  } elseif ($element.TryGetCurrentPattern([System.Windows.Automation.TextPattern]::Pattern, [ref]$pattern)) {
+    $boxText = $pattern.DocumentRange.GetText(-1)
+  }
+  if ($null -eq $boxText) { return $null }
+  return @{ Element = $element; Text = [regex]::Replace($boxText, '[\\s\\u200b]', '') }
+}
+
+$isReady = $false
+$wasReadable = $false
+$boxLength = 0
+$matchedBox = $null
+for ($attempt = 1; $attempt -le 60; $attempt++) {
+  try {
+    $box = Read-FocusedBox
+    if ($box) {
+      $wasReadable = $true
+      $boxLength = $box.Text.Length
+      if ([string]::Equals($box.Text, $expected, [StringComparison]::Ordinal)) { $isReady = $true; $matchedBox = $box; break }
+    }
+  } catch {}
+  Start-Sleep -Milliseconds 100
+}
+# Lengths only: the box may hold an unrelated private draft, which must not reach the log.
+$trace += "box readable=$wasReadable matched=$isReady after $($attempt / 10)s (box $boxLength chars, prompt $($expected.Length)); "
+
+if (-not $isReady) {
+  if (-not $wasReadable) { Fail "${UNVERIFIED} | $trace" }
+  if ($boxLength -gt 0) { Fail "${DRAFT_MISMATCH} | $trace" }
+  Fail "${UNVERIFIED} | $trace"
+}
+Start-Sleep -Milliseconds 150
+if (-not (Test-Front)) { Fail "Grok Bot lost focus before sending | $trace" }
+# Check again right before pressing Enter: if you switched chats in the meantime, the focused box
+# is a different element or holds other text, and Enter must not send that draft.
+$finalBox = $null
+try { $finalBox = Read-FocusedBox } catch {}
+if (-not $finalBox -or -not [System.Windows.Automation.Automation]::Compare($finalBox.Element, $matchedBox.Element) -or
+    -not [string]::Equals($finalBox.Text, $expected, [StringComparison]::Ordinal)) {
+  Fail "${DRAFT_MISMATCH} | $trace message box changed before sending"
+}
+if ($withCommand) { [System.Windows.Forms.SendKeys]::SendWait('^{ENTER}') } else { [System.Windows.Forms.SendKeys]::SendWait('{ENTER}') }
+Write-Output "$trace pressed $(if ($withCommand) { 'ctrl-enter' } else { 'enter' })"
+`;
+
+async function pressSendWindows(expected: string, withModifier: boolean): Promise<string> {
+  const encodedScript = Buffer.from(WINDOWS_PRESS_SEND_SCRIPT, "utf16le").toString("base64");
+  try {
+    const { stdout } = await execFileAsync(
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encodedScript],
+      {
+        env: { ...process.env, GROK_BOTS_EXPECTED: expected, GROK_BOTS_MOD_ENTER: withModifier ? "1" : "0" },
+        windowsHide: true,
+        timeout: 25000,
+      },
+    );
+    return stdout.trim();
+  } catch (error) {
+    // The default message repeats the whole encoded command line; use the script's own error instead.
+    const stderr = error instanceof Error && "stderr" in error ? String(error.stderr).trim().split(/\r?\n/)[0] : "";
+    throw new Error(stderr || "PowerShell couldn't press Enter in Grok Bot");
+  }
+}
+
+async function pressSendMacOS(text: string, withCommand: boolean): Promise<string> {
   return runAppleScript(
     `
 on squeeze(t)

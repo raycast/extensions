@@ -6,16 +6,18 @@ Send a prompt to any of your Grok Bots from Raycast.
 Chat with Grok Bot   [summarize this week's AI news]
 ```
 
-Run **Chat with Grok Bot** with an optional prompt. It opens a list of your Bots. Type to filter (`ad` → *Ada · Research Bot*), then press ↩ to send the prompt to the Bot you select. If you didn't give a prompt, ↩ opens a form for writing one. Each Bot shows a preview of its latest message to you, plus unread counts and pins. Press ⌘Y (**Show Recent Messages**) to open a side panel with the selected Bot's recent chat, newest first, so you can see where things left off; it stays open until you close it.
+Run **Chat with Grok Bot** with an optional prompt. It opens a list of your Bots. Type to filter (`ad` → *Ada · Research Bot*), then press ↩ to send the prompt to the Bot you select. If you didn't give a prompt, ↩ opens a form for writing one. Each Bot shows a preview of its latest message to you, plus unread counts and pins. Press ⌘Y (Ctrl+Y on Windows, **Show Recent Messages**) to open a side panel with the selected Bot's recent chat, newest first, so you can see where things left off; it stays open until you close it.
 
 Choose how Bots are ordered with **Sort Bots By** in the extension's preferences: **Most Used** (default), **Latest Activity**, **Grok Bot Sidebar Order** (grouped into your Grok Bot sidebar sections), or **Name**.
 
 ## Requirements
 
-- macOS with the [Grok Bot](https://docs.x.ai/grok-bot) desktop app installed and signed in.
-- For auto-send: two macOS permissions for Raycast (see [Allow auto-send](#allow-auto-send)).
+- macOS or Windows with the [Grok Bot](https://docs.x.ai/grok-bot) desktop app installed and signed in.
+- For auto-send on macOS: two macOS permissions for Raycast (see [Allow auto-send](#allow-auto-send)). Windows needs no extra setup.
 
 ## Allow auto-send
+
+On Windows, auto-send works without any setup: Raycast brings Grok Bot to the front, reads the message box through UI Automation, and presses Enter (or Ctrl+Enter). Only the confirmation for prompt links has to be off (see [How prompts are sent](#how-prompts-are-sent)). The rest of this section is about macOS.
 
 Grok Bot's prompt links only fill in the message box. Auto-send, which is on by default, then presses Return in Grok Bot for you, and macOS has to allow Raycast to do that. In **System Settings → Privacy & Security**, turn on:
 
@@ -31,7 +33,7 @@ macOS usually asks for the Automation permission the first time you send a promp
   ```
 
   This resets every Automation permission Raycast has, so other Raycast features that control apps will ask again once.
-- Each auto-send attempt is logged to `~/Library/Application Support/com.raycast.macos/extensions/grok-bots/auto-send.log`. Errors there name the step that failed; `-1743` means the Automation permission is missing. The log records only timings and lengths, never message text.
+- Each auto-send attempt is logged to `auto-send.log` in the extension's support folder (on macOS `~/Library/Application Support/com.raycast.macos/extensions/grok-bots/auto-send.log`). Errors there name the step that failed; `-1743` means the Automation permission is missing. The log records only timings and lengths, never message text.
 
 Auto-send only presses Return once Grok Bot's message box holds exactly your prompt. If the box holds anything else (for example an unsent draft, which Grok Bot keeps instead of your prompt) or can't be read, it presses nothing and tells you, so an older draft is never sent by mistake.
 
@@ -41,28 +43,28 @@ Don't want auto-send? Turn off **Send automatically** in the extension's prefere
 
 | Method | What happens | Setup |
 | --- | --- | --- |
-| **Prompt link + auto-send** (default) | Opens Grok Bot's [prompt link](https://docs.x.ai/grok-bot/deep-links), which puts your prompt in the Bot's message box, then presses Return (or ⌘Return, if Grok Bot sends that way). | The two permissions above. |
+| **Prompt link + auto-send** (default) | Opens Grok Bot's [prompt link](https://docs.x.ai/grok-bot/deep-links), which puts your prompt in the Bot's message box, then presses Return (or ⌘Return / Ctrl+Enter, if Grok Bot sends that way). | On macOS, the two permissions above. |
 | **Prompt link only** | Same, but you press Return in Grok Bot yourself. | Turn off **Send automatically**. |
-| **Routine webhook** | POSTs `{"prompt": "…", "source": "raycast"}` to one of the Bot's [routine webhooks](https://docs.x.ai/grok-bot/skills-routines-and-automations). The Bot runs in the background and replies in its chat. Grok Bot doesn't open. | **Set Up Webhook…** (⌘⇧W) on a Bot. |
+| **Routine webhook** | POSTs `{"prompt": "…", "source": "raycast"}` to one of the Bot's [routine webhooks](https://docs.x.ai/grok-bot/skills-routines-and-automations). The Bot runs in the background and replies in its chat. Grok Bot doesn't open. | **Set Up Webhook…** (⌘⇧W, Ctrl+Shift+W on Windows) on a Bot. |
 
 - Prompt links can carry up to 1,000 characters. For a longer prompt, the extension copies it to your clipboard and opens the chat for you to paste it.
-- The first time a prompt link opens, Grok Bot may ask you to confirm it. Turn that confirmation off so auto-send works.
+- The first time a prompt link opens, Grok Bot may ask you to confirm it ("This message came from a link"). Turn that confirmation off so auto-send works.
 - To set up a webhook, ask the Bot something like *"Add a routine with a webhook trigger that does whatever I send in the prompt field."* Then open the routine in Grok Bot on desktop and copy **POST to** and **key** into the form. The extension also accepts the full `Authorization: Bearer …` header. The key is kept in Raycast's encrypted local storage.
 
 ## Other actions
 
-- **Open Chat in Grok Bot** (⌘O)
-- **Create Quicklink for <Bot>** (⌘⇧L): adds a Raycast Quicklink, like `Ask Ada {Prompt}`, for a Bot you message often.
+- **Open Chat in Grok Bot** (⌘O, Ctrl+O on Windows)
+- **Create Quicklink for <Bot>** (⌘⇧L, Ctrl+Shift+L on Windows): adds a Raycast Quicklink, like `Ask Ada {Prompt}`, for a Bot you message often.
 - **Copy Bot ID**, **Copy Prompt Link**
 
 ## How your Bots are found
 
-Grok Bot doesn't offer a public API for listing Bots, so the extension reads the Bot list that the Grok Bot desktop app keeps on your Mac in `~/Library/Application Support/Grok Bot`. It only reads, and never changes, the Bot list (names, avatars, pins, sections and unread counts) and the recent messages Grok Bot has saved for each chat, which it uses for the previews and the recent-messages panel. Messages between Bots aren't shown. Images in messages appear as `[image]` placeholders and are never downloaded. The list is reloaded every time you run the command; if you add or rename a Bot while the list is open, use **Reload Bots** (⌘R).
+Grok Bot doesn't offer a public API for listing Bots, so the extension reads the Bot list that the Grok Bot desktop app keeps on your computer in `~/Library/Application Support/Grok Bot` (macOS) or `%APPDATA%\Grok Bot` (Windows). It only reads, and never changes, the Bot list (names, avatars, pins, sections and unread counts) and the recent messages Grok Bot has saved for each chat, which it uses for the previews and the recent-messages panel. Messages between Bots aren't shown. Images in messages appear as `[image]` placeholders and are never downloaded. The list is reloaded every time you run the command; if you add or rename a Bot while the list is open, use **Reload Bots** (⌘R, Ctrl+R on Windows).
 
 This relies on how the current Grok Bot app stores that list, not on a documented format, so a Grok Bot update can break it. If that happens, the command shows "Couldn't load your Grok Bots" instead of a wrong list. If Grok Bot keeps its data somewhere else, set **Grok Bot Data Folder** in the extension's preferences.
 
 ## Privacy
 
-Everything stays on your Mac. The extension makes no network requests except to a routine webhook you set up yourself.
+Everything stays on your computer. The extension makes no network requests except to a routine webhook you set up yourself.
 
 This is an unofficial extension and isn't affiliated with or endorsed by xAI.

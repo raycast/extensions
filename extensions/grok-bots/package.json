@@ -5,13 +5,17 @@
   "description": "Send prompts to your Grok Bot teammates, preview their latest messages and recent chats, and sort Bots by activity, usage, sidebar order or name.",
   "icon": "extension-icon.png",
   "author": "stanleybogode",
+  "contributors": [
+    "Shrp"
+  ],
   "categories": [
     "Productivity",
     "Communication"
   ],
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
@@ -61,7 +65,7 @@
       "type": "checkbox",
       "title": "Delivery",
       "label": "Send automatically (press Return in Grok Bot)",
-      "description": "Grok Bot's prompt links only fill in the message box. When this is on, Raycast waits until your prompt is in the box and presses Return for you. Needs Raycast to be allowed in System Settings → Privacy & Security → Accessibility.",
+      "description": "Grok Bot's prompt links only fill in the message box. When this is on, Raycast waits until your prompt is in the box and presses Return for you. On macOS, needs Raycast to be allowed in System Settings → Privacy & Security → Accessibility.",
       "default": true,
       "required": false
     },
@@ -87,7 +91,7 @@
       "name": "dataDir",
       "type": "directory",
       "title": "Grok Bot Data Folder",
-      "description": "Only needed if Grok Bot stores its data somewhere other than ~/Library/Application Support/Grok Bot.",
+      "description": "Only needed if Grok Bot stores its data somewhere other than ~/Library/Application Support/Grok Bot (macOS) or %APPDATA%\\Grok Bot (Windows).",
       "required": false
     }
   ],

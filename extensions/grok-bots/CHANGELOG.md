@@ -1,5 +1,11 @@
 # Grok Bots Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support: Bots are read from `%APPDATA%\Grok Bot`.
+- Auto-send works on Windows: it brings Grok Bot to the front, checks the message box through UI Automation, and presses Enter (or Ctrl+Enter), with the same "only send your exact prompt" safeguard as on macOS.
+- Webhook and Quicklink shortcuts use Ctrl+Shift on Windows.
+
 ## [Initial Version] - 2026-11-27
 
 - Chat with Grok Bot: pick one of your Grok Bots from a searchable list and send it a prompt.
