@@ -31,6 +31,9 @@
   - Spotify downloads work into a folder with `{` or `}` in its name.
   - A tool path preference set to the folder instead of the program uses the program inside it.
   - An error from a tool too old for an option says to update it; a failed update isn't offered again before every download.
+  - Download History shows why it couldn't be read, with Try Again, instead of looking empty, and checks for missing files without slowing the list.
+  - Transcript downloads use Video: Browser Cookies too, so a members-only video's captions can be saved.
+  - The links in this extension's Store page lead to its guides on GitHub instead of a missing page.
 - gallery-dl's links point to Codeberg, where its development moved.
 - Updated to Raycast API 2.14 (the Node.js 26 runtime), execa 10 and TypeScript 6.
 

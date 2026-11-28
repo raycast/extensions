@@ -2,7 +2,7 @@
 
 Download videos, audio, image galleries, Spotify music, and complete webpages from the web — straight from Raycast. Then chat with AI about any video, post or article.
 
-![The Downloader — Download form](media/the-downloader-1.png)
+![The Downloader — Download form](https://raw.githubusercontent.com/raycast/extensions/main/extensions/the-downloader/media/the-downloader-1.png)
 
 The Downloader started as a fork of [Video Downloader](https://www.raycast.com/vimtor/video-downloader) by vimtor and its contributors — thank you.
 
@@ -59,16 +59,16 @@ In the extension's preferences:
 - **Video: Audio Format** — MP3, M4A, Opus, FLAC or WAV.
 - **Video: Metadata** — write the title, channel, date and chapters into the file, with the thumbnail as cover art.
 - **Video: SponsorBlock** — cut sponsored segments out of YouTube downloads, using [SponsorBlock](https://sponsor.ajay.app)'s community data (yt-dlp asks its server about the video).
-- **Video: Browser Cookies** — use your browser's login for age-restricted, private or members-only videos. See [BROWSER_COOKIES.md](BROWSER_COOKIES.md).
+- **Video: Browser Cookies** — use your browser's login for age-restricted, private or members-only videos. See [BROWSER_COOKIES.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/BROWSER_COOKIES.md).
 
 ## Supported sites
 
-See [SUPPORTED_SITES.md](SUPPORTED_SITES.md).
+See [SUPPORTED_SITES.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/SUPPORTED_SITES.md).
 
 ## Login-gated galleries
 
-To download from sites that require a login, point the extension at a browser you're already signed into. See [BROWSER_COOKIES.md](BROWSER_COOKIES.md).
+To download from sites that require a login, point the extension at a browser you're already signed into. See [BROWSER_COOKIES.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/BROWSER_COOKIES.md).
 
 ## Spotify downloads
 
-Spotify links need a one-time Developer app setup so spotDL can fetch track metadata. See [SPOTIFY.md](SPOTIFY.md).
+Spotify links need a one-time Developer app setup so spotDL can fetch track metadata. See [SPOTIFY.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/SPOTIFY.md).

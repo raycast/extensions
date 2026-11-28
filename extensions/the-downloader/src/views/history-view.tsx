@@ -141,6 +141,10 @@ export function DownloadHistory() {
   // Whether each entry's file is still there. Files can be moved or deleted
   // after the download, so this is re-checked on every read, not only when the list changes.
   const [exists, setExists] = useState<Map<string, boolean | undefined>>(() => new Map());
+  // Why the last read failed, shown instead of an empty list until a read succeeds.
+  const [loadError, setLoadError] = useState<string>();
+  // The read below, for the Try Again action.
+  const reload = useRef<() => Promise<void>>(async () => undefined);
 
   // Bumped by every local change (Remove, Clear): a read that started before
   // it is older than what's on screen and must not be shown.
@@ -160,7 +164,22 @@ export function DownloadHistory() {
       const changesAtStart = localChanges.current;
       try {
         const list = await loadHistory();
-        const presence = new Map(list.map((e) => [e.id, e.filePath ? fs.existsSync(e.filePath) : undefined]));
+        // Checked off the main thread, all at once: a long history, or files on a
+        // slow network drive, must not freeze the list every couple of seconds.
+        const presence = new Map(
+          await Promise.all(
+            list.map(async (e): Promise<[string, boolean | undefined]> => [
+              e.id,
+              e.filePath
+                ? await fs.promises.access(e.filePath).then(
+                    () => true,
+                    () => false,
+                  )
+                : undefined,
+            ]),
+          ),
+        );
+        if (active) setLoadError(undefined);
         const serialized = JSON.stringify(list) + JSON.stringify([...presence]);
         if (active && changesAtStart === localChanges.current && serialized !== last) {
           last = serialized;
@@ -168,13 +187,18 @@ export function DownloadHistory() {
           setExists(presence);
         }
       } catch (error) {
-        // An unreadable store must not leave the list loading forever; the next tick tries again.
+        // An unreadable store must not leave the list loading forever, nor look
+        // empty: the error is shown until a read (the next tick, or Try Again) works.
         console.error("Could not load the download history", error);
-        if (active) setEntries((current) => current ?? []);
+        if (active) {
+          setLoadError(errorText(error));
+          setEntries((current) => current ?? []);
+        }
       } finally {
         reading = false;
       }
     };
+    reload.current = load;
     void load();
     const timer = setInterval(load, 2000);
     return () => {
@@ -238,7 +262,20 @@ export function DownloadHistory() {
         </List.Dropdown>
       }
     >
-      {entries?.length === 0 && (
+      {entries?.length === 0 && loadError && (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn't read the download history"
+          description={loadError}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => void reload.current()} />
+              {newDownload}
+            </ActionPanel>
+          }
+        />
+      )}
+      {entries?.length === 0 && !loadError && (
         <List.EmptyView
           icon={Icon.Download}
           title="No downloads yet"

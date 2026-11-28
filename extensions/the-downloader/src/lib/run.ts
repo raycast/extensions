@@ -21,24 +21,38 @@ export const MAX_RETAINED_OUTPUT = 1_000_000;
 const tail = (text: string) => (text.length > MAX_RETAINED_OUTPUT ? text.slice(-MAX_RETAINED_OUTPUT) : text);
 
 /** Grace period after SIGTERM before escalating to SIGKILL, so a child that ignores SIGTERM still exits and `close` still fires. */
-const KILL_GRACE_MS = 4_000;
+export const KILL_GRACE_MS = 4_000;
 
 /** The longest delay a timer takes (2^31-1 ms, about 24.8 days); a longer one fires immediately. */
 export const MAX_TIMER_MS = 2_147_483_647;
 
 /**
- * True when yt-dlp says the link has nothing it can download (no extractor for
- * the site, or a page without a video) rather than a network, sign-in or tool
- * failure. The form probes links with yt-dlp, so it knows this before a
- * download starts.
+ * The line of a tool's output that says why it failed: yt-dlp's last
+ * `ERROR:` line, or else the last few lines. Warnings printed before it
+ * (yt-dlp prints many) are never the reason.
  */
-export function isNoMediaError(text: string): boolean {
-  return /Unsupported URL|No video formats found|There's no video in this|No media found/i.test(text);
+function failureLine(text: string): string {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const errors = lines.filter((line) => /^ERROR:/i.test(line));
+  return errors.at(-1) ?? lines.slice(-3).join("\n");
 }
 
-/** What the form and the download view say when yt-dlp finds nothing to download at the link. */
-export const NO_MEDIA_MESSAGE =
-  "No video or audio on this page that yt-dlp can download. To keep the page, choose Website.";
+/**
+ * True when the tool failed because the link has nothing it can download (no
+ * extractor for the site, or a page without a video) rather than a network,
+ * sign-in or tool failure. Only the failure line counts: the same words in an
+ * earlier warning don't. The form probes links with yt-dlp, so it knows this
+ * before a download starts.
+ */
+export function isNoMediaError(text: string): boolean {
+  return /Unsupported URL|No video formats found|There's no video in this|No media found/i.test(failureLine(text));
+}
+
+/** What a failure says when the tool finds nothing to download at the link (the form, the download view, the chat). */
+export const NO_MEDIA_MESSAGE = "No video, audio or images at this link that can be downloaded.";
 
 /**
  * The part of a tool's error output worth showing in a toast: yt-dlp's last
@@ -53,12 +67,7 @@ export function errorSummary(text: string, max = 500): string {
     const tool = /^([\w.-]+):\s*error:/m.exec(text)?.[1] ?? "The tool";
     return `${tool} doesn't know ${unknown[1]}: it is older than this extension expects. Update it (Update Libraries), then try again.`;
   }
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const errors = lines.filter((line) => /^ERROR:/i.test(line));
-  const picked = errors.at(-1) ?? lines.slice(-3).join("\n");
+  const picked = failureLine(text);
   return picked.length > max ? `${picked.slice(0, max)}…` : picked;
 }
 

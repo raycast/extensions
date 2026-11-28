@@ -21,4 +21,4 @@ Default format, quality, and download folder are set in the extension's Raycast 
 
 ## License
 
-Released under the MIT License — see [LICENSE](LICENSE).
+Released under the MIT License — see [LICENSE](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/LICENSE).

@@ -297,7 +297,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           {
             signal: metaAbortable.current?.signal,
             timeoutMs: getIdleTimeoutMs(),
-            cookiesFromBrowser: getVideoExtras().cookiesFromBrowser,
+            // Browser logins only for a known video site. Any other page is
+            // probed too — whatever is picked — and reading the browser's cookie
+            // store for every pasted article would bring up its Keychain prompt.
+            cookiesFromBrowser: detectSource(u) === "video" ? getVideoExtras().cookiesFromBrowser : undefined,
           },
         );
         return { url: u, video: { ...data, title: sanitizeVideoTitle(data.title) } };
@@ -569,7 +572,13 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       const { signal, done } = startAbortable(toast, session);
       session.working();
       try {
-        const { transcript, title } = await extractTranscript(submitUrl, "en", signal);
+        // The same logins the details probe used, so a members-only video that offered Transcript can give it.
+        const { transcript, title } = await extractTranscript(
+          submitUrl,
+          "en",
+          signal,
+          getVideoExtras().cookiesFromBrowser,
+        );
         const filePath = uniqueFilePath(folder, title, "txt");
         // Defense in depth: sanitizeVideoTitle already strips separators, but
         // assert the resolved path stays inside the chosen folder before writing

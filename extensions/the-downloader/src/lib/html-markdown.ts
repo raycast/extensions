@@ -57,11 +57,25 @@ const SKIPPED = new Set(["script", "style", "template", "svg", "button", "form",
 /** Stands for a `<br>` until whitespace has been collapsed around it. */
 const BREAK = "\u0000";
 
+/**
+ * Stand-ins (private-use characters) that keep code's own whitespace out of
+ * the prose clean-up — collapsing spaces, squeezing blank lines — and are put
+ * back at the end: a space and a tab inside inline code, and an empty line
+ * inside a code block.
+ */
+const CODE_SPACE = "\ue000";
+const CODE_TAB = "\ue001";
+const CODE_BLANK_LINE = "\ue002";
+const STAND_INS = /[\ue000-\ue002]/g;
+
+/** Code's spaces and tabs as stand-ins; any stand-in already in the page's text is dropped. */
+const guardCode = (text: string) => text.replace(STAND_INS, "").replace(/ /g, CODE_SPACE).replace(/\t/g, CODE_TAB);
+
 const isElement = (node: Node): node is Element => node.nodeType === ELEMENT;
 
 /** Backslash the characters Markdown would read as formatting. */
 function escapeText(text: string): string {
-  return text.replace(/[\\`*_[\]<]/g, "\\$&");
+  return text.replace(STAND_INS, "").replace(/[\\`*_[\]<]/g, "\\$&");
 }
 
 /** A paragraph that would start like a heading, a quote or a list item gets that start escaped. */
@@ -91,14 +105,18 @@ function wrap(inner: string, marker: string): string {
   return `${match[1]}${marker}${match[2]}${marker}${match[3]}`;
 }
 
-/** Inline code, with a fence longer than any backtick run inside it. */
+/**
+ * Inline code, with a fence longer than any backtick run inside it. Its spaces
+ * stay as they are (`"a  b"` is a different value from `"a b"`); only line
+ * breaks become spaces, as Markdown reads them in a code span anyway.
+ */
 function codeSpan(text: string): string {
-  const value = text.replace(/\s+/g, " ");
+  const value = text.replace(/\r\n?|\n/g, " ");
   if (!value.trim()) return "";
   const longest = Math.max(0, ...(value.match(/`+/g) ?? []).map((run) => run.length));
   const fence = "`".repeat(longest + 1);
   const pad = value.startsWith("`") || value.endsWith("`") ? " " : "";
-  return `${fence}${pad}${value}${pad}${fence}`;
+  return `${fence}${guardCode(`${pad}${value}${pad}`)}${fence}`;
 }
 
 /** The image's address: `src`, a lazy-loading attribute, or the first `srcset` entry. Inline `data:` images are left out. */
@@ -223,11 +241,19 @@ function fenced(el: Element): string {
   const language = /(?:^|\s)(?:language|lang)-([\w#+.-]+)/.exec(
     `${el.getAttribute("class") ?? ""} ${code?.getAttribute("class") ?? ""}`,
   )?.[1];
-  const text = (el.textContent ?? "").replace(/\r\n?/g, "\n").replace(/^\n+|\s+$/g, "");
+  const text = (el.textContent ?? "")
+    .replace(STAND_INS, "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/^\n+|\s+$/g, "");
   if (!text) return "";
   const longest = Math.max(2, ...(text.match(/`+/g) ?? []).map((run) => run.length));
   const fence = "`".repeat(longest + 1);
-  return `${fence}${language ?? ""}\n${text}\n${fence}`;
+  // Empty lines are marked, so the document's blank-line squeeze leaves the code's own alone.
+  const body = text
+    .split("\n")
+    .map((line) => line || CODE_BLANK_LINE)
+    .join("\n");
+  return `${fence}${language ?? ""}\n${body}\n${fence}`;
 }
 
 function table(el: Element, base: string | undefined): string {
@@ -321,6 +347,9 @@ export function htmlToMarkdown(html: string, baseUrl?: string): string {
   const markdown = blocksOf(body, baseUrl)
     .join("\n\n")
     .replace(/\n{3,}/g, "\n\n")
-    .trim();
+    .trim()
+    .replace(new RegExp(CODE_SPACE, "g"), " ")
+    .replace(new RegExp(CODE_TAB, "g"), "\t")
+    .replace(new RegExp(CODE_BLANK_LINE, "g"), "");
   return markdown ? `${markdown}\n` : "";
 }

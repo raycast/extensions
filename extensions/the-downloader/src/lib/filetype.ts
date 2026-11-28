@@ -83,12 +83,13 @@ export function probesWithYtdlp(source: SourceType): boolean {
 /**
  * What the probed media can't give, by filetype. Only explicit evidence
  * counts: a format list where every format lacks video (or sound), no caption
- * tracks, no thumbnail. A result without formats (a playlist, an extractor
- * that lists none) rules nothing out.
+ * tracks, no thumbnail. A playlist's probe describes only its first entry,
+ * and a result without formats (an extractor that lists none) says nothing:
+ * neither rules anything out.
  */
 function mediaGaps(video: Video): Partial<Record<Filetype, string>> {
   const formats = video.formats ?? [];
-  if (formats.length === 0) return {};
+  if (formats.length === 0 || video.playlist_index != null) return {};
   const gaps: Partial<Record<Filetype, string>> = {};
   if (formats.every((f) => f.vcodec === "none")) gaps.video = "the link has audio only";
   if (formats.every((f) => f.acodec === "none")) gaps.audio = "the video has no sound";

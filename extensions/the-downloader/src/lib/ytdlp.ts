@@ -3,7 +3,15 @@ import path from "node:path";
 import { execa } from "execa";
 import { Video } from "../types.js";
 import { PROGRESS_TEMPLATE, YtdlpEvent, parseYtdlpLine } from "./progress.js";
-import { AbortError, DEFAULT_IDLE_MS, MAX_TIMER_MS, RunResult, killProcessTree, runWithWatchdog } from "./run.js";
+import {
+  AbortError,
+  DEFAULT_IDLE_MS,
+  KILL_GRACE_MS,
+  MAX_TIMER_MS,
+  RunResult,
+  killProcessTree,
+  runWithWatchdog,
+} from "./run.js";
 
 /**
  * Pull the first JSON object out of yt-dlp's stdout. yt-dlp can emit `[debug]`
@@ -77,7 +85,13 @@ export async function fetchVideoInfo(
     detached: process.platform !== "win32",
   });
   let timedOut = false;
-  const stop = () => killProcessTree(subprocess);
+  // SIGTERM first; whatever ignores it (a stalled deno) gets SIGKILL after a
+  // grace period, as in runWithWatchdog, so the promise always settles.
+  let killTimer: ReturnType<typeof setTimeout> | undefined;
+  const stop = () => {
+    killProcessTree(subprocess);
+    killTimer ??= setTimeout(() => killProcessTree(subprocess, "SIGKILL"), KILL_GRACE_MS);
+  };
   const timer =
     opts?.timeoutMs && opts.timeoutMs > 0
       ? setTimeout(
@@ -99,6 +113,7 @@ export async function fetchVideoInfo(
     throw error;
   } finally {
     if (timer) clearTimeout(timer);
+    if (killTimer) clearTimeout(killTimer);
     opts?.signal?.removeEventListener("abort", stop);
   }
 }

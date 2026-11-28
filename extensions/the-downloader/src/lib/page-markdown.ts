@@ -10,6 +10,8 @@ import { uniqueFilePath } from "./unique-path.js";
 // reader Chat About Link uses, so it never reaches the local network.
 
 const MAX_NAME = 120;
+/** Leaves room in a 255-byte file name for a ` (99)` copy number and `.md`. */
+const MAX_NAME_BYTES = 200;
 /** Characters no file name may hold on Windows (which covers macOS too), and control characters. */
 // eslint-disable-next-line no-control-regex
 const UNSAFE = /[<>:"/\\|?*\u0000-\u001f\u007f]+/g;
@@ -23,12 +25,18 @@ export function markdownBasename(title: string | undefined, url: string): string
     .replace(/\s+/g, " ")
     .trim()
     .replace(/^[. ]+|[. ]+$/g, "");
-  // Cut on a code point, not inside a surrogate pair.
-  if ([...name].length > MAX_NAME)
-    name = [...name]
-      .slice(0, MAX_NAME)
-      .join("")
-      .replace(/[. ]+$/g, "");
+  // Cut on a code point, not inside a surrogate pair: at most MAX_NAME
+  // characters and MAX_NAME_BYTES of UTF-8. File names top out at 255 bytes,
+  // and a CJK title is three bytes a character, before ` (2).md` is added.
+  const kept: string[] = [];
+  let bytes = 0;
+  for (const char of name) {
+    const size = Buffer.byteLength(char, "utf8");
+    if (kept.length === MAX_NAME || bytes + size > MAX_NAME_BYTES) break;
+    kept.push(char);
+    bytes += size;
+  }
+  if (kept.length < [...name].length) name = kept.join("").replace(/[. ]+$/g, "");
   if (!name) name = webpageFilename(url).replace(/\.html$/, "");
   return RESERVED.test(name) ? `_${name}` : name;
 }
