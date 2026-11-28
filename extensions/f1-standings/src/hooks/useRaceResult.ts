@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { showToast, Toast, useNavigation } from "@raycast/api";
 import { RaceResult, ResultResponse } from "../types";
-import { BASE_API_URL } from "../constants";
+import { API_HEADERS, BASE_API_URL } from "../constants";
 
 type State = {
   isLoading: boolean;
@@ -28,6 +28,7 @@ const useRaceResult = (season: string | null, round: string | null): [RaceResult
       try {
         const res = await fetch(`${BASE_API_URL}/f1/${season}/${round}/results.json`, {
           method: "get",
+          headers: API_HEADERS,
           signal: cancelRef.current.signal,
         });
         const data = (await res.json()) as ResultResponse;

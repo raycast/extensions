@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { DriverStanding, DriverStandingResponse } from "../types";
-import { BASE_API_URL } from "../constants";
+import { API_HEADERS, BASE_API_URL } from "../constants";
 
 type State = {
   driverStandings: DriverStanding[];
@@ -25,6 +25,7 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
       try {
         const res = await fetch(`${BASE_API_URL}/f1/${season}/driverStandings.json`, {
           method: "get",
+          headers: API_HEADERS,
           signal: cancelRef.current.signal,
         });
         const data = (await res.json()) as DriverStandingResponse;

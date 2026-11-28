@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { QualifyingResultResponse } from "../types";
-import { BASE_API_URL } from "../constants";
+import { API_HEADERS, BASE_API_URL } from "../constants";
 import { showFailureToast } from "@raycast/utils";
 
 type Input = {
@@ -21,6 +21,7 @@ export default async function qualifyingResults(input: Input) {
   try {
     const res = await fetch(`${BASE_API_URL}/f1/${input.year}/${input.round}/qualifying.json`, {
       method: "get",
+      headers: API_HEADERS,
     });
     if (res.status !== 200) {
       throw new Error("Invalid HTPTS status code");
