@@ -1,5 +1,10 @@
 # WordReference Dictionary Translation Changelog
 
+## [Fix Translation Unavailable Error] - {PR_MERGE_DATE}
+
+- Send the cookie WordReference's bot check expects, so translations load again instead of showing "Translation unavailable"
+- Request WordReference over HTTP/1.1, so the command no longer crashes with "SocketError: other side closed" a few seconds after a translation loads
+
 ## [Fix Translations Not Loading] - 2026-10-09
 
 - Send an extension user agent instead of a browser one, because WordReference's bot check now blocks requests that claim to be a browser

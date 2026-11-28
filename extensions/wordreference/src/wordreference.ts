@@ -1,16 +1,35 @@
+import { Agent, fetch } from "undici";
+
 export interface WordReferenceErrorResponse {
   type: "error";
   status: number;
   statusText: string;
 }
 
-// WordReference's bot check challenges clients that claim to be a browser, so identify as the extension instead
+/* WordReference answers HTTP 418 with a JavaScript challenge that sets nginx_wr_human=1 in the browser; Raycast runs no JavaScript, so the cookie is sent up front */
 export const wordReferenceRequestHeaders = {
   "User-Agent": "Raycast WordReference Extension",
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
   Referer: "https://www.wordreference.com/",
+  Cookie: "nginx_wr_human=1",
 };
+
+export type WordReferenceTextResponse = { type: "success"; body: string } | WordReferenceErrorResponse;
+
+/* WordReference closes every HTTP/2 connection with a GOAWAY about two seconds after responding, and Raycast's built-in fetch raises that close as an uncaught "SocketError: other side closed" that crashes the command, so requests go over HTTP/1.1 */
+const http1Agent = new Agent({ allowH2: false });
+
+export async function fetchWordReferenceText(url: string, signal?: AbortSignal): Promise<WordReferenceTextResponse> {
+  const response = await fetch(url, { headers: wordReferenceRequestHeaders, dispatcher: http1Agent, signal });
+  const body = await response.text();
+
+  if (response.status >= 400) {
+    return { type: "error", status: response.status, statusText: response.statusText };
+  }
+
+  return { type: "success", body };
+}
 
 export function getErrorMarkdown(status: number, statusText: string): string {
   return `# ${getTranslationErrorTitle(status)}
@@ -58,6 +77,10 @@ ${getProbableCauses(status)}
 ## Technical details
 
 HTTP ${status} ${statusText}`;
+}
+
+export function getWordReferenceAutocompleteUrl(dictionary: string, query: string): string {
+  return `https://www.wordreference.com/autocomplete?dict=${dictionary}&query=${encodeURIComponent(query)}`;
 }
 
 export function getWordReferenceUrl(baseUrl: string, word: string): string {
