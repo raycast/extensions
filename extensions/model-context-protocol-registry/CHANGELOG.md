@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Call Me MCP Server] - {PR_MERGE_DATE}
+
+- Add Call Me (/call-me) to the official registry: let your agent call their human. It rings your own phone through the /call-me app for iPhone or Android, reads the agent's message aloud and returns your spoken reply, and sends texts. Hosted Streamable HTTP server at https://callmemcp.com/mcp with no sign-in or API key (pass the number from the app's My Number screen as `to`), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Requires the /call-me app subscription (3-day free trial).
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
