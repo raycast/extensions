@@ -36,10 +36,10 @@ Suggests a reply to a message, in the language of that message. To always reply 
 ### How to use
 1. Select the message (or the last few, for context)
 2. Press the hotkey: the suggested reply shows and can be edited
-3. Not quite right? Type the key point in **💡 Idea** (${lang} is fine) and press **↵**. Each idea revises the current version.
+3. Not quite right? Type the key point in **💡 Idea** (${lang} is fine) and press **⌘↵**. Each idea revises the current version.
 
 ### In the result
-- **↵** Copy the reply (or apply the idea while typing one)
+- **⌘↵** Copy the reply (or apply the idea, once one is typed)
 - **⌘B** Continue with… Translate, to check the reply in ${lang}
 - **⌘R** Start over
 
@@ -51,14 +51,14 @@ Rewrites an English draft into correct, natural English. Plus **📘 Lessons**: 
 ### How to use
 1. Type the draft in the chat box and select it
 2. Press the hotkey: the rewrite shows and can be edited
-3. Want to add a point or change the tone? Type it in **💡 Idea** and press **↵**
-4. **↵** replaces the selected draft with the new version
+3. Want to add a point or change the tone? Type it in **💡 Idea** and press **⌘↵**
+4. **⌘↵** replaces the selected draft with the new version
 
 ### ⚡ Quick Replace
 Turn it on in Settings: expand **AI Buddy**, select **Buddy Polish English**, tick **Quick Replace** (**⌘⇧R** here opens Settings). When on, the hotkey replaces the selected draft right away: no result view, no lessons. **⌘Z** in the app undoes it.
 
 ### In the result
-- **↵** Replace draft (or apply the idea while typing one)
+- **⌘↵** Replace draft (or apply the idea, once one is typed)
 - **⌘⇧C** Copy
 - **⌘B** Continue with… Translate, to check the new version in ${lang}
 - **⌘R** Start over
@@ -91,8 +91,8 @@ Suggested hotkeys: **⌃⌘T** Translate · **⌃⌘R** Draft Reply · **⌃⌘E
     "Describe the role, tone, rules and examples. The answer format is handled for you. Save empty = use the default. ⌘↵ to save.",
 
   ideaPlaceholder: {
-    reply: "Input idea (e.g. not yet, will send at 9am), then ↵",
-    rewrite: "Input idea (e.g. add a point, more polite), then ↵",
+    reply: "Input idea (e.g. not yet, will send at 9am), then ⌘↵",
+    rewrite: "Input idea (e.g. add a point, more polite), then ⌘↵",
   },
   applied: "Applied",
   direction: "Direction",

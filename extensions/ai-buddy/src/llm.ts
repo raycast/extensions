@@ -219,7 +219,7 @@ const effortMemo = new Map<string, (string | undefined)[]>();
 
 /** Text of one SSE `data:` payload, or "end" at the end of the stream. Throws on an error event. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function readEvent(protocol: Protocol, event: Record<string, any>, model: string): string | "end" {
+function readEvent(protocol: Protocol, event: Record<string, any>, model: string): string | "end" | { last: string } {
   if (protocol === "anthropic") {
     if (event.type === "error")
       throw new Error(`Stream error (${model}): ${event.error?.message ?? JSON.stringify(event.error)}`);
@@ -227,7 +227,9 @@ function readEvent(protocol: Protocol, event: Record<string, any>, model: string
     return event.type === "content_block_delta" && event.delta?.type === "text_delta" ? (event.delta.text ?? "") : "";
   }
   if (event.error) throw new Error(`Stream error (${model}): ${event.error.message ?? JSON.stringify(event.error)}`);
-  return event.choices?.[0]?.delta?.content ?? "";
+  const text = event.choices?.[0]?.delta?.content ?? "";
+  // A finish_reason also ends the answer (some servers send no [DONE] after it).
+  return event.choices?.[0]?.finish_reason ? { last: text } : text;
 }
 
 /** Streams the answer: OpenAI-compatible /chat/completions, or the Claude Messages API. */
@@ -290,6 +292,7 @@ async function* stream(
   const { protocol } = getConfig().provider;
   const decoder = new TextDecoder();
   let buffer = "";
+  let finished = false; // the server said the answer is complete
   // Returns true at the end of the stream.
   function* parse(line: string): Generator<string, boolean> {
     if (!line.startsWith("data:")) return false; // also skips Anthropic's "event:" lines: the JSON carries the type
@@ -302,7 +305,12 @@ async function* stream(
       return false; // skip a malformed / keep-alive chunk instead of failing the whole answer
     }
     const text = readEvent(protocol, event, model);
-    if (text === "end") return true;
+    if (text === "end") return (finished = true);
+    if (typeof text === "object") {
+      finished = true;
+      if (text.last) yield text.last;
+      return false; // usage or [DONE] may still follow
+    }
     if (text) yield text;
     return false;
   }
@@ -314,4 +322,7 @@ async function* stream(
     for (const line of lines) if (yield* parse(line)) return;
   }
   yield* parse(buffer.trim()); // last event without a trailing newline
+  // The connection closed before the end of the answer (a proxy or network cut): not a full answer,
+  // so it is neither cached nor pasted.
+  if (!finished) throw new Error(`The answer from ${model} was cut off: try again.`);
 }

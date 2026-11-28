@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { getConfig, isRecommendedModel, listModels, modelFor } from "./llm";
 import { chosenModel, ModelSlot, setModel } from "./model-store";
-import { checkKey, keyStatus, KeyStatus } from "./key-status";
+import { checkKey, KeyStatus } from "./key-status";
 import { AISetup } from "./setup-view";
 
 const BUILT_IN: { slot: ModelSlot; title: string; icon: string }[] = [
@@ -18,22 +18,26 @@ const BUILT_IN: { slot: ModelSlot; title: string; icon: string }[] = [
  */
 export function KeyStatusSection({ onChanged }: { onChanged?: () => void }) {
   const { provider } = getConfig();
-  const [status, setStatus] = useState<KeyStatus | undefined>(keyStatus);
-  const [checking, setChecking] = useState(status === undefined);
-
-  const run = (force: boolean) => {
-    const controller = new AbortController();
-    setChecking(true);
-    checkKey(controller.signal, force)
-      .then((s) => !controller.signal.aborted && setStatus(s))
-      .finally(() => !controller.signal.aborted && setChecking(false));
-    return controller;
+  const abortable = useRef<AbortController>(null);
+  const force = useRef(false); // Check Again skips the remembered result
+  // checkKey answers at once when this key was checked before.
+  const {
+    data: status,
+    isLoading: checking,
+    revalidate,
+  } = usePromise(
+    async (): Promise<KeyStatus> => {
+      const again = force.current;
+      force.current = false;
+      return checkKey(abortable.current?.signal ?? new AbortController().signal, again);
+    },
+    [],
+    { abortable },
+  );
+  const run = (again: boolean) => {
+    force.current = again;
+    revalidate();
   };
-  useEffect(() => {
-    if (status) return;
-    const controller = run(false);
-    return () => controller.abort();
-  }, []);
 
   const subtitle = checking ? "Checking…" : status?.ok ? `Connected · ${status.count} models` : (status?.error ?? "");
   const state = checking
@@ -53,7 +57,6 @@ export function KeyStatusSection({ onChanged }: { onChanged?: () => void }) {
     />
   );
   const afterSetup = () => {
-    setStatus(keyStatus());
     run(false); // AI Setup remembered its check, so this is instant
     onChanged?.();
   };
@@ -120,7 +123,7 @@ export function ModelsList({ onChanged }: { onChanged?: () => void }) {
   };
 
   return (
-    <List navigationTitle={`Models · ${provider.name}`}>
+    <List navigationTitle={`Models · ${provider.name}`} searchBarPlaceholder="Search commands">
       <List.Section title="All Commands">{row("default", "All Commands", "buddy.png")}</List.Section>
       <List.Section title="Commands">{BUILT_IN.map((b) => row(b.slot, b.title, b.icon))}</List.Section>
     </List>
@@ -134,28 +137,20 @@ export function ModelsList({ onChanged }: { onChanged?: () => void }) {
 export function ModelPicker({ slot, title, onChanged }: { slot: ModelSlot; title: string; onChanged?: () => void }) {
   const { pop } = useNavigation();
   const { provider, model: allCommands } = getConfig();
-  const [models, setModels] = useState<string[]>();
-  const [error, setError] = useState<string>();
+  const abortable = useRef<AbortController>(null);
+  const { data: models, error: loadError } = usePromise(
+    () => listModels(abortable.current?.signal ?? new AbortController().signal),
+    [],
+    {
+      abortable,
+      onData: (list) => void showToast({ style: Toast.Style.Success, title: `Connected · ${list.length} models` }),
+      onError: (e) => void showFailureToast(e.message.split("\n")[0], { title: "Could not load models" }),
+    },
+  );
+  const error = loadError?.message;
   const [typed, setTyped] = useState("");
   const [view, setView] = useState<"recommended" | "all">("recommended");
   const current = chosenModel(provider.id, slot);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    listModels(controller.signal)
-      .then(async (list) => {
-        setModels(list);
-        await showToast({ style: Toast.Style.Success, title: `Connected · ${list.length} models` });
-      })
-      .catch(async (e) => {
-        if (controller.signal.aborted) return;
-        const message = e instanceof Error ? e.message : String(e);
-        setError(message);
-        setModels([]);
-        await showFailureToast(message.split("\n")[0], { title: "Could not load models" });
-      });
-    return () => controller.abort();
-  }, []);
 
   const choose = async (model: string | undefined) => {
     setModel(provider.id, slot, model);
@@ -172,12 +167,13 @@ export function ModelPicker({ slot, title, onChanged }: { slot: ModelSlot; title
       : `Same as All Commands (${allCommands})`;
   const name = typed.trim();
   // Recommended by default; typing searches every model.
-  const shown =
-    view === "all" || name ? (models ?? []) : (models ?? []).filter((m) => isRecommendedModel(m) || m === current);
+  const recommended = (models ?? []).filter((m) => isRecommendedModel(m) || m === current);
+  // A server whose models all look "not recommended" (llama3.2:latest…) still shows them.
+  const shown = view === "all" || name || !recommended.length ? (models ?? []) : recommended;
 
   return (
     <List
-      isLoading={models === undefined}
+      isLoading={models === undefined && !error}
       navigationTitle={`Model · ${title}`}
       filtering
       searchBarPlaceholder="Search models, or type a model name"

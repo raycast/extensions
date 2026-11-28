@@ -66,9 +66,11 @@ export const cleanOutput = (output: string, input: string) =>
  */
 export const stripImages = (markdown: string) =>
   markdown
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
-    .replace(/!\[[^\]]*\]\[[^\]]*\]/g, "")
-    .replace(/<img\b[^>]*>/gi, "");
+    // Inline, full, collapsed and shortcut images: ![a](url), ![a][ref], ![a][], ![a]
+    .replace(/!\[[^\]]*\](\([^)]*\)|\[[^\]]*\])?/g, "")
+    // Reference definitions ([ref]: url), which a shortcut image elsewhere could point at
+    .replace(/^ {0,3}\[[^\]]+\]:[ \t]*\S+.*$/gm, "")
+    .replace(/<(img|picture|source|image|svg)\b[^>]*>/gi, "");
 
 // On an error: the provider, key or model is the usual cause. Fix it, come back, then ⌘R.
 const settingsAction = <Action.Push title="AI Setup" icon={Icon.Plug} target={<AISetup />} />;
@@ -224,8 +226,8 @@ function useLLM({ mode, text, startedAt, replyLanguage }: LLMRequest) {
 }
 
 /**
- * Reply / Rewrite: a form to tweak the answer, or type an idea and press Enter to revise the
- * current version (edits included). Without an idea, Enter copies (Reply) or replaces the
+ * Reply / Rewrite: a form to tweak the answer, or type an idea and press ⌘↵ to revise the
+ * current version (edits included). Without an idea, ⌘↵ copies (Reply) or replaces the
  * still-selected draft (Rewrite).
  */
 function EditableForm(request: LLMRequest) {

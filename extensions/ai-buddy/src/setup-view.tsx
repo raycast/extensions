@@ -1,17 +1,12 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { Connection, connection, saveConnection } from "./connection";
 import { configFor, isInsecureEndpoint, isRecommendedModel, listModels } from "./llm";
 import { chosenModel, setModel } from "./model-store";
 import { rememberStatus } from "./key-status";
 import { PROVIDERS, ProviderId } from "./providers";
 import { hasRaycastAI } from "./raycast-ai";
-
-type Check =
-  | { state: "waiting"; hint: string }
-  | { state: "checking" }
-  | { state: "ok"; models: string[] }
-  | { state: "error"; message: string };
 
 const CHECK_DELAY_MS = 700; // after the last keystroke
 
@@ -27,53 +22,52 @@ export function AISetup({ onSaved, isRoot = false }: { onSaved?: () => void; isR
   const [providerId, setProviderId] = useState<ProviderId>(saved?.provider ?? (hasRaycastAI() ? "raycast" : "gemini"));
   const [keys, setKeys] = useState<Connection["keys"]>(saved?.keys ?? {});
   const [host, setHost] = useState(saved?.host ?? "");
-  const [check, setCheck] = useState<Check>({ state: "checking" });
-  const [attempt, setAttempt] = useState(0); // ⌘R checks again
   const provider = PROVIDERS[providerId];
   const isCustom = providerId === "custom";
   const needsKey = providerId !== "custom" && providerId !== "raycast";
   const key = keys[providerId] ?? "";
-  const draft: Connection = { provider: providerId, host, keys };
   const [model, setModelName] = useState(chosenModel(providerId, "default") ?? provider.defaultModel);
 
   // A new provider starts on its own chosen model.
   useEffect(() => setModelName(chosenModel(providerId, "default") ?? PROVIDERS[providerId].defaultModel), [providerId]);
 
+  // Checked once typing pauses: the host and key as they were then.
+  const [typed, setTyped] = useState({ providerId, host, key });
   useEffect(() => {
-    if (isCustom && !host.trim()) return setCheck({ state: "waiting", hint: "Enter your server's address." });
-    if (needsKey && !key.trim()) return setCheck({ state: "waiting", hint: provider.keyHint });
-    setCheck({ state: "checking" });
-    const controller = new AbortController();
-    const timer = setTimeout(() => {
-      const cfg = configFor(draft);
-      listModels(controller.signal, cfg)
-        .then((models) => {
-          if (controller.signal.aborted) return;
-          setCheck({ state: "ok", models });
-          rememberStatus(cfg, { ok: true, count: models.length });
-        })
-        .catch((e) => {
-          if (controller.signal.aborted) return;
-          setCheck({ state: "error", message: (e instanceof Error ? e.message : String(e)).split("\n")[0] });
-        });
-    }, CHECK_DELAY_MS);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [providerId, host, key, attempt]);
+    const timer = setTimeout(() => setTyped({ providerId, host, key }), CHECK_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [providerId, host, key]);
+  const settled = typed.providerId === providerId && typed.host === host && typed.key === key;
+  const waitingHint =
+    isCustom && !host.trim() ? "Enter your server's address." : needsKey && !key.trim() ? provider.keyHint : undefined;
 
-  const status =
-    check.state === "waiting"
-      ? check.hint
-      : check.state === "checking"
-        ? "Checking…"
-        : check.state === "ok"
-          ? `✓ Connected · ${check.models.length} models`
-          : `✗ ${check.message}`;
+  const abortable = useRef<AbortController>(null);
+  const check = usePromise(
+    async (id: ProviderId, apiHost: string, apiKey: string) => {
+      const cfg = configFor({ provider: id, host: apiHost, keys: { [id]: apiKey } });
+      const list = await listModels(abortable.current?.signal ?? new AbortController().signal, cfg);
+      rememberStatus(cfg, { ok: true, count: list.length });
+      return list;
+    },
+    [typed.providerId, typed.host, typed.key],
+    { abortable, execute: settled && !waitingHint, onError: () => undefined }, // shown in Status, not a toast
+  );
+  const checking = !waitingHint && (!settled || check.isLoading);
+  const failed = !waitingHint && !checking ? check.error?.message.split("\n")[0] : undefined;
+  const found = !waitingHint && !checking && !failed ? (check.data ?? []) : [];
 
-  const models = check.state === "ok" ? check.models : [];
-  const choices = models.filter((m) => isRecommendedModel(m) || m === model);
+  const status = waitingHint
+    ? waitingHint
+    : checking
+      ? "Checking…"
+      : failed
+        ? `✗ ${failed}`
+        : `✓ Connected · ${found.length} models`;
+
+  const models = found;
+  const recommended = models.filter((m) => isRecommendedModel(m) || m === model);
+  // A server whose models all look "not recommended" (llama3.2:latest…) still offers them.
+  const choices = recommended.length ? recommended : models;
   // The model that Save keeps: the one shown in the list, or the typed name (Custom without a list).
   const selected = models.length ? (choices.includes(model) ? model : (choices[0] ?? model)) : model;
 
@@ -87,10 +81,10 @@ export function AISetup({ onSaved, isRoot = false }: { onSaved?: () => void; isR
     setModel(providerId, "default", name && name !== provider.defaultModel ? name : undefined);
     // Only "Connected" once the check has passed; saving before that is allowed (offline, slow server).
     await showToast(
-      check.state === "ok"
+      models.length
         ? { style: Toast.Style.Success, title: `Connected to ${provider.name}` }
-        : check.state === "error"
-          ? { style: Toast.Style.Failure, title: `Saved, but ${provider.name} did not answer`, message: check.message }
+        : failed
+          ? { style: Toast.Style.Failure, title: `Saved, but ${provider.name} did not answer`, message: failed }
           : { style: Toast.Style.Success, title: "Saved", message: "AI Buddy checks the connection when it opens." },
     );
     onSaved?.();
@@ -107,7 +101,7 @@ export function AISetup({ onSaved, isRoot = false }: { onSaved?: () => void; isR
             title="Check Again"
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={() => setAttempt((n) => n + 1)}
+            onAction={check.revalidate}
           />
         </ActionPanel>
       }

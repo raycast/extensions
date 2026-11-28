@@ -1,10 +1,10 @@
 import { getSelectedText, LaunchProps } from "@raycast/api";
-import { launchWithSelection, TextArgs } from "./launch";
+import { launchWithSelection } from "./launch";
 import { loadConnection } from "./connection";
 import { isSetUp } from "./llm";
 import { quickReplace, quickReplaceOn } from "./quick-replace";
 
-export default async function Command(props: LaunchProps<TextArgs>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Rewrite }>) {
   const typed = props.arguments.text?.trim();
   // Quick Replace works on a selected draft only: typed text has nothing to replace.
   await loadConnection();

@@ -37,6 +37,7 @@ export function PromptForm({ id, onSaved }: { id: PromptId; onSaved?: () => void
       <Form.TextArea
         id="instructions"
         title={`✍️ ${t.instructions}`}
+        placeholder="Describe the role, tone and rules. Leave empty to use the default."
         value={text}
         onChange={setText}
         enableMarkdown={false}

@@ -5,7 +5,19 @@ import { promptHash } from "./prompts";
  * Dictionary lookup for a word / short phrase: ONE AI call (prompt "lookup") returns every section
  * as tagged lines, so it can be rendered progressively while it streams and cached as a whole.
  */
-export const isLookupText = (text: string) => text.trim().split(/\s+/).length <= 3;
+const words = new Intl.Segmenter(undefined, { granularity: "word" });
+
+/**
+ * A word or a short phrase (up to 3 words), not a message. Words are counted with Intl.Segmenter,
+ * so Chinese, Japanese and Thai (no spaces) are counted too; sentence punctuation between words
+ * makes it a message.
+ */
+export const isLookupText = (text: string) => {
+  const trimmed = text.trim();
+  const count = [...words.segment(trimmed)].filter((s) => s.isWordLike).length;
+  if (count > 3) return false;
+  return count <= 1 || !/[.!?。！？][\s\S]*\S/.test(trimmed);
+};
 
 export type Lookup = {
   meaning: string;
