@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useFetch } from "@raycast/utils";
+import { useRef, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { useMigratedCachedState } from "./migrateCachedState";
 import { Alert, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
-import { WordReferenceErrorResponse, wordReferenceRequestHeaders } from "../wordreference";
+import { WordReferenceErrorResponse, fetchWordReferenceText, getWordReferenceAutocompleteUrl } from "../wordreference";
 
 export function useSearchTranslations({
   initialSearch = "",
@@ -13,30 +13,19 @@ export function useSearchTranslations({
 }) {
   const [searchText, setSearchText] = useState(initialSearch);
 
-  const { data: response, isLoading } = useFetch<SearchTranslationsResponse>(
-    `https://www.wordreference.com/autocomplete?dict=${translationKey}&query=${encodeURIComponent(searchText.trim())}`,
-    {
-      method: "GET",
-      headers: wordReferenceRequestHeaders,
-      keepPreviousData: true,
-      parseResponse: async (response) => {
-        const body = await response.text();
+  const query = searchText.trim();
+  const abortable = useRef<AbortController>(null);
+  const { data: response, isLoading } = useCachedPromise(
+    async (dictionary: string, text: string): Promise<SearchTranslationsResponse> => {
+      const result = await fetchWordReferenceText(
+        getWordReferenceAutocompleteUrl(dictionary, text),
+        abortable.current?.signal,
+      );
 
-        if (response.status >= 400) {
-          return {
-            type: "error",
-            status: response.status,
-            statusText: response.statusText,
-          };
-        }
-
-        return {
-          type: "success",
-          data: parseSearchTranslations(body, searchText.trim()),
-        };
-      },
-      execute: !!searchText.trim(),
+      return result.type === "success" ? { type: "success", data: parseSearchTranslations(result.body, text) } : result;
     },
+    [translationKey, query],
+    { keepPreviousData: true, execute: !!query, abortable },
   );
 
   const data = response?.type === "success" ? response.data : [];

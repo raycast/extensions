@@ -50,7 +50,8 @@
   "dependencies": {
     "@raycast/api": "^1.104.19",
     "@raycast/utils": "^2.2.6",
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "undici": "^7.30.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",

@@ -1,13 +1,8 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import * as cheerio from "cheerio";
 import { useMemo } from "react";
-import {
-  WordReferenceErrorResponse,
-  getErrorMarkdown,
-  getWordReferenceUrl,
-  wordReferenceRequestHeaders,
-} from "./wordreference";
+import { getErrorMarkdown, getWordReferenceUrl, fetchWordReferenceText } from "./wordreference";
 
 const notFoundMarkdown = `# Translation not found
 
@@ -33,27 +28,7 @@ export function WordTranslation({ word, lang, baseUrl }: { word: string; lang: s
 function useWordTranslation({ word, baseUrl }: { word: string; lang: string; baseUrl: string }) {
   const url = getWordReferenceUrl(baseUrl, word);
 
-  const { data: response, isLoading } = useFetch<TranslationResponse>(url, {
-    method: "GET",
-    headers: wordReferenceRequestHeaders,
-    keepPreviousData: true,
-    parseResponse: async (response) => {
-      const body = await response.text();
-
-      if (response.status >= 400) {
-        return {
-          type: "error",
-          status: response.status,
-          statusText: response.statusText,
-        };
-      }
-
-      return {
-        type: "success",
-        body,
-      };
-    },
-  });
+  const { data: response, isLoading } = useCachedPromise(fetchWordReferenceText, [url], { keepPreviousData: true });
 
   const markdown = useMemo(() => {
     if (isLoading) {
@@ -213,10 +188,3 @@ interface Example {
   from: string;
   to: string;
 }
-
-type TranslationResponse =
-  | {
-      type: "success";
-      body: string;
-    }
-  | WordReferenceErrorResponse;
