@@ -1,5 +1,10 @@
 # Google Chrome Changelog
 
+## [Faster Search Tabs] - {PR_MERGE_DATE}
+
+- Fetch open tabs from Chrome in bulk instead of one request per tab, so Search Tabs opens much faster with many tabs open.
+- Filter tabs in memory while typing instead of re-querying Chrome on every keystroke.
+
 ## [Fix Search History AI Tool] - 2026-11-05
 
 - Return visit times from the Search History AI tool as ISO 8601 dates instead of raw Chrome timestamps.

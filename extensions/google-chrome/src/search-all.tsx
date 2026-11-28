@@ -15,7 +15,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [profile] = useCachedState<string>(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
 
-  const { data: tabData, isLoading: isLoadingTab } = useTabSearch(searchText);
+  const { data: tabData, isLoading: isLoadingTab, revalidate: revalidateTabs } = useTabSearch(searchText);
 
   const {
     data: historyData = [],
@@ -52,7 +52,12 @@ export default function Command() {
           <List.Item title="No tabs found" key={"empty tab list item"} />
         ) : (
           tabData.map((tab) => (
-            <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+            <ChromeListItems.TabList
+              key={tab.key()}
+              tab={tab}
+              useOriginalFavicon={useOriginalFavicon}
+              onTabsChanged={revalidateTabs}
+            />
           ))
         )}
       </List.Section>

@@ -1,33 +1,50 @@
 import { runAppleScript } from "run-applescript";
 import { LocalStorage, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
-import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { NOT_INSTALLED_MESSAGE, TAB_NOT_FOUND_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
-  const faviconFormula = useOriginalFavicon
-    ? `execute t javascript ¬
-        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
-    : '""';
+  const sep = Tab.TAB_CONTENTS_SEPARATOR;
+  // Extracting the page favicon requires running JS in each tab, which is inherently one Apple Event per tab.
+  const faviconStatement = useOriginalFavicon
+    ? `try
+            tell application "Google Chrome" to set _favicon to execute tab j of window id _raw_id javascript ¬
+              "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"
+          end try
+          if _favicon is missing value then set _favicon to ""`
+    : "";
 
   await checkAppInstalled();
 
   try {
+    // Fetch window ids, titles, URLs and tab ids in bulk (4 Apple Events total) instead of 2+ events per tab,
+    // then build the output locally with a list + text item delimiters instead of repeated string concatenation.
     const openTabs = await runAppleScript(`
-      set _output to ""
       tell application "Google Chrome"
-        repeat with w in windows
-          set _w_id to get id of w as inches as string
-          set _tab_index to 1
-          repeat with t in tabs of w
-            set _title to get title of t
-            set _url to get URL of t
-            set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
-            set _tab_index to _tab_index + 1
-          end repeat
-        end repeat
+        set _ids to id of every window
+        set _titles to title of every tab of every window
+        set _urls to URL of every tab of every window
+        set _tab_ids to id of every tab of every window
       end tell
+
+      set _lines to {}
+      repeat with i from 1 to count of _ids
+        set _raw_id to item i of _ids
+        set _w_id to _raw_id as inches as string
+        set _w_titles to item i of _titles
+        set _w_urls to item i of _urls
+        set _w_tab_ids to item i of _tab_ids
+        repeat with j from 1 to count of _w_titles
+          set _favicon to ""
+          ${faviconStatement}
+          set end of _lines to (item j of _w_titles) & "${sep}" & (item j of _w_urls) & "${sep}" & _favicon & "${sep}" & _w_id & "${sep}" & j & "${sep}" & ((item j of _w_tab_ids) as inches as string)
+        end repeat
+      end repeat
+
+      set AppleScript's text item delimiters to linefeed
+      set _output to _lines as text
+      set AppleScript's text item delimiters to ""
       return _output
   `);
 
@@ -119,42 +136,82 @@ export async function openNewTab({
   }
 }
 
-export async function setActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
+/**
+ * AppleScript (to run inside `tell application "Google Chrome"`) that finds the tab by its stable id and sets
+ * `_wnd` to its window and `_t_index` to its current position. A cached Tab's windowsId/tabIndex can be stale
+ * (the list stays mounted after the main window closes), so positions are resolved right before acting.
+ */
+function locateTabScript(tab: Tab): string {
+  return `
+      set _w_id to missing value
+      set _t_index to 0
+      repeat with _w in windows
+        set _ids to id of every tab of _w
+        repeat with j from 1 to count of _ids
+          -- Compare with the same coercion getOpenTabs used, so integer, real and text ids all match
+          if ((item j of _ids) as inches as string) is "${tab.tabId.replace(/[^0-9A-Za-z.+-]/g, "")}" then
+            set _w_id to id of _w
+            set _t_index to j
+            exit repeat
+          end if
+        end repeat
+        if _t_index > 0 then exit repeat
+      end repeat
+      if _t_index is 0 then error "${TAB_NOT_FOUND_MESSAGE}"
+      set _wnd to first window where id is _w_id
+  `;
+}
+
+async function runTabScript(tab: Tab, body: string): Promise<void> {
+  try {
+    await runAppleScript(`
     tell application "Google Chrome"
-      activate
-      set _wnd to first window where id is ${tab.windowsId}
-      set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
+      ${locateTabScript(tab)}
+      ${body}
     end tell
     return true
   `);
+  } catch (err) {
+    if (err instanceof Error && err.message.includes(TAB_NOT_FOUND_MESSAGE)) {
+      throw new Error(TAB_NOT_FOUND_MESSAGE);
+    }
+    throw err;
+  }
+}
+
+export async function setActiveTab(tab: Tab): Promise<void> {
+  await runTabScript(
+    tab,
+    `
+      activate
+      set index of _wnd to 1
+      set active tab index of _wnd to _t_index
+  `,
+  );
 }
 
 export async function closeActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
-    tell application "Google Chrome"
+  await runTabScript(
+    tab,
+    `
       activate
-      set _wnd to first window where id is ${tab.windowsId}
       set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
+      set active tab index of _wnd to _t_index
       close active tab of _wnd
-    end tell
-    return true
-  `);
+  `,
+  );
 }
 
 export async function reloadTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
-    tell application "Google Chrome"
+  await runTabScript(
+    tab,
+    `
       activate
-      set _wnd to first window where id is ${tab.windowsId}
       set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
+      set active tab index of _wnd to _t_index
       tell active tab of _wnd to reload
-    end tell
-    return true
-  `);
+  `,
+  );
 }
 
 const checkAppInstalled = async () => {
