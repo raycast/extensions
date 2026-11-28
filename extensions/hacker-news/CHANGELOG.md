@@ -1,5 +1,9 @@
 # Hacker News Changelog
 
+## [Fix Front Page order] - {PR_MERGE_DATE}
+
+- Front Page stories now match the order on news.ycombinator.com instead of being sorted newest-first
+
 ## [Routine Maintenance] - 2025-03-20
 
 - Migrate to `@raycast/api@1.94.0`
