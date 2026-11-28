@@ -1,4 +1,5 @@
 import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { runAppleScript } from "run-applescript";
 
 import { runInArdia } from "./ardia";
@@ -236,7 +237,7 @@ export async function runJSInYouTubeMusicTab(
       const reason = (error as NodeJS.ErrnoException).code === "ENOENT" ? "ardia-install" : "ardia-cli";
       onError?.(reason);
       const { title, description } = ardiaErrors[reason];
-      if (!silent) await showToast({ style: Toast.Style.Failure, title, message: description });
+      if (!silent) await showFailureToast(error, { title, message: description });
       return undefined;
     }
   }
@@ -347,8 +348,8 @@ export async function openInSelectedBrowser(url: string): Promise<boolean> {
     try {
       await open(url, browser);
       return true;
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Open URL in Ardia" });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Open URL in Ardia" });
       return false;
     }
   }
