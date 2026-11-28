@@ -1,7 +1,8 @@
-import { ensureWisprFlowInstalled, openWisprFlow } from "./db";
-import { NOTETAKER_URL } from "./notetaker";
+import { openWisprFlow } from "./db";
+import { NOTETAKER_URL, runNotetakerCommand } from "./notetaker";
 
 export default async function main() {
-  if (!(await ensureWisprFlowInstalled())) return;
-  await openWisprFlow(NOTETAKER_URL);
+  await runNotetakerCommand(async () => {
+    await openWisprFlow(NOTETAKER_URL);
+  });
 }

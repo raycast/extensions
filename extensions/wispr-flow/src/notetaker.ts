@@ -1,5 +1,5 @@
 import { open, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import {
   ensureWisprFlowInstalled,
   openWisprFlow,
@@ -47,11 +47,14 @@ tell application "System Events"
     repeat with i from 1 to (count of els)
       try
         set e to item i of els
-        if (class of e as text) is "button" and (description of e as text) is "Stop listening" then
-          perform action "AXPress" of e
-          return "stopped"
-        end if
+        set isStopButton to (class of e as text) is "button" and (description of e as text) is "Stop listening"
+      on error
+        set isStopButton to false
       end try
+      if isStopButton then
+        perform action "AXPress" of e
+        return "stopped"
+      end if
     end repeat
   end tell
 end tell
@@ -76,7 +79,7 @@ async function pressStopButton(): Promise<boolean> {
 }
 
 async function showWindowsFallback(message: string): Promise<void> {
-  await openWisprFlow(NOTETAKER_URL);
+  if (!(await openWisprFlow(NOTETAKER_URL))) return;
   await showToast({
     style: Toast.Style.Success,
     title: "Notetaker opened",
@@ -159,15 +162,10 @@ const PRIVACY_SETTINGS_URLS: Record<MissingPermission, string> = {
 async function showNotetakerError(error: unknown): Promise<void> {
   const permission = getMissingPermission(error);
   if (!permission) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Notetaker command failed",
-      message: String(error instanceof Error ? error.message : error),
-    });
+    await showFailureToast(error, { title: "Notetaker command failed" });
     return;
   }
-  await showToast({
-    style: Toast.Style.Failure,
+  await showFailureToast(error, {
     title:
       permission === "accessibility"
         ? "Raycast needs Accessibility access"
@@ -186,8 +184,8 @@ async function showNotetakerError(error: unknown): Promise<void> {
 export async function runNotetakerCommand(
   action: () => Promise<void>,
 ): Promise<void> {
-  if (!(await ensureWisprFlowInstalled())) return;
   try {
+    if (!(await ensureWisprFlowInstalled())) return;
     await action();
   } catch (error) {
     await showNotetakerError(error);
