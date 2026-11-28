@@ -7,6 +7,8 @@ export type RegistryEntry = {
   description?: string;
   icon?: Image.ImageLike;
   homepage?: string;
+  /** Key management page shown to users setting up a local server. */
+  apiKeyUrl?: string;
   configuration: MCPServerConfig;
   /** Direct HTTP endpoint for Raycast; configuration remains the fallback for other clients. */
   remoteUrl?: string;

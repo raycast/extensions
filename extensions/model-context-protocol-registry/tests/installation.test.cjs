@@ -18,7 +18,7 @@ function loadSource(relativePath) {
 }
 
 const { getRaycastServer, getSetupMarkdown } = loadSource("src/registries/builtin/configuration.ts");
-const { getAccessories } = loadSource("src/registries/builtin/utils.ts");
+const { getAccessories, matchesRegistrySearch } = loadSource("src/registries/builtin/utils.ts");
 const { OFFICIAL_ENTRIES } = loadSource("src/registries/builtin/entries.ts");
 const { writeMCPConfig } = loadSource("src/shared/mcp.ts");
 const linear = OFFICIAL_ENTRIES.find((entry) => entry.name === "linear");
@@ -148,4 +148,29 @@ test("Scrapewise installs with headerless native HTTP and keeps its Bearer proxy
   assert.match(raycastSetup, /Complete sign-in when prompted/);
   assert.match(raycastSetup, /Node\.js is not required in Raycast/);
   assert.match(proxySetup, /Requires \[Node\.js with npm\]/);
+});
+
+test("Image-only setup shows the credential page separately from the installed configuration", () => {
+  const entry = OFFICIAL_ENTRIES.find((item) => item.name === "ace-gpt-image");
+  const server = getRaycastServer(entry);
+  assert.equal(server.transport, "stdio");
+  assert.equal(server.command, "uvx");
+  assert.deepEqual(server.args.slice(-2), ["--profile", "gpt-image"]);
+  assert.ok(server.env.ACEDATACLOUD_API_TOKEN);
+  assert.ok(getSetupMarkdown(entry).includes(`[Get an API key](${entry.apiKeyUrl})`));
+  assert.ok(!JSON.stringify(server).includes(entry.apiKeyUrl));
+});
+
+test("built-in searches find product titles and the providers named in descriptions", () => {
+  const aceEntries = OFFICIAL_ENTRIES.filter((entry) => entry.homepage?.startsWith("https://github.com/AceDataCloud/"));
+  assert.equal(aceEntries.length, 27);
+  assert.ok(aceEntries.every((entry) => matchesRegistrySearch(entry, " ACE DATA CLOUD ")));
+  const suno = aceEntries.find((entry) => entry.title === "Suno");
+  assert.ok(suno);
+  assert.ok(matchesRegistrySearch(suno, "suno"));
+  assert.ok(matchesRegistrySearch(elevenlabs, "elevenlabs"));
+  assert.ok(matchesRegistrySearch(elevenlabs, "knowledge bases"));
+  assert.ok(!matchesRegistrySearch(elevenlabs, "ace data cloud"));
+  assert.ok(!matchesRegistrySearch(suno, "no-such-provider-query"));
+  assert.ok(matchesRegistrySearch({ title: "Test", description: undefined }));
 });

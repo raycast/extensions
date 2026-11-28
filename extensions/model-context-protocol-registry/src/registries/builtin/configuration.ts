@@ -27,6 +27,10 @@ export function getSetupMarkdown(entry: RegistryEntry): string {
     return `## Raycast\n\nRaycast connects directly to this server. ${raycastAuth} Node.js is not required in Raycast.\n\n## Other clients\n\nClaude, Cursor, and Windsurf use the local proxy command shown in the details.\n\n${localSetup}`;
   }
 
+  if (entry.apiKeyUrl) {
+    const keySetup = `[Get an API key](${entry.apiKeyUrl}) and replace the placeholder in the server's environment variables.`;
+    return [localSetup, keySetup].filter(Boolean).join("\n\n");
+  }
   return localSetup;
 }
 
