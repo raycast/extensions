@@ -17,7 +17,6 @@
     {
       "name": "recognize-text",
       "title": "Recognize Text",
-      "subtitle": "Vision OCR",
       "description": "Select an area of the screen and copy its text. Press Space while selecting to capture a window.",
       "mode": "no-view",
       "keywords": [
@@ -31,7 +30,6 @@
     {
       "name": "recognize-clipboard",
       "title": "Recognize Text in Clipboard",
-      "subtitle": "Vision OCR",
       "description": "Copy the text from the image or PDF on the clipboard.",
       "mode": "no-view",
       "keywords": [
@@ -43,7 +41,6 @@
     {
       "name": "recognize-selected-file",
       "title": "Recognize Text in Selected File",
-      "subtitle": "Vision OCR",
       "description": "Copy the text from the images or PDFs selected in Finder.",
       "mode": "no-view",
       "keywords": [
@@ -122,136 +119,6 @@
         {
           "title": "Automatic",
           "value": "auto"
-        },
-        {
-          "title": "English",
-          "value": "en-US"
-        },
-        {
-          "title": "French",
-          "value": "fr-FR"
-        },
-        {
-          "title": "German",
-          "value": "de-DE"
-        },
-        {
-          "title": "Spanish",
-          "value": "es-ES"
-        },
-        {
-          "title": "Italian",
-          "value": "it-IT"
-        },
-        {
-          "title": "Portuguese",
-          "value": "pt-BR"
-        },
-        {
-          "title": "Dutch",
-          "value": "nl-NL"
-        },
-        {
-          "title": "Swedish",
-          "value": "sv-SE"
-        },
-        {
-          "title": "Danish",
-          "value": "da-DK"
-        },
-        {
-          "title": "Norwegian Bokmål",
-          "value": "nb-NO"
-        },
-        {
-          "title": "Norwegian Nynorsk",
-          "value": "nn-NO"
-        },
-        {
-          "title": "Polish",
-          "value": "pl-PL"
-        },
-        {
-          "title": "Czech",
-          "value": "cs-CZ"
-        },
-        {
-          "title": "Romanian",
-          "value": "ro-RO"
-        },
-        {
-          "title": "Turkish",
-          "value": "tr-TR"
-        },
-        {
-          "title": "Russian",
-          "value": "ru-RU"
-        },
-        {
-          "title": "Ukrainian",
-          "value": "uk-UA"
-        },
-        {
-          "title": "Arabic",
-          "value": "ar-SA"
-        },
-        {
-          "title": "Arabic (Najdi)",
-          "value": "ars-SA"
-        },
-        {
-          "title": "Thai",
-          "value": "th-TH"
-        },
-        {
-          "title": "Vietnamese",
-          "value": "vi-VT"
-        },
-        {
-          "title": "Indonesian",
-          "value": "id-ID"
-        },
-        {
-          "title": "Malay",
-          "value": "ms-MY"
-        },
-        {
-          "title": "Chinese (Simplified)",
-          "value": "zh-Hans"
-        },
-        {
-          "title": "Chinese (Traditional)",
-          "value": "zh-Hant"
-        },
-        {
-          "title": "Cantonese (Simplified)",
-          "value": "yue-Hans"
-        },
-        {
-          "title": "Cantonese (Traditional)",
-          "value": "yue-Hant"
-        },
-        {
-          "title": "Japanese",
-          "value": "ja-JP"
-        },
-        {
-          "title": "Korean",
-          "value": "ko-KR"
-        }
-      ]
-    },
-    {
-      "name": "secondLanguage",
-      "title": "Second Language",
-      "description": "Another language to recognize alongside the first one.",
-      "type": "dropdown",
-      "required": false,
-      "default": "none",
-      "data": [
-        {
-          "title": "None",
-          "value": "none"
         },
         {
           "title": "English",

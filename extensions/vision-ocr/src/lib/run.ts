@@ -21,9 +21,9 @@ const FAST_LANGUAGES = ["en-US", "fr-FR", "it-IT", "de-DE", "es-ES", "pt-BR"];
 
 export function ocrOptions(): OCROptions {
   const prefs = getPreferenceValues<Preferences>();
-  const languages = [prefs.language, prefs.secondLanguage].filter((code) => code && code !== "auto" && code !== "none");
+  const languages = prefs.language && prefs.language !== "auto" ? [prefs.language] : [];
   return {
-    languages: [...new Set(languages)],
+    languages,
     // Vision's fast recognizer only knows these languages; anything else needs the accurate one.
     fast: prefs.accuracy === "fast" && languages.every((code) => FAST_LANGUAGES.includes(code)),
     languageCorrection: prefs.languageCorrection,

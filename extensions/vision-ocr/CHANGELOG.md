@@ -6,4 +6,4 @@
 - Keep the layout: line breaks, paragraph gaps and code indentation
 - Formats: keep line breaks, join lines into paragraphs, single line, no spaces, links only, email addresses only
 - Copy, append to the clipboard, or paste into the active app
-- Language, second language, fast or accurate recognition, custom words, spelling correction, plain punctuation, QR codes and barcodes
+- Language, fast or accurate recognition, custom words, spelling correction, plain punctuation, QR codes and barcodes

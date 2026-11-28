@@ -33,7 +33,7 @@ Choose one under **Format** in the extension's settings.
 ## Preferences
 
 - **After Recognition**: copy to the clipboard, append to what's already there (to collect text from several places), or paste into the active app.
-- **Language** and **Second Language**: Automatic works for most Latin-script text. Pick a language for Chinese, Japanese, Korean, Arabic, Thai and other scripts.
+- **Language**: Automatic works for most Latin-script text. Pick a language for Chinese, Japanese, Korean, Arabic, Thai and other scripts.
 - **Recognition**: Accurate (default) or Fast. Fast is about 3× quicker but supports only English, French, German, Italian, Portuguese and Spanish.
 - **Custom Words**: names and jargon to prefer, separated by commas.
 - **Correct spelling**: on by default. Turn it off for code, serial numbers and random strings.
