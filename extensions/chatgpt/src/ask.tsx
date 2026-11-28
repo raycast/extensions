@@ -173,8 +173,20 @@ function AskContent(props: { conversation?: Conversation; initialQuestion?: stri
     </ActionPanel>
   );
 
+  const modelDropdown = (
+    <ModelDropdown models={availableModels} onModelChange={changeModel} selectedModel={currentModel.id} />
+  );
+
   if (snapshot.isLoading || (providerModelsLoading && currentModel.id !== selectedModelId))
-    return <List isLoading navigationTitle="Ask" searchText={question.data} onSearchTextChange={question.update} />;
+    return (
+      <List
+        isLoading
+        navigationTitle="Ask"
+        searchText={question.data}
+        onSearchTextChange={question.update}
+        searchBarAccessory={modelDropdown}
+      />
+    );
 
   return (
     <List
@@ -203,9 +215,7 @@ function AskContent(props: { conversation?: Conversation; initialQuestion?: stri
         )
       }
       selectedItemId={chats.selectedChatId || undefined}
-      searchBarAccessory={
-        <ModelDropdown models={availableModels} onModelChange={changeModel} selectedModel={currentModel.id} />
-      }
+      searchBarAccessory={modelDropdown}
       // https://github.com/raycast/extensions/issues/10844
       // `onSelectionChange` may cause race condition
       searchBarPlaceholder={chats.data.length > 0 ? "Ask another question..." : "Ask a question..."}

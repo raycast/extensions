@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix: on Raycast 2, `Ask Question` forgot the last used model and switched back to the first model in the list each time the command or a saved conversation was opened. The model dropdown is now shown while models are loading, which stops Raycast from selecting the first model on its own.
+
 ## [Feature] - 2026-11-24
 
 - Add ChatGPT sign-in via the Codex app-server alongside API-key authentication.
