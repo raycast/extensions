@@ -13,7 +13,9 @@ private func clockShape(_ text: String) -> (shape: String, minutes: [Int]) {
   let range = NSRange(text.startIndex..., in: text)
   let minutes = clockPattern.matches(in: text, range: range).compactMap { match -> Int? in
     guard let h = Range(match.range(at: 1), in: text), let m = Range(match.range(at: 2), in: text) else { return nil }
-    return (Int(text[h]) ?? 0) * 60 + (Int(text[m]) ?? 0)
+    // formatTime follows the system locale, so the digits may be Arabic-Indic (٠٥:٣٠), which Int() can't read.
+    let number = { (digits: Substring) in digits.reduce(0) { $0 * 10 + ($1.wholeNumberValue ?? 0) } }
+    return number(text[h]) * 60 + number(text[m])
   }
   return (clockPattern.stringByReplacingMatches(in: text, range: range, withTemplate: "#"), minutes)
 }
