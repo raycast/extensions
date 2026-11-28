@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Transformer.gg] - 2026-11-28
+
+- Add Transformer.gg to the official registry: book sponsored posts from X creators. Hosted Streamable HTTP server at https://transformer.gg/mcp with OAuth sign-in or an optional Bearer workspace key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free to join. Creators keep 80%.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
