@@ -1,5 +1,12 @@
 # Beeper Changelog
 
+## [Awaiting Reply] - {PR_MERGE_DATE}
+
+- New **Awaiting Reply** command: lists direct conversations where the other person sent the last message, with a message preview, how long they've waited, and a network filter
+- Mark a conversation as handled (⌘D) to hide it until they write again
+- Hand off a reply draft to Beeper without sending it
+- New **Awaiting Reply Count** menu bar command (macOS only, since Raycast menu bar commands aren't available on Windows)
+
 ## [Bug Fix] - 2026-09-20
 
 - Switched authentication to Raycast's app redirect so Beeper accepts the OAuth callback
