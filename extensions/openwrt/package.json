@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openwrt",
+  "title": "OpenWrt",
+  "description": "Monitor OpenWrt status, search clients, manage DHCP/DNS, Wi-Fi QR codes, services, WireGuard, logs, connections, processes, and firewall/UPnP via ubus.",
+  "icon": "extension-icon.png",
+  "author": "ooodnakov",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "router-status",
+      "title": "Router Status",
+      "subtitle": "OpenWrt",
+      "description": "View router uptime, load average, memory, storage, temperatures, interfaces, and Wi-Fi radios",
+      "mode": "view"
+    },
+    {
+      "name": "search-clients",
+      "title": "Search Clients",
+      "subtitle": "OpenWrt",
+      "description": "Search connected DHCP leases and Wi-Fi clients and copy IP or MAC addresses",
+      "mode": "view"
+    },
+    {
+      "name": "manage-services",
+      "title": "Manage Services",
+      "subtitle": "OpenWrt",
+      "description": "Inspect and control OpenWrt init.d services and VPN / WireGuard network interfaces",
+      "mode": "view"
+    },
+    {
+      "name": "quick-status-check",
+      "title": "Quick Status Check",
+      "subtitle": "OpenWrt",
+      "description": "Run quick WAN, DNS, ping, Wi-Fi, and service health checks from your router",
+      "mode": "view"
+    },
+    {
+      "name": "dhcp-dns",
+      "title": "DHCP & Local DNS",
+      "subtitle": "OpenWrt",
+      "description": "View, add, and delete OpenWrt static DHCP reservations and local DNS records",
+      "mode": "view"
+    },
+    {
+      "name": "wifi-manager",
+      "title": "Wi-Fi & QR Code",
+      "subtitle": "OpenWrt",
+      "description": "View Wi-Fi SSIDs, generate scannable Wi-Fi QR codes, toggle SSIDs and radios, and scan nearby channels",
+      "mode": "view"
+    },
+    {
+      "name": "system-logs",
+      "title": "System Logs",
+      "subtitle": "OpenWrt",
+      "description": "Search and filter live OpenWrt syslog entries by severity, daemon, and line limit",
+      "mode": "view"
+    },
+    {
+      "name": "connections-processes",
+      "title": "Connections & Processes",
+      "subtitle": "OpenWrt",
+      "description": "Inspect active NAT connections (conntrack) and monitor or signal router processes",
+      "mode": "view"
+    },
+    {
+      "name": "firewall-upnp",
+      "title": "Firewall & UPnP",
+      "subtitle": "OpenWrt",
+      "description": "View, add, toggle, and delete UCI port forwards and manage active UPnP / NAT-PMP leases",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "routerUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "http://192.168.1.1",
+      "title": "Router URL",
+      "placeholder": "http://192.168.1.1",
+      "description": "Base URL or IP/hostname of your OpenWrt router. /ubus is appended automatically."
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": false,
+      "default": "root",
+      "title": "Username",
+      "placeholder": "root",
+      "description": "OpenWrt LuCI / ubus login username (defaults to root)."
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": false,
+      "title": "Password",
+      "placeholder": "Router password (leave empty if none)",
+      "description": "OpenWrt LuCI / ubus password."
+    },
+    {
+      "name": "allowInsecureTls",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Self-Signed HTTPS",
+      "label": "Accept self-signed router TLS certificates",
+      "description": "Allow uhttpd's default self-signed HTTPS certificate when connecting to your LAN router."
+    },
+    {
+      "name": "pingTargets",
+      "type": "textfield",
+      "required": false,
+      "default": "1.1.1.1, 8.8.8.8",
+      "title": "Quick Check Ping Targets",
+      "placeholder": "1.1.1.1, 8.8.8.8, 192.168.1.10",
+      "description": "Comma-separated IPs or hostnames probed during Quick Status Check."
+    },
+    {
+      "name": "dnsTestDomain",
+      "type": "textfield",
+      "required": false,
+      "default": "cloudflare.com",
+      "title": "DNS Check Domain",
+      "placeholder": "cloudflare.com",
+      "description": "Domain queried via the router's local resolver (127.0.0.1) during Quick Status Check."
+    },
+    {
+      "name": "pinnedServices",
+      "type": "textfield",
+      "required": false,
+      "default": "dnsmasq, firewall, uhttpd, dropbear, wireguard",
+      "title": "Pinned Services",
+      "placeholder": "sing-box, wireguard, dnsmasq, tailscale",
+      "description": "Comma-separated service or interface names highlighted in Manage Services and verified in Quick Status Check."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}
