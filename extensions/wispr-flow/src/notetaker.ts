@@ -73,6 +73,7 @@ function pressShortcutScript({ modifiers, key }: MeetingShortcut): string {
 ObjC.import("AppKit");
 ObjC.import("Carbon");
 ObjC.import("CoreGraphics");
+ObjC.bindFunction("CGPreflightPostEventAccess", ["bool", []]);
 (() => {
   const HID_SYSTEM_STATE = 1;
   const FLAGS_CHANGED = 12;
@@ -81,6 +82,8 @@ ObjC.import("CoreGraphics");
   const flagsFor = ${JSON.stringify(MODIFIER_FLAGS)};
   if ($.NSRunningApplication.runningApplicationsWithBundleIdentifier("${WISPR_FLOW_BUNDLE_ID}").count === 0) return "not running";
   if ($.IsSecureEventInputEnabled()) return "secure input";
+  // macOS drops posted keys without Accessibility access, so raise the error showNotetakerError turns into the permission toast.
+  if (!$.CGPreflightPostEventAccess()) throw new Error("Not allowed to send keystrokes");
   const source = $.CGEventSourceCreate(HID_SYSTEM_STATE);
   let flags = 0;
   const post = (code, down, isModifier) => {
