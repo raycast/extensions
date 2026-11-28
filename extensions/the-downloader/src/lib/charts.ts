@@ -57,7 +57,7 @@ export { kindTitle, knownTotalBytes };
 export function downloadedBytes(s: DownloadSnapshot): number | undefined {
   if (s.status === "done") return knownTotalBytes(s);
   const current = s.streamIndex > 0 ? s.streamIndex - 1 : 0;
-  const finished = s.streamBytes.slice(0, current).reduce((a, b) => a + (b ?? 0), 0);
+  const finished = s.streamBytes.slice(0, current).reduce((a, b) => a + (b ?? 0), s.finishedBytes ?? 0);
   if (s.downloadedBytes === undefined) return finished > 0 ? finished : undefined;
   return finished + s.downloadedBytes;
 }
@@ -150,13 +150,26 @@ function ring(s: DownloadSnapshot, now: number, accent: string): string {
     // Kept short: the label has to fit inside the ring.
     const stream = s.streams > 1 ? (s.stage === "audio" ? "audio" : "video") : "";
     const size = s.totalBytes ? formatBytes(s.totalBytes) : "";
-    small = stream && size ? `${stream} · ${size}` : stream ? `${stream} stream` : size ? `of ${size}` : "downloading";
+    // A playlist says which of its videos this is; the tiles carry the sizes.
+    const place = s.listIndex && s.listTotal && s.listTotal > 1 ? `${s.listIndex} of ${s.listTotal}` : "";
+    small = place
+      ? stream
+        ? `${place} · ${stream}`
+        : place
+      : stream && size
+        ? `${stream} · ${size}`
+        : stream
+          ? `${stream} stream`
+          : size
+            ? `of ${size}`
+            : "downloading";
   } else {
     // No percentage to show (still preparing, or a tool without progress output):
     // a short static arc plus the elapsed clock, which the view ticks every second.
     arcs = arc(0.2, accent, 0.9);
     big = formatClock(elapsedSeconds(s, now));
-    small = s.stage === "prepare" ? "preparing…" : (WORKING_LABEL[s.kind] ?? "working…");
+    small =
+      s.stage === "prepare" ? "preparing…" : s.cutting ? "cutting the clip…" : (WORKING_LABEL[s.kind] ?? "working…");
   }
 
   const bigY = icon ? cy + 12 : cy + 8;
@@ -194,7 +207,12 @@ function tiles(s: DownloadSnapshot, now: number): Tile[] {
       return [
         { label: "Average", value: formatSpeed(averageSpeed(s)) },
         { label: "Took", value: formatClock(elapsed) },
-        { label: "Size", value: formatBytes(total), sub: s.streams > 1 ? `${s.streams} streams merged` : undefined },
+        {
+          label: "Size",
+          value: formatBytes(total),
+          // A playlist's videos, or one video's streams.
+          sub: s.items > 1 ? plural(s.items, "file") : s.streams > 1 ? `${s.streams} streams merged` : undefined,
+        },
         { label: "Peak", value: formatSpeed(top) },
       ];
     }
@@ -393,6 +411,7 @@ export function heroFrameKey(s: DownloadSnapshot, now: number): string {
     s.status,
     s.stage,
     s.streamIndex,
+    s.listIndex ?? 0,
     s.percent === undefined ? "-" : s.percent.toFixed(1),
     s.speedSamples.length,
     s.items,

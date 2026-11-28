@@ -12,9 +12,9 @@ In the **Download** command you can also grab just a video's **thumbnail** image
 
 ## Image galleries
 
-Handled by [gallery-dl](https://github.com/mikf/gallery-dl) — Reddit, Imgur, Pixiv, DeviantArt, Flickr, Instagram and hundreds more.
+Handled by [gallery-dl](https://codeberg.org/mikf/gallery-dl) — Reddit, Imgur, Pixiv, DeviantArt, Flickr, Instagram and hundreds more.
 
-Full list: <https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md>
+Full list: <https://codeberg.org/mikf/gallery-dl/src/branch/master/docs/supportedsites.md>
 
 ## Music
 
@@ -24,8 +24,10 @@ Handled by [spotDL](https://github.com/spotDL/spotify-downloader) — paste a Sp
 
 Any URL that isn't a video, gallery, or music source is saved by [monolith](https://github.com/Y2Z/monolith) as a single self-contained `.html` file — every image, stylesheet, and script embedded, so the page opens offline exactly as it looked online.
 
+Or pick the **Markdown** save mode: the article's text (what a browser's Reader View shows) with its links, images, lists, code and tables, as a `.md` file. It needs no extra tool, but only works for pages that have readable text without JavaScript or a login.
+
 ## Not supported in v1
 
 Sites that require an in-app login or OAuth sign-in are not supported in v1.
 
-For login-gated image galleries, you can still authenticate by setting **Gallery: Cookies from Browser** in the extension preferences — gallery-dl will reuse your browser's session cookies.
+For login-gated image galleries, you can still authenticate by setting **Cookies from Browser** in the extension preferences — gallery-dl will reuse your browser's session cookies. Turn on **Video: Browser Cookies** to do the same for videos.

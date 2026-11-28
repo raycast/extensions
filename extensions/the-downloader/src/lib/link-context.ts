@@ -256,8 +256,24 @@ const STOPWORDS = new Set(
   ),
 );
 
+/** Scripts written without spaces between words: a run of them is a sentence, not a term. */
+const UNSPACED = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}]/u;
+const segmenter =
+  typeof Intl.Segmenter === "function" ? new Intl.Segmenter(undefined, { granularity: "word" }) : undefined;
+
 function terms(text: string): string[] {
-  return (text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []).filter((t) => t.length > 1 && !STOPWORDS.has(t));
+  const lower = text.toLowerCase();
+  if (segmenter && UNSPACED.test(lower)) {
+    // Chinese, Japanese and Thai need real word boundaries; single characters count there.
+    const words: string[] = [];
+    for (const part of segmenter.segment(lower)) {
+      if (part.isWordLike && !STOPWORDS.has(part.segment) && (part.segment.length > 1 || UNSPACED.test(part.segment))) {
+        words.push(part.segment);
+      }
+    }
+    return words;
+  }
+  return (lower.match(/[\p{L}\p{N}]+/gu) ?? []).filter((t) => t.length > 1 && !STOPWORDS.has(t));
 }
 
 /** BM25 score of every chunk against `query`, in chunk order. */

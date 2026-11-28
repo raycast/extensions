@@ -57,7 +57,7 @@
       "name": "fast-download",
       "title": "Fast Download",
       "subtitle": "The Downloader",
-      "description": "Paste a URL and download it instantly using your saved defaults — no form.",
+      "description": "Download a URL instantly using your saved defaults — no form. Without a URL, it takes the link in your clipboard, or the browser tab you're on.",
       "mode": "no-view",
       "keywords": [
         "quick",
@@ -68,8 +68,8 @@
         {
           "name": "url",
           "type": "text",
-          "placeholder": "URL",
-          "required": true
+          "placeholder": "URL or Clipboard",
+          "required": false
         }
       ]
     },
@@ -83,6 +83,19 @@
         "recent",
         "downloads",
         "library"
+      ]
+    },
+    {
+      "name": "doctor",
+      "title": "Check Tools",
+      "subtitle": "The Downloader",
+      "description": "See which tools The Downloader found, their versions and paths, test a link, and copy diagnostics for a bug report.",
+      "mode": "view",
+      "keywords": [
+        "doctor",
+        "diagnostics",
+        "troubleshoot",
+        "versions"
       ]
     },
     {
@@ -157,6 +170,10 @@
             {
               "title": "Claude Haiku 5.5",
               "value": "anthropic-claude-haiku-5-5"
+            },
+            {
+              "title": "GPT-6.2 Sol",
+              "value": "openai-gpt-6.2-sol"
             },
             {
               "title": "GPT-6.1 Sol",
@@ -373,6 +390,14 @@
       "name": "get-link-info",
       "title": "Get Link Info",
       "description": "Gets only a link's details and statistics, without its text: title, author or channel, site, date, views, likes, comments, engagement rates, chapters, tags, description and a video's caption languages. Use it only for questions about how a link is doing or what it is, not for summaries or its content (use read-link for those)"
+    },
+    {
+      "name": "recent-links",
+      "title": "Recent Links",
+      "description": "The links you downloaded or chatted about, to mention with @ in Raycast AI Chat. Picking one attaches what it says: a video's transcript, a post's caption or an article",
+      "functionalities": [
+        "AI mention search"
+      ]
     }
   ],
   "preferences": [
@@ -484,7 +509,7 @@
     {
       "name": "audioFormat",
       "title": "Video: Audio Format",
-      "description": "Default audio format when Media Type is Audio Only.",
+      "description": "Default audio format when Media Type is Audio Only. FLAC and WAV are for editing: bigger files, never better sound than the site's own audio.",
       "type": "dropdown",
       "default": "mp3",
       "required": false,
@@ -500,13 +525,48 @@
         {
           "title": "Opus",
           "value": "opus"
+        },
+        {
+          "title": "FLAC",
+          "value": "flac"
+        },
+        {
+          "title": "WAV",
+          "value": "wav"
         }
       ]
     },
     {
+      "name": "videoEmbedMetadata",
+      "title": "Video: Metadata",
+      "label": "Embed Metadata and Cover",
+      "description": "Write the title, channel, date and chapters into downloaded video and audio files, with the thumbnail as cover art (MP3, M4A, Opus, FLAC, MP4, MKV).",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "videoSponsorBlock",
+      "title": "Video: SponsorBlock",
+      "label": "Remove Sponsor Segments",
+      "description": "Cut sponsored segments out of YouTube downloads, using SponsorBlock's community data. yt-dlp asks sponsor.ajay.app about the video.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "videoCookies",
+      "title": "Video: Browser Cookies",
+      "label": "Use Cookies from Browser for Videos",
+      "description": "Give yt-dlp the browser chosen under Cookies from Browser too, for age-restricted, private or members-only videos. Off by default: a site can limit an account that downloads a lot.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "cookiesFromBrowser",
-      "title": "Gallery: Cookies from Browser",
-      "description": "Use this browser's logins for Instagram, Reddit and other sites that need one (Download and Chat).",
+      "title": "Cookies from Browser",
+      "description": "Use this browser's logins for Instagram, Reddit and other sites that need one (Download and Chat) — and for videos too when Video: Browser Cookies is on.",
       "type": "dropdown",
       "default": "",
       "required": false,
@@ -571,8 +631,8 @@
     },
     {
       "name": "cookiesFromBrowserCustom",
-      "title": "Gallery: Custom Browser Spec",
-      "description": "Only for Custom: a gallery-dl browser spec, e.g. `firefox:/path/to/profile` or `chromium:C:\\…\\Default`.",
+      "title": "Custom Browser Spec",
+      "description": "Only for Custom: a gallery-dl / yt-dlp browser spec, e.g. `firefox:/path/to/profile`, `chromium:C:\\…\\Default`, or `firefox::Work` for a Firefox container.",
       "placeholder": "firefox:/path/to/profile",
       "type": "textfield",
       "default": "",
@@ -634,7 +694,7 @@
     {
       "name": "webpageSaveMode",
       "title": "Webpage: Save Mode",
-      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript.",
+      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript; Markdown keeps the article's text, links and images as a .md file (no monolith needed).",
       "type": "dropdown",
       "default": "complete",
       "required": false,
@@ -646,8 +706,28 @@
         {
           "title": "Lightweight (no JavaScript)",
           "value": "lightweight"
+        },
+        {
+          "title": "Markdown (Article Text)",
+          "value": "markdown"
         }
       ]
+    },
+    {
+      "name": "markdownImages",
+      "title": "Webpage: Markdown Images",
+      "label": "Save images next to the file",
+      "description": "When a webpage is saved as Markdown, download its images into an assets folder beside the .md file, so the note works offline. Off: images stay links to the web.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "markdownFolder",
+      "title": "Webpage: Markdown Folder",
+      "description": "Where webpages saved as Markdown go, such as a folder in your Obsidian vault. Empty: the Download Folder.",
+      "type": "directory",
+      "required": false
     },
     {
       "name": "networkIdleTimeoutSec",
@@ -736,6 +816,7 @@
       "required": false
     }
   ],
+  "resourceProvider": "read-mention",
   "ai": {
     "instructions": "Match the language of the user's message, not of the tool output: an English message gets an English reply, a German one German, a Czech one Czech. After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. To summarize a link or answer anything about what it says, call read-link once — it returns the details too, so don't also call get-link-info. Call get-link-info only for how a link is doing (views, likes, comments) or basic facts about it. When answering from a video's transcript, show when things are said: the timestamp itself is the link text, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows — never hide the link behind other words — and every point of a video summary gets its timestamp. For posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports.",
     "skills": [
@@ -930,21 +1011,21 @@
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@raycast/api": "^2.9.0",
+    "@raycast/api": "^2.14.0",
     "@raycast/utils": "^2.3.3",
-    "execa": "^9.6.1",
-    "linkedom": "^0.18.13",
+    "execa": "^10.2.1",
+    "linkedom": "^0.18.15",
     "srt-parser-2": "^1.2.3",
     "validator": "^13.15.35"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "@types/validator": "^13.15.10",
-    "eslint": "^10.11.0",
-    "prettier": "^3.9.9",
-    "typescript": "^5.9.3"
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -40,7 +40,11 @@ export type YtdlpEvent =
   /** `[download] … has already been downloaded` — a stream was skipped. */
   | { type: "stream-skipped" }
   /** A post-processor started (merge, audio extraction, remux, fixups). */
-  | { type: "postprocess"; step: "merge" | "extract-audio" | "other" };
+  | { type: "postprocess"; step: "merge" | "extract-audio" | "other" }
+  /** `[download] Downloading item 2 of 5` — the next video of a playlist. */
+  | { type: "item"; index: number; total: number }
+  /** `[info] <id>: Downloading 1 time ranges: 90.0-165.0` — a clip, which ffmpeg fetches without progress lines. */
+  | { type: "sections" };
 
 function num(value: string | undefined): number | undefined {
   if (value === undefined || value === "NA" || value === "None") return undefined;
@@ -48,10 +52,12 @@ function num(value: string | undefined): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-const LEGACY_PROGRESS_RE = /\[download\]\s+(\d+(?:\.\d+)?)%/;
+const LEGACY_PROGRESS_RE = /^\s*\[download\]\s+(\d+(?:\.\d+)?)%/;
 const FORMATS_RE = /^\[info\] .*: Downloading \d+ format\(s\): (\S+)/;
+const ITEM_RE = /^\[download\] Downloading item (\d+) of (\d+)/;
+const SECTIONS_RE = /^\[info\] .*: Downloading \d+ time ranges?:/;
 const POSTPROCESSORS =
-  /^\[(Merger|ExtractAudio|VideoRemuxer|VideoConvertor|FixupM3u8|FixupM4a|FixupStretched|FixupDuplicateMoov|FixupTimestamp|EmbedThumbnail|Metadata|MoveFiles)\]/;
+  /^\[(Merger|ExtractAudio|VideoRemuxer|VideoConvertor|FixupM3u8|FixupM4a|FixupStretched|FixupDuplicateMoov|FixupTimestamp|EmbedThumbnail|Metadata|MoveFiles|SponsorBlock|ModifyChapters|ThumbnailsConvertor)\]/;
 
 /** Parse one line of yt-dlp stdout. Returns `undefined` for lines that carry nothing the UI needs. */
 export function parseYtdlpLine(raw: string): YtdlpEvent | undefined {
@@ -76,6 +82,10 @@ export function parseYtdlpLine(raw: string): YtdlpEvent | undefined {
 
   const formats = FORMATS_RE.exec(line);
   if (formats) return { type: "formats", streams: formats[1].split("+").length };
+
+  const item = ITEM_RE.exec(line);
+  if (item) return { type: "item", index: Number(item[1]), total: Number(item[2]) };
+  if (SECTIONS_RE.test(line)) return { type: "sections" };
 
   if (line.startsWith("[download] Destination:")) return { type: "stream-start" };
   if (line.startsWith("[download]") && line.includes("has already been downloaded")) {

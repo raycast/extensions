@@ -22,7 +22,7 @@ type Input = {
 export default async function tool(input: Input) {
   // The interactive commands gate URLs through isValidUrl; this model-driven
   // entry point must too (defense in depth against a prompt-injected value).
-  const raw = input.url?.trim() ?? "";
+  const raw = typeof input.url === "string" ? input.url.trim() : "";
   if (!raw || !isValidUrl(raw)) throw new Error("Invalid URL — provide an http(s) link.");
   const url = new URL(normalizeUrl(raw)).href;
   if (linkKindOf(url) !== "video") return linkInfoForAI(await loadLinkContext(url, { archiveFallback: true }));

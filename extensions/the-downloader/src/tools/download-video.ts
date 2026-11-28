@@ -13,7 +13,7 @@ import {
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { LiveStreamError, fetchVideoInfo, isLiveStream, runVideoDownload } from "../lib/ytdlp.js";
+import { LiveStreamError, fetchVideoInfo, isLiveStream, outputTemplateIn, runVideoDownload } from "../lib/ytdlp.js";
 import { getConfig } from "../lib/config.js";
 import { composeVideoFormat } from "../lib/video-format.js";
 import { detectSource } from "../lib/detect.js";
@@ -38,10 +38,10 @@ export default async function tool(input: Input) {
   // The model supplies this value, so check it like the commands do: only a
   // real http(s) URL may reach yt-dlp, never something it would read as an
   // option (a prompt-injected "--batch-file=…").
-  if (!isValidUrl(input.url)) {
+  if (typeof input.url !== "string" || !isValidUrl(input.url.trim())) {
     throw new Error("Invalid URL — provide an http(s) video URL.");
   }
-  const url = normalizeUrl(input.url);
+  const url = normalizeUrl(input.url.trim());
   const startedAt = Date.now();
   const source = detectSource(url);
   if (source === "gallery" || source === "spotify") {
@@ -103,7 +103,8 @@ export default async function tool(input: Input) {
       {
         url,
         format,
-        outputTemplate: path.join(downloadPath, "%(title)s (%(id)s).%(ext)s"),
+        outputTemplate: outputTemplateIn(downloadPath),
+        forceIpv4,
         ffmpegPath,
         denoPath: deno,
         idleMs: getIdleTimeoutMs(),

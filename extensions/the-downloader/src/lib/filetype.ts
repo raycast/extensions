@@ -1,4 +1,4 @@
-import { SourceType } from "../types.js";
+import { SourceType, Video } from "../types.js";
 import { ToolId } from "./tools.js";
 import { needsJsRuntime } from "./detect.js";
 
@@ -24,6 +24,19 @@ export function defaultFiletype(source: SourceType, audioPreferred: boolean): Fi
     default:
       return audioPreferred ? "audio" : "video";
   }
+}
+
+/** The webpage save modes (the `webpageSaveMode` preference): two monolith ones and Markdown. */
+export type WebpageSaveMode = "complete" | "lightweight" | "markdown";
+
+/** True for the save mode that writes the article as Markdown, without monolith. */
+export function isMarkdownMode(mode: string | undefined): boolean {
+  return mode === "markdown";
+}
+
+/** What a save mode is called in the download view and the history. */
+export function saveModeLabel(mode: string | undefined): string {
+  return isMarkdownMode(mode) ? "Markdown" : mode === "lightweight" ? "Lightweight (no JavaScript)" : "Complete";
 }
 
 /** The tool a (source, filetype) selection runs. */
@@ -56,6 +69,78 @@ export function supportedFiletypes(source: SourceType): Filetype[] {
   return SUPPORTED[source] ?? FILETYPES;
 }
 
+/** What yt-dlp found when the form probed the link: its details, or nothing it can download. */
+export type LinkProbe = { kind: "media"; video: Video } | { kind: "no-media" };
+
+/** A filetype the source usually offers but this link can't give, and why. */
+export type UnavailableFiletype = { filetype: Filetype; reason: string };
+
+/** True when some of the source's filetypes run yt-dlp, so probing the link with it tells what's possible. */
+export function probesWithYtdlp(source: SourceType): boolean {
+  return supportedFiletypes(source).some((ft) => resolveTool(source, ft) === "yt-dlp");
+}
+
+/**
+ * What the probed media can't give, by filetype. Only explicit evidence
+ * counts: a format list where every format lacks video (or sound), no caption
+ * tracks, no thumbnail. A playlist's probe describes only its first entry,
+ * and a result without formats (an extractor that lists none) says nothing:
+ * neither rules anything out.
+ */
+function mediaGaps(video: Video): Partial<Record<Filetype, string>> {
+  const formats = video.formats ?? [];
+  if (formats.length === 0 || video.playlist_index != null) return {};
+  const gaps: Partial<Record<Filetype, string>> = {};
+  if (formats.every((f) => f.vcodec === "none")) gaps.video = "the link has audio only";
+  if (formats.every((f) => f.acodec === "none")) gaps.audio = "the video has no sound";
+  const captions =
+    Object.keys(video.subtitles ?? {}).filter((lang) => lang !== "live_chat").length +
+    Object.keys(video.automatic_captions ?? {}).length;
+  if (captions === 0) gaps.transcript = "the video has no captions";
+  if (!video.thumbnail && !video.thumbnails?.length) gaps.image = "the video has no thumbnail";
+  return gaps;
+}
+
+/**
+ * The Filetype options for this link, once yt-dlp has probed it: the source's
+ * filetypes minus what the link can't give, plus what the probe proved it can
+ * (a webpage with a video with captions also offers Image and Transcript). A
+ * page with no media can still be saved as a webpage, whatever the site.
+ * Without a probe, or if nothing would be left, the source's own list stands.
+ */
+export function probedFiletypes(
+  source: SourceType,
+  probe: LinkProbe | undefined,
+): { options: Filetype[]; unavailable: UnavailableFiletype[] } {
+  const base = supportedFiletypes(source);
+  if (!probe || !probesWithYtdlp(source)) return { options: base, unavailable: [] };
+  const usesYtdlp = (ft: Filetype) => resolveTool(source, ft) === "yt-dlp";
+  const unavailable: UnavailableFiletype[] = [];
+  let candidates: Filetype[];
+  if (probe.kind === "no-media") {
+    for (const ft of base.filter(usesYtdlp)) {
+      unavailable.push({ filetype: ft, reason: "yt-dlp finds no video or audio on this page" });
+    }
+    candidates = [...base.filter((ft) => !usesYtdlp(ft)), "website"];
+  } else {
+    const gaps = mediaGaps(probe.video);
+    candidates = FILETYPES.filter((ft) => base.includes(ft) || usesYtdlp(ft)).filter((ft) => {
+      const reason = gaps[ft];
+      if (!reason) return true;
+      if (base.includes(ft)) unavailable.push({ filetype: ft, reason });
+      return false;
+    });
+  }
+  const options = FILETYPES.filter((ft) => candidates.includes(ft));
+  return options.length > 0 ? { options, unavailable } : { options: base, unavailable: [] };
+}
+
+/** The filetype to show: the user's pick when the link offers it, else the source default, else the first option. */
+export function chooseFiletype(options: Filetype[], picked: Filetype | undefined, fallback: Filetype): Filetype {
+  if (picked && options.includes(picked)) return picked;
+  return options.includes(fallback) ? fallback : (options[0] ?? fallback);
+}
+
 /**
  * Keep `current` when the source supports it; otherwise fall back to the
  * source's sensible default. Used when the URL changes under a filetype the
@@ -83,11 +168,13 @@ export function filetypeGuidance(source: SourceType): string {
 /**
  * Every executable that must exist for a (source, filetype) selection. Deno is
  * required only for YouTube (see `needsJsRuntime`); elsewhere it's optional,
- * so a missing Deno doesn't block Vimeo, Twitch and the like.
+ * so a missing Deno doesn't block Vimeo, Twitch and the like. `webpageMode` is
+ * the chosen save mode when the filetype is a website.
  */
-export function requiredTools(source: SourceType, filetype: Filetype, url = ""): string[] {
+export function requiredTools(source: SourceType, filetype: Filetype, url = "", webpageMode = ""): string[] {
   const tool = resolveTool(source, filetype);
-  if (tool === "monolith") return ["monolith"];
+  // The Markdown save mode reads the page itself; only the HTML modes run monolith.
+  if (tool === "monolith") return isMarkdownMode(webpageMode) ? [] : ["monolith"];
   if (tool === "spotdl") return ["spotdl", "ffmpeg"];
   if (tool === "gallery-dl") return ["gallery-dl"];
   // tool === "yt-dlp". Transcripts skip ffprobe but still need YouTube's

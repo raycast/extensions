@@ -124,7 +124,15 @@ export async function checkOutdated(): Promise<{ outdated: Record<string, string
   } else if (isWindows) {
     try {
       const wingetPath = await getWingetPath();
-      const { stdout: upgradeOutput } = await execa(wingetPath, ["upgrade"], { timeout: CHECK_TIMEOUT_MS });
+      const { stdout: upgradeOutput } = await execa(
+        wingetPath,
+        ["upgrade", "--accept-source-agreements", "--disable-interactivity"],
+        {
+          timeout: CHECK_TIMEOUT_MS,
+          // No terminal to answer a first-run prompt in: fail instead of waiting out the timeout.
+          stdin: "ignore",
+        },
+      );
       for (const pkg of WINGET_PACKAGES) {
         const available = wingetRow(upgradeOutput, pkg)?.available;
         if (available) outdated[pkg] = available;

@@ -8,6 +8,7 @@ const { autoLoadUrlFromClipboard, autoLoadUrlFromSelectedText, enableBrowserExte
 
 export default function Command(props: LaunchProps) {
   const [loadedUrl, setLoadedUrl] = useState("");
+  const [loadedClip, setLoadedClip] = useState("");
   const [startupDone, setStartupDone] = useState(false);
 
   useEffect(() => {
@@ -15,16 +16,26 @@ export default function Command(props: LaunchProps) {
       let loaded = "";
 
       // A URL handed off from the Fast Download command takes priority.
-      const contextUrl = (props.launchContext as { url?: string } | undefined)?.url;
-      if (contextUrl && isValidUrl(contextUrl)) loaded = contextUrl;
+      const context = props.launchContext as { url?: string; clip?: unknown } | undefined;
+      const contextUrl = context?.url;
+      if (contextUrl && isValidUrl(contextUrl)) {
+        loaded = contextUrl;
+        // Chat About Link's "Download a Moment" hands over the part to download with the link.
+        if (typeof context?.clip === "string") setLoadedClip(context.clip.slice(0, 40));
+      }
 
       if (!loaded && autoLoadUrlFromClipboard) {
-        const text = await Clipboard.readText();
-        if (text && isValidUrl(text)) loaded = text;
+        try {
+          // Trimmed: a copied link often ends with a space or a newline.
+          const text = (await Clipboard.readText())?.trim();
+          if (text && isValidUrl(text)) loaded = text;
+        } catch {
+          /* clipboard unavailable — the form opens empty */
+        }
       }
       if (!loaded && autoLoadUrlFromSelectedText) {
         try {
-          const text = await getSelectedText();
+          const text = (await getSelectedText()).trim();
           if (text && isValidUrl(text)) loaded = text;
         } catch {
           /* no selection */
@@ -45,5 +56,5 @@ export default function Command(props: LaunchProps) {
 
   if (!startupDone) return <Form isLoading />;
 
-  return <DownloadForm initialUrl={loadedUrl} />;
+  return <DownloadForm initialUrl={loadedUrl} initialClip={loadedClip} />;
 }

@@ -2,9 +2,13 @@
 
 Some image galleries require you to be logged in — private subreddits, Patreon posts, certain Pixiv works, and so on. The Downloader can borrow cookies from a browser you're already logged into, so gallery-dl sees the same content you do.
 
+## Videos
+
+Videos don't use your browser's cookies unless you turn on **Video: Browser Cookies**. With it on, yt-dlp gets the same browser for age-restricted, private or members-only videos. It is off by default because a site can limit an account that downloads a lot — turn it on when a video asks you to sign in. The AI tools never use your cookies.
+
 ## Pick your browser
 
-Open the extension's preferences and find **Gallery: Cookies from Browser**. Pick the browser you're logged into:
+Open the extension's preferences and find **Cookies from Browser**. Pick the browser you're logged into:
 
 Chrome, Chromium, Firefox, Safari, Edge, Brave, Opera, Vivaldi, LibreWolf, Arc, Zen, Floorp, or **Custom**.
 
@@ -26,7 +30,9 @@ Pick **Custom** when:
 - You want a non-default profile (e.g. a work profile, or `Profile 2` instead of `Default`).
 - Your profile lives somewhere unusual.
 
-Then fill in **Gallery: Custom Browser Spec** with a gallery-dl `--cookies-from-browser` value.
+Then fill in **Custom Browser Spec** with a gallery-dl `--cookies-from-browser` value (yt-dlp takes the same form).
+
+For a Firefox Multi-Account Container, name it after two colons: `firefox::Work` reads only that container's cookies.
 
 ### Format
 
@@ -56,7 +62,7 @@ A Chromium-fork profile by full path (macOS):
 chromium:/Users/you/Library/Application Support/Thorium/Default
 ```
 
-Anything you put here is passed straight to gallery-dl's `--cookies-from-browser`, so gallery-dl's docs are the source of truth: https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorcookies
+Anything you put here is passed straight to gallery-dl's `--cookies-from-browser`, so gallery-dl's docs are the source of truth (see `extractor.*.cookies`): https://codeberg.org/mikf/gallery-dl/src/branch/master/docs/configuration.rst
 
 ### Finding your profile
 

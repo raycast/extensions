@@ -13,6 +13,7 @@ import { TOOL_INFO, ToolId, toolInfoFor } from "./tools.js";
 import { checkOutdated, errorMessageOf, upgrade } from "./package-manager.js";
 import { isManagedBinary } from "./managed-binary.js";
 import {
+  CHECK_TTL_MS,
   CHECK_BUDGET_MS,
   PendingUpdate,
   SNOOZE_MS,
@@ -30,6 +31,8 @@ import {
 } from "./tool-freshness.js";
 
 const CACHE_KEY = "tool-update-check";
+/** How long a check that partly failed stands before the next download tries again. */
+const FAILED_CHECK_TTL_MS = 15 * 60 * 1000;
 const snoozeKey = (tool: ToolId) => `tool-update-snoozed-until:${tool}`;
 
 const TOOL_PATH: Record<ToolId, () => string> = {
@@ -91,8 +94,12 @@ const freshLatestVersions = singleFlight(async (): Promise<Partial<Record<ToolId
     const version = outdated[packageFor(tool, process.platform)];
     if (version) latest[tool] = version;
   }
-  // A partly failed check could hide real updates for hours, so only a clean one is cached.
-  if (issues.length === 0) await LocalStorage.setItem(CACHE_KEY, serializeLatest(latest, now));
+  // A partly failed check could hide real updates for hours, so only a clean
+  // one is cached for the full time. A failed one (GitHub unreachable or
+  // rate-limited, brew offline) is kept briefly, or every download would wait
+  // out the whole check again before starting.
+  const checkedAt = issues.length === 0 ? now : now - CHECK_TTL_MS + FAILED_CHECK_TTL_MS;
+  await LocalStorage.setItem(CACHE_KEY, serializeLatest(latest, checkedAt));
   return latest;
 });
 
@@ -198,7 +205,10 @@ export async function ensureFreshTools(executables: string[]): Promise<ToolUpdat
       await snooze();
       return "declined";
     }
-    return await updateTools(upgradable);
+    const outcome = await updateTools(upgradable);
+    // A failed update would fail the same way before every download: ask again tomorrow.
+    if (outcome === "failed") await snooze();
+    return outcome;
   } catch {
     return "failed";
   } finally {

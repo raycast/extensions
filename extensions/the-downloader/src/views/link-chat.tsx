@@ -36,6 +36,7 @@ import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { chatKey, deleteChat, findChat, saveChat } from "../lib/chat-store.js";
 import { maxHeight } from "../lib/estimate.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
+import { answerMoments, clipLabel, clipText } from "../lib/clip.js";
 import { ChatTurn, answerQuestion, bodyForSave, contextForExport, conversationMarkdown } from "../lib/link-chat.js";
 import {
   LinkContext,
@@ -53,7 +54,14 @@ import { errorText, escapeMarkdown, withoutImages } from "../lib/format.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
 import { timestampUrl } from "../lib/sources/video.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
-import { downloadPath, getGalleryDlPath, getffmpegPath, getytdlPath, sanitizeVideoTitle } from "../utils.js";
+import {
+  downloadPath,
+  getGalleryDlPath,
+  getffmpegPath,
+  getytdlPath,
+  isValidUrl,
+  sanitizeVideoTitle,
+} from "../utils.js";
 import Installer from "./installer.js";
 
 type Suggestion = { title: string; icon: Icon; prompt: string };
@@ -199,9 +207,9 @@ async function saveFile(name: string, content: string, ext: string) {
   }
 }
 
-/** The Download command with this link filled in. */
-function openDownload(url: string) {
-  launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url } }).catch((error) =>
+/** The Download command with this link filled in, and its Clip field when `clip` is given. */
+function openDownload(url: string, clip?: string) {
+  launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url, clip } }).catch((error) =>
     showToast({
       style: Toast.Style.Failure,
       title: "Couldn't open Download",
@@ -308,6 +316,24 @@ function turnMarkdown(turn: Turn, ctx: LinkContext | undefined): string {
           ? `\n\n---\n_${turn.engineTitle}${took}_`
           : "";
   return `${question}\n\n${body}${footer}`;
+}
+
+/** The moments an answer points at, each opening the Download form with that clip filled in. */
+function MomentActions({ answer, duration, url }: { answer: string; duration?: number; url: string }) {
+  const moments = answerMoments(answer, duration || undefined);
+  if (moments.length === 0) return null;
+  return (
+    <ActionPanel.Submenu title="Download a Moment" icon={Icon.Crop}>
+      {moments.map((moment) => (
+        <Action
+          key={moment.start}
+          title={clipLabel(moment)}
+          icon={Icon.Download}
+          onAction={() => openDownload(url, clipText(moment))}
+        />
+      ))}
+    </ActionPanel.Submenu>
+  );
 }
 
 function turnIcon(turn: Turn) {
@@ -457,8 +483,13 @@ export function LinkChat({ url, initialQuestion, root }: { url: string; initialQ
         force,
         archived: fromArchive,
       });
+      // A newer load (Reload, Read Archived Copy) has started: its result is the one to show.
+      if (controller.signal.aborted) return undefined;
+      // The saved chat is read before the link is shown, so a question asked
+      // right away can't be saved over a conversation that wasn't restored yet.
+      const stored = await findChat(chatKey(context)).catch(() => undefined);
+      if (controller.signal.aborted) return undefined;
       setCtx(context);
-      const stored = await findChat(chatKey(context));
       if (stored) {
         // Restore whenever the list is empty — also after Try Again on a failed first
         // load, or the next answer would save over the stored conversation.
@@ -821,6 +852,15 @@ export function LinkChat({ url, initialQuestion, root }: { url: string; initialQ
                     onAction={() => setSearchText(turn.question)}
                   />
                   {turn.error && <Action.CopyToClipboard title="Copy Error" content={turn.error} />}
+                  {ctx?.kind === "video" && turn.status === "done" && (
+                    <MomentActions
+                      answer={turn.answer}
+                      duration={ctx.video?.duration}
+                      // The video's own link: the chat's may be a playlist or channel
+                      // (read as its first video), which the form would download whole.
+                      url={ctx.video?.webpage_url && isValidUrl(ctx.video.webpage_url) ? ctx.video.webpage_url : url}
+                    />
+                  )}
                   {commonActions}
                 </ActionPanel>
               }

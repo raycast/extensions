@@ -1,4 +1,5 @@
 import { spawn, ChildProcess } from "node:child_process";
+import { StringDecoder } from "node:string_decoder";
 
 /**
  * Default watchdog idle window. Real downloads emit progress lines well within
@@ -20,11 +21,64 @@ export const MAX_RETAINED_OUTPUT = 1_000_000;
 const tail = (text: string) => (text.length > MAX_RETAINED_OUTPUT ? text.slice(-MAX_RETAINED_OUTPUT) : text);
 
 /** Grace period after SIGTERM before escalating to SIGKILL, so a child that ignores SIGTERM still exits and `close` still fires. */
-const KILL_GRACE_MS = 4_000;
+export const KILL_GRACE_MS = 4_000;
+
+/** The longest delay a timer takes (2^31-1 ms, about 24.8 days); a longer one fires immediately. */
+export const MAX_TIMER_MS = 2_147_483_647;
+
+/**
+ * The line of a tool's output that says why it failed: yt-dlp's last
+ * `ERROR:` line, or else the last few lines. Warnings printed before it
+ * (yt-dlp prints many) are never the reason.
+ */
+function failureLine(text: string): string {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const errors = lines.filter((line) => /^ERROR:/i.test(line));
+  return errors.at(-1) ?? lines.slice(-3).join("\n");
+}
+
+/**
+ * True when the tool failed because the link has nothing it can download (no
+ * extractor for the site, or a page without a video) rather than a network,
+ * sign-in or tool failure. Only the failure line counts: the same words in an
+ * earlier warning don't. The form probes links with yt-dlp, so it knows this
+ * before a download starts.
+ */
+export function isNoMediaError(text: string): boolean {
+  return /Unsupported URL|No video formats found|There's no video in this|No media found/i.test(failureLine(text));
+}
+
+/** What a failure says when the tool finds nothing to download at the link (the form, the download view, the chat). */
+export const NO_MEDIA_MESSAGE = "No video, audio or images at this link that can be downloaded.";
+
+/**
+ * The part of a tool's error output worth showing in a toast: yt-dlp's last
+ * `ERROR:` line, or else the last few lines — never the pages of warnings that
+ * can come before them. The full text stays available to Copy Error.
+ */
+export function errorSummary(text: string, max = 500): string {
+  if (isNoMediaError(text)) return NO_MEDIA_MESSAGE;
+  // optparse (yt-dlp) and argparse (gallery-dl, spotDL) on an option they don't know yet.
+  const unknown = /(?:no such option|unrecognized arguments?):\s*(--?[\w-]+)/i.exec(text);
+  if (unknown) {
+    const tool = /^([\w.-]+):\s*error:/m.exec(text)?.[1] ?? "The tool";
+    return `${tool} doesn't know ${unknown[1]}: it is older than this extension expects. Update it (Update Libraries), then try again.`;
+  }
+  const picked = failureLine(text);
+  return picked.length > max ? `${picked.slice(0, max)}…` : picked;
+}
 
 export type RunOptions = {
   /** Maximum ms of silence (no stdout/stderr) before the child is killed and the promise rejects. */
   idleMs: number;
+  /**
+   * Multiplies `idleMs` each time the window restarts — for a phase that is
+   * silent by nature (ffmpeg merging or converting a long video).
+   */
+  idleScale?: () => number;
   /** Environment for the child. Defaults to the parent's `process.env`. */
   env?: NodeJS.ProcessEnv;
   /** Working directory for the child. Defaults to the parent's. */
@@ -46,6 +100,46 @@ export class AbortError extends Error {
   constructor() {
     super("aborted");
     this.name = "AbortError";
+  }
+}
+
+/**
+ * End `child` together with everything it started. On POSIX that is its
+ * process group (negative pid; the child must have been spawned `detached`),
+ * so grandchildren — yt-dlp's ffmpeg post-processor, its deno — die with it
+ * instead of orphaning. Windows has no process groups: `taskkill /T` ends the
+ * whole tree instead (a PyInstaller `yt-dlp.exe` is a launcher whose Python
+ * child would otherwise keep running). Falls back to a direct kill when
+ * neither works, and for an escalation signal. No signal → SIGTERM.
+ */
+export function killProcessTree(child: Pick<ChildProcess, "pid" | "kill">, signal?: NodeJS.Signals): void {
+  const pid = child.pid;
+  const isPosix = process.platform !== "win32";
+  if (isPosix && typeof pid === "number") {
+    try {
+      if (signal) process.kill(-pid, signal);
+      else process.kill(-pid);
+      return;
+    } catch {
+      /* group already gone, or not a group leader — fall through to a direct kill */
+    }
+  }
+  if (!isPosix && typeof pid === "number" && !signal) {
+    // Don't kill the parent first: its children would be orphaned and out of taskkill's reach.
+    try {
+      spawn("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore", windowsHide: true }).on("error", () =>
+        child.kill(),
+      );
+      return;
+    } catch {
+      /* taskkill unavailable — fall through to a direct kill */
+    }
+  }
+  try {
+    if (signal) child.kill(signal);
+    else child.kill();
+  } catch {
+    /* child may already be dead */
   }
 }
 
@@ -80,8 +174,13 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
     const isPosix = process.platform !== "win32";
     const child = spawn(binary, args, {
       stdio: ["ignore", "pipe", "pipe"],
-      env: options.env ?? process.env,
+      // The Python tools (yt-dlp, gallery-dl, spotDL) write a pipe in Windows'
+      // ANSI code page unless told otherwise, dropping the characters it lacks
+      // from titles and saved paths; this side reads UTF-8.
+      env: { PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8", ...(options.env ?? process.env) },
       cwd: options.cwd,
+      // No console window flashing up for every tool run on Windows.
+      windowsHide: true,
       // On POSIX, run the child as its own process-group leader so termination
       // can signal the whole group (negative pid) — otherwise killing yt-dlp
       // orphans its ffmpeg grandchild, which keeps re-encoding under launchd.
@@ -91,6 +190,11 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
     let stdout = "";
     let stderr = "";
     let stdoutLineBuffer = "";
+    // Decoders, so a character split across two chunks isn't read as two broken halves.
+    const stdoutDecoder = new StringDecoder("utf8");
+    const stderrDecoder = new StringDecoder("utf8");
+    // The window the last timer was set with, for the message when it fires.
+    let idleWindowMs = options.idleMs;
     let settled = false;
     let idleTimer: ReturnType<typeof setTimeout> | undefined;
     let killTimer: ReturnType<typeof setTimeout> | undefined;
@@ -116,40 +220,7 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
       reject(error);
     };
 
-    // Signal the child's whole process group on POSIX (negative pid) so
-    // grandchildren — yt-dlp's ffmpeg post-processor — die with it instead of
-    // orphaning. Windows has no process groups: `taskkill /T` ends the whole
-    // tree instead. Falls back to a direct child kill when neither works, and
-    // for the escalation after the grace period. No signal → SIGTERM.
-    const killGroup = (signal?: NodeJS.Signals) => {
-      const pid = child.pid;
-      if (isPosix && typeof pid === "number") {
-        try {
-          if (signal) process.kill(-pid, signal);
-          else process.kill(-pid);
-          return;
-        } catch {
-          /* group already gone — fall through to a direct child kill */
-        }
-      }
-      if (!isPosix && typeof pid === "number" && !signal) {
-        // Don't kill the parent first: its children would be orphaned and out of taskkill's reach.
-        try {
-          spawn("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore", windowsHide: true }).on("error", () =>
-            child.kill(),
-          );
-          return;
-        } catch {
-          /* taskkill unavailable — fall through to a direct child kill */
-        }
-      }
-      try {
-        if (signal) child.kill(signal);
-        else child.kill();
-      } catch {
-        /* child may already be dead */
-      }
-    };
+    const killGroup = (signal?: NodeJS.Signals) => killProcessTree(child, signal);
 
     const beginTermination = (reason: "abort" | "idle") => {
       if (settled || termination) return;
@@ -168,13 +239,14 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
     const resetIdle = () => {
       if (settled || termination) return;
       if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => beginTermination("idle"), options.idleMs);
+      // Past 2^31-1 ms, setTimeout fires at once instead of never.
+      idleWindowMs = Math.min(options.idleMs * (options.idleScale?.() ?? 1), MAX_TIMER_MS);
+      idleTimer = setTimeout(() => beginTermination("idle"), idleWindowMs);
     };
     resetIdle();
 
     child.stdout?.on("data", (data: Buffer) => {
-      resetIdle();
-      const text = data.toString();
+      const text = stdoutDecoder.write(data);
       stdout = tail(stdout + text);
       options.onStdoutChunk?.(text);
       if (options.onStdoutLine) {
@@ -187,10 +259,12 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
         stdoutLineBuffer = lines.pop() ?? "";
         for (const line of lines) options.onStdoutLine(line);
       }
+      // After the lines were handled: a line may change `idleScale` (a post-processing step starting).
+      resetIdle();
     });
     child.stderr?.on("data", (data: Buffer) => {
       resetIdle();
-      const text = data.toString();
+      const text = stderrDecoder.write(data);
       stderr = tail(stderr + text);
       options.onStderrChunk?.(text);
     });
@@ -204,7 +278,7 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
       if (termination === "abort") {
         settleReject(new AbortError());
       } else if (termination === "idle") {
-        const seconds = Math.round(options.idleMs / 1000);
+        const seconds = Math.round(idleWindowMs / 1000);
         settleReject(
           new Error(
             options.idleKillMessage ??

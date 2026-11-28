@@ -2,16 +2,17 @@
 
 Download videos, audio, image galleries, Spotify music, and complete webpages from the web — straight from Raycast. Then chat with AI about any video, post or article.
 
-![The Downloader — Download form](media/the-downloader-1.png)
+![The Downloader — Download form](https://raw.githubusercontent.com/raycast/extensions/main/extensions/the-downloader/media/the-downloader-1.png)
 
 The Downloader started as a fork of [Video Downloader](https://www.raycast.com/vimtor/video-downloader) by vimtor and its contributors — thank you.
 
 ## Commands
 
-- **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download. A live view follows the download: a progress ring, speed, time left and size, a download-speed chart, and the steps (prepare → video → audio → merge → saved), with the title, channel, format and folder alongside. Press Esc to go back to the form; the download keeps running and its toast keeps reporting progress.
-- **Fast Download** — pass a URL as a command argument and download it instantly using your saved defaults — no form.
-- **Download History** — everything you've downloaded, grouped by day, with thumbnails, search, type filters, and one-keystroke Open, Show in Finder and Download Again.
-- **Chat About Link** — paste a link and ask anything about it: a video (YouTube, TikTok, X, Vimeo…), a social post (Instagram, Reddit, Pinterest…) or any article. The Downloader loads its details and statistics and its text — a video's transcript with timestamps, a post's caption, an article's text — then answers, with clickable timestamps for videos. Suggested questions fit each kind of link. Chats are saved, so you can continue them later. Also available from the Download form, the preview, the live view and the history (⌘⇧A). Articles are read without ever touching your local network (routers, `.local` and private addresses are refused), and in the page's own text encoding. When a page blocks apps, is gone or needs JavaScript, you can read the Internet Archive's saved copy instead (not for pages behind a login, a paywall or a legal block).
+- **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download. A **playlist or channel** link lists its videos, so you can pick the ones you want; they go into a folder named after the playlist. **Clip** downloads only part of a video (`1:30-2:45`), **Audio Language** picks the soundtrack of a video that has several (YouTube's dubbed audio), and **Subtitles** puts a caption track inside the video or next to it as an `.srt` file. A webpage is saved as one self-contained `.html` file, or as **Markdown** — the article's text, links and images in a `.md` file with its title, source and date on top (⌘⇧C copies that Markdown instead of saving it). With **Images** on, the page's images are saved into an `assets` folder beside the note, so it works offline; **Webpage: Markdown Folder** in preferences sends Markdown saves to a folder of their own, such as your Obsidian vault. A live view follows the download: a progress ring, speed, time left and size, a download-speed chart, and the steps (prepare → video → audio → merge → saved), with the title, channel, format and folder alongside. Press Esc to go back to the form; the download keeps running and its toast keeps reporting progress.
+- **Fast Download** — pass a URL as a command argument and download it instantly using your saved defaults — no form. Without a URL it takes the link in your clipboard, or the browser tab you're on (with the Raycast browser extension), so it works from a hotkey. A deeplink does the same from Shortcuts or a script: `raycast://extensions/Stheno/the-downloader/fast-download?arguments=%7B%22url%22%3A%22https%3A%2F%2Fexample.com%2Fvideo%22%7D`.
+- **Download History** — everything you've downloaded, grouped by day, with thumbnails, search, type filters, and one-keystroke Open, Show in Finder and Download Again. Export the list as CSV or JSON, or remove the entries whose files are gone.
+- **Check Tools** — every tool The Downloader uses, with its version, where it was found and whether it runs. Reads a test link and copies diagnostics for a bug report.
+- **Chat About Link** — paste a link and ask anything about it: a video (YouTube, TikTok, X, Vimeo…), a social post (Instagram, Reddit, Pinterest…) or any article. The Downloader loads its details and statistics and its text — a video's transcript with timestamps, a post's caption, an article's text — then answers, with clickable timestamps for videos; **Download a Moment** on an answer opens the Download form with that part of the video set as the clip. Suggested questions fit each kind of link. Chats are saved, so you can continue them later. Also available from the Download form, the preview, the live view and the history (⌘⇧A). Articles are read without ever touching your local network (routers, `.local` and private addresses are refused), and in the page's own text encoding. When a page blocks apps, is gone or needs JavaScript, you can read the Internet Archive's saved copy instead (not for pages behind a login, a paywall or a legal block).
 
 Before downloading, the form shows what yt-dlp found — channel, duration, views and the best quality — and each Quality choice lists the resolution and estimated size it will fetch. Press ⌘Y for a full preview with the description and every available format.
 
@@ -29,7 +30,9 @@ Chat About Link's settings also set the **Answer Style** (Balanced, Short with a
 
 In Raycast AI Chat, mention **@the-downloader** to download videos, read any link (`read-link`: a video's timestamped transcript, a post's caption or an article) or get its details and statistics (`get-link-info`). The extension also includes three Skills: **Summarize Link**, **Study Notes** and **Performance Check**.
 
-Privacy: when `read-link` or `get-link-info` can't read an article (it blocks apps, is gone or needs JavaScript), they look up its saved copy on the Internet Archive automatically, which sends the link to archive.org. In Chat About Link that only happens when you choose **Read Archived Copy**.
+Type **@** in the AI Chat composer and choose **Recent Links** to mention a link you downloaded or chatted about before: its transcript, caption or article is attached to your message, so you don't need to paste the link again.
+
+Privacy: when `read-link`, `get-link-info` or a mentioned Recent Link can't read an article (it blocks apps, is gone or needs JavaScript), they look up its saved copy on the Internet Archive automatically, which sends the link to archive.org. Saving or copying a webpage as Markdown does the same when the page blocks apps or is gone. In Chat About Link that only happens when you choose **Read Archived Copy**.
 
 ## What you need
 
@@ -50,14 +53,23 @@ brew install yt-dlp ffmpeg gallery-dl deno monolith
 
 spotDL isn't installed with the others: the first time you use the Spotify feature, the extension downloads its prebuilt binary from [spotDL's official GitHub Releases](https://github.com/spotDL/spotify-downloader/releases) over HTTPS, checks it against the SHA-256 published with the release, and ad-hoc codesigns it on macOS. The prebuilt binary is x86_64-only, so Apple Silicon Macs need Rosetta 2 (`softwareupdate --install-rosetta --agree-to-license`); alternatively, install spotDL via `brew install spotdl` for a native Apple-Silicon Python build.
 
+## Video options
+
+In the extension's preferences:
+
+- **Video: Audio Format** — MP3, M4A, Opus, FLAC or WAV.
+- **Video: Metadata** — write the title, channel, date and chapters into the file, with the thumbnail as cover art.
+- **Video: SponsorBlock** — cut sponsored segments out of YouTube downloads, using [SponsorBlock](https://sponsor.ajay.app)'s community data (yt-dlp asks its server about the video).
+- **Video: Browser Cookies** — use your browser's login for age-restricted, private or members-only videos. See [BROWSER_COOKIES.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/BROWSER_COOKIES.md).
+
 ## Supported sites
 
-See [SUPPORTED_SITES.md](SUPPORTED_SITES.md).
+See [SUPPORTED_SITES.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/SUPPORTED_SITES.md).
 
 ## Login-gated galleries
 
-To download from sites that require a login, point the extension at a browser you're already signed into. See [BROWSER_COOKIES.md](BROWSER_COOKIES.md).
+To download from sites that require a login, point the extension at a browser you're already signed into. See [BROWSER_COOKIES.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/BROWSER_COOKIES.md).
 
 ## Spotify downloads
 
-Spotify links need a one-time Developer app setup so spotDL can fetch track metadata. See [SPOTIFY.md](SPOTIFY.md).
+Spotify links need a one-time Developer app setup so spotDL can fetch track metadata. See [SPOTIFY.md](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/SPOTIFY.md).

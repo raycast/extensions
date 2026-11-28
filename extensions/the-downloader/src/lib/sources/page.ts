@@ -96,13 +96,27 @@ function withoutSiteSuffix(title: string, site: string | undefined): string {
   return title;
 }
 
-/** The article's text blocks, innermost first so nested blocks aren't read twice. */
+/**
+ * The article's text blocks, in reading order. Each block gives its own text —
+ * what isn't inside a block nested in it — so nothing is read twice, and a
+ * list item keeps its line when it also holds a nested list
+ * (`<li>Fruits<ul><li>Apple</li></ul></li>`).
+ */
 function paragraphsOf(html: string): string[] {
   const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`);
-  const blocks = [...document.querySelectorAll(BLOCKS)].filter((el) => !el.querySelector(BLOCKS));
   const out: string[] = [];
-  for (const block of blocks) {
-    const text = clean(block.textContent);
+  for (const block of document.querySelectorAll(BLOCKS)) {
+    let own = "";
+    for (const child of block.childNodes) {
+      const element =
+        child.nodeType === 1
+          ? (child as unknown as { matches(selector: string): boolean; querySelector(selector: string): unknown })
+          : undefined;
+      // A nested block, or a wrapper around one, is read on its own turn.
+      if (element && (element.matches(BLOCKS) || element.querySelector(BLOCKS))) own += " ";
+      else own += child.textContent ?? "";
+    }
+    const text = clean(own);
     if (text && text !== out.at(-1)) out.push(text);
   }
   if (out.length === 0) {
@@ -132,7 +146,56 @@ function hostOf(url: string): string {
 
 /** A fetched page as a LinkContext. Pure: `html` is already decoded. */
 export function parsePage(html: string, url: string, now = Date.now()): LinkContext {
-  const { document } = parseHTML(html);
+  return readArticle(html, url, now).ctx;
+}
+
+/**
+ * The page without what never holds its text: scripts (except JSON-LD, read
+ * for the title and author), styles, inline SVG, templates and comments
+ * (`<noscript>` stays: Readability takes lazy-loaded images from it). A
+ * news page is often megabytes of these, and parsing them into a DOM and
+ * walking it again in Readability froze the command for seconds.
+ */
+export function slimHtml(html: string): string {
+  // Scripts before comments: a script can hold `<!--` as text.
+  return html
+    .replace(/<script\b([^>]*)>[\s\S]*?<\/script\s*>/gi, (whole, attrs: string) =>
+      /application\/ld\+json/i.test(attrs) ? whole : "",
+    )
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<(style|svg|template)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "");
+}
+
+/** Most elements Readability walks; a page past it (an endless feed) is read from its first part. */
+const MAX_ELEMENTS = 30_000;
+
+/**
+ * Readability's article, or null. A document past `MAX_ELEMENTS` loses its
+ * tail first: Readability itself would refuse it outright (`maxElemsToParse`)
+ * and leave the page with no text at all.
+ */
+function parseReadable(document: Doc) {
+  const all = document.querySelectorAll("body *");
+  if (all.length > MAX_ELEMENTS) {
+    for (let i = all.length - 1; i >= MAX_ELEMENTS; i--) {
+      const el = all[i] as unknown as { remove(): void; isConnected?: boolean };
+      if (el.isConnected !== false) el.remove();
+    }
+  }
+  try {
+    return new Readability(document as unknown as Document, { charThreshold: MIN_TEXT }).parse();
+  } catch (error) {
+    console.error("Readability couldn't read the page", error);
+    return null;
+  }
+}
+
+/** A page's context together with its article as HTML (Readability's output), for saving it as Markdown. */
+export type PageArticle = { ctx: LinkContext; articleHtml: string };
+
+/** `parsePage`, keeping the article's HTML. `articleHtml` is empty when the page has no readable text. */
+export function readArticle(html: string, url: string, now = Date.now()): PageArticle {
+  const { document } = parseHTML(slimHtml(html));
   // Metadata first: Readability rewrites the document it reads.
   const ld = jsonLd(document);
   const article = ld.find(isArticle);
@@ -141,10 +204,16 @@ export function parsePage(html: string, url: string, now = Date.now()): LinkCont
     names((article?.publisher as Json | undefined)?.name) ??
     names(ld.find((o) => o["@type"] === "WebSite")?.name) ??
     hostOf(url);
+  const documentTitle = clean(document.querySelector("title")?.textContent);
+  const headline = typeof article?.headline === "string" ? clean(article.headline) : "";
+  const ldName = typeof article?.name === "string" ? clean(article.name) : "";
+  // Some sites (Wikipedia) put a one-line description in `headline` and the real
+  // title in `name`: trust `name` when the page's own <title> starts with it.
+  const namedByTitle = !!ldName && ldName !== headline && documentTitle.toLowerCase().startsWith(ldName.toLowerCase());
   const rawTitle =
-    (typeof article?.headline === "string" ? clean(article.headline) : undefined) ??
-    metaContent(document, 'meta[property="og:title"]', 'meta[name="twitter:title"]') ??
-    clean(document.querySelector("title")?.textContent);
+    (namedByTitle ? ldName : headline) ||
+    metaContent(document, 'meta[property="og:title"]', 'meta[name="twitter:title"]') ||
+    documentTitle;
   const author =
     names(article?.author) ??
     metaContent(document, 'meta[name="author"]', 'meta[property="article:author"]:not([content^="http"])');
@@ -164,7 +233,7 @@ export function parsePage(html: string, url: string, now = Date.now()): LinkCont
   const language = clean(document.documentElement?.getAttribute("lang")) || undefined;
   const walled = behindAccessWall(ld, url);
 
-  const readable = new Readability(document as unknown as Document, { charThreshold: MIN_TEXT }).parse();
+  const readable = parseReadable(document);
   let paragraphs = readable?.content ? paragraphsOf(readable.content) : [];
   const words = paragraphs.join(" ").split(/\s+/).filter(Boolean).length;
   if (paragraphs.join(" ").length < MIN_TEXT) paragraphs = [];
@@ -178,7 +247,7 @@ export function parsePage(html: string, url: string, now = Date.now()): LinkCont
   if (language) facts.push({ label: "Language", value: language });
 
   const key = stripHash(url);
-  return {
+  const ctx: LinkContext = {
     url: key,
     kind: "page",
     key,
@@ -195,10 +264,16 @@ export function parsePage(html: string, url: string, now = Date.now()): LinkCont
     noteReason: paragraphs.length ? undefined : walled ? "access" : "unreadable",
     fetchedAt: now,
   };
+  return { ctx, articleHtml: paragraphs.length ? (readable?.content ?? "") : "" };
 }
 
 /** Fetch and read a web page. The URL must already be validated and normalized. */
 export async function loadPageLink(url: string, options: { signal?: AbortSignal }): Promise<LinkContext> {
+  return (await loadPageArticle(url, options)).ctx;
+}
+
+/** `loadPageLink`, keeping the article's HTML. */
+export async function loadPageArticle(url: string, options: { signal?: AbortSignal }): Promise<PageArticle> {
   let response;
   try {
     response = await safeFetch(url, {
@@ -234,5 +309,5 @@ export async function loadPageLink(url: string, options: { signal?: AbortSignal 
     }
     throw error;
   }
-  return parsePage(decodeHtml(response.body, response.contentType), response.url);
+  return readArticle(decodeHtml(response.body, response.contentType), response.url);
 }

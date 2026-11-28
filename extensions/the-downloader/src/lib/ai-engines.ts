@@ -41,11 +41,16 @@ export type EngineSettings = {
 };
 
 /** Engine settings from Chat About Link's preferences. */
+/** `localhost:11434` → `http://localhost:11434`: an address typed without its scheme can't be fetched. */
+export function withScheme(address: string): string {
+  return !address || /^[a-z][a-z0-9+.-]*:\/\//i.test(address) ? address : `http://${address}`;
+}
+
 export function engineSettings(prefs: Preferences.ChatLink): EngineSettings {
   const context = Number.parseInt(prefs.ollamaContext ?? "", 10);
   return {
     raycastModel: prefs.raycastModel || undefined,
-    ollamaUrl: prefs.ollamaUrl?.trim() || "http://127.0.0.1:11434",
+    ollamaUrl: withScheme(prefs.ollamaUrl?.trim() || "") || "http://127.0.0.1:11434",
     ollamaModel: prefs.ollamaModel?.trim() || undefined,
     ollamaContext: Number.isFinite(context) && context >= 2048 ? context : 8192,
   };
@@ -300,7 +305,9 @@ export async function firstOllamaModel(url: string, signal?: AbortSignal): Promi
   const res = await fetch(`${base(url)}/api/tags`, { signal });
   if (!res.ok) throw new Error(`Ollama returned ${res.status}`);
   const data = (await res.json()) as { models?: { name: string }[] };
-  const name = data.models?.[0]?.name;
+  // An embedding model (nomic-embed-text, mxbai-embed-large) can't chat: skip one when anything else is installed.
+  const names = (data.models ?? []).map((m) => m.name).filter((n): n is string => typeof n === "string" && !!n);
+  const name = names.find((n) => !/embed/i.test(n)) ?? names[0];
   if (!name) throw new Error("Ollama has no models installed. Run `ollama pull llama3.2` (or any model) first.");
   return name;
 }

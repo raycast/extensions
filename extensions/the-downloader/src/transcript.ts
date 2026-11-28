@@ -4,7 +4,7 @@ import path from "path";
 import crypto from "node:crypto";
 import { environment } from "@raycast/api";
 import { forceIpv4, getDenoPath, getffmpegPath, getIdleTimeoutMs, getytdlPath, sanitizeVideoTitle } from "./utils.js";
-import { LiveStreamError, fetchVideoInfo, isLiveStream } from "./lib/ytdlp.js";
+import { LiveStreamError, fetchVideoInfo, isLiveStream, outputTemplateIn } from "./lib/ytdlp.js";
 import { runWithWatchdog } from "./lib/run.js";
 import SRTParser from "srt-parser-2";
 import { Video } from "./types.js";
@@ -171,12 +171,17 @@ export function buildTranscriptArgs(o: {
   ffmpegPath: string;
   outputTemplate: string;
   denoPath?: string;
+  forceIpv4?: boolean;
+  /** A browser spec whose logins yt-dlp uses (Video: Browser Cookies, in the Download form only). */
+  cookiesFromBrowser?: string;
 }): string[] {
   return [
     "--write-sub", // Uploaded captions
     "--write-auto-sub", // Automatic captions
     "--skip-download", // Captions only, no media
     "--no-playlist", // A watch?v=…&list=… URL must not fetch the whole playlist's subs
+    "--playlist-items", // …and a playlist or channel link reads its first video, like the metadata fetch
+    "1",
     // yt-dlp otherwise raises on the first caption track that fails (e.g. HTTP
     // 429 on an automatic variant) and never tries the others.
     "--ignore-errors",
@@ -187,6 +192,8 @@ export function buildTranscriptArgs(o: {
     "--ffmpeg-location",
     o.ffmpegPath,
     ...(o.denoPath ? ["--js-runtimes", `deno:${o.denoPath}`] : []),
+    ...(o.forceIpv4 ? ["--force-ipv4"] : []),
+    ...(o.cookiesFromBrowser ? ["--cookies-from-browser", o.cookiesFromBrowser] : []),
     "-o",
     o.outputTemplate,
     o.url,
@@ -201,6 +208,7 @@ export async function fetchSubtitles(
   url: string,
   requested: string,
   signal?: AbortSignal,
+  cookiesFromBrowser?: string,
 ): Promise<{ video: Video; srt: string; language: string }> {
   const ytdlPath = getytdlPath();
   const ffmpegPath = getffmpegPath();
@@ -223,7 +231,11 @@ export async function fetchSubtitles(
   // print [debug]/[warning] lines before the JSON), --no-warnings/--quiet/
   // --no-playlist, the Deno runtime, and an abortable timeout — none of which
   // the previous bare `JSON.parse(execa stdout)` had.
-  const video = await fetchVideoInfo(ytdlPath, url, forceIpv4, deno, { signal, timeoutMs: getIdleTimeoutMs() });
+  const video = await fetchVideoInfo(ytdlPath, url, forceIpv4, deno, {
+    signal,
+    timeoutMs: getIdleTimeoutMs(),
+    cookiesFromBrowser,
+  });
 
   // Check if it's a live stream
   if (isLiveStream(video)) {
@@ -258,7 +270,9 @@ export async function fetchSubtitles(
       track,
       ffmpegPath,
       denoPath: deno,
-      outputTemplate: path.join(tmpDir, "%(id)s.%(ext)s"),
+      forceIpv4,
+      cookiesFromBrowser,
+      outputTemplate: outputTemplateIn(tmpDir, "%(id)s.%(ext)s"),
     });
     const { code, stderr } = await runWithWatchdog(ytdlPath, args, { idleMs: getIdleTimeoutMs(), abortSignal: signal });
 
@@ -287,8 +301,17 @@ export async function fetchSubtitles(
   }
 }
 
-export default async function extractTranscript(url: string, language: string = "en", signal?: AbortSignal) {
-  const { video, srt } = await fetchSubtitles(url, language, signal);
+/**
+ * The video's transcript as plain text. `cookiesFromBrowser` is for the
+ * Download form, where Video: Browser Cookies applies; the AI tools never pass it.
+ */
+export default async function extractTranscript(
+  url: string,
+  language: string = "en",
+  signal?: AbortSignal,
+  cookiesFromBrowser?: string,
+) {
+  const { video, srt } = await fetchSubtitles(url, language, signal, cookiesFromBrowser);
 
   // Convert SRT to markdown
   const transcript = cleanUpSrt(srt);

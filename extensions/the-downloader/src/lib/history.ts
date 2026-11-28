@@ -103,6 +103,73 @@ export function matchesFilter(entry: HistoryEntry, filter: HistoryFilter): boole
   }
 }
 
+/**
+ * True when every word of `search` is somewhere in `fields` (case doesn't
+ * matter). The History list and its export both go by this.
+ */
+export function matchesSearch(search: string, fields: (string | undefined)[]): boolean {
+  const words = search.toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const text = fields.filter(Boolean).join(" ").toLowerCase();
+  return words.every((word) => text.includes(word));
+}
+
+/** Bytes of everything in `entries` whose size is known; `undefined` when none is. */
+export function totalBytes(entries: HistoryEntry[]): number | undefined {
+  const sizes = entries.map((e) => e.bytes).filter((b): b is number => typeof b === "number");
+  return sizes.length > 0 ? sizes.reduce((a, b) => a + b, 0) : undefined;
+}
+
+const CSV_COLUMNS = [
+  "finished",
+  "status",
+  "type",
+  "title",
+  "channel",
+  "source",
+  "format",
+  "bytes",
+  "items",
+  "url",
+  "file",
+  "error",
+] as const;
+
+/**
+ * One CSV cell. Quoted when it holds a comma, quote or line break; a text that
+ * starts like a formula (`=`, `+`, `-`, `@`) gets a leading apostrophe, so a
+ * video title can't run as one when the file is opened in a spreadsheet.
+ */
+function csvCell(value: string | number | undefined): string {
+  if (value === undefined) return "";
+  let text = String(value);
+  if (typeof value === "string" && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+/** The history as CSV, newest first, with a header row. */
+export function historyCsv(entries: HistoryEntry[]): string {
+  const rows = entries.map((e) =>
+    [
+      new Date(e.finishedAt).toISOString(),
+      e.status,
+      e.kind,
+      e.title,
+      e.uploader,
+      e.source,
+      e.format,
+      e.bytes,
+      e.items,
+      e.url,
+      e.filePath,
+      e.error,
+    ]
+      .map(csvCell)
+      .join(","),
+  );
+  return [CSV_COLUMNS.join(","), ...rows].join("\r\n") + "\r\n";
+}
+
 function startOfDay(t: number): number {
   const d = new Date(t);
   d.setHours(0, 0, 0, 0);
@@ -282,6 +349,20 @@ export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
     (list) => !list.some((e) => e.id === id),
     VERIFY_ATTEMPTS,
     () => saveDeletion((d) => ({ ...d, removed: [...d.removed.filter((r) => r !== id), id] })),
+  ).written;
+}
+
+/**
+ * Remove several entries at once (the ones whose files are gone). Rejects,
+ * leaving them in place, when the deletion can't be saved.
+ */
+export function removeManyFromHistory(ids: string[]): Promise<HistoryEntry[]> {
+  const gone = new Set(ids);
+  return mutate(
+    (list) => list.filter((e) => !gone.has(e.id)),
+    (list) => !list.some((e) => gone.has(e.id)),
+    VERIFY_ATTEMPTS,
+    () => saveDeletion((d) => ({ ...d, removed: [...d.removed.filter((id) => !gone.has(id)), ...ids] })),
   ).written;
 }
 

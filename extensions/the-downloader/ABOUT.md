@@ -8,7 +8,7 @@ Paste a URL (or let it auto-load from your clipboard, selected text, or browser 
 
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) — videos and audio
 - [Deno](https://deno.com) — the JavaScript runtime yt-dlp uses for YouTube extraction
-- [gallery-dl](https://github.com/mikf/gallery-dl) — image galleries
+- [gallery-dl](https://codeberg.org/mikf/gallery-dl) — image galleries
 - [spotDL](https://github.com/spotDL/spotify-downloader) — Spotify tracks, albums, and playlists
 - [ffmpeg](https://ffmpeg.org) — audio extraction and format conversion
 - [monolith](https://github.com/Y2Z/monolith) — complete webpages as a single HTML file
@@ -21,4 +21,4 @@ Default format, quality, and download folder are set in the extension's Raycast 
 
 ## License
 
-Released under the MIT License — see [LICENSE](LICENSE).
+Released under the MIT License — see [LICENSE](https://github.com/raycast/extensions/blob/main/extensions/the-downloader/LICENSE).

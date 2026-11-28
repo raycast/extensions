@@ -29,7 +29,25 @@ function fromMeta(head: Buffer): string | undefined {
 
 /** The page's charset label, lower-cased: BOM, else header, else <meta>, else `utf-8`. */
 export function charsetOf(contentType: string | undefined, head: Buffer): string {
-  return (fromBom(head) ?? fromContentType(contentType) ?? fromMeta(head) ?? "utf-8").toLowerCase();
+  const bom = fromBom(head);
+  if (bom) return bom.toLowerCase();
+  // A header label the decoder doesn't know (`utf8mb4`) says nothing: ask the <meta> next.
+  const header = fromContentType(contentType)?.toLowerCase();
+  if (header && isSupported(header)) return header;
+  // The <meta> was readable as ASCII, so the page can't be UTF-16: per the HTML
+  // standard, such a label means UTF-8.
+  const meta = fromMeta(head)?.toLowerCase();
+  if (meta) return /^utf-16/.test(meta) ? "utf-8" : meta;
+  return header ?? "utf-8";
+}
+
+function isSupported(label: string): boolean {
+  try {
+    new TextDecoder(label);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function textDecoder(label: string) {

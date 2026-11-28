@@ -47,7 +47,14 @@ export type DownloadSnapshot = DownloadInit & {
   /** When the first and the latest progress update arrived; bounds the average speed. */
   firstProgressAt?: number;
   lastProgressAt?: number;
-  /** Files or tracks saved so far (gallery-dl, spotDL). */
+  /** Which video of a playlist is downloading now, and how many there are (1-based; unset for a single video). */
+  listIndex?: number;
+  listTotal?: number;
+  /** Bytes of the playlist's videos that are already done. */
+  finishedBytes?: number;
+  /** A clip is being cut: ffmpeg fetches it and reports no progress until it's done. */
+  cutting?: boolean;
+  /** Files or tracks saved so far (gallery-dl, spotDL), or the videos a playlist saved. */
   items: number;
   /** Cumulative `items`, sampled over time. */
   itemSamples: number[];
@@ -90,10 +97,11 @@ function pushSample(samples: number[], value: number): number[] {
   return halved;
 }
 
-/** Sum of every stream size yt-dlp has announced so far. */
+/** Sum of every stream size yt-dlp has announced so far, over all of a playlist's videos. */
 export function knownTotalBytes(s: DownloadSnapshot): number | undefined {
   const sizes = s.streamBytes.filter((b): b is number => typeof b === "number");
-  return sizes.length > 0 ? sizes.reduce((a, b) => a + b, 0) : undefined;
+  const finished = s.finishedBytes ?? 0;
+  return sizes.length > 0 || finished > 0 ? sizes.reduce((a, b) => a + b, finished) : undefined;
 }
 
 /** The stages shown in the view's step strip, in order. */
@@ -182,12 +190,33 @@ export class DownloadSession {
       case "stream-start":
       case "stream-skipped": {
         const streamIndex = s.streamIndex + 1;
+        // No 0% for a clip: it would sit there until the cut is finished.
+        const percent = event.type === "stream-skipped" ? 100 : s.cutting ? undefined : 0;
+        this.update({ streamIndex, stage: this.streamStage(streamIndex), percent }, true);
+        return;
+      }
+      case "sections":
+        this.update({ cutting: true });
+        return;
+      case "item":
+        // The next video of a playlist: its streams and steps start over.
         this.update(
-          { streamIndex, stage: this.streamStage(streamIndex), percent: event.type === "stream-skipped" ? 100 : 0 },
+          {
+            listIndex: event.index,
+            listTotal: event.total,
+            finishedBytes: knownTotalBytes(s),
+            streams: 1,
+            streamIndex: 0,
+            streamBytes: [],
+            stage: "prepare",
+            percent: undefined,
+            eta: undefined,
+            downloadedBytes: undefined,
+            totalBytes: undefined,
+          },
           true,
         );
         return;
-      }
       case "postprocess":
         if (s.stage !== "process") this.update({ stage: "process", percent: undefined, eta: undefined }, true);
         return;
@@ -230,10 +259,16 @@ export class DownloadSession {
     this.update({ stage: "download" }, true);
   }
 
-  succeed(result: { filePath?: string; title?: string; message?: string }, now = Date.now()) {
+  /** `items` and `folder` are for a playlist: how many videos it saved, and the folder they went into. */
+  succeed(
+    result: { filePath?: string; title?: string; message?: string; items?: number; folder?: string },
+    now = Date.now(),
+  ) {
     const s = this.snapshot;
     this.update(
       {
+        ...(result.items !== undefined ? { items: result.items } : {}),
+        ...(result.folder ? { folder: result.folder } : {}),
         status: "done",
         stage: "done",
         percent: 100,
@@ -303,4 +338,22 @@ export class DownloadSession {
 /** Subscribe a component to a session; re-renders on every (throttled) update. */
 export function useDownloadSession(session: DownloadSession): DownloadSnapshot {
   return useSyncExternalStore(session.subscribe, session.getSnapshot);
+}
+
+/** Downloads this command is running, so an action that would close it can say so first. */
+const running = new Set<AbortController>();
+
+/** Count `controller`'s download as running until it's aborted or the returned function is called. */
+export function trackRunningDownload(controller: AbortController): () => void {
+  running.add(controller);
+  const untrack = () => {
+    running.delete(controller);
+  };
+  controller.signal.addEventListener("abort", untrack, { once: true });
+  return untrack;
+}
+
+/** True while this command runs a download (one the form started; Fast Download has no view to leave). */
+export function isDownloadRunning(): boolean {
+  return running.size > 0;
 }

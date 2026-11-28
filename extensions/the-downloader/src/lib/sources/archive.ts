@@ -1,7 +1,7 @@
 import { decodeHtml } from "../charset.js";
 import { LinkContext, LinkLoadError } from "../link-context.js";
 import { HttpError, SafeFetchOptions, SafeResponse, safeFetch } from "../safe-fetch.js";
-import { parsePage } from "./page.js";
+import { PageArticle, readArticle } from "./page.js";
 
 // The Internet Archive's saved copy of a page, for when the live page won't
 // let the reader in (a bot wall, a login) or is gone. The Wayback Machine
@@ -62,6 +62,11 @@ async function fromArchive(url: string, options: SafeFetchOptions): Promise<Safe
 
 /** Read the Internet Archive's latest copy of a page, as that page. The URL must already be validated. */
 export async function loadArchivedPage(url: string, options: { signal?: AbortSignal }): Promise<LinkContext> {
+  return (await loadArchivedArticle(url, options)).ctx;
+}
+
+/** `loadArchivedPage`, keeping the article's HTML (for saving it as Markdown). */
+export async function loadArchivedArticle(url: string, options: { signal?: AbortSignal }): Promise<PageArticle> {
   const answer = await fromArchive(availabilityUrl(url), {
     signal: options.signal,
     accept: ["application/json"],
@@ -82,10 +87,13 @@ export async function loadArchivedPage(url: string, options: { signal?: AbortSig
     maxBytes: MAX_BYTES,
     timeoutMs: TIMEOUT_MS,
   });
-  const ctx = parsePage(decodeHtml(page.body, page.contentType), url);
+  const { ctx, articleHtml } = readArticle(decodeHtml(page.body, page.contentType), url);
   return {
-    ...ctx,
-    facts: [{ label: "Read from", value: `the Internet Archive's copy saved ${snapshot.savedOn}` }, ...ctx.facts],
-    archive: { viewUrl: snapshot.viewUrl, savedOn: snapshot.savedOn },
+    articleHtml,
+    ctx: {
+      ...ctx,
+      facts: [{ label: "Read from", value: `the Internet Archive's copy saved ${snapshot.savedOn}` }, ...ctx.facts],
+      archive: { viewUrl: snapshot.viewUrl, savedOn: snapshot.savedOn },
+    },
   };
 }
