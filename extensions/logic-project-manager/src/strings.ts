@@ -24,6 +24,10 @@ type TranslationKeys = {
   copyBounce: string;
   copyBounceName: string;
   copyBouncePath: string;
+  projectNameCopied: string;
+  projectPathCopied: string;
+  bounceNameCopied: string;
+  bouncePathCopied: string;
   bounceCopied: string;
   openInFinder: string;
   showInFinder: string;
@@ -31,7 +35,7 @@ type TranslationKeys = {
   browseCollections: string;
   backToProjects: string;
   backToSearchBounces: string;
-  open: string;
+  openCollection: string;
   tracklist: string;
   unsorted: string;
   setTrackNumber: string;
@@ -48,11 +52,11 @@ type TranslationKeys = {
   all: string;
   notes: string;
   lyrics: string;
-  openNote: string;
+  openNotes: string;
   openLyrics: string;
   showNotes: string;
   showLyrics: string;
-  editNote: string;
+  editNotes: string;
   editLyrics: string;
   none: string;
   pinned: string;
@@ -78,7 +82,8 @@ type TranslationKeys = {
   name: string;
   invalidName: string;
   nameExists: string;
-  renameFailed: string;
+  renameProjectFailed: string;
+  renameBounceFailed: string;
   docRenameSkipped: string;
   docNameHint: string;
   docConflictWarning: string;
@@ -96,8 +101,8 @@ type TranslationKeys = {
   restoreDocConflict: string;
   docFolderMissing: string;
   docFolderMissingHint: string;
-  openPreferences: string;
   docSaveFailed: string;
+  lyricsSaveFailed: string;
   useProjectFolders: string;
   manyProjectsMissing: string;
   manyProjectsMissingHint: string;
@@ -115,7 +120,11 @@ type TranslationKeys = {
   docNameTaken: string;
   renameConfirmTitle: string;
   rename: string;
-  edit: string;
+  renameBounce: string;
+  renameCollection: string;
+  editStage: string;
+  editGenre: string;
+  editRole: string;
   color: string;
   sizeLargest: string;
   sizeSmallest: string;
@@ -123,7 +132,7 @@ type TranslationKeys = {
   browseProjectBounces: string;
   playLatestBounce: string;
   playingLatestBounce: string;
-  playbackFailed: string;
+  playBounceFailed: string;
   stoppingPlayback: string;
   noBounces: string;
   manageExternalBounce: string;
@@ -145,19 +154,34 @@ type TranslationKeys = {
   collections: string;
   deleteCollectionHint: string;
   role: string;
-  create: string;
+  newStage: string;
+  newGenre: string;
+  newRole: string;
+  newCollection: string;
   delete: string;
   deleteAll: string;
   deleteAllConfirmTitle: string;
   deleteAllFailed: string;
   created: string;
-  renamed: string;
-  deleted: string;
+  stageCreated: string;
+  genreCreated: string;
+  roleCreated: string;
+  collectionCreated: string;
+  collectionRenamed: string;
+  stageDeleted: string;
+  genreDeleted: string;
+  roleDeleted: string;
+  collectionDeleted: string;
+  stagesDeleted: string;
+  genresDeleted: string;
+  rolesDeleted: string;
+  projectMovedToTrash: string;
+  bounceMovedToTrash: string;
   noCategories: string;
   tracklistDuration: string;
   queueCollection: string;
   collectionQueued: string;
-  queueFailed: string;
+  queueCollectionFailed: string;
   tracksWord: string;
   tracksCount: string;
   skippedNoBounce: string;
@@ -172,9 +196,8 @@ type TranslationKeys = {
   duplicateProject: string;
   duplicatingProject: string;
   projectDuplicated: string;
-  duplicateFailed: string;
+  duplicateProjectFailed: string;
   moveToTrash: string;
-  movedToTrash: string;
   trashProjectHint: string;
   trashBounceHint: string;
   cleanUpLeftovers: string;
@@ -200,7 +223,6 @@ type TranslationKeys = {
   genreAliasesPlaceholder: string;
   roleAliasesPlaceholder: string;
   retry: string;
-  tryAgain: string;
   openExtensionPreferences: string;
   noNotesYet: string;
   noLyricsYet: string;
@@ -211,7 +233,8 @@ type TranslationKeys = {
   docUnreadable: string;
   lyricsUnreadable: string;
   docUnreadableHint: string;
-  trashFailed: string;
+  trashProjectFailed: string;
+  trashBounceFailed: string;
   sectionPlayback: string;
   sectionDetails: string;
   sectionFile: string;
@@ -340,7 +363,7 @@ type TranslationKeys = {
 export const strings: TranslationKeys = {
   searchProjects: "Search Projects",
   searchProjectsPlaceholder: "Search projects, or # to combine filters",
-  advancedSearch: "Every word must match",
+  advancedSearch: "Every Word Must Match",
   advancedSearchHint:
     "Name, stage, genre, collection, created date, key, BPM and time sig.\ne.g. # rnb 2025 Am 120-128",
   openReadme: "Open Search Help",
@@ -364,6 +387,10 @@ export const strings: TranslationKeys = {
   copyBounce: "Copy Bounce",
   copyBounceName: "Copy Bounce Name",
   copyBouncePath: "Copy Bounce Path",
+  projectNameCopied: "Project Name Copied",
+  projectPathCopied: "Project Path Copied",
+  bounceNameCopied: "Bounce Name Copied",
+  bouncePathCopied: "Bounce Path Copied",
   bounceCopied: "Bounce Copied",
   openInFinder: "Open in Finder",
   showInFinder: "Show in Finder",
@@ -371,7 +398,7 @@ export const strings: TranslationKeys = {
   browseCollections: "Browse Collections",
   backToProjects: "Back to Search Projects",
   backToSearchBounces: "Back to Search Bounces",
-  open: "Open",
+  openCollection: "Open Collection",
   tracklist: "Tracklist",
   unsorted: "Unsorted",
   setTrackNumber: "Set Track Number…",
@@ -388,11 +415,11 @@ export const strings: TranslationKeys = {
   all: "All",
   notes: "Notes",
   lyrics: "Lyrics",
-  openNote: "Open Note",
+  openNotes: "Open Notes",
   openLyrics: "Open Lyrics",
   showNotes: "Show Notes",
   showLyrics: "Show Lyrics",
-  editNote: "Edit Note",
+  editNotes: "Edit Notes",
   editLyrics: "Edit Lyrics",
   none: "None",
   pinned: "Pinned",
@@ -418,8 +445,9 @@ export const strings: TranslationKeys = {
   name: "Name",
   invalidName: "Name can't contain / or :",
   nameExists: "A project with that name already exists",
-  renameFailed: "Rename failed",
-  docRenameSkipped: "Renamed — but a doc wasn't moved",
+  renameProjectFailed: "Couldn't Rename Project",
+  renameBounceFailed: "Couldn't Rename Bounce",
+  docRenameSkipped: "Renamed — But a Doc Wasn't Moved",
   docNameHint: "Note & lyrics file: “{file}” ({chars} → full-width look-alikes)",
   docConflictWarning:
     "The notes folder already contains {files}. After renaming, this project will show that existing file; its own notes (if any) keep the old file name.",
@@ -428,40 +456,44 @@ export const strings: TranslationKeys = {
   tagNameExists: "A tag with that name already exists",
   aliases: "Aliases",
   aliasesInfo: "Other names to search by, separated by commas (e.g. dnb for Drum & Bass).",
-  docChangedExternally: "Note Changed Elsewhere",
+  docChangedExternally: "Notes Changed Elsewhere",
   docChangedExternallyHint:
     "This note was edited outside Raycast (e.g. in Obsidian) after you opened it. Saving will replace those changes.",
   overwriteDoc: "Overwrite",
   lyricsChangedExternally: "Lyrics Changed Elsewhere",
   lyricsChangedExternallyHint:
     "These lyrics were edited outside Raycast (e.g. in Obsidian) after you opened them. Saving will replace those changes.",
-  projectsRestored: "Restored put-back project",
-  restoreDocConflict: "Restored — a note name was taken",
-  docFolderMissing: "Notes / lyrics folder not found",
+  projectsRestored: "Restored Put-Back Project",
+  restoreDocConflict: "Restored — A Note Name Was Taken",
+  docFolderMissing: "Couldn't Find Notes / Lyrics Folder",
   docFolderMissingHint: "Choose it again in Extension Preferences. Nothing will be written until then.",
-  openPreferences: "Open Extension Preferences",
-  docSaveFailed: "Couldn't save",
+  docSaveFailed: "Couldn't Save Notes",
+  lyricsSaveFailed: "Couldn't Save Lyrics",
   useProjectFolders: "Store in Project Folders Instead",
-  manyProjectsMissing: "Projects missing — nothing changed",
+  manyProjectsMissing: "Projects Missing — Nothing Changed",
   manyProjectsMissingHint:
     "Most projects disappeared at once. Is the drive connected? If you moved the folder, update it in preferences.",
   openProjectsFolder: "Open Projects Folder",
-  ambiguousFinderChanges: "Some Finder changes skipped",
-  newProjectLooksNew: "“{name}” looks like a new project",
-  newProjectsLookNew: "{count} projects look new",
+  ambiguousFinderChanges: "Some Finder Changes Skipped",
+  newProjectLooksNew: "“{name}” Looks Like a New Project",
+  newProjectsLookNew: "{count} Projects Look New",
   newProjectLooksNewHint: "Previous settings were archived. Use Restore Previous Settings to bring them back.",
   restorePreviousSettings: "Restore Previous Settings",
-  restorePreviousSettingsConfirmTitle: "Restore previous settings?",
+  restorePreviousSettingsConfirmTitle: "Restore Previous Settings?",
   restorePreviousSettingsConfirmMessage:
     "This brings back the previous project's tags, collections, track numbers, and roles, plus notes and lyrics stored in custom folders. Anything already set on this project is kept.",
   previousSettingsRestored: "Previous Settings Restored",
-  docShared: "Shares a note file with another project",
+  docShared: "Shares a Note File with Another Project",
   docSharedHint:
     "This project's notes / lyrics file would be the same as {names}'s. Rename this project so each keeps its own file — nothing is read or written until then.",
-  docNameTaken: "Note file name already used",
-  renameConfirmTitle: "Rename project?",
+  docNameTaken: "Note File Name Already Used",
+  renameConfirmTitle: "Rename Project?",
   rename: "Rename",
-  edit: "Edit",
+  renameBounce: "Rename Bounce",
+  renameCollection: "Rename Collection",
+  editStage: "Edit Stage",
+  editGenre: "Edit Genre",
+  editRole: "Edit Role",
   color: "Color",
   sizeLargest: "Size — Largest",
   sizeSmallest: "Size — Smallest",
@@ -469,7 +501,7 @@ export const strings: TranslationKeys = {
   browseProjectBounces: "Browse Project Bounces",
   playLatestBounce: "Play Latest Bounce",
   playingLatestBounce: "Playing Latest Bounce",
-  playbackFailed: "Playback Failed",
+  playBounceFailed: "Couldn't Play Bounce",
   stoppingPlayback: "Stopping Playback",
   noBounces: "No Bounces Found",
   manageExternalBounce: "Manage External Bounce",
@@ -492,19 +524,34 @@ export const strings: TranslationKeys = {
   collections: "Collections",
   deleteCollectionHint: "This only removes the collection. Your projects are not deleted.",
   role: "Role",
-  create: "Create",
+  newStage: "New Stage",
+  newGenre: "New Genre",
+  newRole: "New Role",
+  newCollection: "New Collection",
   delete: "Delete",
   deleteAll: "Delete All",
-  deleteAllConfirmTitle: "Delete all {count} options?",
+  deleteAllConfirmTitle: "Delete All {count} Tags?",
   deleteAllFailed: "Couldn't Delete All",
   created: "Created",
-  renamed: "Renamed",
-  deleted: "Deleted",
-  noCategories: "Nothing here yet",
+  stageCreated: "Stage Created",
+  genreCreated: "Genre Created",
+  roleCreated: "Role Created",
+  collectionCreated: "Collection Created",
+  collectionRenamed: "Collection Renamed",
+  stageDeleted: "Stage Deleted",
+  genreDeleted: "Genre Deleted",
+  roleDeleted: "Role Deleted",
+  collectionDeleted: "Collection Deleted",
+  stagesDeleted: "Stages Deleted",
+  genresDeleted: "Genres Deleted",
+  rolesDeleted: "Roles Deleted",
+  projectMovedToTrash: "Project Moved to Trash",
+  bounceMovedToTrash: "Bounce Moved to Trash",
+  noCategories: "Nothing Here Yet",
   tracklistDuration: "Tracklist Duration",
   queueCollection: "Queue Collection in Player",
   collectionQueued: "Collection Queued",
-  queueFailed: "Queue Failed",
+  queueCollectionFailed: "Couldn't Queue Collection",
   tracksWord: "tracks",
   tracksCount: "Track(s)",
   skippedNoBounce: "skipped (no bounce)",
@@ -519,27 +566,26 @@ export const strings: TranslationKeys = {
   duplicateProject: "Duplicate Project",
   duplicatingProject: "Duplicating Project…",
   projectDuplicated: "Project Duplicated",
-  duplicateFailed: "Duplicate Failed",
+  duplicateProjectFailed: "Couldn't Duplicate Project",
   moveToTrash: "Move to Trash",
-  movedToTrash: "Moved to Trash",
   trashProjectHint: "This moves the entire project folder to the Trash:",
   trashBounceHint: "This moves the bounce to the Trash:",
   cleanUpLeftovers: "Clean Up Leftovers",
-  leftoversFound: "Found leftover project data",
+  leftoversFound: "Found Leftover Project Data",
   leftoversFoundMessage: "{count} to clean up",
-  noRemovedProjects: "Nothing to clean up",
-  removedNotOnDisk: "Not in Projects folder",
+  noRemovedProjects: "Nothing to Clean Up",
+  removedNotOnDisk: "Not in Projects Folder",
   cleanUp: "Clean Up",
   cleanUpAll: "Clean Up All",
   cleanedUp: "Cleaned Up",
-  cleanUpRemovedConfirmTitle: "Clean Up this project's data?",
+  cleanUpRemovedConfirmTitle: "Clean Up This Project's Data?",
   cleanUpRemovedConfirmMessage:
     "Its notes are archived to the Deleted Projects folder and its tags / track numbers are cleared. The project folder itself is not touched.",
-  trashNoAccess: "Projects left the folder — data kept safe",
+  trashNoAccess: "Projects Left the Folder — Data Kept Safe",
   trashNoAccessHint: "Grant Full Disk Access to clean up automatically, or run Clean Up Leftovers.",
   openFullDiskAccess: "Open Full Disk Access Settings",
   loadProjectsFailed: "Couldn't Load Projects",
-  loadProjectsFailedHint: "Check that your Projects folder exists and that Raycast can access it.",
+  loadProjectsFailedHint: "Check that your Projects Folder exists and that Raycast can access it.",
   loadBounceSettingsFailed: "Couldn't Load Bounce Settings",
   loadTagsFailed: "Couldn't Load Tags",
   loadInfoFailed: "Couldn't Load Info",
@@ -548,19 +594,19 @@ export const strings: TranslationKeys = {
   genreAliasesPlaceholder: "e.g. dnb, drum n bass",
   roleAliasesPlaceholder: "e.g. opener, closer",
   retry: "Retry",
-  tryAgain: "Try Again",
   openExtensionPreferences: "Open Extension Preferences",
   noNotesYet: "_No notes yet_",
   noLyricsYet: "_No lyrics yet_",
   notesPlaceholder: "Ideas, to-dos, mix notes…",
   lyricsPlaceholder: "Write your lyrics here…",
-  storageUnreadable: "Saved data unreadable — nothing changed",
-  renameDataPending: "Renamed — tags not moved yet",
-  docUnreadable: "Couldn't read this note",
-  lyricsUnreadable: "Couldn't read these lyrics",
+  storageUnreadable: "Saved Data Unreadable — Nothing Changed",
+  renameDataPending: "Renamed — Tags Not Moved Yet",
+  docUnreadable: "Couldn't Read Notes",
+  lyricsUnreadable: "Couldn't Read Lyrics",
   docUnreadableHint:
     "The file exists but couldn't be opened (e.g. not downloaded from iCloud yet). Nothing was changed.",
-  trashFailed: "Couldn't move to Trash",
+  trashProjectFailed: "Couldn't Move Project to Trash",
+  trashBounceFailed: "Couldn't Move Bounce to Trash",
   sectionPlayback: "Playback",
   sectionDetails: "Details",
   sectionFile: "File",
@@ -582,11 +628,11 @@ export const strings: TranslationKeys = {
   allProjectsInCollection: "All projects are already in this collection.",
   resetToDefaults: "Reset to Defaults",
   resetToDefaultsHint:
-    "Custom names, colors, and order will be lost. Projects tagged with an option that no longer exists will have that tag cleared.",
+    "Custom names, colors, and order will be lost. Projects with a tag that no longer exists will have it cleared.",
   resetToFirstRun: "Reset to First Run",
   resetToFirstRunHint: "Reopen Search Projects to start fresh.",
   dev: "Dev",
-  removeCollectionsConfirmTitle: "Remove from collection?",
+  removeCollectionsConfirmTitle: "Remove from Collection?",
   removeCollectionsConfirmHint:
     "This project will be removed from {names}, clearing its order and role there. The project itself won't be deleted.",
   removeCollectionsFormHint: "Removing a collection clears this project's order and role there.",
@@ -598,7 +644,7 @@ export const strings: TranslationKeys = {
   unmatchedBounceTooltip: "Unmatched bounce",
   searchUnmatchedBounces: "Search Unmatched Bounces",
   noUnmatchedBounces: "No Unmatched Bounces",
-  noUnmatchedBouncesHint: "Every bounce in the shared bounces folder belongs to a project.",
+  noUnmatchedBouncesHint: "Every bounce in the Shared Bounces Folder belongs to a project.",
   assignToProject: "Assign to Project",
   assignProjectField: "Project",
   assignMatchField: "Match",
@@ -606,7 +652,7 @@ export const strings: TranslationKeys = {
   assignThisFileOnly: "This File Only",
   aliasField: "Starts With",
   aliasFieldInfo:
-    "Bounces in the shared folder whose file name starts with this (followed by a space, -, _ or .) go to this project.",
+    "Bounces in the Shared Bounces Folder whose file name starts with this (followed by a space, -, _ or .) go to this project.",
   aliasEmpty: "Enter a name",
   aliasTaken: "Already used by {project}",
   aliasNotMatchingFile: "This file doesn't start with it",
@@ -616,7 +662,7 @@ export const strings: TranslationKeys = {
   assignBounceFailed: "Couldn't Assign Bounce",
   bounceAliasesField: "Bounce Aliases",
   bounceAliasesInfo:
-    "Separated by commas. Bounces in the shared folder that start with one of these belong to this project.",
+    "Separated by commas. Bounces in the Shared Bounces Folder that start with one of these belong to this project.",
   previousNamesField: "Previous Names",
   previousNamesInfo: "Bounces made before the project was renamed. Deselect a name to stop matching it.",
   previousNameBefore: "{name} (before {date})",
@@ -627,10 +673,10 @@ export const strings: TranslationKeys = {
   bounceNameExists: "A file with that name already exists",
   removeExternalSource: "Remove External Source",
   externalSourceRemoved: "External Source Removed",
-  removeExternalSourceConfirmTitle: "Remove external source?",
+  removeExternalSourceConfirmTitle: "Remove External Source?",
   removeExternalSourceConfirmHint: "This only removes it from this project's bounces. The file on disk is not deleted.",
   copyError: "Copy Error",
-  saveFailed: "Couldn't save",
+  saveFailed: "Couldn't Save Changes",
   storageUnreadableHint:
     "The extension's saved data couldn't be read, so this change was skipped to avoid overwriting it.",
   ambiguousFinderChangesHint: "They couldn't be matched to a project safely, so their tags weren't moved.",
@@ -641,7 +687,7 @@ export const strings: TranslationKeys = {
   tagsAssigned: "Tags Updated",
   deleteTagInUse: "{count} project(s) use this. It will be removed from them.",
   deleteRoleInUse: "{count} track(s) in your collections use this role. It will be cleared from them.",
-  templateMissing: "Template not found — started empty",
+  templateMissing: "Template Not Found — Started Empty",
   analyzing: "Analyzing",
   onboardingSharedTitle: "Set Up a Shared Bounces Folder?",
   onboardingSharedMessage:
@@ -660,19 +706,19 @@ export const strings: TranslationKeys = {
   exportFolderNotDirectory: "This is not a folder.",
   exportingData: "Exporting Data",
   dataExported: "Data Exported",
-  exportFailed: "Could Not Export Data",
+  exportFailed: "Couldn't Export Data",
   importData: "Import Data",
   importFile: "File",
   importFileRequired: "Choose a file to import.",
   replaceData: "Replace",
   importingData: "Importing Data",
   dataImported: "Data Imported",
-  importNothingToChange: "Nothing to change",
-  importConfirmTitle: "Replace current data?",
+  importNothingToChange: "Nothing to Change",
+  importConfirmTitle: "Replace Current Data?",
   importConfirmBody: "This will change {changes}.",
   importConfirmBackup: "Your current data will be backed up to {file} first.",
   importChangeProjects: "{count} projects",
-  importChangeOptions: "{count} tag options",
+  importChangeOptions: "{count} tags",
   importChangeCollections: "track numbers or roles in {count} collections",
   importChangePins: "pinned collections",
   importResultRestored: "{count} restored",
@@ -681,14 +727,14 @@ export const strings: TranslationKeys = {
   importResultUnmatched: "{count} unmatched",
   importResultDropped: "{count} track numbers dropped",
   importBackupSaved: "Backup: {file}",
-  importFailed: "Could Not Import Data",
+  importFailed: "Couldn't Import Data",
   importBadFormat: "This is not an exported data file.",
   importBadVersion: "This file was made by a newer version of the extension.",
   importOtherExtension: "This file was exported by {extension}.",
   importBadStructureAt: "Invalid data: {detail}",
   corruptDataKind: "Unreadable data: {kind}.",
   corruptDataMetadata: "project tags",
-  corruptDataCategories: "categories",
+  corruptDataCategories: "tags",
   corruptDataPins: "pinned collections",
   corruptDataOrders: "track numbers",
   corruptDataRoles: "roles",

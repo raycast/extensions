@@ -17,7 +17,7 @@ export function DocActions({
   return (
     <>
       <Action.Push
-        title={strings.editNote}
+        title={strings.editNotes}
         icon={Icon.Highlight}
         shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
         target={<EditNote project={project} onSaved={onNoteSaved} />}
@@ -29,7 +29,7 @@ export function DocActions({
         target={<EditNote project={project} kind="lyrics" onSaved={onLyricsSaved} />}
       />
       <Action
-        title={strings.openNote}
+        title={strings.openNotes}
         icon={Icon.Book}
         shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
         onAction={async () => {

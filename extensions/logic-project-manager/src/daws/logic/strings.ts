@@ -4,13 +4,18 @@ type AlternativesViewStrings = {
   openInDaw: string;
   activeAlternative: string;
   copyAlternativeName: string;
+  alternativeNameCopied: string;
   setActive: string;
   activeChanged: string;
   renameAlternative: string;
   alternativeRenamed: string;
+  alternativeMovedToTrash: string;
   alternativeNameExists: string;
   duplicateAlternative: string;
   alternativeDuplicated: string;
+  renameAlternativeFailed: string;
+  duplicateAlternativeFailed: string;
+  trashAlternativeFailed: string;
   trashAlternativeHint: string;
   lastAlternative: string;
   changeConfirmTitle: string;
@@ -24,13 +29,18 @@ export const alternativesViewStrings: AlternativesViewStrings = {
   openInDaw: "Open in Logic Pro",
   activeAlternative: "Active Alternative",
   copyAlternativeName: "Copy Alternative Name",
+  alternativeNameCopied: "Alternative Name Copied",
   setActive: "Set as Active Alternative",
   activeChanged: "Active Alternative Changed",
   renameAlternative: "Rename Alternative",
   alternativeRenamed: "Alternative Renamed",
+  alternativeMovedToTrash: "Alternative Moved to Trash",
   alternativeNameExists: "An Alternative with that name already exists",
   duplicateAlternative: "Duplicate Alternative",
   alternativeDuplicated: "Alternative Duplicated",
+  renameAlternativeFailed: "Couldn't Rename Alternative",
+  duplicateAlternativeFailed: "Couldn't Duplicate Alternative",
+  trashAlternativeFailed: "Couldn't Move Alternative to Trash",
   trashAlternativeHint: "This moves the Alternative to the Trash:",
   lastAlternative: "A project needs at least one Alternative",
   changeConfirmTitle: "Change Alternative?",
@@ -48,10 +58,15 @@ type ProjectFilesViewStrings = {
   openLatestProjectFile: string;
   latestProjectFile: string;
   copyProjectFileName: string;
+  projectFileNameCopied: string;
   renameProjectFile: string;
   duplicateProjectFile: string;
   projectFileRenamed: string;
+  projectFileMovedToTrash: string;
   projectFileDuplicated: string;
+  renameProjectFileFailed: string;
+  duplicateProjectFileFailed: string;
+  trashProjectFileFailed: string;
   projectFileNameExists: string;
   trashProjectFileHint: string;
   lastProjectFile: string;
@@ -66,10 +81,15 @@ export const projectFilesViewStrings: ProjectFilesViewStrings = {
   openLatestProjectFile: "Open Latest Project File",
   latestProjectFile: "Latest Project File",
   copyProjectFileName: "Copy Project File Name",
+  projectFileNameCopied: "Project File Name Copied",
   renameProjectFile: "Rename Project File",
   duplicateProjectFile: "Duplicate Project File",
   projectFileRenamed: "Project File Renamed",
+  projectFileMovedToTrash: "Project File Moved to Trash",
   projectFileDuplicated: "Project File Duplicated",
+  renameProjectFileFailed: "Couldn't Rename Project File",
+  duplicateProjectFileFailed: "Couldn't Duplicate Project File",
+  trashProjectFileFailed: "Couldn't Move Project File to Trash",
   projectFileNameExists: "A project file with this name already exists",
   trashProjectFileHint: "This moves the project file to the Trash:",
   lastProjectFile: "A project needs at least one project file",

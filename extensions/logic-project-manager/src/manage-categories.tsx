@@ -58,6 +58,37 @@ const ALIAS_PLACEHOLDERS: Record<CategoryKind, string> = {
   role: strings.roleAliasesPlaceholder,
 };
 
+// 新建、编辑、删除的标题都带上分类名，用户不用回头看下拉框选的是哪一类。
+const NEW_LABELS: Record<CategoryKind, string> = {
+  stage: strings.newStage,
+  genre: strings.newGenre,
+  role: strings.newRole,
+};
+
+const EDIT_LABELS: Record<CategoryKind, string> = {
+  stage: strings.editStage,
+  genre: strings.editGenre,
+  role: strings.editRole,
+};
+
+const CREATED_LABELS: Record<CategoryKind, string> = {
+  stage: strings.stageCreated,
+  genre: strings.genreCreated,
+  role: strings.roleCreated,
+};
+
+const DELETED_LABELS: Record<CategoryKind, string> = {
+  stage: strings.stageDeleted,
+  genre: strings.genreDeleted,
+  role: strings.roleDeleted,
+};
+
+const DELETED_ALL_LABELS: Record<CategoryKind, string> = {
+  stage: strings.stagesDeleted,
+  genre: strings.genresDeleted,
+  role: strings.rolesDeleted,
+};
+
 const TAXONOMIES: Record<CategoryKind, Taxonomy> = {
   stage: stageTaxonomy,
   genre: genreTaxonomy,
@@ -291,7 +322,7 @@ export default function Command() {
     const next = [...options, option];
     await TAXONOMIES[kind].save(next);
     setOptions(next);
-    await showToast({ style: Toast.Style.Success, title: strings.created });
+    await showToast({ style: Toast.Style.Success, title: CREATED_LABELS[kind] });
   }
 
   async function editOption(id: string, name: string, aliases: string[], color?: Color) {
@@ -363,7 +394,7 @@ export default function Command() {
     await TAXONOMIES[kind].save(next);
     setOptions(next);
     await clearTagEverywhere(kind, option);
-    await showToast({ style: Toast.Style.Success, title: strings.deleted });
+    await showToast({ style: Toast.Style.Success, title: DELETED_LABELS[kind] });
   }
 
   // 删光当前这张列表。先确认，写明删几个选项、影响几个项目（Role 是几个曲目）。
@@ -384,13 +415,13 @@ export default function Command() {
       return;
     }
     setOptions([]);
-    await showToast({ style: Toast.Style.Success, title: strings.deleted });
+    await showToast({ style: Toast.Style.Success, title: DELETED_ALL_LABELS[kind] });
   }
 
   // 恢复默认：写回默认种子，并清掉项目上指向已不存在选项的引用（Role 按名字，Stage/Genre 按 id）。
   async function resetOptions() {
     const confirmed = await confirmAlert({
-      icon: { source: Icon.Undo, tintColor: Color.Red },
+      icon: { source: Icon.ArrowCounterClockwise, tintColor: Color.Red },
       title: `${strings.resetToDefaults}?`,
       message: strings.resetToDefaultsHint,
       primaryAction: { title: strings.resetToDefaults, style: Alert.ActionStyle.Destructive },
@@ -425,17 +456,22 @@ export default function Command() {
 
   const createAction = (
     <Action.Push
-      title={strings.create}
+      title={NEW_LABELS[kind]}
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
       target={
-        <CategoryForm title={strings.create} aliasesPlaceholder={ALIAS_PLACEHOLDERS[kind]} onSubmit={createOption} />
+        <CategoryForm title={NEW_LABELS[kind]} aliasesPlaceholder={ALIAS_PLACEHOLDERS[kind]} onSubmit={createOption} />
       }
     />
   );
 
   const resetAction = (
-    <Action title={strings.resetToDefaults} icon={Icon.Undo} style={Action.Style.Destructive} onAction={resetOptions} />
+    <Action
+      title={strings.resetToDefaults}
+      icon={Icon.ArrowCounterClockwise}
+      style={Action.Style.Destructive}
+      onAction={resetOptions}
+    />
   );
 
   const deleteAllAction = (
@@ -478,7 +514,7 @@ export default function Command() {
           description={loadError ?? undefined}
           actions={
             <ActionPanel>
-              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={() => void reload(kind)} />
+              <Action title={strings.retry} icon={Icon.ArrowClockwise} onAction={() => void reload(kind)} />
               <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
@@ -507,12 +543,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push
-                title={strings.edit}
+                title={EDIT_LABELS[kind]}
                 icon={Icon.Pencil}
                 shortcut={Keyboard.Shortcut.Common.Edit}
                 target={
                   <CategoryForm
-                    title={strings.edit}
+                    title={EDIT_LABELS[kind]}
                     currentName={option.name}
                     currentAliases={option.aliases}
                     aliasesPlaceholder={ALIAS_PLACEHOLDERS[kind]}

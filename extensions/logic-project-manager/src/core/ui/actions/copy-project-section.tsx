@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import type { Project } from "@/core/projects/types";
+import { copyWithHud } from "@/core/ui/shared/toast";
 import { strings } from "@/strings";
 
 // 项目行的复制分区：最新 bounce、项目名、项目路径。各界面共用。
@@ -20,17 +21,17 @@ export function CopyProjectSection({
           onAction={onCopyLatestBounce}
         />
       )}
-      <Action.CopyToClipboard
-        content={project.title}
+      <Action
         title={strings.copyProjectName}
         icon={Icon.CopyClipboard}
         shortcut={Keyboard.Shortcut.Common.CopyName}
+        onAction={() => void copyWithHud(project.title, strings.projectNameCopied)}
       />
-      <Action.CopyToClipboard
-        content={project.folderPath}
+      <Action
         title={strings.copyProjectPath}
         icon={Icon.CopyClipboard}
         shortcut={Keyboard.Shortcut.Common.CopyPath}
+        onAction={() => void copyWithHud(project.folderPath, strings.projectPathCopied)}
       />
     </ActionPanel.Section>
   );

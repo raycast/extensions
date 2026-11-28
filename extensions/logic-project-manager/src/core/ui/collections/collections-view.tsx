@@ -115,7 +115,7 @@ export function CollectionList({
     const option: TaxonomyOption = { id, name };
     await collectionTaxonomy.save([...current, option]);
     await reloadCollections();
-    await showToast({ style: Toast.Style.Success, title: strings.created });
+    await showToast({ style: Toast.Style.Success, title: strings.collectionCreated });
     return true;
   }
 
@@ -127,7 +127,7 @@ export function CollectionList({
     }
     await collectionTaxonomy.save(current.map((o) => (o.id === id ? { ...o, name } : o)));
     await reloadCollections();
-    await showToast({ style: Toast.Style.Success, title: strings.renamed });
+    await showToast({ style: Toast.Style.Success, title: strings.collectionRenamed });
     return true;
   }
 
@@ -149,15 +149,15 @@ export function CollectionList({
     setPinnedIds(await removePinnedCollection(c.id));
 
     await reloadCollections();
-    await showToast({ style: Toast.Style.Success, title: strings.deleted });
+    await showToast({ style: Toast.Style.Success, title: strings.collectionDeleted });
   }
 
   const createAction = (
     <Action.Push
-      title={strings.create}
+      title={strings.newCollection}
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<CollectionNameForm title={strings.create} onSubmit={createCollection} />}
+      target={<CollectionNameForm title={strings.newCollection} onSubmit={createCollection} />}
     />
   );
 
@@ -177,7 +177,7 @@ export function CollectionList({
         actions={
           <ActionPanel>
             <Action.Push
-              title={strings.open}
+              title={strings.openCollection}
               icon={Icon.Tray}
               target={
                 <CollectionPanel
@@ -191,12 +191,12 @@ export function CollectionList({
             />
             {createAction}
             <Action.Push
-              title={strings.rename}
+              title={strings.renameCollection}
               icon={Icon.Pencil}
               shortcut={Keyboard.Shortcut.Common.Edit}
               target={
                 <CollectionNameForm
-                  title={strings.rename}
+                  title={strings.renameCollection}
                   currentName={c.name}
                   onSubmit={(name) => renameCollection(c.id, name)}
                 />

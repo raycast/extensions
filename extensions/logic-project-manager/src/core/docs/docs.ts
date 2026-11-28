@@ -373,7 +373,7 @@ export function isBlankDoc(content: string): boolean {
   return content.replace(/^\uFEFF/, "").trim() === "";
 }
 
-// 新建文件的初始内容：有模板文件就套模板，否则空。Edit Note 新建笔记时也用它预填正文。
+// 新建文件的初始内容：有模板文件就套模板，否则空。Edit Notes 新建笔记时也用它预填正文。
 export function initialContent(project: { title: string }, kind: DocKind): string {
   const templateFile = getTemplateFile(kind);
   if (templateFile) {

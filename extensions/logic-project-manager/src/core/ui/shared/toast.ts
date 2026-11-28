@@ -1,9 +1,15 @@
-import { Clipboard, Toast, showToast } from "@raycast/api";
+import { Clipboard, Toast, showHUD, showToast } from "@raycast/api";
 import { StorageUnreadableError } from "@/core/fs/storage";
 import { strings } from "@/strings";
 
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+/** 复制到剪贴板后关窗并显示 HUD。复制类操作都用它，提示文字统一是「对象 + Copied」。 */
+export async function copyWithHud(content: string | { file: string }, title: string): Promise<void> {
+  await Clipboard.copy(content);
+  await showHUD(title);
 }
 
 /** 失败提示里的 Copy Error：复制标题和完整错误（含调用栈），反馈问题时直接粘贴。 */

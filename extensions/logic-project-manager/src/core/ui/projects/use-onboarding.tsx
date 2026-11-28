@@ -41,7 +41,7 @@ export function useOnboarding(input: { getProjects: () => Project[]; reloadProje
       await confirmAlert({
         title: strings.onboardingSharedTitle,
         message: strings.onboardingSharedMessage,
-        primaryAction: { title: strings.openPreferences, onAction: () => void openExtensionPreferences() },
+        primaryAction: { title: strings.openExtensionPreferences, onAction: () => void openExtensionPreferences() },
         dismissAction: { title: strings.skip },
       });
       await LocalStorage.setItem(ONBOARDING_ASKED_KEY, "true");

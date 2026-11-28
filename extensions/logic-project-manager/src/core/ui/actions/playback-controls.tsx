@@ -45,7 +45,7 @@ export function PlaybackControlsSection({
       />
       <Action
         title={strings.restartTrack}
-        icon={Icon.ArrowCounterClockwise}
+        icon={Icon.RotateClockwise}
         shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
         onAction={() => {
           onRestart();

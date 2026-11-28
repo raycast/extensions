@@ -61,7 +61,7 @@ export function EditNote({
       writeDocBody(project, kind, note);
     } catch (error) {
       // 自定义文件夹失效等：不返回上一页，保留已输入的内容。
-      await showDocError(error);
+      await showDocError(error, kind);
       return;
     }
 
@@ -78,7 +78,7 @@ export function EditNote({
   return (
     <Form
       isLoading={!loaded}
-      navigationTitle={`${kind === "notes" ? strings.editNote : strings.editLyrics} — ${project.title}`}
+      navigationTitle={`${kind === "notes" ? strings.editNotes : strings.editLyrics} — ${project.title}`}
       actions={
         <ActionPanel>{loaded && <Action.SubmitForm title={strings.save} onSubmit={handleSubmit} />}</ActionPanel>
       }

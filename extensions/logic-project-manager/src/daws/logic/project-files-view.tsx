@@ -42,7 +42,7 @@ import { LOG_PREFIX } from "@/core/log";
 import { alternativesViewStrings, projectFilesViewStrings } from "./strings";
 import { openWithDaw } from "@/core/daw-app";
 import { useDawApp } from "@/core/ui/hooks/use-daw-app";
-import { showFailure, errorMessage } from "@/core/ui/shared/toast";
+import { copyWithHud, showFailure, errorMessage } from "@/core/ui/shared/toast";
 import { ShowInFinderAction } from "@/core/ui/actions/show-in-finder";
 import { labels } from "@/daws/labels";
 import { AlternativesView, findWindowImage } from "./alternatives-view";
@@ -130,7 +130,7 @@ function RenameProjectFileForm({ file, onRenamed }: { file: ProjectFile; onRenam
     try {
       fs.renameSync(file.packagePath, target);
     } catch (error) {
-      await showFailure(strings.renameFailed, error);
+      await showFailure(projectFilesViewStrings.renameProjectFileFailed, error);
       return;
     }
 
@@ -236,7 +236,7 @@ export function ProjectFilesView({ project }: { project: Project }) {
 
   const reload = () => setReloadToken((n) => n + 1);
 
-  // 出错页面上的 Try Again：重读期间显示加载，读完再收起。
+  // 出错页面上的 Retry：重读期间显示加载，读完再收起。
   const retryLoad = () => {
     setIsLoading(true);
     reload();
@@ -268,7 +268,7 @@ export function ProjectFilesView({ project }: { project: Project }) {
         message: path.basename(target),
       });
     } catch (error) {
-      await showFailure(strings.duplicateFailed, error);
+      await showFailure(projectFilesViewStrings.duplicateProjectFileFailed, error);
     }
   };
 
@@ -288,9 +288,13 @@ export function ProjectFilesView({ project }: { project: Project }) {
     try {
       await trash(file.packagePath);
       reload();
-      await showToast({ style: Toast.Style.Success, title: strings.movedToTrash, message: file.name });
+      await showToast({
+        style: Toast.Style.Success,
+        title: projectFilesViewStrings.projectFileMovedToTrash,
+        message: file.name,
+      });
     } catch (error) {
-      await showFailure(strings.trashFailed, error);
+      await showFailure(projectFilesViewStrings.trashProjectFileFailed, error);
     }
   };
 
@@ -314,7 +318,7 @@ export function ProjectFilesView({ project }: { project: Project }) {
           description={loadError ?? undefined}
           actions={
             <ActionPanel>
-              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={retryLoad} />
+              <Action title={strings.retry} icon={Icon.ArrowClockwise} onAction={retryLoad} />
               <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
@@ -383,17 +387,19 @@ export function ProjectFilesView({ project }: { project: Project }) {
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title={strings.sectionCopy}>
-                    <Action.CopyToClipboard
-                      content={path.basename(file.packagePath)}
+                    <Action
                       title={projectFilesViewStrings.copyProjectFileName}
                       icon={Icon.CopyClipboard}
                       shortcut={Keyboard.Shortcut.Common.CopyName}
+                      onAction={() =>
+                        void copyWithHud(path.basename(file.packagePath), projectFilesViewStrings.projectFileNameCopied)
+                      }
                     />
-                    <Action.CopyToClipboard
-                      content={file.packagePath}
+                    <Action
                       title={strings.copyProjectPath}
                       icon={Icon.CopyClipboard}
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
+                      onAction={() => void copyWithHud(file.packagePath, strings.projectPathCopied)}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title={strings.sectionArrange}>

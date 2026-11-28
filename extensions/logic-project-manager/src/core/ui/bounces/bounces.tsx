@@ -6,7 +6,6 @@ import {
   Icon,
   Keyboard,
   Alert,
-  Clipboard,
   Color,
   confirmAlert,
   showToast,
@@ -36,7 +35,7 @@ import {
 import type { BounceWithSource } from "@/core/projects/bounces";
 import { addExcludedSharedBounce, setExternalBounces } from "@/core/metadata/project-metadata";
 import { ManageExternalBounces } from "@/core/ui/components/manage-external-bounces";
-import { showFailure } from "@/core/ui/shared/toast";
+import { copyWithHud, showFailure } from "@/core/ui/shared/toast";
 
 const BOUNCES_SORT_STORAGE_KEY = "bounces-sort-option";
 const BOUNCES_GROUP_STORAGE_KEY = "bounces-group-option";
@@ -88,7 +87,7 @@ function RenameBounceForm({
   }
   return (
     <Form
-      navigationTitle={strings.rename}
+      navigationTitle={strings.renameBounce}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={strings.save} icon={Icon.Check} onSubmit={handleSubmit} />
@@ -149,7 +148,7 @@ export function Bounces(props: {
       await trash(bounce.path);
     } catch (error) {
       // 文件被占用、权限不足、外接盘已拔出等：如实提示，不更新登记记录。
-      await showFailure(strings.trashFailed, error);
+      await showFailure(strings.trashBounceFailed, error);
       return;
     }
     // 若删掉的正是被登记的外部文件来源，顺手移除记录（用户经扩展主动删除，确知已不存在）。
@@ -171,12 +170,11 @@ export function Bounces(props: {
       await showFailure(strings.saveFailed, recordError);
       return;
     }
-    await showToast({ style: Toast.Style.Success, title: strings.movedToTrash, message: bounce.name });
+    await showToast({ style: Toast.Style.Success, title: strings.bounceMovedToTrash, message: bounce.name });
   };
 
   const handleCopy = async (bounce: BounceWithSource) => {
-    await Clipboard.copy({ file: bounce.path });
-    await showToast({ style: Toast.Style.Success, title: strings.bounceCopied, message: bounce.name });
+    await copyWithHud({ file: bounce.path }, strings.bounceCopied);
   };
 
   // 返回是否保存成功：表单据此决定关不关。
@@ -198,7 +196,7 @@ export function Bounces(props: {
     try {
       fs.renameSync(bounce.path, newPath);
     } catch (error) {
-      await showFailure(strings.renameFailed, error);
+      await showFailure(strings.renameBounceFailed, error);
       return false;
     }
     // 外部「文件」来源：路径即登记路径，改名后同步更新记录，否则记录会指向旧名而失效。
@@ -325,7 +323,7 @@ export function Bounces(props: {
                         {renderManageAction()}
                         <ShowInFinderAction path={b.path} />
                         <Action.Push
-                          title={strings.rename}
+                          title={strings.renameBounce}
                           icon={Icon.Pencil}
                           shortcut={Keyboard.Shortcut.Common.Edit}
                           target={
@@ -346,11 +344,11 @@ export function Bounces(props: {
                     ) : (
                       <ActionPanel.Section>
                         {renderManageAction()}
-                        <Action.CopyToClipboard
-                          content={b.path}
+                        <Action
                           title={strings.copyBouncePath}
                           icon={Icon.CopyClipboard}
                           shortcut={Keyboard.Shortcut.Common.CopyPath}
+                          onAction={() => void copyWithHud(b.path, strings.bouncePathCopied)}
                         />
                       </ActionPanel.Section>
                     )}

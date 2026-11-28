@@ -140,7 +140,7 @@ export async function reloadProjectData(
       style: Toast.Style.Failure,
       title: strings.manyProjectsMissing,
       message: strings.manyProjectsMissingHint,
-      primaryAction: { title: strings.openPreferences, onAction: () => void openExtensionPreferences() },
+      primaryAction: { title: strings.openExtensionPreferences, onAction: () => void openExtensionPreferences() },
       secondaryAction: { title: strings.openProjectsFolder, onAction: () => void open(root) },
     });
   } else if (ambiguous > 0) {

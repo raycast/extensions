@@ -134,12 +134,12 @@ Manage Tags 用来编辑三份标签列表，用搜索栏旁的下拉框在它�
 
 ### 编辑列表
 
-- **Create**（⌘N）新增选项。**Edit**（⌘E）修改名称和别名，阶段还可以修改颜色。重命名后，所有用到这个选项的项目和曲目都会保留它。同一份列表中的两个选项不能重名。
+- **New Stage**、**New Genre** 或 **New Role**（⌘N）新增标签。**Edit Stage**、**Edit Genre** 或 **Edit Role**（⌘E）修改名称和别名，阶段还可以修改颜色。重命名后，所有用到这个标签的项目和曲目都会保留它。同一份列表中的两个标签不能重名。
 - **别名**是用来搜索的其他名称，用逗号分隔（例如 Drum & Bass 用 `dnb`）。见[组合搜索](https://github.com/iyekChen/logic-project-manager/blob/main/README.zh-CN.md#组合搜索)。
 - 用 Move Up（⌘⌥↑）和 Move Down（⌘⌥↓），或 Move to Top（⌘⇧↑）和 Move to Bottom（⌘⇧↓）调整顺序。所有选择标签的地方都按这个顺序显示。
-- **Delete**（⌃X）会先告诉你有多少项目或曲目在用这个选项，确认后从它们身上全部移除。
-- **Delete All**（⌃⇧X）会先告诉你删掉几个选项、有多少项目或曲目在用它们，确认后清空当前查看的列表，并从这些项目或曲目上全部移除。列表里至少有一个选项时才出现。
-- **Reset to Defaults** 把当前查看的列表恢复为默认值。自定义的名称、颜色、别名和顺序都会丢失，用到已不在列表中的选项的项目或曲目会失去这个标签。
+- **Delete**（⌃X）会先告诉你有多少项目或曲目在用这个标签，确认后从它们身上全部移除。
+- **Delete All**（⌃⇧X）会先告诉你删掉几个标签、有多少项目或曲目在用它们，确认后清空当前查看的列表，并从这些项目或曲目上全部移除。列表里至少有一个标签时才出现。
+- **Reset to Defaults** 把当前查看的列表恢复为默认值。自定义的名称、颜色、别名和顺序都会丢失，用到已不在列表中的标签的项目或曲目会失去它。
 
 ### 为项目打标签
 
@@ -229,7 +229,7 @@ Search Bounces 命令在一个地方列出所有项目的 bounce。属于多个�
 
 ### 建立合集
 
-1. 在 Search Projects 中使用 Browse Collections（⌃↵），然后选择 Create。
+1. 在 Search Projects 中使用 Browse Collections（⌃↵），然后选择 New Collection。
 2. 打开合集，用 Add Projects… 选择曲目。也可以在项目的 Edit Info 中把它加入合集。
 3. 新曲目先放在 Unsorted 中。按 Enter 选择 Set Track Number…，或用 Add to Tracklist 给曲目分配下一个空闲编号。
 
@@ -275,12 +275,12 @@ Energy（能量）通过比较每首曲目和合集中其他曲目在密度、�
 
 - **保存位置：** 默认是项目文件夹中的 `Notes.md` 和 `Lyrics.md`（存成 Package 的项目则在 `.logicx` 内部）。设置 Notes Folder 或 Lyrics Folder 可以存到别处，比如 Obsidian 仓库；见[文件名](https://github.com/iyekChen/logic-project-manager/blob/main/README.zh-CN.md#文件名)。
 - **查看：** 在 Search Projects 的 [Detail 视图](https://github.com/iyekChen/logic-project-manager/blob/main/README.zh-CN.md#overview-与-detail)（⌘⇧T）中，侧边栏显示笔记，⌘⌥⇧T 切换到歌词。
-- **编辑：** 用 Edit Note（⌘⌥N）和 Edit Lyrics（⌘⌥L）在 Raycast 中编辑，或用 Open Note（⌘⇧N）和 Open Lyrics（⌘⇧L）在你的 Markdown App 中打开文件。这些操作在合集里的曲目上同样可用。
+- **编辑：** 用 Edit Notes（⌘⌥N）和 Edit Lyrics（⌘⌥L）在 Raycast 中编辑，或用 Open Notes（⌘⇧N）和 Open Lyrics（⌘⇧L）在你的 Markdown App 中打开文件。这些操作在合集里的曲目上同样可用。
 - **在别处编辑：** 在其他 App 中的修改会立即显示。如果你在 Raycast 中编辑时，文件在别的 App 里被改了，保存前会先询问你，再覆盖那些修改。
 
 ### 笔记模板
 
-要使用模板，在 Extension Preferences 中把 Notes Template 或 Lyrics Template 设为一个 `.md` 文件。新建笔记或歌词文件时，或者现有文件为空时，会套用模板。包括 Open Note、Open Lyrics，以及 Edit Note 或 Edit Lyrics 的第一次保存。
+要使用模板，在 Extension Preferences 中把 Notes Template 或 Lyrics Template 设为一个 `.md` 文件。新建笔记或歌词文件时，或者现有文件为空时，会套用模板。包括 Open Notes、Open Lyrics，以及 Edit Notes 或 Edit Lyrics 的第一次保存。
 
 | 占位符      | 替换为         | 默认格式     |
 | ----------- | -------------- | ------------ |
@@ -346,7 +346,7 @@ tags:
 - 切换 Active Alternative；
 - 把东西移到废纸篓。
 
-重命名项目或改动 Alternative 前，需要先在 Logic Pro 中关闭项目。笔记和歌词只在你编辑它们时写入，或者在文件还不存在时使用 Open Note 或 Open Lyrics 创建。它们会随项目一起重命名或归档，详见[项目追踪](https://github.com/iyekChen/logic-project-manager/blob/main/README.zh-CN.md#项目追踪)。
+重命名项目或改动 Alternative 前，需要先在 Logic Pro 中关闭项目。笔记和歌词只在你编辑它们时写入，或者在文件还不存在时使用 Open Notes 或 Open Lyrics 创建。它们会随项目一起重命名或归档，详见[项目追踪](https://github.com/iyekChen/logic-project-manager/blob/main/README.zh-CN.md#项目追踪)。
 
 ### 存储
 

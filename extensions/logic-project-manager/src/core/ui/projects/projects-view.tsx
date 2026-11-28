@@ -132,7 +132,7 @@ export function ProjectsView() {
   // 同名旧项目的设置已归档的项目：这些行多出 Restore Previous Settings。
   const { ids: replacedIds, revalidate: revalidateReplaced } = useReplacedProjects(projects);
 
-  // 出错页面上的 Try Again：重读期间显示加载，读完再收起。
+  // 出错页面上的 Retry：重读期间显示加载，读完再收起。
   const [retrying, setRetrying] = useState(false);
   const retryLoad = useCallback(async () => {
     setRetrying(true);
@@ -234,9 +234,9 @@ export function ProjectsView() {
       await removeProjectFromAllOrders(project.id);
       await removeProjectFromAllRoles(project.id);
       await reloadProjects();
-      await showToast({ style: Toast.Style.Success, title: strings.movedToTrash, message: project.title });
+      await showToast({ style: Toast.Style.Success, title: strings.projectMovedToTrash, message: project.title });
     } catch (error) {
-      await showFailure(strings.trashFailed, error);
+      await showFailure(strings.trashProjectFailed, error);
     } finally {
       trashingIds.delete(project.id);
     }
@@ -487,7 +487,7 @@ export function ProjectsView() {
           description={loadError ?? undefined}
           actions={
             <ActionPanel>
-              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={retryLoad} />
+              <Action title={strings.retry} icon={Icon.ArrowClockwise} onAction={retryLoad} />
               <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
@@ -500,7 +500,7 @@ export function ProjectsView() {
           description={labels.noProjectsFoundHint.replace("{folder}", PROJECTS_ROOT)}
           actions={
             <ActionPanel>
-              <Action title={strings.openPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
               <Action.Open title={strings.openProjectsFolder} icon={Icon.Finder} target={PROJECTS_ROOT} />
             </ActionPanel>
           }

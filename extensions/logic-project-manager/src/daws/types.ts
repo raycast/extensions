@@ -90,6 +90,7 @@ export type DawLabels = {
   readingSets: string;
   newProjectFile: string;
   newProjectFileFailed: string;
+  dawAppNotFound: string;
   noProjectsFound: string;
   noProjectsFoundHint: string;
   renameConfirmMessage: string;

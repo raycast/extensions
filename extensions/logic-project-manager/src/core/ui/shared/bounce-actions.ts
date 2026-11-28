@@ -1,8 +1,8 @@
-import { Clipboard, Toast, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import type { Project } from "@/core/projects/types";
 import { findLatestProjectBounce } from "@/core/projects/bounces";
 import type { PlayBounce } from "@/core/ui/hooks/use-audio-player";
-import { showFailure } from "@/core/ui/shared/toast";
+import { copyWithHud, showFailure } from "@/core/ui/shared/toast";
 import { strings } from "@/strings";
 
 // 播放和复制最新 bounce：Search Projects 与 Tracklist 共用，保证两处口径一致。
@@ -16,7 +16,7 @@ export function playProjectBounce(project: Project, play: PlayBounce): void {
   }
   play(project.id, latestBouncePath, {
     onError: (message) => {
-      void showFailure(strings.playbackFailed, message);
+      void showFailure(strings.playBounceFailed, message);
     },
   });
 }
@@ -28,10 +28,5 @@ export async function copyLatestBounce(project: Project): Promise<void> {
     void showToast({ style: Toast.Style.Failure, title: strings.noBounces });
     return;
   }
-  await Clipboard.copy({ file: latestBouncePath });
-  void showToast({
-    style: Toast.Style.Success,
-    title: strings.bounceCopied,
-    message: latestBouncePath.split("/").pop() ?? "",
-  });
+  await copyWithHud({ file: latestBouncePath }, strings.bounceCopied);
 }

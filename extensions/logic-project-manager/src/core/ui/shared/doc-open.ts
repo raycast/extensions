@@ -13,7 +13,7 @@ import { showFailure } from "@/core/ui/shared/toast";
 import { strings } from "@/strings";
 
 /** 文档读写出错时统一提示；自定义文件夹失效时附带"打开扩展设置"。 */
-export async function showDocError(error: unknown): Promise<void> {
+export async function showDocError(error: unknown, kind: DocKind): Promise<void> {
   if (error instanceof DocSharedError) {
     await showToast({ style: Toast.Style.Failure, title: strings.docShared, message: error.others.join(", ") });
     return;
@@ -23,7 +23,7 @@ export async function showDocError(error: unknown): Promise<void> {
       style: Toast.Style.Failure,
       title: strings.docFolderMissing,
       message: error.folder,
-      primaryAction: { title: strings.openPreferences, onAction: () => void openExtensionPreferences() },
+      primaryAction: { title: strings.openExtensionPreferences, onAction: () => void openExtensionPreferences() },
       // 只有设置已被清空时才有意义：设置里还填着旧路径的话，要去设置里改。
       secondaryAction: error.fromMemory
         ? { title: strings.useProjectFolders, onAction: () => forgetDocFolder(error.kind) }
@@ -31,7 +31,7 @@ export async function showDocError(error: unknown): Promise<void> {
     });
     return;
   }
-  await showFailure(strings.docSaveFailed, error);
+  await showFailure(kind === "notes" ? strings.docSaveFailed : strings.lyricsSaveFailed, error);
 }
 
 /** 打开（必要时按模板新建）某项目的文档；出错时提示而不是抛出。 */
@@ -46,10 +46,10 @@ export async function openDoc(project: { title: string; folderPath: string }, ki
         style: Toast.Style.Failure,
         title: strings.templateMissing,
         message: template,
-        primaryAction: { title: strings.openPreferences, onAction: () => void openExtensionPreferences() },
+        primaryAction: { title: strings.openExtensionPreferences, onAction: () => void openExtensionPreferences() },
       });
     }
   } catch (error) {
-    await showDocError(error);
+    await showDocError(error, kind);
   }
 }

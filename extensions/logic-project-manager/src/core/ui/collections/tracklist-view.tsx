@@ -247,7 +247,7 @@ export function CollectionPanel({
     [],
   );
 
-  // Edit Note / Edit Lyrics 存盘后：重读该曲目的那份文档，让详情面板即时回显。
+  // Edit Notes / Edit Lyrics 存盘后：重读该曲目的那份文档，让详情面板即时回显。
   function reloadDoc(project: Project, kind: "notes" | "lyrics") {
     const body = stripFrontmatter(readDocFile(project, kind));
     setProjectList((prev) => prev.map((p) => (p.id === project.id ? { ...p, [kind]: body } : p)));
@@ -331,7 +331,7 @@ export function CollectionPanel({
     try {
       fs.writeFileSync(playlistPath, lines.join("\n") + "\n");
     } catch (error) {
-      await showFailure(strings.queueFailed, error);
+      await showFailure(strings.queueCollectionFailed, error);
       return;
     }
 
@@ -481,7 +481,7 @@ export function CollectionPanel({
         <ActionPanel.Section title={strings.sectionTracklist}>
           <Action
             title={strings.addToTracklist}
-            icon={Icon.Hashtag}
+            icon={Icon.Tack}
             shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={() => apply(assignNumber(map, p.id, nextNumber(map)))}
           />
@@ -492,7 +492,7 @@ export function CollectionPanel({
       <ActionPanel.Section title={strings.sectionTracklist}>
         <Action
           title={strings.removeFromTracklist}
-          icon={Icon.Minus}
+          icon={Icon.TackDisabled}
           shortcut={Keyboard.Shortcut.Common.Pin}
           onAction={() => removeFromTracklist(p.id)}
         />

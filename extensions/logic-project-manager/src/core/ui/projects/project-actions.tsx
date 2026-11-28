@@ -55,7 +55,7 @@ function RestorePreviousSettingsAction({ project, onRestored }: { project: Proje
   );
 }
 
-/** Details 分区：Edit Info、Edit Note / Edit Lyrics、Open Note / Open Lyrics。 */
+/** Details 分区：Edit Info、Edit Notes / Edit Lyrics、Open Notes / Open Lyrics。 */
 export function ProjectDetailsSection({
   project,
   onSaved,
@@ -141,7 +141,7 @@ export function ProjectFileSection({
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={async () => {
           if (!dawApp) {
-            await showToast({ style: Toast.Style.Failure, title: labels.newProjectFileFailed });
+            await showToast({ style: Toast.Style.Failure, title: labels.dawAppNotFound });
             return;
           }
           try {

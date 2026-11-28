@@ -34,7 +34,7 @@ import { LOG_PREFIX } from "@/core/log";
 import { alternativesViewStrings } from "./strings";
 import { openWithDaw } from "@/core/daw-app";
 import { useDawApp } from "@/core/ui/hooks/use-daw-app";
-import { showFailure, errorMessage } from "@/core/ui/shared/toast";
+import { copyWithHud, showFailure, errorMessage } from "@/core/ui/shared/toast";
 import { ShowInFinderAction } from "@/core/ui/actions/show-in-finder";
 import { labels } from "@/daws/labels";
 import { SortBySubmenu } from "@/core/ui/actions/sort-by-submenu";
@@ -98,7 +98,7 @@ function RenameAlternativeForm({ alternative, onRenamed }: { alternative: Projec
     try {
       await renameAlternative(alternative.path, alternative, trimmed);
     } catch (error) {
-      await showFailure(strings.renameFailed, error);
+      await showFailure(alternativesViewStrings.renameAlternativeFailed, error);
       return;
     }
 
@@ -187,7 +187,7 @@ export function AlternativesView({ project }: { project: Project }) {
 
   const reload = () => setReloadToken((n) => n + 1);
 
-  // 出错页面上的 Try Again：重读期间显示加载，读完再收起。
+  // 出错页面上的 Retry：重读期间显示加载，读完再收起。
   const retryLoad = () => {
     setIsLoading(true);
     reload();
@@ -260,7 +260,7 @@ export function AlternativesView({ project }: { project: Project }) {
         message: name,
       });
     } catch (error) {
-      await showFailure(strings.duplicateFailed, error);
+      await showFailure(alternativesViewStrings.duplicateAlternativeFailed, error);
     }
   };
 
@@ -284,9 +284,13 @@ export function AlternativesView({ project }: { project: Project }) {
         alternative.active === true,
       );
       reload();
-      await showToast({ style: Toast.Style.Success, title: strings.movedToTrash, message: alternative.name });
+      await showToast({
+        style: Toast.Style.Success,
+        title: alternativesViewStrings.alternativeMovedToTrash,
+        message: alternative.name,
+      });
     } catch (error) {
-      await showFailure(strings.trashFailed, error);
+      await showFailure(alternativesViewStrings.trashAlternativeFailed, error);
     }
   };
 
@@ -310,7 +314,7 @@ export function AlternativesView({ project }: { project: Project }) {
           description={loadError ?? undefined}
           actions={
             <ActionPanel>
-              <Action title={strings.tryAgain} icon={Icon.ArrowClockwise} onAction={retryLoad} />
+              <Action title={strings.retry} icon={Icon.ArrowClockwise} onAction={retryLoad} />
               <Action title={strings.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
@@ -399,17 +403,17 @@ export function AlternativesView({ project }: { project: Project }) {
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title={strings.sectionCopy}>
-                    <Action.CopyToClipboard
-                      content={alternative.name}
+                    <Action
                       title={alternativesViewStrings.copyAlternativeName}
                       icon={Icon.CopyClipboard}
                       shortcut={Keyboard.Shortcut.Common.CopyName}
+                      onAction={() => void copyWithHud(alternative.name, alternativesViewStrings.alternativeNameCopied)}
                     />
-                    <Action.CopyToClipboard
-                      content={alternative.path}
+                    <Action
                       title={strings.copyProjectPath}
                       icon={Icon.CopyClipboard}
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
+                      onAction={() => void copyWithHud(alternative.path, strings.projectPathCopied)}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title={strings.sectionArrange}>

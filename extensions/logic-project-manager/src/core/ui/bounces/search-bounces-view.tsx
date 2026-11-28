@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Icon,
-  Keyboard,
-  List,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSettings } from "@/settings";
 import { strings } from "@/strings";
@@ -34,7 +23,7 @@ import { BOUNCES_SORT_OPTIONS, BounceGroupSubmenu, Bounces } from "./bounces";
 import { formatSize, groupBySource, splitExt } from "./bounce-format";
 import { useBounceGroupOption } from "./use-bounce-group-option";
 import { AssignBounce } from "./unmatched-bounces";
-import { showFailure } from "@/core/ui/shared/toast";
+import { copyWithHud, showFailure } from "@/core/ui/shared/toast";
 import { itemLimit, limitGroups } from "@/core/ui/shared/progressive-list";
 import { useProgressiveList } from "@/core/ui/hooks/use-progressive-list";
 
@@ -120,8 +109,7 @@ export function SearchBouncesView() {
   }, [isLoading, items]);
 
   const handleCopy = async (bounce: BounceListItem) => {
-    await Clipboard.copy({ file: bounce.path });
-    await showToast({ style: Toast.Style.Success, title: strings.bounceCopied, message: bounce.name });
+    await copyWithHud({ file: bounce.path }, strings.bounceCopied);
   };
 
   const sortedProjects = [...projects].sort((a, b) => a.title.localeCompare(b.title));

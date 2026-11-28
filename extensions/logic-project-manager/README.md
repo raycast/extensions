@@ -134,12 +134,12 @@ Manage Tags edits the three lists you tag with. Use the dropdown next to the sea
 
 ### Editing the lists
 
-- **Create** (⌘N) adds an option. **Edit** (⌘E) changes its name, aliases, and, for stages, its color. Renaming keeps the option on every project and track that uses it. Two options in the same list can't share a name.
+- **New Stage**, **New Genre**, or **New Role** (⌘N) adds a tag. **Edit Stage**, **Edit Genre**, or **Edit Role** (⌘E) changes its name, aliases, and, for stages, its color. Renaming keeps the tag on every project and track that uses it. Two tags in the same list can't share a name.
 - **Aliases** are other names to search by, separated by commas (e.g. `dnb` for Drum & Bass). See [Combined search](https://github.com/iyekChen/logic-project-manager/blob/main/README.md#combined-search).
 - Reorder with Move Up (⌘⌥↑) and Move Down (⌘⌥↓), or Move to Top (⌘⇧↑) and Move to Bottom (⌘⇧↓). The same order is used everywhere you pick a tag.
-- **Delete** (⌃X) asks first, telling you how many projects or tracks use the option, and then removes it from all of them.
-- **Delete All** (⌃⇧X) asks first, telling you how many options it removes and how many projects or tracks use them, and then empties the list you're viewing and removes those options from all of them. It only appears when the list has at least one option.
-- **Reset to Defaults** restores the default list for the list you're viewing. Your custom names, colors, aliases, and order are lost, and projects or tracks using an option that's no longer in the list lose it.
+- **Delete** (⌃X) asks first, telling you how many projects or tracks use the tag, and then removes it from all of them.
+- **Delete All** (⌃⇧X) asks first, telling you how many tags it removes and how many projects or tracks use them, and then empties the list you're viewing and removes those tags from all of them. It only appears when the list has at least one tag.
+- **Reset to Defaults** restores the default list for the list you're viewing. Your custom names, colors, aliases, and order are lost, and projects or tracks using a tag that's no longer in the list lose it.
 
 ### Tagging projects
 
@@ -229,7 +229,7 @@ A collection is a group of projects, such as an EP, an album, or a set of collab
 
 ### Building a collection
 
-1. In Search Projects, use Browse Collections (⌃↵), then Create.
+1. In Search Projects, use Browse Collections (⌃↵), then New Collection.
 2. Open the collection and use Add Projects… to pick its tracks. You can also add a project to collections from its Edit Info.
 3. New tracks wait in Unsorted. Press Enter to Set Track Number…, or use Add to Tracklist to give a track the next free number.
 
@@ -275,12 +275,12 @@ Each project can have a note and a lyrics file, saved as ordinary Markdown files
 
 - **Where they're saved:** `Notes.md` and `Lyrics.md` in the project folder by default (inside the `.logicx` for a project saved as a package). Set a Notes Folder or Lyrics Folder to keep them elsewhere, such as an Obsidian vault; see [File names](https://github.com/iyekChen/logic-project-manager/blob/main/README.md#file-names).
 - **Viewing:** in Search Projects' [Detail view](https://github.com/iyekChen/logic-project-manager/blob/main/README.md#overview-and-detail) (⌘⇧T), the side panel shows the note, and ⌘⌥⇧T switches it to the lyrics.
-- **Editing:** use Edit Note (⌘⌥N) and Edit Lyrics (⌘⌥L) to edit in Raycast, or Open Note (⌘⇧N) and Open Lyrics (⌘⇧L) to open the file in your Markdown app. These actions also work on tracks inside a collection.
+- **Editing:** use Edit Notes (⌘⌥N) and Edit Lyrics (⌘⌥L) to edit in Raycast, or Open Notes (⌘⇧N) and Open Lyrics (⌘⇧L) to open the file in your Markdown app. These actions also work on tracks inside a collection.
 - **Editing elsewhere:** changes made in other apps show up right away. If a file changes in another app while you're editing it in Raycast, you're asked before your save replaces those changes.
 
 ### Note templates
 
-To use a template, set Notes Template or Lyrics Template in Extension Preferences to a `.md` file. A template is applied when a note or lyrics file is created, or when the existing file is empty. This covers Open Note, Open Lyrics, and the first save in Edit Note or Edit Lyrics.
+To use a template, set Notes Template or Lyrics Template in Extension Preferences to a `.md` file. A template is applied when a note or lyrics file is created, or when the existing file is empty. This covers Open Notes, Open Lyrics, and the first save in Edit Notes or Edit Lyrics.
 
 | Placeholder | Becomes                      | Default format |
 | ----------- | ---------------------------- | -------------- |
@@ -346,7 +346,7 @@ The extension changes project files only when you ask:
 - switching the Active Alternative;
 - moving something to the Trash.
 
-Renaming a project or changing an Alternative asks you to close the project in Logic Pro first. Notes and lyrics are written only when you edit them, or when you use Open Note or Open Lyrics before the file exists. They're renamed or archived along with their project, as described in [Project tracking](https://github.com/iyekChen/logic-project-manager/blob/main/README.md#project-tracking).
+Renaming a project or changing an Alternative asks you to close the project in Logic Pro first. Notes and lyrics are written only when you edit them, or when you use Open Notes or Open Lyrics before the file exists. They're renamed or archived along with their project, as described in [Project tracking](https://github.com/iyekChen/logic-project-manager/blob/main/README.md#project-tracking).
 
 ### Storage
 

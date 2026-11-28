@@ -20,7 +20,7 @@ import {
   type Bounce,
 } from "@/core/projects/bounces";
 import type { Project } from "@/core/projects/types";
-import { showFailure } from "@/core/ui/shared/toast";
+import { copyWithHud, showFailure } from "@/core/ui/shared/toast";
 import { ShowInFinderAction } from "@/core/ui/actions/show-in-finder";
 import { projectIcon } from "@/daws/icons";
 import { strings } from "@/strings";
@@ -73,11 +73,11 @@ export function UnmatchedBounces({ projects, onChanged }: { projects: Project[];
                 <ShowInFinderAction path={bounce.path} />
               </ActionPanel.Section>
               <ActionPanel.Section title={strings.sectionCopy}>
-                <Action.CopyToClipboard
-                  content={bounce.path}
+                <Action
                   title={strings.copyBouncePath}
                   icon={Icon.CopyClipboard}
                   shortcut={Keyboard.Shortcut.Common.CopyPath}
+                  onAction={() => void copyWithHud(bounce.path, strings.bouncePathCopied)}
                 />
               </ActionPanel.Section>
             </ActionPanel>

@@ -223,7 +223,7 @@ export function EditInfo({
       try {
         fs.renameSync(project.folderPath, newPath);
       } catch (error) {
-        await showFailure(strings.renameFailed, error);
+        await showFailure(strings.renameProjectFailed, error);
         return;
       }
 
@@ -238,7 +238,7 @@ export function EditInfo({
         // 预检之后仍写入失败：文件夹已改名，不往回改。下次加载列表时，Finder 同步会按 inode 认出这次改名，
         // 把没迁完的数据和文档补齐（每一步都能重复执行）；同步成功前不会更新项目清单，所以每次加载都会重试。
         onSaved({ oldId: project.id, newId: trimmedName, folderPath: newPath });
-        await showFailure(strings.renameFailed, error);
+        await showFailure(strings.renameProjectFailed, error);
         return;
       }
       docRenameResult = renameDocFiles(project.title, trimmedName);

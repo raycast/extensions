@@ -107,7 +107,7 @@ export function DuplicateProject({
         await fs.promises.rm(target, { recursive: true, force: true }).catch(() => undefined);
       }
       toast.style = Toast.Style.Failure;
-      toast.title = code === "ERR_FS_CP_EEXIST" ? strings.nameExists : strings.duplicateFailed;
+      toast.title = code === "ERR_FS_CP_EEXIST" ? strings.nameExists : strings.duplicateProjectFailed;
       toast.message = error instanceof Error ? error.message : String(error);
       toast.primaryAction = copyErrorAction(toast.title, error);
       if (mounted.current) setIsDuplicating(false);

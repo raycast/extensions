@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { copyWithHud } from "@/core/ui/shared/toast";
 import { strings } from "@/strings";
 
 // bounce 行的复制分区：文件、文件名、完整路径。各界面共用。
@@ -11,17 +12,17 @@ export function CopyBounceSection({ name, path, onCopy }: { name: string; path: 
         shortcut={Keyboard.Shortcut.Common.Copy}
         onAction={onCopy}
       />
-      <Action.CopyToClipboard
-        content={name}
+      <Action
         title={strings.copyBounceName}
         icon={Icon.CopyClipboard}
         shortcut={Keyboard.Shortcut.Common.CopyName}
+        onAction={() => void copyWithHud(name, strings.bounceNameCopied)}
       />
-      <Action.CopyToClipboard
-        content={path}
+      <Action
         title={strings.copyBouncePath}
         icon={Icon.CopyClipboard}
         shortcut={Keyboard.Shortcut.Common.CopyPath}
+        onAction={() => void copyWithHud(path, strings.bouncePathCopied)}
       />
     </ActionPanel.Section>
   );
