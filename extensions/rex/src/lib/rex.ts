@@ -111,14 +111,50 @@ function describeError(error: unknown): string {
   return "Rex returned an unexpected error.";
 }
 
+// Every Rex CLI call funnels through runRex. A workspace can contain many
+// sessions and windows, and activity loading reads status and process info for
+// every block, so cap how many child processes run at once. Waiters are queued
+// FIFO instead of fanning out all at once.
+const MAX_CONCURRENT_CLI_PROCESSES = 4;
+
+let activeCliProcesses = 0;
+const pendingCliStarts: Array<() => void> = [];
+
+function acquireCliSlot(): Promise<void> {
+  if (activeCliProcesses < MAX_CONCURRENT_CLI_PROCESSES) {
+    activeCliProcesses += 1;
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    pendingCliStarts.push(resolve);
+  });
+}
+
+function releaseCliSlot(): void {
+  const nextStart = pendingCliStarts.shift();
+
+  // Hand the slot straight to the next waiter so the active count is unchanged.
+  if (nextStart) {
+    nextStart();
+    return;
+  }
+
+  activeCliProcesses -= 1;
+}
+
 async function runRex(args: string[]): Promise<string> {
   const cli = resolveCli();
+
+  await acquireCliSlot();
 
   try {
     const { stdout } = await execFileAsync(cli, args, { maxBuffer: 10 * 1024 * 1024 });
     return stdout;
   } catch (error) {
     throw new Error(describeError(error));
+  } finally {
+    releaseCliSlot();
   }
 }
 

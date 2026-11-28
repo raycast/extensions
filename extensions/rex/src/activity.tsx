@@ -325,6 +325,10 @@ export default function Activity() {
   const hosts = hostsData ?? [];
   const onlineIds = new Set(onlineData ?? []);
 
+  const refreshActivity = async () => {
+    await Promise.allSettled([revalidate(), ...(scope === "online" ? [revalidateOnline()] : [])]);
+  };
+
   useEffect(() => {
     if (hostsError) {
       showFailureToast(hostsError, { title: "Could Not Load Servers" });
@@ -496,7 +500,7 @@ export default function Activity() {
           description={error.message}
           actions={
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={refreshActivity} />
             </ActionPanel>
           }
         />
@@ -507,7 +511,7 @@ export default function Activity() {
           description="Programs running in Rex terminal blocks will show up here."
           actions={
             <ActionPanel>
-              <Action title="Refresh Activity" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Refresh Activity" icon={Icon.ArrowClockwise} onAction={refreshActivity} />
               {viewActions}
             </ActionPanel>
           }
@@ -534,7 +538,7 @@ export default function Activity() {
               {allServersOff && (
                 <Action title="Show All Servers" icon={Icon.Layers} onAction={() => setDisabledHostIds(new Set())} />
               )}
-              <Action title="Refresh Activity" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Refresh Activity" icon={Icon.ArrowClockwise} onAction={refreshActivity} />
               {viewActions}
             </ActionPanel>
           }
@@ -570,7 +574,7 @@ export default function Activity() {
                         title="Refresh Activity"
                         icon={Icon.ArrowClockwise}
                         shortcut={Keyboard.Shortcut.Common.Refresh}
-                        onAction={revalidate}
+                        onAction={refreshActivity}
                       />
                       <Action.CopyToClipboard title="Copy Block ID" content={activity.block_id} />
                       {text(activity.host_id) && (
