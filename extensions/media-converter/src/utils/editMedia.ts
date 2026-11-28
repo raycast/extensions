@@ -40,7 +40,12 @@ export type EditOptions = {
 
 export async function editMedia(inputPath: string, request: EditRequest, options: EditOptions = {}): Promise<string> {
   const startedAt = Date.now();
-  const inputBytes = fs.existsSync(inputPath) ? fs.statSync(inputPath).size : 0;
+  let inputBytes = 0;
+  try {
+    inputBytes = fs.statSync(inputPath).size;
+  } catch {
+    inputBytes = 0;
+  }
   const ffmpeg = await findFFmpegPath();
   if (!ffmpeg) throw new Error("FFmpeg is not installed or configured.");
   const inspection = await inspectMedia(inputPath);

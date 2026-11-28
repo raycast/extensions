@@ -35,8 +35,13 @@ export default function Command() {
       await patchQueueJob(job.id, { status: "running", progress: 0, error: undefined, output: undefined });
       await reload();
       const startedAt = Date.now();
-      const inputBytes = fs.existsSync(job.input) ? fs.statSync(job.input).size : 0;
       try {
+        let inputBytes = 0;
+        try {
+          inputBytes = fs.statSync(job.input).size;
+        } catch {
+          inputBytes = 0;
+        }
         const quality = job.targetSizeMb
           ? (await resolveTargetSizeQuality(job.input, job.outputFormat, job.quality, job.targetSizeMb, job.trim))
               .quality
