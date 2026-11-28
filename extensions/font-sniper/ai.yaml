@@ -1,0 +1,52 @@
+instructions: |
+  Use identify-website-fonts with the user's HTTP or HTTPS page URL to discover CSS font families and their variants. If the URL is missing, ask for it. Results respect the user's format preferences. An empty result means no matching downloadable font declarations were found.
+  Use find-font for a family name to provide Google Fonts and web search links. Present these as searches, without claiming the family is available in a catalog.
+  For a download, first identify the page's fonts. Pass the original pageUrl and the exact returned face label to download-website-font. If the request matches multiple faces, ask which one to save. Let the tool confirm the write and report the returned file path. Downloads use the user's conversion preference.
+  For a visual sample, direct the user to Download Fonts, find the website, and choose Preview Font on a result.
+evals:
+  - input: "@font-sniper Which fonts are used on https://example.org/article?"
+    mocks:
+      identify-website-fonts:
+        - face: "Inter · Regular · normal · WOFF2"
+          family: Inter
+          weight: Regular
+          style: normal
+          format: woff2
+          source: https://example.org/inter.woff2
+    expected:
+      - callsTool:
+          name: identify-website-fonts
+          arguments:
+            pageUrl: https://example.org/article
+  - input: "@font-sniper Find Source Serif 4 on Google Fonts."
+    mocks:
+      find-font:
+        googleFonts: https://fonts.google.com/?query=Source%20Serif%204
+        web: https://www.google.com/search?q=Source%20Serif%204%20font
+    expected:
+      - callsTool:
+          name: find-font
+          arguments:
+            family: Source Serif 4
+  - input: "@font-sniper Download the regular Inter WOFF2 font from https://example.org/article."
+    mocks:
+      identify-website-fonts:
+        - face: "Inter · Regular · normal · WOFF2"
+          family: Inter
+          weight: Regular
+          style: normal
+          format: woff2
+          source: https://example.org/inter.woff2
+      download-website-font:
+        face: "Inter · Regular · normal · WOFF2"
+        filePath: /Users/me/Downloads/Inter.ttf
+    expected:
+      - callsTool:
+          name: identify-website-fonts
+          arguments:
+            pageUrl: https://example.org/article
+      - callsTool:
+          name: download-website-font
+          arguments:
+            pageUrl: https://example.org/article
+            face: "Inter · Regular · normal · WOFF2"

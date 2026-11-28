@@ -1,5 +1,11 @@
 # Font Sniper Changelog
 
+## [Font Previews, Search, and Raycast AI] - {PR_MERGE_DATE}
+
+- Preview a website font before downloading it and inspect its family, style, and glyph count.
+- Copy font names and source URLs, or look up a family on Google Fonts and the web.
+- Use Raycast AI to identify fonts on a page, find a family by name, and download a specific face.
+
 ## [Modernize + Windows Compatible Shortcut] - 2026-01-22
 
 - Added Windows compatible shortcut for "Select All" / "Deselect All"
