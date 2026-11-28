@@ -1557,13 +1557,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "getmattered",
     title: "GetMattered",
     description:
-      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: GetMattered rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system. Works with 34 hiring systems, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: GetMattered rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system. Works with 30+ hiring systems, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted Streamable HTTP server with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste.",
     icon: "https://getmattered.com/apple-touch-icon.png",
     homepage: "https://getmattered.com/mcps?source=raycast-mcp-registry",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.getmattered.com/mcp"],
     },
+    remoteUrl: "https://mcp.getmattered.com/mcp",
   },
   {
     name: "airbridge",

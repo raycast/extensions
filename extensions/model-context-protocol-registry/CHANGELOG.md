@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update GetMattered Entry] - 2026-11-28
+
+- Update GetMattered in the official registry: add its remote URL (https://mcp.getmattered.com/mcp) so Raycast connects directly over HTTP, with `mcp-remote` kept as the fallback for other clients. The hiring-system count now reads 30+.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
