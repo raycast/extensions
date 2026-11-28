@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "next-term",
+  "title": "Next Term",
+  "description": "Search Next Term tabs and projects, start coding agents, and see waiting agents in the menu bar, with Next Term 0.11.80 or later.",
+  "icon": "icon.png",
+  "author": "mishuk_adhikari",
+  "categories": ["Developer Tools", "Productivity"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Next Term",
+      "description": "Every Next Term tab by name, project and what runs in it; Return brings it forward.",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Next Term",
+      "description": "Open and recent Next Term projects; type part of a name and Return opens it.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Project",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "start-agent",
+      "title": "Start Agent",
+      "subtitle": "Next Term",
+      "description": "Start Claude Code, Codex, OpenCode, Gemini CLI or Command Code in a project, in a new tab.",
+      "mode": "view"
+    },
+    {
+      "name": "waiting-agents",
+      "title": "Agents Waiting",
+      "subtitle": "Next Term",
+      "description": "In the menu bar: how many agents wait for your decision; click one to answer it.",
+      "mode": "menu-bar",
+      "interval": "30s"
+    },
+    {
+      "name": "go-to-waiting-agent",
+      "title": "Go to Waiting Agent",
+      "subtitle": "Next Term",
+      "description": "Brings forward the tab whose agent waits for you.",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-anything",
+      "title": "Go to Anything",
+      "subtitle": "Next Term",
+      "description": "Opens Next Term's Go to Anything over the window in front.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "nxtrm",
+      "title": "nxtrm Path",
+      "description": "Next Term's command line tool, nxtrm. Leave empty to use the one inside Next Term.app.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
