@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { TASK_HISTORY_URL, TaskResult } from "./components/task-result";
 import { taskResults } from "./lib/outputs";
@@ -103,7 +103,17 @@ export default function TaskHistory() {
       searchBarPlaceholder="Filter recent tasks"
     >
       {!isLoading && tasks.length === 0 && loadError && (
-        <List.EmptyView icon={Icon.Warning} title="Could not load your tasks" description={loadError.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load your tasks"
+          description={loadError.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
       )}
       {!isLoading && tasks.length === 0 && !loadError && (
         <List.EmptyView

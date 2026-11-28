@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Job } from "../lib/catalog";
 import {
   fieldParams,
-  fileMatchesKind,
+  fileSlotError,
   fileSlots,
   hiddenDefaults,
   inputFit,
@@ -12,6 +12,7 @@ import {
   isLiveModel,
   modelFields,
   primarySlot,
+  promptError,
   promptParameter,
   validateField,
   type FileSlot,
@@ -157,15 +158,18 @@ export function ModelForm({
   const [chosenSlug, setChosenSlug] = useState<string | undefined>(initialModel?.trim().toLowerCase());
   const [modelSearch, setModelSearch] = useState("");
 
-  const [prompt, setPrompt] = useState("");
-  const [files, setFiles] = useState<Record<string, string[]>>({});
   const [initialFiles, setInitialFiles] = useState<string[]>([]);
   const [initialFilesLoaded, setInitialFilesLoaded] = useState(!loadInitialFiles);
-  const [values, setValues] = useState<Record<string, string | boolean>>({});
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
+
+  // The prompt is "prompt"; files and settings are kept per model (`<slug>::<parameter id>`), so
+  // switching models and back keeps what was entered. A setting nobody touched has no value here
+  // and shows its default. `validation` is set below, once the model's fields are known.
+  const validation: Record<string, (value: unknown) => string | undefined> = {};
+  const { handleSubmit, itemProps, values, setValue } = useForm<Form.Values>({ onSubmit: run, validation });
+  const prompt = typeof values.prompt === "string" ? values.prompt : "";
 
   useEffect(() => {
     loadInitialFiles?.()
@@ -173,7 +177,7 @@ export function ModelForm({
       .catch(() => undefined) // No selection: the picker starts empty.
       .finally(() => setInitialFilesLoaded(true));
     loadInitialPrompt?.()
-      .then((text) => text?.trim() && setPrompt((current) => current || text.trim()))
+      .then((text) => text?.trim() && setValue("prompt", (current: unknown) => current || text.trim()))
       .catch(() => undefined); // No selected text: the prompt starts empty.
   }, []);
 
@@ -220,8 +224,8 @@ export function ModelForm({
     allFields.some((field) => field.advanced) || otherSlots.some((slot) => !slot.param.required && !anyModel);
 
   const key = (id: string) => `${slug}::${id}`;
-  const valueOf = (field: ModelField) => values[key(field.id)] ?? field.defaultValue;
-  const filesOf = (slot: FileSlot) => files[key(slot.param.id)] ?? (slot === primary ? initialFiles : []);
+  const valueOf = (field: ModelField): string | boolean => values[key(field.id)] ?? field.defaultValue;
+  const filesOf = (slot: FileSlot): string[] => values[key(slot.param.id)] ?? (slot === primary ? initialFiles : []);
   const fieldValues = Object.fromEntries(sentFields.map((field) => [field.id, valueOf(field)]));
   const sentFileSlots = [primary, ...otherSlots].filter((slot): slot is FileSlot =>
     Boolean(slot && filesOf(slot).length),
@@ -237,6 +241,19 @@ export function ModelForm({
   for (const slot of sentFileSlots) runParams[slot.param.id] = filesOf(slot);
   const price = model ? priceLine(quote(model, runParams, { promptChars: prompt.trim().length })) : undefined;
 
+  // Each check takes the item's new value when the form passes one, else the value it shows.
+  if (showPrompt)
+    validation.prompt = (value) =>
+      promptError(promptRequired, typeof value === "string" ? value : prompt, job.promptTitle);
+  for (const slot of [primary, ...shownSlots]) {
+    if (!slot) continue;
+    validation[key(slot.param.id)] = (value) =>
+      fileSlotError(slot, Array.isArray(value) ? value : filesOf(slot), slot === primary);
+  }
+  for (const field of sentFields) {
+    validation[key(field.id)] = (value) => validateField(field, value === undefined ? valueOf(field) : value);
+  }
+
   function chooseModel(next: string) {
     if (!next || next === picked) return;
     setChosenSlug(next);
@@ -250,10 +267,6 @@ export function ModelForm({
     setChosenSlug(undefined);
   }
 
-  function clearError(id: string) {
-    if (errors[id]) setErrors((previous) => ({ ...previous, [id]: undefined }));
-  }
-
   async function submit() {
     if (submittingRef.current) return;
     if (!slug || !model) {
@@ -265,34 +278,20 @@ export function ModelForm({
       );
       return;
     }
-    const nextErrors: Record<string, string | undefined> = {};
     if (job.input && !primary) {
       await showFailureToast(new Error(`${slug} cannot take this ${job.input}. Pick another model.`), {
         title: `No ${job.input} input`,
       });
       return;
     }
-    if (promptRequired && !prompt.trim())
-      nextErrors.prompt = job.promptTitle ? `Write the ${job.promptTitle.toLowerCase()}` : "Write a prompt";
-    for (const slot of [primary, ...shownSlots]) {
-      if (!slot) continue;
-      const chosen = filesOf(slot);
-      if (chosen.length === 0 && (slot.param.required || slot === primary))
-        nextErrors[key(slot.param.id)] = "Choose a file";
-      else if (chosen.some((path) => !fileMatchesKind(path, slot.kind))) {
-        nextErrors[key(slot.param.id)] = `Choose ${slot.kind === "audio" ? "an audio" : `a ${slot.kind}`} file`;
-      }
-    }
-    for (const field of sentFields) {
-      const error = validateField(field, valueOf(field));
-      if (error) {
-        nextErrors[key(field.id)] = error;
-        if (field.advanced) setShowAdvanced(true);
-      }
-    }
-    setErrors(nextErrors);
-    if (Object.values(nextErrors).some(Boolean)) return;
+    // A hidden advanced setting that fails its check is shown, so its error can be seen.
+    if (sentFields.some((field) => field.advanced && validateField(field, valueOf(field)))) setShowAdvanced(true);
+    // The entered values, not the form's: an untouched setting must not count as entered.
+    await handleSubmit(values);
+  }
 
+  async function run() {
+    if (submittingRef.current || !slug || !model) return;
     const params: Record<string, unknown> = {
       ...hiddenDefaults(model, sentIds),
       ...fieldParams(sentFields, fieldValues),
@@ -306,10 +305,16 @@ export function ModelForm({
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Starting task" });
     try {
-      const run = await runModel(slug, params, credentials(), uploads);
+      const started = await runModel(slug, params, credentials(), uploads);
       await toast.hide();
       push(
-        <TaskResult slug={slug} taskId={run.taskid} taskToken={run.tasktoken} noun={job.noun} prompt={prompt.trim()} />,
+        <TaskResult
+          slug={slug}
+          taskId={started.taskid}
+          taskToken={started.tasktoken}
+          noun={job.noun}
+          prompt={prompt.trim()}
+        />,
       );
     } catch (error) {
       await toast.hide();
@@ -325,37 +330,21 @@ export function ModelForm({
     return (
       <Form.FilePicker
         key={id}
-        id={id}
+        {...itemProps[id]}
         title={title}
         info={slot.param.description?.trim() || slot.param.note?.trim() || undefined}
         allowMultipleSelection={slot.multiple}
         canChooseDirectories={false}
         value={filesOf(slot)}
-        error={errors[id]}
-        onChange={(paths) => {
-          setFiles((previous) => ({ ...previous, [id]: paths }));
-          clearError(id);
-        }}
       />
     );
   }
 
   function renderField(field: ModelField) {
     const id = key(field.id);
-    const onChange = (value: string | boolean) => {
-      setValues((previous) => ({ ...previous, [id]: value }));
-      clearError(id);
-    };
     if (field.kind === "dropdown") {
       return (
-        <Form.Dropdown
-          key={id}
-          id={id}
-          title={field.title}
-          info={field.info}
-          value={String(valueOf(field))}
-          onChange={onChange}
-        >
+        <Form.Dropdown key={id} {...itemProps[id]} title={field.title} info={field.info} value={String(valueOf(field))}>
           {field.options.map((option) => (
             <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
           ))}
@@ -366,11 +355,10 @@ export function ModelForm({
       return (
         <Form.Checkbox
           key={id}
-          id={id}
+          {...itemProps[id]}
           label={field.title}
           info={field.info}
           value={valueOf(field) === true}
-          onChange={onChange}
         />
       );
     }
@@ -378,13 +366,11 @@ export function ModelForm({
     return (
       <TextInput
         key={id}
-        id={id}
+        {...itemProps[id]}
         title={field.title}
         info={field.info}
         placeholder={field.placeholder}
-        error={errors[id]}
         value={String(valueOf(field))}
-        onChange={onChange}
       />
     );
   }
@@ -441,15 +427,10 @@ export function ModelForm({
       {primary && initialFilesLoaded && filePicker(primary, KIND_TITLES[job.input ?? primary.kind])}
       {showPrompt && (
         <Form.TextArea
-          id="prompt"
+          {...itemProps.prompt}
           title={job.promptTitle ?? "Prompt"}
           placeholder={job.promptPlaceholder ?? promptParam?.placeholder ?? "Describe what you want"}
           value={prompt}
-          error={errors.prompt}
-          onChange={(text) => {
-            setPrompt(text);
-            clearError("prompt");
-          }}
         />
       )}
       {shownSlots.map((slot) => filePicker(slot, slot.param.label?.trim() || KIND_TITLES[slot.kind]))}

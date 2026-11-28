@@ -1,13 +1,12 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
-import { fileMatchesKind } from "../lib/params";
 import { credentials } from "../lib/preferences";
 import { getWorkflow, runWorkflow, uploadFile } from "../lib/wiro";
 import {
   parseWorkflow,
-  workflowFieldIsEmpty,
   workflowFieldValue,
+  workflowItemError,
   workflowRunInput,
   type WorkflowInput,
   type WorkflowValue,
@@ -25,39 +24,36 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
   } = usePromise(async (slug: string) => parseWorkflow(await getWorkflow(slug, credentials())), [fullSlug], {
     failureToastOptions: { title: "Could not load the workflow" },
   });
-  const [values, setValues] = useState<Record<string, WorkflowValue>>({});
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
 
-  const valueOf = (input: WorkflowInput) => workflowFieldValue(input, values);
+  // The form holds only what the user entered: an untouched input keeps the workflow's saved
+  // value (workflowItemError tells an entered value from the one an untouched input shows).
+  const {
+    handleSubmit,
+    itemProps,
+    values: formValues,
+  } = useForm<Form.Values>({
+    onSubmit: run,
+    validation: Object.fromEntries(
+      (workflow?.inputs ?? []).map((input) => [
+        input.key,
+        (value: WorkflowValue | undefined) => workflowItemError(input, values, value),
+      ]),
+    ),
+  });
+  const values = formValues as Record<string, WorkflowValue>;
 
-  function setValue(key: string, value: WorkflowValue) {
-    setValues((previous) => ({ ...previous, [key]: value }));
-    if (errors[key]) setErrors((previous) => ({ ...previous, [key]: undefined }));
-  }
+  const valueOf = (input: WorkflowInput) => workflowFieldValue(input, values);
 
   async function submit() {
     if (submittingRef.current || !workflow) return;
-    const nextErrors: Record<string, string | undefined> = {};
-    for (const input of workflow.inputs) {
-      const value = valueOf(input);
-      if (input.kind === "file") {
-        const paths = value as string[];
-        if (input.required && workflowFieldIsEmpty(input, values)) nextErrors[input.key] = "Choose a file";
-        else if (paths.some((path) => !fileMatchesKind(path, input.fileKind ?? "file"))) {
-          nextErrors[input.key] =
-            `Choose ${input.fileKind === "audio" ? "an audio" : `a ${input.fileKind ?? "file"}`} file`;
-        }
-      } else if (input.kind === "number" && String(value).trim() && !Number.isFinite(Number(value))) {
-        nextErrors[input.key] = "Enter a number";
-      } else if (input.required && workflowFieldIsEmpty(input, values)) {
-        nextErrors[input.key] = "Required";
-      }
-    }
-    setErrors(nextErrors);
-    if (Object.values(nextErrors).some(Boolean)) return;
+    // The entered values, not the form's: an untouched input must not count as entered.
+    await handleSubmit(values);
+  }
 
+  async function run() {
+    if (submittingRef.current || !workflow) return;
     submittingRef.current = true;
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Starting the workflow" });
@@ -85,7 +81,7 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
   }
 
   function renderInput(input: WorkflowInput) {
-    const common = { id: input.key, title: input.label, info: input.description, error: errors[input.key] };
+    const common = { ...itemProps[input.key], title: input.label, info: input.description };
     const value = valueOf(input);
     switch (input.kind) {
       case "file":
@@ -96,19 +92,11 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
             allowMultipleSelection={false}
             canChooseDirectories={false}
             value={value as string[]}
-            onChange={(paths) => setValue(input.key, paths)}
           />
         );
       case "select":
         return (
-          <Form.Dropdown
-            key={input.key}
-            id={input.key}
-            title={input.label}
-            info={input.description}
-            value={String(value)}
-            onChange={(next) => setValue(input.key, next)}
-          >
+          <Form.Dropdown key={input.key} {...common} value={String(value)}>
             {input.options.map((option) => (
               <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
             ))}
@@ -118,23 +106,14 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
         return (
           <Form.Checkbox
             key={input.key}
-            id={input.key}
+            {...itemProps[input.key]}
             label={input.label}
             info={input.description}
             value={value === true}
-            onChange={(next) => setValue(input.key, next)}
           />
         );
       case "longtext":
-        return (
-          <Form.TextArea
-            key={input.key}
-            {...common}
-            placeholder={input.label}
-            value={String(value)}
-            onChange={(next) => setValue(input.key, next)}
-          />
-        );
+        return <Form.TextArea key={input.key} {...common} placeholder={input.label} value={String(value)} />;
       default:
         return (
           <Form.TextField
@@ -144,7 +123,6 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
               input.kind === "number" && input.initialValue ? `Empty uses ${input.initialValue}` : input.label
             }
             value={String(value)}
-            onChange={(next) => setValue(input.key, next)}
           />
         );
     }

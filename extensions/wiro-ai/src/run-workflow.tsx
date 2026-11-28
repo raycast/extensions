@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { WorkflowForm } from "./components/workflow-form";
@@ -11,7 +11,7 @@ const WORKFLOWS_URL = "https://wiro.ai/panel/workflows";
 
 export default function RunWorkflow() {
   const [search, setSearch] = useState("");
-  const { data, isLoading, error, pagination } = useCachedPromise(
+  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
     (text: string) =>
       async ({ page }: { page: number }) => {
         const { workflows, total } = await listWorkflows(credentials(), {
@@ -38,7 +38,17 @@ export default function RunWorkflow() {
       pagination={pagination}
     >
       {!isLoading && workflows.length === 0 && loadError && (
-        <List.EmptyView icon={Icon.Warning} title="Could not load your workflows" description={loadError.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load your workflows"
+          description={loadError.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
       )}
       {!isLoading && workflows.length === 0 && !loadError && (
         <List.EmptyView

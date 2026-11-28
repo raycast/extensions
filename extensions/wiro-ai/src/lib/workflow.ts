@@ -1,4 +1,5 @@
 import { kindOf, type ResultItem } from "./outputs";
+import { chooseFileMessage, fileMatchesKind } from "./params";
 import { SITE_URL } from "./wiro";
 
 // Workflows: their inputs (from Workflow/Detail) and what a finished run
@@ -160,6 +161,44 @@ export function workflowFieldIsEmpty(input: WorkflowInput, values: Record<string
   if (String(value ?? "").trim()) return false;
   if (input.kind === "number") return !input.hasSavedValue;
   return input.key in values || !input.hasSavedValue;
+}
+
+/**
+ * Checks one workflow input; returns an error message or undefined. A file must be of the input's
+ * kind, a number must be a number, and a required input must reach the run with a value.
+ */
+export function workflowInputError(input: WorkflowInput, values: Record<string, WorkflowValue>): string | undefined {
+  if (input.kind === "file") {
+    if (input.required && workflowFieldIsEmpty(input, values)) return "Choose a file";
+    const paths = workflowFieldValue(input, values) as string[];
+    const kind = input.fileKind ?? "file";
+    return paths.some((path) => !fileMatchesKind(path, kind)) ? chooseFileMessage(kind) : undefined;
+  }
+  const value = workflowFieldValue(input, values);
+  if (input.kind === "number" && String(value).trim() && !Number.isFinite(Number(value))) return "Enter a number";
+  if (input.required && workflowFieldIsEmpty(input, values)) return "Required";
+  return undefined;
+}
+
+function sameValue(a: WorkflowValue, b: WorkflowValue): boolean {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((item, i) => item === b[i]);
+  }
+  return String(a) === String(b);
+}
+
+/**
+ * The form's check for one input. `value` is the item's value from the form (on change or blur),
+ * or undefined at submit. A value that only repeats what an untouched input shows is not counted
+ * as entered, so leaving an empty field that has a saved value is no error.
+ */
+export function workflowItemError(
+  input: WorkflowInput,
+  values: Record<string, WorkflowValue>,
+  value?: WorkflowValue,
+): string | undefined {
+  const entered = value !== undefined && (input.key in values || !sameValue(value, workflowFieldValue(input, values)));
+  return workflowInputError(input, entered ? { ...values, [input.key]: value } : values);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { AgentChat } from "./components/agent-chat";
 import { toAgentSummary, type AgentSummary } from "./lib/agent";
@@ -26,7 +26,17 @@ export default function MessageAgent() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter your agents">
       {!isLoading && agents.length === 0 && error && (
-        <List.EmptyView icon={Icon.Warning} title="Could not load your agents" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load your agents"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
       )}
       {!isLoading && agents.length === 0 && !error && (
         <List.EmptyView

@@ -365,3 +365,24 @@ export function fileMatchesKind(path: string, kind: MediaKind): boolean {
   if (kind === "file") return true;
   return MEDIA_EXTENSIONS[kind].test(path);
 }
+
+/** "Choose an image file", "Choose a video file" and so on. */
+export function chooseFileMessage(kind: MediaKind): string {
+  if (kind === "file") return "Choose a file";
+  return `Choose ${kind === "image" || kind === "audio" ? "an" : "a"} ${kind} file`;
+}
+
+/**
+ * Checks the files picked for one slot; returns an error message or undefined. The primary slot
+ * (the job's own input) and required slots need a file; every file must be of the slot's kind.
+ */
+export function fileSlotError(slot: FileSlot, paths: string[], primary: boolean): string | undefined {
+  if (paths.length === 0) return slot.param.required || primary ? "Choose a file" : undefined;
+  return paths.some((path) => !fileMatchesKind(path, slot.kind)) ? chooseFileMessage(slot.kind) : undefined;
+}
+
+/** Checks the prompt; returns an error message or undefined. */
+export function promptError(required: boolean, text: string, promptTitle?: string): string | undefined {
+  if (!required || text.trim()) return undefined;
+  return promptTitle ? `Write the ${promptTitle.toLowerCase()}` : "Write a prompt";
+}
