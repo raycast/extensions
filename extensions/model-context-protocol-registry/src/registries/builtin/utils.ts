@@ -2,6 +2,11 @@ import { Color, environment, Icon, List, open } from "@raycast/api";
 import { RegistryEntry } from "./types";
 import { URL } from "url";
 
+export function matchesRegistrySearch(entry: RegistryEntry, searchText = "") {
+  const query = searchText.trim().toLowerCase();
+  return entry.title.toLowerCase().includes(query) || (entry.description?.toLowerCase().includes(query) ?? false);
+}
+
 function getEnvironmentIcon(entry: RegistryEntry): List.Item.Accessory | undefined {
   if (entry.remoteUrl) return undefined;
 

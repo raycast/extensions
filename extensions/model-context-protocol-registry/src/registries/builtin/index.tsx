@@ -3,7 +3,7 @@ import { ToggleDetailsAction } from "../../shared/actions";
 import { SUPPORTED_CLIENTS } from "../../shared/mcp";
 import { RegistryProps } from "../types";
 import { COMMUNITY_ENTRIES, OFFICIAL_ENTRIES } from "./entries";
-import { getAccessories } from "./utils";
+import { getAccessories, matchesRegistrySearch } from "./utils";
 import { getRaycastServer, getSetupMarkdown } from "./configuration";
 import { InstallServerToClientAction } from "./actions";
 import { RegistryEntry } from "./types";
@@ -29,7 +29,7 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
   return (
     <>
       {props.entries
-        .filter((entry) => entry.title.toLowerCase().includes(props.searchText?.toLowerCase() ?? ""))
+        .filter((entry) => matchesRegistrySearch(entry, props.searchText))
         .sort((a, b) => a.title.localeCompare(b.title))
         .map((entry) => (
           <List.Item
