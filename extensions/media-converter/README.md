@@ -8,7 +8,8 @@
 - Convert videos, images, and audio files with a simple interface
 - Support for all popular media formats
 - **Video → Animated GIF** with quality palette generation
-- **Trim** videos and audio via Start / End fields
+- **Trim** videos and audio via Start / End fields in Convert Media, or use lossless **Trim** (`-c copy`, with optional in-place replacement via Trash / Recycle Bin) in **Edit Media**
+- **Replace original file** — optional checkbox in Convert Media, Manage Presets, and Edit Media → Trim to move the original to Trash / Recycle Bin once processing succeeds
 - **Video codec selection** for `.mp4` and `.mkv` (`H.264`, `H.265 / HEVC`, `AV1` via `libsvtav1`/`libaom-av1`, and hardware-detected NVIDIA NVENC)
 - **Strip metadata** (EXIF, GPS, tags) for privacy — per-run toggle or a default preference
 - **Custom output folder** — save converted files anywhere (per-run or as a preference)
@@ -73,6 +74,7 @@ Raycast extensions cannot run as permanent background daemons. If Raycast or the
 
 Open **Edit Media**, choose one file, and select an operation:
 
+- Trim a video or audio file losslessly (`-c copy`), optionally replacing the original file in place
 - Resize and/or crop an image or video
 - Change audio or video playback speed from 0.25× to 40×. For video, optionally choose 24, 30, or 60 fps and remove audio in the same edit
 - Change video frame rate to 24, 30, or 60 fps, keeping audio unless removal is selected

@@ -80,6 +80,7 @@ function PresetItem({ preset, onChange }: { preset: Preset; onChange: () => Prom
     { tag: { value: preset.outputFormat, color: Color.Blue } },
     { text: preset.mediaType },
   ];
+  if (preset.replaceOriginal) accessories.push({ icon: Icon.Trash, tooltip: "Replaces original file" });
   if (preset.stripMetadata) accessories.push({ icon: Icon.EyeDisabled, tooltip: "Strips metadata" });
   if (preset.trim) accessories.push({ icon: Icon.FilmStrip, tooltip: "Includes trim settings" });
 
@@ -169,11 +170,13 @@ function describePreset(p: Preset): string {
   else if (typeof q === "string") parts.push(q);
   else if (q && typeof q === "object") {
     const obj = q as Record<string, unknown>;
+    if (obj.codec) parts.push(String(obj.codec));
     if (obj.bitrate) parts.push(`${obj.bitrate}kbps`);
-    if (obj.crf !== undefined) parts.push(`CRF ${obj.crf}`);
+    if (obj.crf !== undefined) parts.push(`Q${obj.crf}`);
     if (obj.variant) parts.push(`ProRes ${obj.variant}`);
     if (obj.fps) parts.push(`${obj.fps}fps`);
   }
+  if (p.replaceOriginal) parts.push("replace original");
   if (p.stripMetadata) parts.push("strip metadata");
   return parts.join(" · ");
 }

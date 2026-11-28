@@ -43,6 +43,7 @@ export default function Command() {
         const output = await convertMedia(job.input, job.outputFormat, quality, {
           outputDir: job.outputDir,
           stripMetadata: job.stripMetadata,
+          replaceOriginal: job.replaceOriginal,
           trim: job.trim,
           signal: controller.signal,
           onProgress: (progress) => {

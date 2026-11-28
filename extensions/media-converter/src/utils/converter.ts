@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, trash } from "@raycast/api";
 import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "./ffmpeg";
 import {
   buildAvifArgs,
@@ -60,6 +60,63 @@ export function preserveFileTimestamps(sourcePath: string, targetPath: string): 
   }
 }
 
+/**
+ * Replace `targetPath` with `tempPath`, moving the original to the OS Trash / Recycle Bin first
+ * when supported, and falling back to an atomic backup-and-swap on volumes without Trash support.
+ */
+export async function replaceFileSafely(tempPath: string, targetPath: string): Promise<void> {
+  try {
+    await trash(targetPath);
+    if (!fs.existsSync(targetPath)) {
+      fs.renameSync(tempPath, targetPath);
+      return;
+    }
+  } catch {
+    // Volumes without Trash / Recycle Bin support (e.g. some network shares) fall back below.
+  }
+
+  try {
+    fs.renameSync(tempPath, targetPath);
+    return;
+  } catch {
+    // On Windows, renaming onto an existing path can fail; fall back to backup swap.
+  }
+  const backupPath = `${targetPath}.bak-${Date.now()}`;
+  fs.renameSync(targetPath, backupPath);
+  try {
+    fs.renameSync(tempPath, targetPath);
+    fs.unlinkSync(backupPath);
+  } catch (error) {
+    try {
+      if (!fs.existsSync(targetPath) && fs.existsSync(backupPath)) {
+        fs.renameSync(backupPath, targetPath);
+      }
+    } catch {
+      /* ignore restore error */
+    }
+    throw error;
+  }
+}
+
+/** Move `targetPath` to the OS Trash / Recycle Bin, falling back to unlink when Trash is unavailable. */
+export async function trashFileSafely(targetPath: string): Promise<void> {
+  try {
+    await trash(targetPath);
+    if (!fs.existsSync(targetPath)) return;
+  } catch {
+    // Volumes without Trash / Recycle Bin support fall back to unlinking.
+  }
+  if (fs.existsSync(targetPath)) {
+    fs.unlinkSync(targetPath);
+  }
+}
+
+function isSameFilePath(a: string, b: string): boolean {
+  const ra = path.resolve(a);
+  const rb = path.resolve(b);
+  return process.platform === "win32" ? ra.toLowerCase() === rb.toLowerCase() : ra === rb;
+}
+
 function getUniqueOutputPath(filePath: string, extension: string, outputDir?: string): string {
   const baseName = path.basename(filePath, path.extname(filePath));
   const dir = outputDir && outputDir.length > 0 ? outputDir : path.dirname(filePath);
@@ -79,6 +136,7 @@ export type ConvertOptions = {
   returnCommandString?: boolean;
   outputDir?: string;
   stripMetadata?: boolean;
+  replaceOriginal?: boolean;
   trim?: TrimOptions;
   onProgress?: (p: ProgressInfo) => void;
   signal?: AbortSignal;
@@ -116,10 +174,47 @@ export async function convertMedia<T extends AllOutputExtension>(
     throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
   }
 
-  const { returnCommandString = false, outputDir, stripMetadata, trim, onProgress, signal } = opts;
+  const { returnCommandString = false, outputDir, stripMetadata, replaceOriginal, trim, onProgress, signal } = opts;
   const trimArgs = buildTrimArgs(trim);
   const metadataArgs = stripMetadata ? ["-map_metadata", "-1"] : ["-map_metadata", "0"];
   const keepDates = shouldPreserveFileDates(stripMetadata);
+
+  const resolveWriteTarget = (ext: string): { writePath: string; replaceInPlace: boolean } => {
+    const dir = outputDir && outputDir.length > 0 ? outputDir : path.dirname(filePath);
+    const baseName = path.basename(filePath, path.extname(filePath));
+    const directPath = path.join(dir, `${baseName}${ext}`);
+    const replaceInPlace = Boolean(replaceOriginal) && !returnCommandString && isSameFilePath(directPath, filePath);
+    if (replaceInPlace) {
+      const tmp = path.join(
+        dir,
+        `${baseName}.convert-tmp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}${ext}`,
+      );
+      return { writePath: tmp, replaceInPlace: true };
+    }
+    return { writePath: getUniqueOutputPath(filePath, ext, outputDir), replaceInPlace: false };
+  };
+
+  const finalizeOutput = async (writePath: string, replaceInPlace: boolean): Promise<string> => {
+    if (keepDates) preserveFileTimestamps(filePath, writePath);
+    if (replaceInPlace) {
+      await replaceFileSafely(writePath, filePath);
+      return filePath;
+    }
+    if (replaceOriginal && !returnCommandString) {
+      await trashFileSafely(filePath);
+    }
+    return writePath;
+  };
+
+  const cleanupTempOutput = (writePath: string, replaceInPlace: boolean): void => {
+    if (replaceInPlace && fs.existsSync(writePath)) {
+      try {
+        fs.unlinkSync(writePath);
+      } catch {
+        /* ignore temp cleanup error */
+      }
+    }
+  };
 
   let ffmpegArgs = [...trimArgs, "-i"];
   const outputCategory = getOutputCategory(outputFormat);
@@ -139,7 +234,7 @@ export async function convertMedia<T extends AllOutputExtension>(
   if (outputCategory === "gif") {
     const gifQuality = quality as GifQuality;
     const gifSettings = gifQuality[".gif"];
-    const finalOutputPath = getUniqueOutputPath(filePath, ".gif", outputDir);
+    const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(".gif");
 
     const fps = gifSettings.fps;
     const scale = gifSettings.width === "original" ? "iw" : gifSettings.width;
@@ -178,8 +273,10 @@ export async function convertMedia<T extends AllOutputExtension>(
       await runProcess(paletteSpec, signal);
       console.log(`Executing FFmpeg GIF command: ${formatProcessForDisplay(finalSpec)}`);
       await execWithOptionalProgress(finalSpec);
-      if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
-      return finalOutputPath;
+      return await finalizeOutput(finalOutputPath, replaceInPlace);
+    } catch (error) {
+      cleanupTempOutput(finalOutputPath, replaceInPlace);
+      throw error;
     } finally {
       if (fs.existsSync(tempPaletteFile)) {
         try {
@@ -195,7 +292,7 @@ export async function convertMedia<T extends AllOutputExtension>(
     case "image": {
       const currentOutputFormat = outputFormat as OutputImageExtension;
       const imageQuality = quality as ImageQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
+      const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(currentOutputFormat);
 
       let tempHeicFile: string | null = null;
       let tempPaletteFile: string | null = null;
@@ -417,9 +514,9 @@ export async function convertMedia<T extends AllOutputExtension>(
           console.log(`Executing FFmpeg image command: ${formatProcessForDisplay(ffmpegSpec)}`);
           await runProcess(ffmpegSpec, signal);
         }
-        if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
-        return finalOutputPath;
+        return await finalizeOutput(finalOutputPath, replaceInPlace);
       } catch (error) {
+        cleanupTempOutput(finalOutputPath, replaceInPlace);
         console.error(`Error converting ${processedInputPath} to ${currentOutputFormat}:`, error);
         throw error;
       } finally {
@@ -436,7 +533,7 @@ export async function convertMedia<T extends AllOutputExtension>(
     case "audio": {
       const currentOutputFormat = outputFormat as OutputAudioExtension;
       const audioQuality = quality as AudioQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
+      const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(currentOutputFormat);
 
       ffmpegArgs.push(filePath);
 
@@ -497,9 +594,13 @@ export async function convertMedia<T extends AllOutputExtension>(
         return formatProcessForDisplay(ffmpegSpec);
       }
       console.log(`Executing FFmpeg audio command: ${formatProcessForDisplay(ffmpegSpec)}`);
-      await execWithOptionalProgress(ffmpegSpec);
-      if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
-      return finalOutputPath;
+      try {
+        await execWithOptionalProgress(ffmpegSpec);
+        return await finalizeOutput(finalOutputPath, replaceInPlace);
+      } catch (error) {
+        cleanupTempOutput(finalOutputPath, replaceInPlace);
+        throw error;
+      }
     }
 
     case "video": {
@@ -613,7 +714,7 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       // Handle encoding mode (unified for all formats except .mov)
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
+      const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(currentOutputFormat);
       const mp4FaststartArgs = currentOutputFormat === ".mp4" ? ["-movflags", "+faststart"] : [];
       let logFilePrefix: string | null = null;
 
@@ -708,8 +809,10 @@ export async function convertMedia<T extends AllOutputExtension>(
         }
         console.log(`Executing FFmpeg video command: ${formatProcessForDisplay(ffmpegSpec)}`);
         await execWithOptionalProgress(ffmpegSpec);
-        if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
-        return finalOutputPath;
+        return await finalizeOutput(finalOutputPath, replaceInPlace);
+      } catch (error) {
+        cleanupTempOutput(finalOutputPath, replaceInPlace);
+        throw error;
       } finally {
         // Clean up 2-pass log files if they exist
         if (logFilePrefix) {

@@ -5,8 +5,11 @@ import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from
 import { probeDurationSec, runFFmpegWithProgress, type ProgressInfo } from "./ffmpegRun";
 import { inspectMedia } from "./mediaProbe";
 import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
-import { getMediaType, type AllOutputExtension } from "../types/media";
+import { getMediaType, OUTPUT_ALL_EXTENSIONS, type AllOutputExtension } from "../types/media";
 import { recordEditHistory } from "./historyRecording";
+import { buildTrimArgs, preserveFileTimestamps, replaceFileSafely } from "./converter";
+import { resolveTrim } from "./conversionOptions";
+import { trimmedDuration } from "./targetSize";
 
 export const EDIT_FRAME_RATES = [24, 30, 60] as const;
 
@@ -20,6 +23,7 @@ export type EditRequest =
       cropX?: number;
       cropY?: number;
     }
+  | { operation: "trim"; start?: string; end?: string; replaceOriginal?: boolean }
   | { operation: "speed"; speed: number; frameRate?: number; removeAudio?: boolean }
   | { operation: "frame-rate"; frameRate: number; removeAudio?: boolean }
   | { operation: "remove-audio" }
@@ -40,8 +44,18 @@ export async function editMedia(inputPath: string, request: EditRequest, options
   const inspection = await inspectMedia(inputPath);
   const hasAudio = inspection.streams.some((stream) => stream.type === "audio");
   const hasVideo = inspection.streams.some((stream) => stream.type === "video");
+  const replaceOriginal = request.operation === "trim" && request.replaceOriginal === true;
   const outputExtension = editOutputExtension(inputPath, request);
-  const outputPath = uniqueEditPath(inputPath, outputExtension, options.outputDir);
+  const fileExtension =
+    request.operation === "trim" ? path.extname(inputPath).toLowerCase() || outputExtension : outputExtension;
+  const writeTarget = replaceOriginal
+    ? tempReplacePath(inputPath)
+    : uniqueEditPath(
+        inputPath,
+        fileExtension,
+        options.outputDir,
+        request.operation === "trim" ? "-trimmed" : "-edited",
+      );
   let effectiveInputPath = inputPath;
   let tempHeicPng: string | null = null;
   if (path.extname(inputPath).toLowerCase() === ".heic" && request.operation === "resize-crop") {
@@ -72,15 +86,34 @@ export async function editMedia(inputPath: string, request: EditRequest, options
       throw error;
     }
   }
-  const spec = buildEditProcessSpec(ffmpeg.path, effectiveInputPath, outputPath, request, { hasAudio, hasVideo });
+  const spec = buildEditProcessSpec(ffmpeg.path, effectiveInputPath, writeTarget, request, { hasAudio, hasVideo });
   const duration = inspection.durationSec ?? (await probeDurationSec(ffmpeg.path, inputPath)) ?? undefined;
+  const expectedDuration =
+    request.operation === "speed" && duration !== undefined
+      ? duration / request.speed
+      : request.operation === "trim" && duration !== undefined
+        ? trimmedDuration(duration, resolveTrim(request.start, request.end).trim)
+        : duration;
   console.log(`Executing FFmpeg edit command: ${formatProcessForDisplay(spec)}`);
   try {
     await runFFmpegWithProgress(spec, {
-      totalDurationSec: request.operation === "speed" && duration !== undefined ? duration / request.speed : duration,
+      totalDurationSec: expectedDuration,
       onProgress: options.onProgress,
       signal: options.signal,
     });
+    preserveFileTimestamps(inputPath, writeTarget);
+    if (replaceOriginal) {
+      await replaceFileSafely(writeTarget, inputPath);
+    }
+  } catch (error) {
+    if (replaceOriginal && fs.existsSync(writeTarget)) {
+      try {
+        fs.unlinkSync(writeTarget);
+      } catch {
+        /* ignore temp cleanup error */
+      }
+    }
+    throw error;
   } finally {
     if (tempHeicPng && fs.existsSync(tempHeicPng)) {
       try {
@@ -90,6 +123,7 @@ export async function editMedia(inputPath: string, request: EditRequest, options
       }
     }
   }
+  const outputPath = replaceOriginal ? inputPath : writeTarget;
   try {
     await recordEditHistory({
       input: inputPath,
@@ -142,6 +176,24 @@ export function buildEditProcessSpec(
         if (streams.hasAudio) args.push("-c:a", "aac", "-b:a", "192k");
       }
       break;
+    }
+    case "trim": {
+      if (inputType !== "video" && inputType !== "audio") {
+        throw new Error("Trim requires a video or audio file.");
+      }
+      if (!streams.hasVideo && !streams.hasAudio) {
+        throw new Error("No trimmable audio or video stream was found.");
+      }
+      const trimResolution = resolveTrim(request.start, request.end);
+      if (trimResolution.error) throw new Error(trimResolution.error);
+      if (!trimResolution.trim) throw new Error("Enter a start time, end time, or both to trim.");
+      const trimArgs = buildTrimArgs(trimResolution.trim);
+      const ext = path.extname(outputPath).toLowerCase();
+      const faststartArgs = ext === ".mp4" || ext === ".m4a" ? ["-movflags", "+faststart"] : [];
+      return {
+        command: ffmpegPath,
+        args: [...trimArgs, "-i", inputPath, "-c", "copy", ...faststartArgs, "-map_metadata", "0", "-y", outputPath],
+      };
     }
     case "speed": {
       if (!Number.isFinite(request.speed) || request.speed < 0.25 || request.speed > 40) {
@@ -244,6 +296,13 @@ function frameRateFilter(frameRate: number): string {
 function editOutputExtension(inputPath: string, request: EditRequest): AllOutputExtension {
   if (request.operation === "extract-audio") return request.audioFormat;
   const inputType = getMediaType(path.extname(inputPath));
+  if (request.operation === "trim") {
+    const extension = path.extname(inputPath).toLowerCase();
+    if ((OUTPUT_ALL_EXTENSIONS as readonly string[]).includes(extension)) {
+      return extension as AllOutputExtension;
+    }
+    return inputType === "audio" ? ".mp3" : ".mp4";
+  }
   if (inputType === "image") {
     const extension = path.extname(inputPath).toLowerCase();
     return [".jpg", ".png", ".webp", ".tiff", ".avif"].includes(extension) ? (extension as AllOutputExtension) : ".png";
@@ -252,13 +311,20 @@ function editOutputExtension(inputPath: string, request: EditRequest): AllOutput
   return ".mp4";
 }
 
-function uniqueEditPath(inputPath: string, extension: string, outputDir?: string): string {
+function uniqueEditPath(inputPath: string, extension: string, outputDir?: string, suffix = "-edited"): string {
   const dir = outputDir || path.dirname(inputPath);
-  const base = `${path.basename(inputPath, path.extname(inputPath))}-edited`;
+  const base = `${path.basename(inputPath, path.extname(inputPath))}${suffix}`;
   let output = path.join(dir, `${base}${extension}`);
   let counter = 1;
   while (fs.existsSync(output)) output = path.join(dir, `${base}(${counter++})${extension}`);
   return output;
+}
+
+function tempReplacePath(inputPath: string): string {
+  const dir = path.dirname(inputPath);
+  const ext = path.extname(inputPath);
+  const base = path.basename(inputPath, ext);
+  return path.join(dir, `${base}.trim-tmp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}${ext}`);
 }
 
 function audioCodecArgs(format: ".mp3" | ".m4a" | ".wav" | ".flac"): string[] {

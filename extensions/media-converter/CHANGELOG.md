@@ -5,6 +5,8 @@
 ### Added
 
 - **Video Codec** selector for `.mp4` and `.mkv` outputs in Advanced Mode (`H.264`, `H.265 / HEVC`, `AV1 (CPU)`, plus hardware-detected NVIDIA NVENC options for `H.264`, `H.265 / HEVC`, and `AV1`), and a **Default Video Codec** preference.
+- **Trim** operation in **Edit Media** for lossless stream-copy (`-c copy`) trimming of video and audio, with an optional **Replace original file** checkbox (off by default; moves the original to Trash / Recycle Bin).
+- Optional **Replace original file** checkbox in **Convert Media** and **Manage Presets** (off by default; moves the original to Trash / Recycle Bin after conversion succeeds and reuses the original filename when format and folder match).
 - `.heic` image input support on Windows and Linux when FFmpeg 7.0+ is installed (converting to JPG, PNG, WebP, TIFF, or AVIF, and resizing/cropping in **Edit Media**).
 - Show the resolved FFmpeg CRF/CQ value next to each percentage in the Advanced Mode **Quality** dropdown (e.g. `45 (CRF 28)` or `30 (CQ 36)`).
 

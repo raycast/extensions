@@ -27,6 +27,7 @@ export type PresetEditorSeed = {
   outputFormat?: AllOutputExtension;
   quality?: QualitySettings;
   stripMetadata?: boolean;
+  replaceOriginal?: boolean;
   trim?: TrimOptions;
   outputDir?: string;
 };
@@ -51,6 +52,9 @@ export function PresetEditorForm({ onSaved, ...rest }: { onSaved: () => Promise<
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension>(initialOutputFormat);
   const [quality, setQuality] = useState<QualitySettings>(initialQuality);
   const [stripMetadata, setStripMetadata] = useState<boolean>(editing?.stripMetadata ?? seed?.stripMetadata ?? false);
+  const [replaceOriginal, setReplaceOriginal] = useState<boolean>(
+    editing?.replaceOriginal ?? seed?.replaceOriginal ?? false,
+  );
   const [trimStart, setTrimStart] = useState(editing?.trim?.start ?? seed?.trim?.start ?? "");
   const [trimEnd, setTrimEnd] = useState(editing?.trim?.end ?? seed?.trim?.end ?? "");
   const [outputDir, setOutputDir] = useState(editing?.outputDir ?? seed?.outputDir ?? "");
@@ -106,6 +110,7 @@ export function PresetEditorForm({ onSaved, ...rest }: { onSaved: () => Promise<
         outputFormat,
         quality,
         stripMetadata,
+        replaceOriginal,
         trim: trimStart.trim() || trimEnd.trim() ? { start: trimStart.trim(), end: trimEnd.trim() } : undefined,
         outputDir: outputDir.trim() || undefined,
         description: description.trim() || undefined,
@@ -183,6 +188,15 @@ export function PresetEditorForm({ onSaved, ...rest }: { onSaved: () => Promise<
       )}
 
       <Form.Separator />
+
+      <Form.Checkbox
+        id="replaceOriginal"
+        title="Output"
+        label="Replace original file"
+        value={replaceOriginal}
+        onChange={setReplaceOriginal}
+        info="When enabled, moves the original file to the Trash / Recycle Bin once conversion succeeds (reusing the original filename when the format and folder match). Leave off to keep the original file."
+      />
 
       <Form.Checkbox
         id="stripMetadata"

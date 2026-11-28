@@ -334,6 +334,7 @@ export type Preset = {
   quality: QualitySettings;
   trim?: TrimOptions;
   stripMetadata?: boolean;
+  replaceOriginal?: boolean;
   outputDir?: string;
   description?: string;
 };

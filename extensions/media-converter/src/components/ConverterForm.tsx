@@ -121,6 +121,7 @@ export function ConverterForm({
   const [stripMetadata, setStripMetadata] = useState<boolean>(
     prefill?.stripMetadata ?? Boolean(preferences.defaultStripMetadata),
   );
+  const [replaceOriginal, setReplaceOriginal] = useState<boolean>(false);
   const [outputLocationMode, setOutputLocationMode] = useState<"sameAsInput" | "customFolder" | "thisRun">(
     prefill?.outputDir
       ? "thisRun"
@@ -443,6 +444,7 @@ export function ConverterForm({
         quality: currentQualitySetting,
         outputDir: resolvedOutputDir,
         stripMetadata,
+        replaceOriginal,
         trim: parsedTrim,
         showProgress: true,
         signal: abortController.signal,
@@ -467,6 +469,7 @@ export function ConverterForm({
       setTrimEnd(preset.trim.end ?? "");
     }
     if (typeof preset.stripMetadata === "boolean") setStripMetadata(preset.stripMetadata);
+    setReplaceOriginal(Boolean(preset.replaceOriginal));
     if (preset.outputDir) {
       setOutputLocationMode("thisRun");
       setCustomOutputFolderOverride(preset.outputDir);
@@ -489,6 +492,7 @@ export function ConverterForm({
               quality: currentQualitySetting,
               trim: parsedTrim,
               stripMetadata,
+              replaceOriginal,
               outputDir: resolvedOutputDir,
             }}
             onSaved={async () => {
@@ -535,6 +539,7 @@ export function ConverterForm({
           quality: currentQualitySetting,
           outputDir: resolvedOutputDir,
           stripMetadata,
+          replaceOriginal,
           trim: parsedTrim,
           targetSizeMb: parsedTargetSize,
         });
@@ -775,6 +780,14 @@ export function ConverterForm({
               onChange={setCustomOutputFolderOverride}
             />
           )}
+          <Form.Checkbox
+            id="replaceOriginal"
+            title="Output"
+            label="Replace original file"
+            value={replaceOriginal}
+            onChange={setReplaceOriginal}
+            info="When enabled, moves the original file to the Trash / Recycle Bin once conversion succeeds (reusing the original filename when the format and folder match). Leave off to keep the original file."
+          />
           <Form.Checkbox
             id="stripMetadata"
             title="Privacy"
