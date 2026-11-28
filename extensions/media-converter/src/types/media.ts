@@ -192,12 +192,15 @@ export type AudioQuality = {
 export const VIDEO_ENCODING_MODES = ["crf", "vbr", "vbr-2-pass"] as const;
 export type VideoEncodingMode = (typeof VIDEO_ENCODING_MODES)[number];
 
+export const VIDEO_CODECS = ["h264", "h264-nvenc", "hevc", "hevc-nvenc", "av1", "av1-nvenc"] as const;
+export type VideoCodec = (typeof VIDEO_CODECS)[number];
+
 // Runtime object for video quality settings (for minimal redundancy)
 const VIDEO_QUALITY_OBJECT = {
   ".mp4": [
-    { encodingMode: "crf", crf: 75, preset: "medium" },
-    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
-    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { codec: "h264", encodingMode: "crf", crf: 75, preset: "medium" },
+    { codec: "h264", encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { codec: "h264", encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
   ],
   ".avi": [
     { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
@@ -205,9 +208,9 @@ const VIDEO_QUALITY_OBJECT = {
   ],
   ".mov": [{ variant: "standard" }],
   ".mkv": [
-    { encodingMode: "crf", crf: 75, preset: "medium" },
-    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
-    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { codec: "hevc", encodingMode: "crf", crf: 75, preset: "medium" },
+    { codec: "hevc", encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { codec: "hevc", encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
   ],
   ".mpg": [
     { encodingMode: "crf", crf: 75 },
@@ -221,9 +224,10 @@ const VIDEO_QUALITY_OBJECT = {
   ],
 } as const;
 
-// Derive VideoQuality type from VIDEO_QUALITY_OBJECT
+// Derive VideoQuality type from VIDEO_QUALITY_OBJECT (with generalized codec union for .mp4/.mkv)
+type WidenCodec<T> = T extends { codec: string } ? Omit<T, "codec"> & { codec?: VideoCodec } : T;
 export type VideoQuality = {
-  [K in keyof typeof VIDEO_QUALITY_OBJECT]: (typeof VIDEO_QUALITY_OBJECT)[K][number];
+  [K in keyof typeof VIDEO_QUALITY_OBJECT]: WidenCodec<(typeof VIDEO_QUALITY_OBJECT)[K][number]>;
 };
 
 // Generate allowed encoding modes from VIDEO_QUALITY_OBJECT
@@ -275,6 +279,7 @@ export const VP9_QUALITY = ["best", "good", "realtime"] as const;
 export type VP9Quality = (typeof VP9_QUALITY)[number];
 
 export type VideoControlType =
+  | "codec"
   | "encodingMode"
   | "crf"
   | "vbr"
@@ -338,6 +343,7 @@ export type Preset = {
 export function buildVideoQuality<K extends OutputVideoExtension>(
   format: K,
   overrides?: Partial<{
+    codec: VideoCodec;
     encodingMode: VideoEncodingMode;
     crf: number;
     bitrate: VideoBitrate;
@@ -380,6 +386,13 @@ export function buildVideoQuality<K extends OutputVideoExtension>(
     (options[0] as Record<string, unknown>) ??
     {};
 
+  const supportsCodec = format === ".mp4" || format === ".mkv";
+  const codec = supportsCodec
+    ? ((overrides && overrides.codec && VIDEO_CODECS.includes(overrides.codec) ? overrides.codec : undefined) ??
+      (base && ((base as Record<string, unknown>).codec as VideoCodec | undefined)) ??
+      ((proto as Record<string, unknown>).codec as VideoCodec | undefined))
+    : undefined;
+
   if (mode === "crf") {
     const crf =
       overrides && typeof overrides.crf === "number"
@@ -391,7 +404,12 @@ export function buildVideoQuality<K extends OutputVideoExtension>(
         ? overrides.preset
         : (((proto as Record<string, unknown>).preset as VideoPreset | undefined) ??
           (base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)));
-    return { encodingMode: "crf", crf: crf as number, ...(preset ? { preset } : {}) } as VideoQuality[K];
+    return {
+      ...(codec ? { codec } : {}),
+      encodingMode: "crf",
+      crf: crf as number,
+      ...(preset ? { preset } : {}),
+    } as VideoQuality[K];
   }
 
   // vbr / vbr-2-pass
@@ -416,7 +434,9 @@ export function buildVideoQuality<K extends OutputVideoExtension>(
       : (((proto as Record<string, unknown>).quality as VP9Quality | undefined) ??
         (base && ((base as Record<string, unknown>).quality as VP9Quality | undefined)));
 
-  const result: Record<string, unknown> = { encodingMode: mode };
+  const result: Record<string, unknown> = {};
+  if (codec) result.codec = codec;
+  result.encodingMode = mode;
   if (bitrate) result.bitrate = bitrate;
   if (maxBitrate !== undefined) result.maxBitrate = maxBitrate;
   if (preset) result.preset = preset;
@@ -469,11 +489,11 @@ export const SIMPLE_QUALITY_MAPPINGS = {
 
   // Video quality mappings
   ".mp4": {
-    lowest: { encodingMode: "crf", crf: 30, preset: "fast" },
-    low: { encodingMode: "crf", crf: 50, preset: "medium" },
-    medium: { encodingMode: "crf", crf: 75, preset: "medium" },
-    high: { encodingMode: "crf", crf: 85, preset: "slow" },
-    highest: { encodingMode: "crf", crf: 95, preset: "slower" },
+    lowest: { codec: "h264", encodingMode: "crf", crf: 30, preset: "fast" },
+    low: { codec: "h264", encodingMode: "crf", crf: 50, preset: "medium" },
+    medium: { codec: "h264", encodingMode: "crf", crf: 75, preset: "medium" },
+    high: { codec: "h264", encodingMode: "crf", crf: 85, preset: "slow" },
+    highest: { codec: "h264", encodingMode: "crf", crf: 95, preset: "slower" },
   },
   ".avi": {
     lowest: { encodingMode: "vbr", bitrate: "1000", maxBitrate: "" },
@@ -490,11 +510,11 @@ export const SIMPLE_QUALITY_MAPPINGS = {
     highest: { variant: "4444" },
   },
   ".mkv": {
-    lowest: { encodingMode: "crf", crf: 30, preset: "fast" },
-    low: { encodingMode: "crf", crf: 50, preset: "medium" },
-    medium: { encodingMode: "crf", crf: 75, preset: "medium" },
-    high: { encodingMode: "crf", crf: 85, preset: "slow" },
-    highest: { encodingMode: "crf", crf: 95, preset: "slower" },
+    lowest: { codec: "hevc", encodingMode: "crf", crf: 30, preset: "fast" },
+    low: { codec: "hevc", encodingMode: "crf", crf: 50, preset: "medium" },
+    medium: { codec: "hevc", encodingMode: "crf", crf: 75, preset: "medium" },
+    high: { codec: "hevc", encodingMode: "crf", crf: 85, preset: "slow" },
+    highest: { codec: "hevc", encodingMode: "crf", crf: 95, preset: "slower" },
   },
   ".mpg": {
     lowest: { encodingMode: "crf", crf: 30 },
@@ -539,10 +559,10 @@ export const DEFAULT_QUALITIES = {
   },
 
   // Video defaults (CRF mode)
-  ".mp4": { encodingMode: "crf", crf: 75, preset: "medium" },
+  ".mp4": { codec: "h264", encodingMode: "crf", crf: 75, preset: "medium" },
   ".avi": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
   ".mov": { variant: "standard" },
-  ".mkv": { encodingMode: "crf", crf: 75, preset: "medium" },
+  ".mkv": { codec: "hevc", encodingMode: "crf", crf: 75, preset: "medium" },
   ".mpg": { encodingMode: "crf", crf: 75 },
   ".webm": { encodingMode: "crf", crf: 60, quality: "good" },
 
@@ -552,9 +572,9 @@ export const DEFAULT_QUALITIES = {
 
 // Video VBR defaults (for when switching to VBR modes)
 export const DEFAULT_VBR_QUALITIES = {
-  ".mp4": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ".mp4": { codec: "h264", encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
   ".avi": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
-  ".mkv": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ".mkv": { codec: "hevc", encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
   ".mpg": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
   ".webm": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
 } as const;
@@ -678,9 +698,23 @@ export function getDefaultQuality(
     return { ".gif": { fps, width, loop: true } } as QualitySettings;
   }
 
+  const preferredVideoCodec =
+    typeof preferences.defaultVideoCodec === "string" &&
+    (VIDEO_CODECS as readonly string[]).includes(preferences.defaultVideoCodec)
+      ? (preferences.defaultVideoCodec as VideoCodec)
+      : undefined;
+
+  const applyPreferredCodec = (entry: Record<string, unknown>): Record<string, unknown> => {
+    if ((format === ".mp4" || format === ".mkv") && preferredVideoCodec) {
+      return { ...entry, codec: preferredVideoCodec };
+    }
+    return entry;
+  };
+
   if (preferences.moreConversionSettings) {
+    const base = DEFAULT_QUALITIES[format as Exclude<AllOutputExtension, ".gif">];
     return {
-      [format]: DEFAULT_QUALITIES[format as Exclude<AllOutputExtension, ".gif">],
+      [format]: typeof base === "object" && base !== null ? applyPreferredCodec(base as Record<string, unknown>) : base,
     } as QualitySettings;
   }
 
@@ -689,8 +723,10 @@ export function getDefaultQuality(
   }
 
   if ((format as SimpleQualityMappingExtension) in SIMPLE_QUALITY_MAPPINGS) {
+    const mapped = SIMPLE_QUALITY_MAPPINGS[format as SimpleQualityMappingExtension][qualityLevel];
     return {
-      [format]: SIMPLE_QUALITY_MAPPINGS[format as SimpleQualityMappingExtension][qualityLevel],
+      [format]:
+        typeof mapped === "object" && mapped !== null ? applyPreferredCodec(mapped as Record<string, unknown>) : mapped,
     } as QualitySettings;
   }
 

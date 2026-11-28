@@ -763,6 +763,44 @@
       "description": "Default output format for video conversions."
     },
     {
+      "name": "defaultVideoCodec",
+      "type": "dropdown",
+      "title": "Default Video Codec (MP4 / MKV)",
+      "default": "auto",
+      "required": false,
+      "data": [
+        {
+          "title": "Format Default (.mp4 → H.264, .mkv → H.265)",
+          "value": "auto"
+        },
+        {
+          "title": "H.264 (libx264)",
+          "value": "h264"
+        },
+        {
+          "title": "H.264 (NVIDIA NVENC)",
+          "value": "h264-nvenc"
+        },
+        {
+          "title": "H.265 / HEVC (libx265)",
+          "value": "hevc"
+        },
+        {
+          "title": "H.265 / HEVC (NVIDIA NVENC)",
+          "value": "hevc-nvenc"
+        },
+        {
+          "title": "AV1 (CPU)",
+          "value": "av1"
+        },
+        {
+          "title": "AV1 (NVIDIA NVENC)",
+          "value": "av1-nvenc"
+        }
+      ],
+      "description": "Default video codec for MP4 and MKV conversions."
+    },
+    {
       "name": "defaultVideoQualityPreset",
       "type": "dropdown",
       "title": "Default Video Quality Preset (Simple Mode)",
@@ -929,6 +967,15 @@
       "placeholder": "/path/to/output/folder",
       "required": false,
       "description": "Used when 'Default Output Location' is set to 'Custom folder'. Must be an existing folder you can write to."
+    },
+    {
+      "name": "preserveFileDates",
+      "type": "checkbox",
+      "title": "Preserve original files' date when modified",
+      "label": "Preserve original files' date when modified",
+      "default": true,
+      "required": false,
+      "description": "Keeps converted files sorted alongside originals by Date Modified (skipped when Strip Metadata is enabled)."
     },
     {
       "name": "defaultStripMetadata",

@@ -9,6 +9,7 @@
 - Support for all popular media formats
 - **Video → Animated GIF** with quality palette generation
 - **Trim** videos and audio via Start / End fields
+- **Video codec selection** for `.mp4` and `.mkv` (`H.264`, `H.265 / HEVC`, `AV1` via `libsvtav1`/`libaom-av1`, and hardware-detected NVIDIA NVENC)
 - **Strip metadata** (EXIF, GPS, tags) for privacy — per-run toggle or a default preference
 - **Custom output folder** — save converted files anywhere (per-run or as a preference)
 - **Before/After size comparison** in the success toast (e.g. "saved 42 MB (58%)")
@@ -107,11 +108,13 @@ You can also set defaults in extension preferences:
 - **Default Audio Output Format**: default output format for audio conversions.
 - **Default Audio Quality Preset**: preset used in simple mode (`lowest`, `low`, `medium`, `high`, `highest`).
 - **Default Video Output Format**: default output format for video conversions.
+- **Default Video Codec (MP4 / MKV)**: default video codec for `.mp4` and `.mkv` outputs (`Format Default`, `H.264`, `H.265 / HEVC`, `AV1 (CPU)`, and NVIDIA NVENC variants).
 - **Default Video Quality Preset**: preset used in simple mode (`lowest`, `low`, `medium`, `high`, `highest`).
 - **Default GIF FPS**: default frame rate for video → GIF conversions (`10`, `15`, `24`, `30`).
 - **Default GIF Width**: default output width for GIFs (`original`, `480`, `720`, `1080`).
 - **Default Output Location**: `Same folder as input` or `Custom folder` (see next).
 - **Custom Output Folder**: absolute path used when `Default Output Location` is set to `Custom folder`.
+- **Preserve original files' date when modified**: when on (default), keeps the original file's Date Modified timestamp on converted outputs (skipped when Strip Metadata is enabled).
 - **Strip Metadata By Default**: when on, converted files get `-map_metadata -1` applied so EXIF/GPS/tags are removed.
 
 You can still override all values in the Convert Media form every time you run a conversion.

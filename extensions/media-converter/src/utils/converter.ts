@@ -1,8 +1,20 @@
 import path from "path";
 import fs from "fs";
 import os from "os";
+import { getPreferenceValues } from "@raycast/api";
 import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "./ffmpeg";
-import { buildAvifArgs, getAvailableEncoders, missingEncoderError, pickAvifEncoder } from "./encoders";
+import {
+  buildAvifArgs,
+  getAvailableEncoders,
+  mapPresetToAomCpuUsed,
+  mapPresetToNvenc,
+  mapPresetToSvtAv1,
+  missingEncoderError,
+  pickAv1VideoEncoder,
+  pickAvifEncoder,
+  qualityPercentToCrf,
+  type Av1VideoEncoder,
+} from "./encoders";
 import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
 import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
 import { parseTimeString, toFfmpegTime } from "./time";
@@ -15,6 +27,8 @@ import {
   ImageQuality,
   AudioQuality,
   VideoQuality,
+  VideoCodec,
+  VideoPreset,
   GifQuality,
   getMediaType,
   getOutputCategory,
@@ -23,9 +37,27 @@ import {
 } from "../types/media";
 
 function convertQualityToCrf(qualityPercentage: Percentage): number {
-  // Map 100% quality to CRF 0, and 0% quality to CRF 51
-  // Using a linear mapping for simplicity
-  return Math.round(51 - (qualityPercentage / 100) * 51);
+  return qualityPercentToCrf(qualityPercentage, 51);
+}
+
+function shouldPreserveFileDates(stripMetadata?: boolean): boolean {
+  if (stripMetadata) return false;
+  try {
+    const prefs = getPreferenceValues<{ preserveFileDates?: boolean }>();
+    return prefs.preserveFileDates !== false;
+  } catch {
+    return true;
+  }
+}
+
+/** Copy original file's Date Modified (mtime) & Date Accessed (atime) to the converted output. */
+export function preserveFileTimestamps(sourcePath: string, targetPath: string): void {
+  try {
+    const stat = fs.statSync(sourcePath);
+    fs.utimesSync(targetPath, stat.atime, stat.mtime);
+  } catch (error) {
+    console.warn("Failed to preserve file timestamps:", error);
+  }
 }
 
 function getUniqueOutputPath(filePath: string, extension: string, outputDir?: string): string {
@@ -86,7 +118,8 @@ export async function convertMedia<T extends AllOutputExtension>(
 
   const { returnCommandString = false, outputDir, stripMetadata, trim, onProgress, signal } = opts;
   const trimArgs = buildTrimArgs(trim);
-  const metadataArgs = stripMetadata ? ["-map_metadata", "-1"] : [];
+  const metadataArgs = stripMetadata ? ["-map_metadata", "-1"] : ["-map_metadata", "0"];
+  const keepDates = shouldPreserveFileDates(stripMetadata);
 
   let ffmpegArgs = [...trimArgs, "-i"];
   const outputCategory = getOutputCategory(outputFormat);
@@ -145,6 +178,7 @@ export async function convertMedia<T extends AllOutputExtension>(
       await runProcess(paletteSpec, signal);
       console.log(`Executing FFmpeg GIF command: ${formatProcessForDisplay(finalSpec)}`);
       await execWithOptionalProgress(finalSpec);
+      if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
       return finalOutputPath;
     } finally {
       if (fs.existsSync(tempPaletteFile)) {
@@ -383,6 +417,7 @@ export async function convertMedia<T extends AllOutputExtension>(
           console.log(`Executing FFmpeg image command: ${formatProcessForDisplay(ffmpegSpec)}`);
           await runProcess(ffmpegSpec, signal);
         }
+        if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
         return finalOutputPath;
       } catch (error) {
         console.error(`Error converting ${processedInputPath} to ${currentOutputFormat}:`, error);
@@ -463,6 +498,7 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
       console.log(`Executing FFmpeg audio command: ${formatProcessForDisplay(ffmpegSpec)}`);
       await execWithOptionalProgress(ffmpegSpec);
+      if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
       return finalOutputPath;
     }
 
@@ -472,11 +508,66 @@ export async function convertMedia<T extends AllOutputExtension>(
 
       ffmpegArgs.push(filePath);
 
+      let resolvedAv1Encoder: Av1VideoEncoder | null = null;
+      let isNvencEncoder = false;
+
       // Add format-specific codec and settings
       switch (currentOutputFormat) {
-        case ".mp4": {
-          const mp4Quality = videoQuality[".mp4"];
-          ffmpegArgs.push("-vcodec", "h264", "-acodec", "aac", "-preset", mp4Quality.preset);
+        case ".mp4":
+        case ".mkv": {
+          const containerQuality = videoQuality[currentOutputFormat];
+          const codec: VideoCodec = containerQuality.codec ?? (currentOutputFormat === ".mkv" ? "hevc" : "h264");
+          const preset: VideoPreset = containerQuality.preset;
+
+          if (codec === "h264") {
+            ffmpegArgs.push("-vcodec", "h264", "-acodec", "aac", "-preset", preset);
+          } else if (codec === "h264-nvenc") {
+            const encoders = await getAvailableEncoders(ffmpegPath.path);
+            if (encoders && !encoders.has("h264_nvenc")) {
+              throw missingEncoderError(`${currentOutputFormat.toUpperCase()} (H.264 NVENC)`, "h264_nvenc");
+            }
+            isNvencEncoder = true;
+            ffmpegArgs.push("-c:v", "h264_nvenc", "-preset", mapPresetToNvenc(preset), "-c:a", "aac");
+          } else if (codec === "hevc") {
+            ffmpegArgs.push("-vcodec", "libx265", "-acodec", "aac", "-preset", preset);
+            if (currentOutputFormat === ".mp4") {
+              ffmpegArgs.push("-tag:v", "hvc1");
+            }
+          } else if (codec === "hevc-nvenc") {
+            const encoders = await getAvailableEncoders(ffmpegPath.path);
+            if (encoders && !encoders.has("hevc_nvenc")) {
+              throw missingEncoderError(`${currentOutputFormat.toUpperCase()} (H.265 NVENC)`, "hevc_nvenc");
+            }
+            isNvencEncoder = true;
+            ffmpegArgs.push("-c:v", "hevc_nvenc", "-preset", mapPresetToNvenc(preset), "-c:a", "aac");
+            if (currentOutputFormat === ".mp4") {
+              ffmpegArgs.push("-tag:v", "hvc1");
+            }
+          } else {
+            const encoders = await getAvailableEncoders(ffmpegPath.path);
+            resolvedAv1Encoder = pickAv1VideoEncoder(codec, encoders);
+            if (!resolvedAv1Encoder) {
+              const requested = codec === "av1-nvenc" ? "av1_nvenc" : "libsvtav1 or libaom-av1";
+              throw missingEncoderError(`${currentOutputFormat.toUpperCase()} (AV1)`, requested);
+            }
+            if (resolvedAv1Encoder === "av1_nvenc") {
+              isNvencEncoder = true;
+              ffmpegArgs.push("-c:v", "av1_nvenc", "-preset", mapPresetToNvenc(preset), "-c:a", "aac");
+            } else if (resolvedAv1Encoder === "libsvtav1") {
+              ffmpegArgs.push("-c:v", "libsvtav1", "-preset", mapPresetToSvtAv1(preset), "-c:a", "aac");
+            } else {
+              ffmpegArgs.push(
+                "-c:v",
+                "libaom-av1",
+                "-cpu-used",
+                mapPresetToAomCpuUsed(preset),
+                "-row-mt",
+                "1",
+                "-c:a",
+                "aac",
+              );
+            }
+          }
           break;
         }
         case ".avi": {
@@ -503,11 +594,6 @@ export async function convertMedia<T extends AllOutputExtension>(
           );
           break;
         }
-        case ".mkv": {
-          const mkvQuality = videoQuality[".mkv"];
-          ffmpegArgs.push("-vcodec", "libx265", "-acodec", "aac", "-preset", mkvQuality.preset);
-          break;
-        }
         case ".mpg": {
           ffmpegArgs.push("-vcodec", "mpeg2video", "-acodec", "mp3");
           break;
@@ -528,6 +614,7 @@ export async function convertMedia<T extends AllOutputExtension>(
 
       // Handle encoding mode (unified for all formats except .mov)
       const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
+      const mp4FaststartArgs = currentOutputFormat === ".mp4" ? ["-movflags", "+faststart"] : [];
       let logFilePrefix: string | null = null;
 
       if (currentOutputFormat !== ".mov") {
@@ -535,9 +622,28 @@ export async function convertMedia<T extends AllOutputExtension>(
 
         if ("encodingMode" in qualitySettings) {
           if (qualitySettings.encodingMode === "crf") {
-            ffmpegArgs.push("-crf", String(convertQualityToCrf(qualitySettings.crf)));
+            if (isNvencEncoder) {
+              if (qualitySettings.crf >= 100) {
+                ffmpegArgs.push("-rc", "constqp", "-qp", "0");
+              } else {
+                const cq = Math.max(1, qualityPercentToCrf(qualitySettings.crf, 51));
+                ffmpegArgs.push("-rc", "vbr", "-cq", String(cq), "-b:v", "0");
+              }
+            } else if (resolvedAv1Encoder === "libsvtav1") {
+              ffmpegArgs.push("-crf", String(qualityPercentToCrf(qualitySettings.crf, 63)));
+            } else if (resolvedAv1Encoder === "libaom-av1") {
+              ffmpegArgs.push("-crf", String(qualityPercentToCrf(qualitySettings.crf, 63)), "-b:v", "0");
+            } else {
+              ffmpegArgs.push("-crf", String(convertQualityToCrf(qualitySettings.crf)));
+            }
           } else {
             // VBR or VBR 2-pass
+            if (isNvencEncoder) {
+              ffmpegArgs.push("-rc", "vbr");
+              if (qualitySettings.encodingMode === "vbr-2-pass") {
+                ffmpegArgs.push("-multipass", "fullres");
+              }
+            }
             ffmpegArgs.push("-b:v", `${qualitySettings.bitrate}k`);
 
             if ("maxBitrate" in qualitySettings && qualitySettings.maxBitrate) {
@@ -549,7 +655,7 @@ export async function convertMedia<T extends AllOutputExtension>(
               );
             }
 
-            if (qualitySettings.encodingMode === "vbr-2-pass") {
+            if (qualitySettings.encodingMode === "vbr-2-pass" && !isNvencEncoder) {
               if (returnCommandString) {
                 // For command string, include both passes
                 logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
@@ -562,6 +668,7 @@ export async function convertMedia<T extends AllOutputExtension>(
                   command: ffmpegPath.path,
                   args: [
                     ...ffmpegArgs,
+                    ...mp4FaststartArgs,
                     ...metadataArgs,
                     "-pass",
                     "2",
@@ -594,13 +701,14 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       try {
-        ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
+        ffmpegArgs.push(...mp4FaststartArgs, ...metadataArgs, "-y", finalOutputPath);
         const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };
         if (returnCommandString) {
           return formatProcessForDisplay(ffmpegSpec);
         }
         console.log(`Executing FFmpeg video command: ${formatProcessForDisplay(ffmpegSpec)}`);
         await execWithOptionalProgress(ffmpegSpec);
+        if (keepDates) preserveFileTimestamps(filePath, finalOutputPath);
         return finalOutputPath;
       } finally {
         // Clean up 2-pass log files if they exist

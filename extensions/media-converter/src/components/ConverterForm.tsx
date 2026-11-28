@@ -23,6 +23,12 @@ import { getAllPresets, findPreset } from "../utils/presets";
 import { PresetEditorForm } from "./PresetEditorForm";
 import { enqueueConversionJobs } from "../utils/queue";
 import { resolveTargetSizeQuality, supportsTargetSize } from "../utils/targetSize";
+import {
+  formatQualityCrfHint,
+  getNvencCapabilities,
+  isCodecSupportedByNvenc,
+  type NvencCapabilities,
+} from "../utils/encoders";
 import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "../utils/ffmpeg";
 import {
   OUTPUT_VIDEO_EXTENSIONS,
@@ -56,6 +62,8 @@ import {
   AUDIO_COMPRESSION_LEVEL,
   type AudioCompressionLevel,
   ALLOWED_VIDEO_ENCODING_MODES,
+  VIDEO_CODECS,
+  type VideoCodec,
   type VideoEncodingMode,
   VIDEO_BITRATE,
   type VideoBitrate,
@@ -141,17 +149,21 @@ export function ConverterForm({
 
   useEffect(() => {
     let cancelled = false;
-    if (ffmpegVersion !== undefined) {
-      setDetectedFfmpegVersion(ffmpegVersion);
-      return;
-    }
     findFFmpegPath()
       .then((found) => {
-        if (!cancelled) setDetectedFfmpegVersion(found?.version ?? null);
+        if (!cancelled && ffmpegVersion === undefined) {
+          setDetectedFfmpegVersion(found?.version ?? null);
+        }
+        if (found) {
+          void getNvencCapabilities(found.path);
+        }
       })
       .catch(() => {
-        if (!cancelled) setDetectedFfmpegVersion(null);
+        if (!cancelled && ffmpegVersion === undefined) setDetectedFfmpegVersion(null);
       });
+    if (ffmpegVersion !== undefined) {
+      setDetectedFfmpegVersion(ffmpegVersion);
+    }
     return () => {
       cancelled = true;
     };
@@ -837,6 +849,23 @@ export function QualitySettingsComponent({
   onQualityChange: (quality: QualitySettings) => void;
 }) {
   const currentMediaType = getMediaType(outputFormat)!;
+  const [nvencCaps, setNvencCaps] = useState<NvencCapabilities | null>(null);
+
+  useEffect(() => {
+    if (currentMediaType !== "video" || (outputFormat !== ".mp4" && outputFormat !== ".mkv")) return;
+    let cancelled = false;
+    findFFmpegPath()
+      .then((found) => (found ? getNvencCapabilities(found.path) : null))
+      .then((caps) => {
+        if (!cancelled) setNvencCaps(caps);
+      })
+      .catch(() => {
+        if (!cancelled) setNvencCaps({ h264: false, hevc: false, av1: false });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentMediaType, outputFormat]);
 
   const getCurrentSettings = () => {
     return (currentQuality as Record<string, unknown>)[outputFormat];
@@ -874,7 +903,11 @@ export function QualitySettingsComponent({
     }
     case "video": {
       const videoSettings = getCurrentSettings() as Record<string, unknown>;
-      const videoControls = Object.keys(videoSettings || {});
+      const rawControls = Object.keys(videoSettings || {});
+      const videoControls =
+        (outputFormat === ".mp4" || outputFormat === ".mkv") && !rawControls.includes("codec")
+          ? ["codec", ...rawControls]
+          : rawControls;
       return (
         <DynamicQualitySettings
           outputFormat={outputFormat}
@@ -1115,7 +1148,43 @@ export function QualitySettingsComponent({
 
       if (mediaType === "video") {
         controlType = controlType as VideoControlType;
+        const activeCodec =
+          (settingsObj?.codec as VideoCodec | undefined) ?? (outputFormat === ".mkv" ? "hevc" : "h264");
         switch (controlType) {
+          case "codec":
+            return (
+              <Form.Dropdown
+                key="codec"
+                id="videoCodec"
+                title="Video Codec"
+                value={activeCodec}
+                onChange={(codec: string) => onSettingsChange({ ...settingsObj, codec: codec as VideoCodec })}
+                info="Choose the video encoder for MP4/MKV. AV1 produces smaller files; NVIDIA NVENC options appear automatically when supported by your GPU."
+              >
+                {VIDEO_CODECS.filter((codec) => codec === activeCodec || isCodecSupportedByNvenc(codec, nvencCaps)).map(
+                  (codec) => (
+                    <Form.Dropdown.Item
+                      key={codec}
+                      value={codec}
+                      title={
+                        codec === "av1-nvenc"
+                          ? "AV1 (NVIDIA NVENC)"
+                          : codec === "av1"
+                            ? "AV1 (CPU)"
+                            : codec === "hevc-nvenc"
+                              ? "H.265 / HEVC (NVIDIA NVENC)"
+                              : codec === "hevc"
+                                ? "H.265 / HEVC (libx265)"
+                                : codec === "h264-nvenc"
+                                  ? "H.264 (NVIDIA NVENC)"
+                                  : "H.264 (libx264)"
+                      }
+                    />
+                  ),
+                )}
+              </Form.Dropdown>
+            );
+
           case "encodingMode":
             return (
               <Form.Dropdown
@@ -1129,11 +1198,19 @@ export function QualitySettingsComponent({
                   if (outputFormat === ".mov") {
                     return;
                   } else if (newMode === "crf") {
-                    const newSettings = DEFAULT_QUALITIES[outputFormat as keyof typeof DEFAULT_QUALITIES];
+                    const base = DEFAULT_QUALITIES[outputFormat as keyof typeof DEFAULT_QUALITIES] as Record<
+                      string,
+                      unknown
+                    >;
+                    const newSettings =
+                      outputFormat === ".mp4" || outputFormat === ".mkv" ? { ...base, codec: activeCodec } : base;
                     onSettingsChange(newSettings);
                   } else {
                     const vbrDefault = DEFAULT_VBR_QUALITIES[outputFormat as keyof typeof DEFAULT_VBR_QUALITIES];
-                    const newSettings = { ...vbrDefault, encodingMode: newMode };
+                    const newSettings =
+                      outputFormat === ".mp4" || outputFormat === ".mkv"
+                        ? { ...vbrDefault, codec: activeCodec, encodingMode: newMode }
+                        : { ...vbrDefault, encodingMode: newMode };
                     onSettingsChange(newSettings);
                   }
                 }}
@@ -1163,12 +1240,16 @@ export function QualitySettingsComponent({
                 title="Quality"
                 value={(currentValue as number)?.toString()}
                 onChange={(quality: string) => onSettingsChange({ ...settingsObj, [controlType]: parseInt(quality) })}
-                info="Higher values = better quality, larger files"
+                info="Higher % = lower CRF/CQ = better quality and larger files"
               >
                 {[...Array(21).keys()]
-                  .map((i) => (100 - i * 5).toString())
+                  .map((i) => 100 - i * 5)
                   .map((q) => (
-                    <Form.Dropdown.Item key={q} value={q} title={`${q}`} />
+                    <Form.Dropdown.Item
+                      key={q}
+                      value={q.toString()}
+                      title={`${q} (${formatQualityCrfHint(q, outputFormat === ".mp4" || outputFormat === ".mkv" ? activeCodec : undefined)})`}
+                    />
                   ))}
               </Form.Dropdown>
             );
@@ -1224,7 +1305,7 @@ export function QualitySettingsComponent({
                 onChange={(preset: string) =>
                   onSettingsChange({ ...settingsObj, [controlType]: preset as VideoPreset })
                 }
-                info="Balance between encoding speed and compression efficiency"
+                info="Slower presets take longer to encode but produce smaller files and higher quality; faster presets finish quicker with larger files and lower quality."
               >
                 {VIDEO_PRESET.map((preset) => (
                   <Form.Dropdown.Item

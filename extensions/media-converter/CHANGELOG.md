@@ -4,7 +4,14 @@
 
 ### Added
 
+- **Video Codec** selector for `.mp4` and `.mkv` outputs in Advanced Mode (`H.264`, `H.265 / HEVC`, `AV1 (CPU)`, plus hardware-detected NVIDIA NVENC options for `H.264`, `H.265 / HEVC`, and `AV1`), and a **Default Video Codec** preference.
 - `.heic` image input support on Windows and Linux when FFmpeg 7.0+ is installed (converting to JPG, PNG, WebP, TIFF, or AVIF, and resizing/cropping in **Edit Media**).
+- Show the resolved FFmpeg CRF/CQ value next to each percentage in the Advanced Mode **Quality** dropdown (e.g. `45 (CRF 28)` or `30 (CQ 36)`).
+
+### Changed
+
+- `.mp4` outputs now include `-movflags +faststart` for faster streaming playback, and H.265 `.mp4` outputs include `-tag:v hvc1` for broader player compatibility.
+- Clarified the **Encoding Preset** tooltip to explain how slower vs. faster presets affect encoding time, file size, and quality.
 
 ### Fixed
 
