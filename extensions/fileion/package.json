@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fileion",
+  "title": "Fileion",
+  "description": "Search software, tools, Q&A and articles on Fileion.Com: latest versions, free online tools, questions and news.",
+  "icon": "extension-icon.png",
+  "author": "sjsiam",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-fileion",
+      "title": "Search Fileion",
+      "subtitle": "Fileion",
+      "description": "Search software, tools, Q&A and articles on Fileion.Com in one list, with a preview for every result.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-updates",
+      "title": "Recent Updates",
+      "subtitle": "Fileion",
+      "description": "The newest software versions added to Fileion.Com.",
+      "mode": "view"
+    },
+    {
+      "name": "latest-articles",
+      "title": "Latest Articles",
+      "subtitle": "Fileion",
+      "description": "The newest Fileion blog posts and news, with a Blog or News filter and search.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Optional Fileion API key. Free use has a limit per address; a free key raises it. Create one at https://developers.fileion.com/keys",
+      "placeholder": "Leave empty unless you have a key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
