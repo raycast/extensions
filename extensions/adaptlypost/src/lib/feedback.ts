@@ -1,5 +1,5 @@
 import { openExtensionPreferences, showToast, Toast } from "@raycast/api";
-import { ApiError } from "./http";
+import { isRejectedKey } from "./http";
 
 type ToastCopy<T> = {
   pending: string;
@@ -11,7 +11,7 @@ type ToastCopy<T> = {
 const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
 const preferencesAction = (error: unknown): Toast.ActionOptions | undefined =>
-  error instanceof ApiError && error.status === 401
+  isRejectedKey(error)
     ? { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() }
     : undefined;
 

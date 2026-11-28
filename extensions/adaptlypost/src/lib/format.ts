@@ -71,6 +71,8 @@ export const formatDateTime = (value: string): string =>
 
 export const appUrlForPost = (post: Post): string => `${APP_URL}${APP_PATH_BY_STATUS[post.status]}`;
 
+export const editorUrlForPost = (post: Post): string => `${APP_URL}/create-post?postId=${encodeURIComponent(post.id)}`;
+
 export function postTitle(post: Post): string {
   const firstLine = post.text
     ?.split("\n")

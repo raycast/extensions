@@ -32,6 +32,8 @@ export class ApiError extends Error {
   }
 }
 
+export const isRejectedKey = (error: unknown): boolean => error instanceof ApiError && error.status === 401;
+
 export function buildUrl(baseUrl: string, path: string, query: ApiRequest["query"] = {}): string {
   const url = new URL(`${baseUrl}${path}`);
   for (const [name, value] of Object.entries(query)) {

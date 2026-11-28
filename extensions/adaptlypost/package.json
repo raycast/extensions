@@ -39,6 +39,13 @@
       "mode": "view"
     },
     {
+      "name": "search-drafts",
+      "title": "Search Drafts",
+      "subtitle": "AdaptlyPost",
+      "description": "Browse your drafts, then edit, publish or delete one.",
+      "mode": "view"
+    },
+    {
       "name": "search-accounts",
       "title": "Search Accounts",
       "subtitle": "AdaptlyPost",
