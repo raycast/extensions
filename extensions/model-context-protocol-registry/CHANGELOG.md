@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add DiffCI MCP Server] - {PR_MERGE_DATE}
+
+- Add DiffCI to the official registry: find which tests and checks a code change affects before you push, interpret DiffCI reports, and check GitHub Actions workflows. 3 read-only tools. Hosted Streamable HTTP server at https://diffci.com/mcp/v1 with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
