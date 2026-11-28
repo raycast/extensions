@@ -1,5 +1,10 @@
 # Coffee Changelog
 
+## [Keep schedule changes made as it starts] - {PR_MERGE_DATE}
+
+- Deleting, editing or pausing today's schedule just as it started could leave its session running and bring the old schedule back. Coffee now checks the schedule again before and after starting it. If it changed meanwhile, Coffee stops the session instead of saving the old schedule back, and a schedule deleted just before its start no longer replaces a session you started yourself ([#34024](https://github.com/raycast/extensions/issues/34024)).
+- Deleting a schedule in Schedule Caffeination right after it starts now stops its session, even before the list shows it as running.
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).

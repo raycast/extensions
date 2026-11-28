@@ -4,6 +4,8 @@ import {
   Schedule,
   startCaffeinate,
   getSchedule,
+  parseSchedule,
+  schedulesEqual,
   stopCaffeinateIfMatches,
   isCoffeeRunning,
   getCaffeinationState,
@@ -87,6 +89,12 @@ function getRaycastSessionId(): string {
   return `ppid:${process.ppid}`;
 }
 
+async function isStillStored(schedule: Schedule): Promise<boolean> {
+  const stored = parseSchedule(await LocalStorage.getItem(schedule.day));
+  // Other checks save IsRunning too; only a change to the schedule itself counts.
+  return schedulesEqual(stored && { ...stored, IsRunning: schedule.IsRunning }, schedule);
+}
+
 async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
     return false;
@@ -120,12 +128,19 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
     endTime.setHours(endHour, endMinute, 0, 0);
     const remainingSeconds = Math.ceil((endTime.getTime() - currentDate.getTime()) / 1000);
 
-    await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${remainingSeconds}`, {
+    // Reading the state can take seconds; don't replace a session for a schedule changed or deleted meanwhile.
+    if (!(await isStillStored(schedule))) return false;
+    const sessionId = await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${remainingSeconds}`, {
       kind: "schedule",
       day: schedule.day,
       from: schedule.from,
       to: schedule.to,
     });
+    // A delete or edit made during the start didn't see this session running, so it didn't stop it.
+    if (!(await isStillStored(schedule))) {
+      if (sessionId) await stopCaffeinateIfMatches({ menubar: true, status: true }, sessionId);
+      return false;
+    }
     schedule.IsRunning = true;
     await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
     return true;

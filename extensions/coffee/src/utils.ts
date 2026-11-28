@@ -110,12 +110,13 @@ export async function startCaffeinate(
   reason?: CaffeinationReason,
 ) {
   parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
+  let sessionId: string | null;
   if (process.platform === "win32") {
-    const sessionId = await windowsStartCaffeinate(additionalArgs);
+    sessionId = await windowsStartCaffeinate(additionalArgs);
     await setWindowsCaffeinationReason(sessionId, reason);
   } else {
     const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
-    await startMacCaffeinate(args, reason);
+    ({ sessionId } = await startMacCaffeinate(args, reason));
   }
 
   // showHUD closes the window and Raycast 2 unloads view commands, so spawn
@@ -126,6 +127,7 @@ export async function startCaffeinate(
     await showHUD(hudMessage);
   }
   await refresh;
+  return sessionId;
 }
 
 export async function stopCaffeinate(
@@ -292,6 +294,18 @@ export function parseSchedule(value: unknown): Schedule | undefined {
   }
 
   return undefined;
+}
+
+export function schedulesEqual(a: Schedule | undefined, b: Schedule | undefined): boolean {
+  if (a === undefined || b === undefined) return a === b;
+
+  return (
+    a.day === b.day &&
+    a.from === b.from &&
+    a.to === b.to &&
+    a.IsManuallyDecafed === b.IsManuallyDecafed &&
+    a.IsRunning === b.IsRunning
+  );
 }
 
 export async function changeScheduleState(operation: "caffeinate" | "decaffeinate", schedule: Schedule) {
