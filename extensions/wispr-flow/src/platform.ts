@@ -12,7 +12,7 @@ export const WISPR_FLOW_BUNDLE_ID = "com.electron.wispr-flow";
 export interface PlatformAdapter {
   getDefaultDbPath(): string;
   isWisprFlowInstalled(): Promise<boolean>;
-  openWisprFlow(url: string): Promise<void>;
+  openWisprFlow(url: string): Promise<boolean>;
 }
 
 class MacOSPlatform implements PlatformAdapter {
@@ -31,8 +31,9 @@ class MacOSPlatform implements PlatformAdapter {
     return apps.some(({ bundleId }) => bundleId === WISPR_FLOW_BUNDLE_ID);
   }
 
-  async openWisprFlow(url: string): Promise<void> {
+  async openWisprFlow(url: string): Promise<boolean> {
     await open(url, WISPR_FLOW_BUNDLE_ID);
+    return true;
   }
 }
 
@@ -73,15 +74,17 @@ class WindowsPlatform implements PlatformAdapter {
     return false;
   }
 
-  async openWisprFlow(url: string): Promise<void> {
+  async openWisprFlow(url: string): Promise<boolean> {
     try {
       await open(url);
+      return true;
     } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not open Wispr Flow",
         message: "Please open Wispr Flow manually.",
       });
+      return false;
     }
   }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wispr-flow",
   "title": "Wispr Flow",
-  "description": "Search your Wispr Flow transcription history, manage your custom dictionary, toggle voice dictation and paste your last transcript.",
+  "description": "Search your Wispr Flow transcription history, manage your custom dictionary, toggle voice dictation and Notetaker, and paste your last transcript.",
   "icon": "icon.png",
   "author": "carterm",
   "contributors": [
@@ -10,7 +10,8 @@
     "mattiacolombomc",
     "yonn",
     "traviscooksfdc",
-    "tim_gailey"
+    "tim_gailey",
+    "andy_slezak"
   ],
   "categories": [
     "Productivity",
@@ -115,6 +116,34 @@
       "title": "Stop Recording",
       "subtitle": "Wispr Flow",
       "description": "Stop Wispr Flow voice dictation",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-notetaker",
+      "title": "Toggle Notetaker",
+      "subtitle": "Wispr Flow",
+      "description": "Start a Wispr Flow Notetaker recording, or stop the one in progress",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-notetaker",
+      "title": "Start Notetaker",
+      "subtitle": "Wispr Flow",
+      "description": "Start a new Wispr Flow Notetaker recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-notetaker",
+      "title": "Stop Notetaker",
+      "subtitle": "Wispr Flow",
+      "description": "Stop the Wispr Flow Notetaker recording in progress",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-notetaker",
+      "title": "Open Notetaker",
+      "subtitle": "Wispr Flow",
+      "description": "Open the Notetaker page in Wispr Flow",
       "mode": "no-view"
     },
     {

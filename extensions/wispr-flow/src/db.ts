@@ -38,7 +38,7 @@ export async function ensureWisprFlowInstalled(): Promise<boolean> {
   return installed;
 }
 
-export async function openWisprFlow(url: string): Promise<void> {
+export async function openWisprFlow(url: string): Promise<boolean> {
   return platform.openWisprFlow(url);
 }
 
