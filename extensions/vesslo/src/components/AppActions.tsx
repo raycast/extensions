@@ -5,6 +5,7 @@ import { resolveAppActions } from "../utils/action-policy";
 import { openInVesslo, performAppAction } from "../utils/actions";
 import { ReloadDataAction } from "./DataStateNotice";
 import { HomebrewRequestReview } from "./HomebrewRequestReview";
+import { AppDetail } from "./AppDetail";
 
 export function AppActions({
   app,
@@ -89,6 +90,19 @@ export function AppActions({
             content={app.bundleId}
           />
         )}
+        <Action.Push
+          title="View App Details"
+          icon={Icon.Info}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          target={
+            <AppDetail
+              app={app}
+              reviewReason={policy.reviewReason}
+              navigationBundleId={policy.navigationBundleId}
+              canShowInFinder={policy.canShowInFinder}
+            />
+          }
+        />
       </ActionPanel.Section>
       {onRefresh && (
         <ActionPanel.Section title="Vesslo Data">

@@ -8,11 +8,11 @@ Search your Vesslo app library, review updates and findings, and follow Homebrew
 
 [Website](https://vesslo.top/vesslo) · [Vesslo for macOS](https://github.com/hjm79/Vesslo-MacAppManager) · [Raycast Store](https://www.raycast.com/hjm79/vesslo)
 
-> **Requires Vesslo 2.1.0 (Build 30) or later on macOS 13 or later.** [Download Vesslo 2.1.0](https://github.com/hjm79/Vesslo-MacAppManager-release/releases/download/v2.1.0/Vesslo.dmg). Vesslo provides a 14-day trial; a license is required after the trial.
+> **Requires Vesslo 2.1.0 (Build 30) or later on macOS 13 or later.** [Download the latest Vesslo](https://github.com/hjm79/Vesslo-MacAppManager-release/releases/latest). Vesslo provides a 14-day trial; a license is required after the trial.
 
 ## Setup
 
-1. Use macOS 13 or later with Raycast and [Vesslo 2.1.0 (Build 30) or later](https://github.com/hjm79/Vesslo-MacAppManager-release/releases/download/v2.1.0/Vesslo.dmg) installed. Vesslo is a separate paid companion app with a 14-day trial. No additional account, API key, or credential preference is required by this extension.
+1. Use macOS 13 or later with Raycast and [Vesslo 2.1.0 (Build 30) or later](https://github.com/hjm79/Vesslo-MacAppManager-release/releases/latest) installed. Vesslo is a separate paid companion app with a 14-day trial. No additional account, API key, or credential preference is required by this extension.
 2. Open Vesslo and let it load your app library. Vesslo automatically exports the library to `~/Library/Application Support/Vesslo/raycast_data.json`.
 3. Run the desired Vesslo command in Raycast. **Reload Vesslo Data (`⌘R`)** rereads the local export. To check for newer app versions, run an update check in Vesslo itself.
 4. For exact Homebrew review, run an update check in Vesslo before selecting targets in Raycast. Vesslo 2.1.0 (Build 30) provides the required review and receipt integration; each selected target must still have current readiness evidence.
@@ -23,13 +23,15 @@ Search your Vesslo app library, review updates and findings, and follow Homebrew
 | --- | --- |
 | **Search Apps** | Find apps by name, Bundle ID, developer, tag, or memo. Choose a search field, read match context, and open an available app, reveal it in Finder, or inspect it in Vesslo. |
 | **View Updates** | Inspect Vesslo's exported candidates, current and target versions, source filters, sorting, and check status. Use `⌘I` for details. Supported actions open Vesslo or the App Store as indicated. |
-| **Bulk Homebrew Update** | Select 1–16 eligible Homebrew app installations, review the selection, and ask Vesslo to confirm it. Selection survives search changes. Vesslo owns execution and verification. |
+| **Bulk Homebrew Update** | Select 1–16 eligible Homebrew app installations, use **Selected Only** to inspect or remove selections, and ask Vesslo to confirm them. Selection survives search changes. Vesslo owns execution and verification. |
 | **Browse by Tag** | Browse installed apps under their exact Vesslo tags. Back navigation preserves the previous view. |
 | **Review Apps** | Inspect exported Security, Update Sources, or Management findings. Switch **All Apps / Update Candidates** independently with `⌘⇧U`; use `⌘I` for details. This view does not scan or update apps. |
 | **Deleted Apps** | Search deleted records retained in the export and copy their recorded Bundle IDs or paths. It does not restore, reinstall, open, or update deleted apps. |
-| **Homebrew Requests** | Read Vesslo's request history and results for every original target. Inspect technical details when needed. The command cannot retry, delete, or execute requests. |
+| **Homebrew Requests** | Filter request history by recorded status and search the original targets or reasons. Earlier-session, expired, and cached results remain identified as history. Inspect technical details when needed; this command cannot retry, delete, or execute requests. |
 
 Tags and memos are edited in Vesslo. The extension presents the data Vesslo has exported.
+
+Use **View App Details** in an app's action menu for structured version, source, developer, and installation information alongside Vesslo's review warnings. Update and review previews use the same native information layout.
 
 ![Search Apps with compact app rows](media/vesslo-search-apps.png)
 

@@ -63,7 +63,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.5.1"
+    "@raycast/api": "^2.14.1"
   },
   "overrides": {
     "brace-expansion": "5.0.9"
@@ -71,8 +71,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "eslint": "^9.39.2",
     "prettier": "^3.0.3",
     "react": "19.0.0",
@@ -84,7 +84,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node scripts/test.cjs",
     "typecheck": "tsc --noEmit --pretty false",
     "lint:source": "eslint src",
     "build:check": "ray build --environment dist --output dist --non-interactive"
