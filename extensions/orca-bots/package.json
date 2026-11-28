@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orca-bots",
+  "title": "Orca Bots",
+  "description": "Ask Orca bots questions, read their replies, and monitor agents. Requires the Orca app.",
+  "icon": "extension-icon.png",
+  "author": "eromleduk",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "ask-bot",
+      "title": "Ask Bot",
+      "description": "Send a prompt to an Orca bot and read its reply",
+      "mode": "view"
+    },
+    {
+      "name": "open-agents",
+      "title": "Open Agents",
+      "description": "See what your Orca agents are doing at a glance",
+      "mode": "view"
+    },
+    {
+      "name": "ask-default-bot",
+      "title": "Ask Default Bot",
+      "description": "Send a question to your default bot and read its reply in one step",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Your Question",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "orcaPath",
+      "type": "file",
+      "required": false,
+      "title": "Orca CLI Path",
+      "description": "Leave empty to use the CLI bundled inside Orca.app.",
+      "placeholder": "/Applications/Orca.app/Contents/Resources/bin/orca"
+    },
+    {
+      "name": "defaultBot",
+      "type": "directory",
+      "required": false,
+      "title": "Default Bot",
+      "description": "Bot folder inside ~/.orca/bots, for example ~/.orca/bots/leglaude. Used by \"Ask Default Bot\"."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.11.1",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}
