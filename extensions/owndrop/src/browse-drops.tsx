@@ -3,7 +3,6 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Color,
   confirmAlert,
   Icon,
   Keyboard,
@@ -26,7 +25,6 @@ import {
   downloadDropForClipboard,
   type DropItem,
   extractUrl,
-  formatBytes,
   getCacheScope,
   getServerUrl,
   listDrops,
@@ -39,13 +37,6 @@ function getItemTitle(item: DropItem): string {
     return (item.text ?? "").split("\n")[0]?.slice(0, 90) || "Empty text";
   }
   return item.name || "Untitled file";
-}
-
-function getItemSubtitle(item: DropItem): string {
-  if (item.type === "text" && item.linkPreview?.title) {
-    return item.text ?? "";
-  }
-  return item.device || "Unknown device";
 }
 
 function getItemIcon(item: DropItem): Icon {
@@ -169,7 +160,7 @@ function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploade
     try {
       await launchCommand({ name: "drop-clipboard", type: LaunchType.UserInitiated });
     } catch (err) {
-      await showFailureToast(err, { title: "Failed to launch Drop" });
+      await showFailureToast(err, { title: "Failed to launch Drop Clipboard" });
     }
   };
   const selectedItem = visibleItems.find((item) => item.id === selectedId) ?? visibleItems[0];
@@ -275,24 +266,13 @@ function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploade
         <List.EmptyView
           icon={Icon.Tray}
           title={isLoading || query !== remoteQuery ? "Searching Drops…" : "No Drops"}
-          description="Run Drop to send clipboard content. Browse refreshes every 10 seconds."
+          description="Run Drop Clipboard to send clipboard content. Browse Drops refreshes every 10 seconds."
         />
       ) : (
         <List.Section title={error ? "Cached Results" : undefined}>
           {visibleItems.map((item) => {
             const kind = getDropKind(item);
             const url = item.type === "text" ? extractUrl(item.text) : null;
-            const accessories: List.Item.Accessory[] = [];
-            if (item.id === uploaded?.id) accessories.push({ tag: { value: "Just dropped", color: Color.Green } });
-            if (item.pinned) {
-              accessories.push({
-                icon: { source: Icon.Pin, tintColor: Color.Blue },
-                tooltip: "Pinned",
-              });
-            }
-            accessories.push({ tag: item.device || "Web" });
-            accessories.push({ text: formatBytes(item.size) });
-            accessories.push({ date: new Date(item.createdAt) });
 
             return (
               <List.Item
@@ -300,8 +280,6 @@ function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploade
                 id={item.id}
                 icon={getItemIcon(item)}
                 title={getItemTitle(item)}
-                subtitle={getItemSubtitle(item)}
-                accessories={accessories}
                 detail={item.id === selectedItem?.id ? <DropDetail key={item.id} item={item} /> : undefined}
                 actions={
                   <ActionPanel>

@@ -33,7 +33,11 @@ export default function DropCommand() {
         setMessage("Clipboard is empty or unsupported. Enter text or choose files below.");
         return;
       }
-      await showToast({ style: Toast.Style.Success, title: "Dropped successfully", message: "Selected in Browse" });
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Dropped successfully",
+        message: "Selected in Browse Drops",
+      });
       push(<BrowseDropsCommand uploaded={item!} />);
     } catch (error) {
       setMessage((error as Error).message);
@@ -71,7 +75,7 @@ export default function DropCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Drop" onSubmit={() => send({ text, files })} />
-          <Action.Push title="Browse" target={<BrowseDropsCommand />} />
+          <Action.Push title="Browse Drops" target={<BrowseDropsCommand />} />
         </ActionPanel>
       }
     >
