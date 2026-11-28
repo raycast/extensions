@@ -1,9 +1,10 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard, useNavigation } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { endedSessionError, listVaultSharing, listVaultsAndItems, SESSION_CHECK_WAIT_MS } from "./pass-cli";
+import { endedSessionError, listVaultSharing, listVaultsAndItems, waitForSessionCheck } from "./pass-cli";
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 import { SearchItemsView } from "./search-items-view";
 import { NotLoggedInView } from "./login-view";
+import { ReloadOptions, SessionLockedView } from "./session-lock-view";
 import {
   getCachedFolders,
   getCachedItems,
@@ -15,7 +16,7 @@ import {
   setCachedVaults,
 } from "./cache";
 import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
-import { createListingSaves, createRequestTracker, listingSaves, withTimeout } from "./refresh";
+import { createListingSaves, createRequestTracker, listingSaves } from "./refresh";
 import { platformShortcut } from "./shortcuts";
 import {
   SortVaultsByDropdown,
@@ -84,26 +85,40 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     );
   }, []);
 
-  async function loadVaults() {
+  async function loadVaults(options?: ReloadOptions) {
     const isLatest = loads.start();
-    // The login screen stays while loading after a login or Check Again, until there's something to show.
-    if (error?.type !== "not_authenticated") setError(null);
+    // Raycast can pass its own arguments to an action's callback.
+    const isUnlocked = options?.isUnlocked === true;
+    // The login and Session Locked screens stay while loading after a login or Check Again, until there's something to
+    // show. Once unlocked, the vaults already here show at once.
+    if (!PassCliError.isSessionBlocked(error?.type) || (isUnlocked && vaults.length > 0)) setError(null);
     setIsLoading(true);
 
     // Saved vaults wait for pass-cli to confirm the session, as in the item list: an ended one shows the login screen.
-    const sessionCheck = hasLoadedFromCache.current ? Promise.resolve(undefined) : endedSessionError();
+    const sessionCheck = hasLoadedFromCache.current || isUnlocked ? Promise.resolve(undefined) : endedSessionError();
+    // Session Locked shows at once when the session has most likely locked itself, until pass-cli says.
+    let showsLockDue = false;
+    const showLockDue = (locked: PassCliError) => {
+      if (!isLatest()) return;
+      showsLockDue = true;
+      setError(locked);
+    };
     const [cachedVaults, cachedItems, cachedSharing, cachedFolders, sessionEnded] = await Promise.all([
       getCachedVaults(),
       getCachedItems(),
       getCachedSharing(),
       getCachedFolders(),
-      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
+      waitForSessionCheck(sessionCheck, showLockDue),
     ]);
     if (!isLatest()) return;
+    // E.g. used in a terminal meanwhile: it isn't locked.
+    if (showsLockDue && !sessionEnded) setError(null);
     let isFresh = false;
     if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
       knownFolders.current = cachedFolders?.data ?? [];
+      // E.g. once unlocked: the saved vaults show while the listing runs.
+      setError(null);
       // The items cache only holds complete listings, so every cached vault gets a count.
       if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
@@ -163,10 +178,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
         knownFolders.current = [];
         setSessionConfirmed(false);
       }
-      // Without pass-cli, no vault can open: the screen saying how to fix it comes first, as in the item list.
+      // Without pass-cli, or while the session is locked, no vault can open: the screen saying how to fix it comes
+      // first, as in the item list.
       if (
         !hasLoadedFromCache.current ||
-        (err instanceof PassCliError && (err.type === "not_authenticated" || PassCliError.isCliPath(err.type)))
+        (err instanceof PassCliError && (PassCliError.isSessionBlocked(err.type) || PassCliError.isCliPath(err.type)))
       ) {
         if (err instanceof PassCliError) {
           setError(err);
@@ -198,6 +214,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
 
   if (error?.type === "not_authenticated") {
     return <NotLoggedInView reload={loadVaults} />;
+  }
+
+  if (error?.type === "session_locked") {
+    return <SessionLockedView reload={loadVaults} />;
   }
 
   if (error?.type === "keyring_error") {

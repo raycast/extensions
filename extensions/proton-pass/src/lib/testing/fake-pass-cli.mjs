@@ -30,7 +30,59 @@ const expectedArgs = {
   "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
   "json:totps-wrapper": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
   "json:totps-flat": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
+  unlock: ["session", "unlock"],
+  "unlock-echo": ["session", "unlock"],
+  "unlock-not-locked": ["session", "unlock"],
+  "unlock-no-lock": ["session", "unlock"],
+  "unlock-logged-out": ["session", "unlock"],
+  "unlock-hang": ["session", "unlock"],
 };
+
+// pass-cli 2.7.1's messages: pass/src/macros.rs (assert_response!), pass-cli/src/main.rs and commands/session/unlock.rs.
+const LOCKED = "Session is locked. Please unlock your session and try again.";
+const LOCKED_ERROR = "Error: Could not perform operation. Reason: SessionLocked";
+const INVALIDATED = [
+  "Your session has been invalidated and you have been logged out automatically.",
+  "Please log in again with: pass login",
+];
+const LOCK_CODE = "example-123";
+const PROMPT_DELAY_MS = 100;
+
+/**
+ * Like pass-cli, which reads the code with rpassword: from the terminal only, with echo off unless `echo`. The code
+ * must come once the prompt shows: typed before, it would show on screen.
+ */
+function promptForCode({ echo = false } = {}) {
+  if (!process.stdin.isTTY) {
+    console.error(
+      "Error: Error reading lock code\n\nCaused by:\n    0: Error prompting for password\n    1: Device not configured (os error 6)",
+    );
+    process.exit(1);
+  }
+  if (!echo) process.stdin.setRawMode(true);
+  let prompted = false;
+  let typed = "";
+  return new Promise((resolve) => {
+    process.stdin.on("data", (chunk) => {
+      if (!prompted) {
+        console.error("Error: the code came before the prompt");
+        process.exit(1);
+      }
+      typed += chunk.toString("utf8");
+      const end = typed.search(/[\r\n]/);
+      if (end >= 0) resolve(typed.slice(0, end));
+    });
+    setTimeout(() => {
+      prompted = true;
+      process.stdout.write("Enter lock code: ");
+    }, PROMPT_DELAY_MS);
+  });
+}
+
+function wrongCode() {
+  console.error("Error: Error unlocking session\n\nCaused by:\n    Could not perform operation. Reason: InvalidValue");
+  process.exit(1);
+}
 
 if (mode in expectedArgs && JSON.stringify(args) !== JSON.stringify(expectedArgs[mode])) {
   console.error(`Unexpected arguments for ${mode}`);
@@ -177,7 +229,85 @@ const fixtures = {
   "totps-flat": { primary: "111222", secondary: "333444" },
 };
 
+if ((mode?.startsWith("unlock") || mode?.startsWith("session:")) && process.env.FAKE_PASS_CLI_LOG) {
+  appendFileSync(process.env.FAKE_PASS_CLI_LOG, `${JSON.stringify({ args, env: process.env })}\n`);
+}
+
+/**
+ * `info --output json`, then `session unlock` run without a terminal, for a session that has a lock code or not:
+ * locked, unlocked, without one (`no-lock`), or whose lock code was removed between the two (`lock-removed`). Or
+ * logged out (`logged-out`).
+ */
+async function sessionState(state) {
+  const command = args.join(" ");
+  if (state === "logged-out") {
+    console.error("Error: This operation requires an authenticated client");
+    process.exitCode = 1;
+  } else if (command === "info --output json") {
+    // pass-cli 2.7.1's InfoOutput, commands/info.rs.
+    const info = { release_track: "stable", id: "user-1", username: "alice", email: "alice@example.com" };
+    console.log(JSON.stringify({ ...info, session_has_lock: state !== "no-lock", session_lock_after_seconds: 300 }));
+  } else if (command !== "session unlock") {
+    console.error(`Unexpected arguments for ${mode}`);
+    process.exit(3);
+  } else if (state === "unlocked") {
+    console.log("Session is not locked");
+  } else if (state === "locked") {
+    // Without a terminal, the prompt fails, before any code is checked.
+    if (await promptForCode()) wrongCode();
+  } else {
+    console.error("Error: Session has no lock");
+    process.exitCode = 1;
+  }
+}
+
 switch (mode) {
+  case "session:locked":
+  case "session:unlocked":
+  case "session:no-lock":
+  case "session:lock-removed":
+  case "session:logged-out":
+    await sessionState(mode.slice("session:".length));
+    break;
+  // Any command, once the session has locked itself after a while unused.
+  case "locked":
+    console.error(LOCKED);
+    console.error(LOCKED_ERROR);
+    process.exitCode = 1;
+    break;
+  // Any command, once Proton has ended the session, e.g. after too many wrong lock codes.
+  case "session-invalidated":
+    for (const line of INVALIDATED) console.error(line);
+    process.exitCode = 1;
+    break;
+  case "unlock": {
+    const code = await promptForCode();
+    if (code !== LOCK_CODE) wrongCode();
+    process.stdout.write("\r\n");
+    console.log("Session unlocked successfully");
+    process.exit(0);
+    break;
+  }
+  // A terminal that shows what's typed: the code must not show up in the extension anyway.
+  case "unlock-echo":
+    await promptForCode({ echo: true });
+    wrongCode();
+    break;
+  case "unlock-not-locked":
+    console.log("Session is not locked");
+    break;
+  case "unlock-no-lock":
+    console.error("Error: Session has no lock");
+    process.exitCode = 1;
+    break;
+  case "unlock-logged-out":
+    for (const line of INVALIDATED) console.error(line);
+    process.exitCode = 1;
+    break;
+  case "unlock-hang":
+    process.on("SIGHUP", () => process.exit(1));
+    setInterval(() => {}, 1_000);
+    break;
   // A vault shared with a flag that hides its items' contents: pass-cli 2.7.1 refuses them ("not allowed by policy"),
   // and still lists the items' names. FAKE_PASS_CLI_LOG, when set, gets each command's arguments.
   case "policy-hidden":

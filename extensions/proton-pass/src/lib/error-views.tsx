@@ -4,6 +4,7 @@ import { CliPathErrorType, PassCliError, PassCliErrorType, PROTON_PASS_CLI_DOCS 
 import { clearCliCache, outdatedCliVersion } from "./cli";
 import { MIN_PASS_CLI_VERSION } from "./core/cli-version";
 import { NotLoggedInView } from "./login-view";
+import { ReloadOptions, SessionLockedView } from "./session-lock-view";
 
 function ClearCliCacheAction({ onComplete }: { onComplete?: () => void }): JSX.Element {
   const handle = async () => {
@@ -58,6 +59,14 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string, mess
         description: "Run 'pass-cli login' (web login) to authenticate",
         showDocsLink: true,
         showRetry: false,
+      };
+    case "session_locked":
+      return {
+        icon: Icon.Lock,
+        title: "Session Locked",
+        description: "Your pass-cli session is locked. Unlock it, then try again.",
+        showDocsLink: false,
+        showRetry: true,
       };
     case "keyring_error":
       return {
@@ -164,12 +173,14 @@ export function ErrorListView({ errorType, onRetry, contextTitle, message }: Err
 
 export function renderErrorView(
   errorType: PassCliErrorType | null,
-  onRetry?: () => void,
+  onRetry?: (options?: ReloadOptions) => void,
   contextTitle?: string,
   message?: string,
 ): JSX.Element | null {
   if (!errorType) return null;
   // The login screen, rather than a message: it can log in, and follow a login started before.
   if (errorType === "not_authenticated" && onRetry) return <NotLoggedInView reload={onRetry} />;
+  // The code is typed there, and the view loads again once unlocked.
+  if (errorType === "session_locked" && onRetry) return <SessionLockedView reload={onRetry} />;
   return <ErrorListView errorType={errorType} onRetry={onRetry} contextTitle={contextTitle} message={message} />;
 }

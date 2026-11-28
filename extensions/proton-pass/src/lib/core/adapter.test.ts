@@ -101,6 +101,86 @@ test("returns false for the real unauthenticated CLI failure", async () => {
   assert.equal(await adapter.checkAuth(), false);
 });
 
+test("a locked session isn't taken for a logged-out one, which would clear the saved items and show the login", async () => {
+  const adapter = createPassCliAdapter(fakeCommand("locked"));
+
+  for (const command of [() => adapter.checkAuth(), () => adapter.listVaults()]) {
+    await assert.rejects(command, (error: unknown) => error instanceof PassCliError && error.type === "session_locked");
+  }
+});
+
+test("a session ended by Proton, e.g. after too many wrong lock codes, counts as logged out", async () => {
+  assert.equal(await createPassCliAdapter(fakeCommand("session-invalidated")).checkAuth(), false);
+});
+
+test("a session with a lock code is asked whether it's locked: info says only that it has one, and answers either way", async () => {
+  const checkWith = async (mode: string) => {
+    const dir = mkdtempSync(join(tmpdir(), "pass-session-"));
+    const log = join(dir, "calls.log");
+    try {
+      const lockCodes: number[] = [];
+      const adapter = createPassCliAdapter(fakeCommand(mode), { env: { ...process.env, FAKE_PASS_CLI_LOG: log } });
+      const answer = await adapter.checkSession(() => lockCodes.push(1));
+      const calls = readFileSync(log, "utf8")
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line).args.join(" "));
+      return { answer, calls, toldLockCode: lockCodes.length > 0 };
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  assert.deepEqual(await checkWith("session:locked"), {
+    answer: { state: "locked", hasLock: true },
+    calls: ["info --output json", "session unlock"],
+    toldLockCode: true,
+  });
+  assert.deepEqual(await checkWith("session:unlocked"), {
+    answer: { state: "open", hasLock: true },
+    calls: ["info --output json", "session unlock"],
+    toldLockCode: true,
+  });
+  assert.deepEqual(await checkWith("session:lock-removed"), {
+    answer: { state: "open", hasLock: false },
+    calls: ["info --output json", "session unlock"],
+    toldLockCode: true,
+  });
+  // Without a lock code, nothing more than before.
+  assert.deepEqual(await checkWith("session:no-lock"), {
+    answer: { state: "open", hasLock: false },
+    calls: ["info --output json"],
+    toldLockCode: false,
+  });
+});
+
+test("the session check gives the lock's delay, and only commands on the account count as using the session", async () => {
+  const delays: (number | undefined)[] = [];
+  await createPassCliAdapter(fakeCommand("session:locked")).checkSession((seconds) => delays.push(seconds));
+  assert.deepEqual(delays, [300]);
+
+  let uses = 0;
+  const hooks = { onSessionUsed: () => void uses++ };
+  await createPassCliAdapter(fakeCommand("json:vaults-array"), {}, hooks).listVaults();
+  assert.equal(uses, 1);
+  // Not info, nor the lock check, which say nothing of what the session did: Proton's delay may have passed.
+  await createPassCliAdapter(fakeCommand("session:unlocked"), {}, hooks).checkSession();
+  // Nor a command refused because the session is locked.
+  await assert.rejects(createPassCliAdapter(fakeCommand("locked"), {}, hooks).listVaults());
+  assert.equal(uses, 1);
+});
+
+test("the session check reports a logged-out session as ended, and a locked one refused by info as locked", async () => {
+  assert.deepEqual(await createPassCliAdapter(fakeCommand("session:logged-out")).checkSession(), {
+    state: "ended",
+    hasLock: false,
+  });
+  await assert.rejects(
+    createPassCliAdapter(fakeCommand("locked")).checkSession(),
+    (error: unknown) => error instanceof PassCliError && error.type === "session_locked",
+  );
+});
+
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
   assert.deepEqual(vaultShareListArgs(), ["share", "list", "--only-vaults", "true", "--output", "json"]);

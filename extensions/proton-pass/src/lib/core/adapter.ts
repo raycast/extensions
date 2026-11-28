@@ -8,6 +8,7 @@ import {
 } from "../pass-cli-normalize";
 import { Folder, Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
 import { CommandDescriptor, ExecCliOptions, execCli, normalizeCliExecutionError } from "./exec";
+import { canCheckLockState, checkLockState, unlockSession, UnlockOutcome } from "./unlock";
 
 export function passwordArgs(options: PasswordOptions): string[] {
   if (options.type === "random") {
@@ -34,6 +35,38 @@ export function logoutArgs(force: boolean): string[] {
 
 export function authCheckArgs(): string[] {
   return ["info"];
+}
+
+/** `info`, which says whether the session has a lock code: see checkSession. */
+export function sessionInfoArgs(): string[] {
+  return ["info", "--output", "json"];
+}
+
+/** What the session check found: whether pass-cli has a session, whether it's locked, and whether it has a lock code. */
+export interface SessionCheck {
+  state: "open" | "locked" | "ended";
+  hasLock: boolean;
+}
+
+/** `session_has_lock`, in pass-cli's info since 2.2.2. */
+function hasLockCode(info: string): boolean {
+  try {
+    const data: unknown = JSON.parse(info);
+    return isRecord(data) && data.session_has_lock === true;
+  } catch {
+    return false;
+  }
+}
+
+/** `session_lock_after_seconds`: how long the session may stay unused before Proton locks it, 30 to 900 seconds. */
+function lockAfterSeconds(info: string): number | undefined {
+  try {
+    const data: unknown = JSON.parse(info);
+    const seconds = isRecord(data) ? data.session_lock_after_seconds : undefined;
+    return typeof seconds === "number" && Number.isFinite(seconds) && seconds > 0 ? seconds : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function vaultListArgs(): string[] {
@@ -120,7 +153,14 @@ function parseShares(text: string): unknown[] {
 export interface PassCliAdapter {
   generatePassword(options: PasswordOptions): Promise<string>;
   checkAuth(): Promise<boolean>;
+  /**
+   * Whether the session is open, locked or ended. For a session with a lock code, `onLockCode` is called as soon as
+   * that's known, before pass-cli is asked whether it's locked, with how long it may stay unused before Proton locks it.
+   */
+  checkSession(onLockCode?: (lockAfterSeconds?: number) => void): Promise<SessionCheck>;
   logout(force: boolean): Promise<void>;
+  /** Unlocks a locked session with its lock code: see unlockSession. */
+  unlock(code: string): Promise<UnlockOutcome>;
   listVaults(): Promise<Vault[]>;
   /** The user's role on each vault, by share ID. */
   listVaultRoles(): Promise<Map<string, VaultRole>>;
@@ -142,10 +182,26 @@ export interface PassCliAdapter {
  */
 const policyHiddenShares = new Set<string>();
 
-export function createPassCliAdapter(command: CommandDescriptor, execOptions: ExecCliOptions = {}): PassCliAdapter {
+export interface PassCliAdapterHooks {
+  /**
+   * Called when pass-cli answered a command on the account, which Proton counts as using the session: its lock's delay
+   * starts again. Not for `info`, `password` or the lock check, which may not.
+   */
+  onSessionUsed?: () => void;
+}
+
+/** The commands that use the account on Proton's servers, refused while the session is locked. */
+const ACCOUNT_COMMANDS = new Set(["vault", "share", "item", "folder"]);
+
+export function createPassCliAdapter(
+  command: CommandDescriptor,
+  execOptions: ExecCliOptions = {},
+  hooks: PassCliAdapterHooks = {},
+): PassCliAdapter {
   async function run(args: readonly string[]): Promise<string> {
     try {
       const { stdout } = await execCli(command, args, execOptions);
+      if (ACCOUNT_COMMANDS.has(args[0])) hooks.onSessionUsed?.();
       return stdout.trim();
     } catch (error) {
       throw normalizeCliExecutionError(error, command.file);
@@ -172,12 +228,34 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
     logout: async (force) => {
       await run(logoutArgs(force));
     },
+    unlock: (code) => unlockSession(command, code, { env: execOptions.env }),
     checkAuth: async () => {
       try {
         await run(authCheckArgs());
         return true;
       } catch (error) {
         if (error instanceof PassCliError && error.type === "not_authenticated") return false;
+        throw error;
+      }
+    },
+    checkSession: async (onLockCode) => {
+      const ended: SessionCheck = { state: "ended", hasLock: false };
+      let info: string;
+      try {
+        info = await run(sessionInfoArgs());
+      } catch (error) {
+        if (error instanceof PassCliError && error.type === "not_authenticated") return ended;
+        throw error;
+      }
+      if (!hasLockCode(info)) return { state: "open", hasLock: false };
+      onLockCode?.(lockAfterSeconds(info));
+      // Where it can't be asked, a locked session shows once a listing is refused.
+      if (!canCheckLockState()) return { state: "open", hasLock: true };
+      try {
+        const lock = await checkLockState(command, { env: execOptions.env });
+        return { state: lock === "locked" ? "locked" : "open", hasLock: lock !== "none" };
+      } catch (error) {
+        if (error instanceof PassCliError && error.type === "not_authenticated") return ended;
         throw error;
       }
     },

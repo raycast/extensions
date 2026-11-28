@@ -10,6 +10,11 @@ const SHARING_CACHE_KEY = "proton_pass_sharing_cache";
 const FOLDERS_CACHE_KEY = "proton_pass_folders_cache";
 // Per-vault item caches were written by earlier versions; keep them available for offline vault views.
 const VAULT_ITEMS_CACHE_PREFIX = `${ITEMS_CACHE_KEY}_`;
+// Whether the session had a lock code when pass-cli last said, for the next opening: see waitForSessionCheck.
+const SESSION_LOCK_KEY = "proton_pass_session_has_lock";
+// How long the session may stay unused before Proton locks it, in seconds, and when the extension last used it.
+const SESSION_LOCK_AFTER_KEY = "proton_pass_session_lock_after_seconds";
+const SESSION_USED_AT_KEY = "proton_pass_session_used_at";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface CachedData<T> {
@@ -70,6 +75,21 @@ export const setCachedVaults = (vaults: Vault[]) => setCache(VAULTS_CACHE_KEY, v
 export const getCachedFolders = () => getCache<VaultFolder[]>(FOLDERS_CACHE_KEY);
 export const setCachedFolders = (folders: VaultFolder[]) => setCache(FOLDERS_CACHE_KEY, folders);
 
+export const getSessionHasLock = async () => (await LocalStorage.getItem<boolean>(SESSION_LOCK_KEY)) === true;
+/** With the lock's delay when pass-cli gave it: without, the one saved before stays. */
+export async function setSessionHasLock(hasLock: boolean, lockAfterSeconds?: number): Promise<void> {
+  if (!hasLock) {
+    await Promise.all([LocalStorage.removeItem(SESSION_LOCK_KEY), LocalStorage.removeItem(SESSION_LOCK_AFTER_KEY)]);
+    return;
+  }
+  await LocalStorage.setItem(SESSION_LOCK_KEY, true);
+  if (lockAfterSeconds !== undefined) await LocalStorage.setItem(SESSION_LOCK_AFTER_KEY, lockAfterSeconds);
+}
+export const getSessionLockAfter = () => LocalStorage.getItem<number>(SESSION_LOCK_AFTER_KEY);
+
+export const getSessionUsedAt = () => LocalStorage.getItem<number>(SESSION_USED_AT_KEY);
+export const setSessionUsedAt = (time: number) => LocalStorage.setItem(SESSION_USED_AT_KEY, time);
+
 export const getCachedSharing = () => getCache<SavedSharing>(SHARING_CACHE_KEY);
 export const setCachedSharing = (sharing: SavedSharing) => setCache(SHARING_CACHE_KEY, sharing);
 
@@ -81,6 +101,9 @@ export async function clearCache(): Promise<void> {
       key === VAULTS_CACHE_KEY ||
       key === SHARING_CACHE_KEY ||
       key === FOLDERS_CACHE_KEY ||
+      key === SESSION_LOCK_KEY ||
+      key === SESSION_LOCK_AFTER_KEY ||
+      key === SESSION_USED_AT_KEY ||
       key.startsWith(VAULT_ITEMS_CACHE_PREFIX),
   );
 

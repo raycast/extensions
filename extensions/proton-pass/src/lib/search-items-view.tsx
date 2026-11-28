@@ -1,7 +1,7 @@
 import { Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
+import { endedSessionError, listItems, listVaultsAndItems, VaultFailure, waitForSessionCheck } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import {
   getCachedFolders,
@@ -12,6 +12,7 @@ import {
   setCachedVaults,
 } from "./cache";
 import { renderErrorView } from "./error-views";
+import type { ReloadOptions } from "./session-lock-view";
 import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts } from "./item-counts";
@@ -128,10 +129,13 @@ export function SearchItemsView({
   // A slower, older load must not overwrite a newer one (e.g. Retry during a refresh).
   const loads = useMemo(createRequestTracker, []);
 
-  async function loadItems() {
+  async function loadItems(options?: ReloadOptions) {
     const isLatest = loads.start();
-    // The login screen stays while loading after a login or Check Again, until there's something to show.
-    if (error?.type !== "not_authenticated") setError(null);
+    // Raycast can pass its own arguments to an action's callback.
+    const isUnlocked = options?.isUnlocked === true;
+    // The login and Session Locked screens stay while loading after a login or Check Again, until there's something to
+    // show. Once unlocked, the items already here show at once.
+    if (!PassCliError.isSessionBlocked(error?.type) || (isUnlocked && itemsRef.current.length > 0)) setError(null);
     // Loading from the start, so that an empty list doesn't say "No Items Found" meanwhile.
     setIsLoading(true);
     setFailedVaults([]);
@@ -139,15 +143,23 @@ export function SearchItemsView({
 
     // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
     // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
-    // screen replaces them once it answers that the session has ended.
+    // screen replaces them once it answers that the session has ended. Not those of a session with a lock code, which
+    // wait until pass-cli says whether it's locked.
     const sessionCheck =
-      hasLoadedFromCache.current || sessionConfirmed ? Promise.resolve(undefined) : endedSessionError();
+      hasLoadedFromCache.current || sessionConfirmed || isUnlocked ? Promise.resolve(undefined) : endedSessionError();
+    // Session Locked shows at once when the session has most likely locked itself, until pass-cli says.
+    let showsLockDue = false;
+    const showLockDue = (locked: PassCliError) => {
+      if (!isLatest()) return;
+      showsLockDue = true;
+      setError({ type: locked.type, message: locked.message });
+    };
     const [sharedItems, cachedVaults, cachedFolders, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
       getCachedFolders(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
-      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
+      waitForSessionCheck(sessionCheck, showLockDue),
     ]);
     const sharedHasVault = sharedItems?.data.some((item) => listedUnder(item) === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
@@ -163,6 +175,8 @@ export function SearchItemsView({
           }
         : sharedItems;
     if (!isLatest()) return;
+    // E.g. used in a terminal meanwhile: it isn't locked.
+    if (showsLockDue && !sessionEnded) setError(null);
     let isFresh = false;
     if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current && !sessionEnded) {
       // Show cached metadata once the session is confirmed, even when stale: listing everything can take
@@ -170,6 +184,8 @@ export function SearchItemsView({
       updateItems(cachedItems.data);
       updateKnownFolders(cachedFolders?.data ?? []);
       setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
+      // E.g. once unlocked: the saved items show while the listing runs.
+      setError(null);
       // The shared cache only holds complete listings, so every cached vault gets a count.
       if (sharedItems && cachedVaults) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
@@ -188,7 +204,7 @@ export function SearchItemsView({
       if (initialVault && !isSharedWithMe(initialVault) && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
         const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {
-          if (err instanceof PassCliError && err.type === "not_authenticated") throw err;
+          if (err instanceof PassCliError && PassCliError.isSessionBlocked(err.type)) throw err;
           return []; // The full listing below reports the failure.
         });
         if (!isLatest()) return;
@@ -253,8 +269,9 @@ export function SearchItemsView({
         setVaults([]);
         setItemCounts(new Map());
       }
-      // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
-      if (itemsRef.current.length === 0 || PassCliError.isCliPath(type)) {
+      // Without pass-cli, or while the session is locked, passwords, notes and details can't load: the screen saying
+      // how to fix it comes first. A locked session's items stay saved, for once it's unlocked.
+      if (itemsRef.current.length === 0 || PassCliError.isCliPath(type) || type === "session_locked") {
         setError({ type, message });
       } else {
         setLoadFailureMessage(message);

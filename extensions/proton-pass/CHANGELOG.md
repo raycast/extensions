@@ -1,5 +1,13 @@
 # proton-pass Changelog
 
+## [Session Lock] - {PR_MERGE_DATE}
+
+- A pass-cli session with a lock code (`pass-cli session create-lock`) locks itself after a while unused, and pass-cli then refuses every command. The extension used to show that as an unknown error. Browse Items, the vault list and Get TOTP Code now show a Session Locked screen instead of the items: on macOS, type your lock code there to unlock the session; on Windows, it gives the command to run in PowerShell
+- On macOS, nothing of a locked session shows before that screen. When the extension hasn't been used for longer than the lock's delay, the screen shows after a second; otherwise the extension waits for pass-cli to say whether the session is locked, up to 30 seconds, showing "Checking Session…" after the first second
+- Once unlocked, the items already there show at once, while the list refreshes
+- A copy, paste or fill refused by a locked session offers Unlock Session
+- Logout on the Session Locked screen removes the session from this computer, the way out of a forgotten code. A session that Proton ended, e.g. after too many wrong codes, shows the login screen
+
 ## [Proton Pass CLI 2.7.1] - 2026-11-22
 
 - The extension downloads Proton Pass CLI 2.7.1 instead of 2.5.1. On Apple silicon Macs, it's the first pass-cli whose signature keeps the same name from one version to the next, so macOS shouldn't ask for keychain access again when the extension later moves to a newer one. This once, macOS asks for the new pass-cli: choose Always Allow. You stay logged in

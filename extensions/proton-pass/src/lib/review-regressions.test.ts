@@ -22,9 +22,11 @@ import * as artifact from "./core/artifact";
 import * as cliVersion from "./core/cli-version";
 import * as installer from "./core/installer";
 import * as which from "./core/which";
+import * as unlock from "./core/unlock";
 import * as itemFields from "./item-fields";
 import * as generatorDefaults from "./generator-defaults";
 import { normalizeItemDetail } from "./pass-cli-normalize";
+import * as types from "./types";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -36,7 +38,24 @@ const folderViewStub = {
   FolderView: () => null,
 };
 
+// What views hand a locked session: the Session Locked screen itself is tested on its own.
+const sessionLockStub = { SessionLockedView: function SessionLockedView() {} };
+
 // Run the real UI callbacks with Raycast services replaced; no account or clipboard access.
+/**
+ * The views wait for the session check through pass-cli.ts, which waits longer for a session with a lock code. Stubs of
+ * it that don't say wait as for a session without one: SESSION_CHECK_WAIT_MS, and no lock check in Get TOTP Code.
+ */
+function withSessionWaits(name: string, service: unknown): unknown {
+  if ((name !== "./pass-cli" && name !== "./lib/pass-cli") || !service || typeof service !== "object") return service;
+  const stub = service as Record<string, unknown>;
+  const waits: Record<string, unknown> = {
+    waitForSessionCheck: (check: Promise<unknown>) => refresh.withTimeout(check, stub.SESSION_CHECK_WAIT_MS as number),
+    lockedSessionError: async () => undefined,
+  };
+  return new Proxy(stub, { get: (target, key: string) => (key in target ? target[key] : waits[key]) });
+}
+
 function loadView(
   file: string,
   services: Record<string, unknown>,
@@ -52,14 +71,17 @@ function loadView(
     module,
     exports: module.exports,
     require: (name: string) => {
+      if (name in services) return withSessionWaits(name, services[name]);
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
-      if (name in services) return services[name];
       if (name === "./shared-items") return sharedItems;
       if (name === "./format") return format;
       if (name === "./totp") return totp;
       if (name === "./item-fields") return itemFields;
       if (name === "./folders" || name === "./lib/folders") return folders;
       if (name === "./folder-view") return folderViewStub;
+      if (name === "./session-lock-view") return sessionLockStub;
+      if (name === "./core/unlock") return unlock;
+      if (name === "./types") return types;
       if (name === "./sort" || name === "./lib/sort") return sort;
       if (name === "./vault-dropdown" || name === "./lib/vault-dropdown") return vaultDropdown;
       if (name === "./lib/item-counts") return itemCounts;
@@ -163,10 +185,22 @@ function itemActions(
   const contents: string[] = [];
   const concealed: boolean[] = [];
   const huds: string[] = [];
-  const toasts: { style: string; title: string; message?: string }[] = [];
+  const toasts: {
+    style: string;
+    title: string;
+    message?: string;
+    primaryAction?: { title: string; onAction: () => void };
+  }[] = [];
+  const pushed: unknown[] = [];
+  const pop = () => events.push("pop");
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
+    "react/jsx-runtime": {
+      jsx: (type: unknown, props: Element["props"]) => ({ type, props }),
+      jsxs: (type: unknown, props: Element["props"]) => ({ type, props }),
+    },
     "@raycast/api": {
+      useNavigation: () => ({ push: (view: unknown) => pushed.push(view), pop }),
       Action: {},
       ActionPanel: {},
       Icon: {},
@@ -232,8 +266,9 @@ function itemActions(
     // The item view has no details panel to toggle.
     onToggleDetail: isInList ? () => undefined : undefined,
     onUse: () => events.push("use"),
+    onRefresh: () => events.push("refresh"),
   });
-  return { entries: actions(panel), panel, events, fills, contents, concealed, huds, toasts };
+  return { entries: actions(panel), panel, events, fills, contents, concealed, huds, toasts, pushed };
 }
 
 /** The titles of the actions in each section of an item's menu, as Raycast shows them. */
@@ -1152,14 +1187,14 @@ test("pass-cli commands wait for the session check, during which pass-cli can ca
     "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
     "node:os": { homedir: () => "/fixture" },
     "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
-    "./cache": {},
+    "./cache": { setSessionHasLock: async () => undefined },
     "./cli": { ensureCli: async () => "/fixture-cli" },
     "./core/adapter": {
       createPassCliAdapter: () => ({
-        checkAuth: () => {
+        checkSession: () => {
           started.push("info");
           return new Promise((resolve) => {
-            finishCheck = () => resolve(true);
+            finishCheck = () => resolve({ state: "open", hasLock: false });
           });
         },
         getItem: async () => {
@@ -1206,7 +1241,7 @@ test("the session check reports a CLI Path that can't run, so that saved items s
       },
       "./core/adapter": {
         createPassCliAdapter: () => ({
-          checkAuth: async () => {
+          checkSession: async () => {
             throw failure;
           },
         }),
@@ -2625,7 +2660,12 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
   assert.equal(typeof retriedEmpty.onRetry, "function");
 });
 
-function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown; "./item-counts"?: unknown }) {
+function searchItemsFixture(services: {
+  "./pass-cli": unknown;
+  "./cache": unknown;
+  "./item-counts"?: unknown;
+  "./error-views"?: unknown;
+}) {
   const harness = hookHarness();
   const { SearchItemsView } = loadView("search-items-view.tsx", {
     react: harness.react,
@@ -4459,4 +4499,1041 @@ test("pass-cli is looked for in Raycast's PATH first, and a CLI Path set by hand
   calls.length = 0;
   await load("/opt/example/pass-cli").logout();
   assert.deepEqual(calls, [`check /opt/example/pass-cli ${searchPath}`]);
+});
+
+// A locked session: `pass-cli session create-lock` makes the session lock itself after a while unused, and Proton
+// then refuses every command until `pass-cli session unlock`.
+const sessionLocked = () => new PassCliError("Your pass-cli session is locked.", "session_locked");
+const typedJsx = {
+  jsx: (type: unknown, props: Element["props"]) => ({ type, props }),
+  jsxs: (type: unknown, props: Element["props"]) => ({ type, props }),
+};
+
+function passCliCountingClears(adapter: Record<string, unknown>) {
+  const counts = { clears: 0 };
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": {
+      clearCache: async () => {
+        counts.clears++;
+      },
+      setSessionHasLock: async () => undefined,
+    },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": { createPassCliAdapter: () => adapter },
+    "./core/login": { isDetachedLoginRunning: async () => false },
+    "./mock-data": {},
+  }) as unknown as {
+    endedSessionError: () => Promise<PassCliError | undefined>;
+    listVaultsAndItems: () => Promise<unknown>;
+    localTotpCode: (shareId: string, itemId: string) => string | undefined;
+  };
+  return { api, counts };
+}
+
+test("the session check reports a locked session, whose saved items stay for once it's unlocked", async () => {
+  for (const checkSession of [
+    // Found by asking whether the session with a lock code is locked.
+    async () => ({ state: "locked", hasLock: true }),
+    // Refused by pass-cli's info.
+    async () => {
+      throw sessionLocked();
+    },
+  ]) {
+    const { api, counts } = passCliCountingClears({ checkSession });
+    assert.equal((await api.endedSessionError())?.type, "session_locked");
+    assert.equal(counts.clears, 0);
+  }
+});
+
+test("a locked session fails the whole listing rather than each vault, and keeps the saved items", async () => {
+  const vault = { shareId: "vault", name: "Personal" };
+  const listing = (failing: "items" | "folders" | "shares") =>
+    passCliCountingClears({
+      listVaults: async () => [vault],
+      listItemShares: async () => {
+        if (failing === "shares") throw sessionLocked();
+        return [];
+      },
+      listFolders: async () => {
+        if (failing === "folders") throw sessionLocked();
+        return [];
+      },
+      listItems: async (shareId: string, vaultName: string, onTotpUri: (itemId: string, uri: string) => void) => {
+        if (failing === "items") throw sessionLocked();
+        onTotpUri("login", "otpauth://totp/Example?secret=JBSWY3DPEHPK3PXP");
+        return [{ ...item, shareId, vaultName }];
+      },
+    });
+  for (const failing of ["items", "folders", "shares"] as const) {
+    const { api, counts } = listing(failing);
+    await assert.rejects(api.listVaultsAndItems(), (error: unknown) => {
+      assert.equal((error as PassCliError).type, "session_locked", failing);
+      return true;
+    });
+    assert.equal(counts.clears, 0, failing);
+  }
+});
+
+test("a locked session shows its screen instead of the saved items, in Browse Items and Get TOTP Code", async () => {
+  // Saved items show while pass-cli answers; the listing then finds the session locked.
+  await assertCliPathScreen(sessionLocked());
+});
+
+function lockedSearchFixture(listVaultsAndItems: () => Promise<unknown>, sessionCheck: () => Promise<unknown>) {
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: sessionCheck,
+      listItems: async () => [],
+      listVaultsAndItems,
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: true }),
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+      setCachedFolders: async () => undefined,
+    },
+  });
+  return { harness, SearchItemsView };
+}
+
+test("once unlocked, the saved items show while the listing runs, and the screen stays until then", async () => {
+  let isLocked = true;
+  let finishListing: () => void = () => undefined;
+  const reloads: (() => Promise<void>)[] = [];
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => (isLocked ? sessionLocked() : undefined),
+      listItems: async () => [],
+      listVaultsAndItems: () =>
+        new Promise((resolve) => {
+          finishListing = () =>
+            resolve({ vaults: [], items: [item], failedVaults: [], folders: { shareIds: [], folders: [] } });
+        }),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: true }),
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+      setCachedFolders: async () => undefined,
+    },
+    "./error-views": {
+      renderErrorView: (type: unknown, onRetry: () => Promise<void>) => {
+        if (!type) return null;
+        reloads.push(onRetry);
+        return { props: { error: type } };
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(render().props.error, "session_locked");
+
+  isLocked = false;
+  const reload = reloads[reloads.length - 1]();
+  // The screen stays until the session check answers, rather than an empty list.
+  assert.equal(render().props.error, "session_locked");
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.deepEqual(render().props.items, [item]);
+  finishListing();
+  await reload;
+  assert.deepEqual(render().props.items, [item]);
+});
+
+test("a session that locks while the items show replaces them with its screen, rather than a toast", async () => {
+  const { harness, SearchItemsView } = lockedSearchFixture(
+    async () => {
+      throw sessionLocked();
+    },
+    async () => undefined,
+  );
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(render().props.error, "session_locked");
+});
+
+test("the vault list shows the Session Locked screen over saved vaults, which stay for once it's unlocked", async () => {
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "react/jsx-runtime": typedJsx,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => {
+        throw sessionLocked();
+      },
+    },
+    "./search-items-view": {},
+    "./error-views": { CliPathErrorView: () => null },
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+      getCachedSharing: async () => null,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  harness.render(VaultsView, { startOnItems: false });
+  harness.effects[0]();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  const screen = harness.render(VaultsView, { startOnItems: false }) as unknown as {
+    type: unknown;
+    props: Element["props"];
+  };
+  assert.equal(screen.type, sessionLockStub.SessionLockedView);
+  assert.equal(typeof screen.props.reload, "function");
+});
+
+test("the item lists' error screens show Session Locked, which loads the list again once unlocked", () => {
+  const { renderErrorView } = loadView("error-views.tsx", {
+    react: {},
+    "react/jsx-runtime": typedJsx,
+    "@raycast/api": { Icon: {}, List: { EmptyView: {} }, Action: {}, ActionPanel: {} },
+    "./cli": {},
+    "./core/cli-version": {},
+    "./login-view": { NotLoggedInView: function NotLoggedInView() {} },
+  });
+  const reload = () => undefined;
+  const screen = (renderErrorView as unknown as (...args: unknown[]) => { type: unknown; props: Element["props"] })(
+    "session_locked",
+    reload,
+  );
+  assert.equal(screen.type, sessionLockStub.SessionLockedView);
+  assert.equal(screen.props.reload, reload);
+});
+
+test("a copy refused by a locked session offers to unlock it, then comes back to the item", async () => {
+  const locked = itemActions(undefined, item, undefined, {
+    store: {
+      peek: () => undefined,
+      load: async () => {
+        throw sessionLocked();
+      },
+    },
+  });
+  await (locked.entries.find((entry) => entry.title === "Copy Password")!.onAction as () => Promise<void>)();
+  const failure = locked.toasts[locked.toasts.length - 1];
+  assert.equal(failure.title, "Session Locked");
+  assert.equal(failure.primaryAction?.title, "Unlock Session");
+  failure.primaryAction!.onAction();
+  const [screen] = locked.pushed as { type: unknown; props: Element["props"] }[];
+  assert.equal(screen.type, sessionLockStub.SessionLockedView);
+  (screen.props.reload as () => void)();
+  // Back to the list, which loads again: the login screen shows there if Logout was chosen instead.
+  assert.deepEqual(locked.events.slice(-2), ["pop", "refresh"]);
+});
+
+function sessionLockedScreen({
+  platform = "darwin",
+  unlock = async () => "unlocked",
+  logout = async () => undefined,
+  confirmed = true,
+}: {
+  platform?: string;
+  unlock?: (code: string) => Promise<string>;
+  logout?: (force: boolean) => Promise<void>;
+  confirmed?: boolean;
+} = {}) {
+  const harness = hookHarness();
+  const toasts: { style: string; title: string; message?: string }[] = [];
+  const events: string[] = [];
+  const copied: string[] = [];
+  const { SessionLockedView } = loadView(
+    "session-lock-view.tsx",
+    {
+      react: harness.react,
+      "@raycast/api": {
+        Form: { Description: "Form.Description", PasswordField: "Form.PasswordField" },
+        List: { EmptyView: "List.EmptyView" },
+        Action: { SubmitForm: "Action.SubmitForm", Style: { Destructive: "destructive" } },
+        ActionPanel: "ActionPanel",
+        Alert: { ActionStyle: { Destructive: "destructive" } },
+        Icon: {},
+        Keyboard: { Shortcut: { Common: { Refresh: "refresh" } } },
+        Toast: { Style: { Animated: "animated", Success: "success", Failure: "failure" } },
+        showToast: async (toast: (typeof toasts)[number]) => {
+          const shown = { ...toast };
+          toasts.push(shown);
+          return shown;
+        },
+        confirmAlert: async () => {
+          events.push("confirm");
+          return confirmed;
+        },
+        Clipboard: {
+          copy: async (value: string) => {
+            copied.push(value);
+          },
+        },
+        showHUD: async (title: string) => {
+          events.push(`hud: ${title}`);
+        },
+      },
+      "./pass-cli": {
+        unlockSession: async (code: string) => {
+          events.push("unlock");
+          return unlock(code);
+        },
+        logout: async (force: boolean) => {
+          events.push(`logout${force ? " --force" : ""}`);
+          return logout(force);
+        },
+        unlockCommand: async () => "& 'C:\\Users\\someone\\pass-cli.exe' session unlock",
+      },
+    },
+    { process: { platform, env: {} } },
+  );
+  const reload = async (options?: { isUnlocked?: boolean }) => {
+    events.push(options?.isUnlocked ? "reload (unlocked)" : "reload");
+  };
+  const render = () => harness.render(SessionLockedView, { reload }) as unknown as Element;
+  const menu = () => actions(render().props.actions);
+  const action = (title: string) => menu().find((entry) => entry.title === title)!;
+  const field = () => actions(render()).find((entry) => entry.id === "code")!;
+  const type = (code: string) => (field().onChange as (value: string) => void)(code);
+  const submit = () => (action("Unlock Session").onSubmit as () => Promise<void>)();
+  return { render, menu, action, field, type, submit, toasts, events, copied };
+}
+
+test("the lock code typed in the Session Locked screen unlocks the session, then the view loads again", async () => {
+  const typed: string[] = [];
+  const screen = sessionLockedScreen({
+    unlock: async (code) => {
+      typed.push(code);
+      return "unlocked";
+    },
+  });
+  // The field has the focus, and the code is hidden as it's typed.
+  assert.equal(screen.field().autoFocus, true);
+  assert.equal(screen.menu()[1].title, "Unlock Session");
+  screen.type("example-123");
+  await screen.submit();
+  assert.deepEqual(typed, ["example-123"]);
+  // The view knows the session is unlocked: what it already has shows at once.
+  assert.deepEqual(screen.events, ["unlock", "reload (unlocked)"]);
+  assert.deepEqual(
+    screen.toasts.map(({ style, title }) => `${style}: ${title}`),
+    ["success: Session Unlocked"],
+  );
+  // The code doesn't stay on screen.
+  assert.equal(screen.field().value, "");
+});
+
+test("a wrong lock code says why and empties the field, and an empty one isn't sent", async () => {
+  const screen = sessionLockedScreen({
+    unlock: async () => {
+      throw new PassCliError("Error unlocking session: Could not perform operation. Reason: InvalidValue", "unknown");
+    },
+  });
+  await screen.submit();
+  assert.deepEqual(screen.events, []);
+  assert.equal(screen.field().error, "Enter your lock code");
+
+  screen.type("example-999");
+  assert.equal(screen.field().error, undefined);
+  await screen.submit();
+  assert.deepEqual(screen.events, ["unlock"]);
+  const failure = screen.toasts[screen.toasts.length - 1];
+  assert.equal(`${failure.style}: ${failure.title}`, "failure: Couldn't Unlock");
+  assert.match(failure.message ?? "", /InvalidValue/);
+  assert.equal(screen.field().value, "");
+});
+
+test("a session ended while unlocking, e.g. after too many wrong codes, goes to the login", async () => {
+  const screen = sessionLockedScreen({
+    unlock: async () => {
+      throw new PassCliError("Your pass-cli session has ended.", "not_authenticated");
+    },
+  });
+  screen.type("example-999");
+  await screen.submit();
+  assert.deepEqual(screen.events, ["unlock", "reload"]);
+  assert.equal(screen.toasts[screen.toasts.length - 1].title, "Logged Out");
+});
+
+test("a forgotten lock code can only be left by logging out on this computer, which asks first", async () => {
+  const declined = sessionLockedScreen({ confirmed: false });
+  await (declined.action("Logout").onAction as () => Promise<void>)();
+  assert.deepEqual(declined.events, ["confirm"]);
+
+  const screen = sessionLockedScreen();
+  assert.equal(screen.action("Logout").style, "destructive");
+  await (screen.action("Logout").onAction as () => Promise<void>)();
+  // Proton refuses to end a locked session, which `logout --force` removes from this computer.
+  assert.deepEqual(screen.events, ["confirm", "logout --force", "reload"]);
+
+  await (screen.action("Check Again").onAction as () => Promise<void>)();
+  assert.equal(screen.events[screen.events.length - 1], "reload");
+});
+
+test("on Windows, where pass-cli can't get the code from Raycast, the screen gives the command for a terminal", async () => {
+  const screen = sessionLockedScreen({ platform: "win32" });
+  const view = screen.render();
+  const emptyView = [view.props.children].flat()[0] as Element;
+  assert.match(String(emptyView.props.description), /PowerShell/);
+  const entries = actions(emptyView.props.actions);
+  assert.deepEqual(
+    entries.slice(1).map((entry) => entry.title),
+    ["Copy Unlock Command", "Check Again", "Logout"],
+  );
+  await (entries[1].onAction as () => Promise<void>)();
+  assert.deepEqual(screen.copied, ["& 'C:\\Users\\someone\\pass-cli.exe' session unlock"]);
+  assert.deepEqual(screen.events, ["hud: Unlock Command Copied"]);
+});
+
+test("once unlocked, the items shown before the session locked come back at once, without waiting for pass-cli", async () => {
+  let checks = 0;
+  let listings = 0;
+  const reloads: ((options?: { isUnlocked?: boolean }) => Promise<void>)[] = [];
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => {
+        checks++;
+        return undefined;
+      },
+      listItems: async () => [],
+      listVaultsAndItems: () => {
+        listings++;
+        // Locked while the saved items show, then still listing once unlocked.
+        return listings === 1 ? Promise.reject(sessionLocked()) : new Promise(() => undefined);
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: true }),
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+    },
+    "./error-views": {
+      renderErrorView: (type: unknown, onRetry: (options?: { isUnlocked?: boolean }) => Promise<void>) => {
+        if (!type) return null;
+        reloads.push(onRetry);
+        return { props: { error: type } };
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(render().props.error, "session_locked");
+
+  void reloads[reloads.length - 1]({ isUnlocked: true });
+  assert.deepEqual(render().props.items, [item]);
+  await new Promise(setImmediate);
+  assert.equal(checks, 1);
+});
+
+test("once unlocked, a lock found by the session check shows the saved items without checking again", async () => {
+  let checks = 0;
+  const reloads: ((options?: { isUnlocked?: boolean }) => Promise<void>)[] = [];
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => {
+        checks++;
+        return sessionLocked();
+      },
+      listItems: async () => [],
+      listVaultsAndItems: () => new Promise(() => undefined),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: true }),
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+    },
+    "./error-views": {
+      renderErrorView: (type: unknown, onRetry: (options?: { isUnlocked?: boolean }) => Promise<void>) => {
+        if (!type) return null;
+        reloads.push(onRetry);
+        return { props: { error: type } };
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(render().props.error, "session_locked");
+
+  void reloads[reloads.length - 1]({ isUnlocked: true });
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.deepEqual(render().props.items, [item]);
+  assert.equal(checks, 1);
+});
+
+test("once unlocked, the vault list shows its vaults at once, rather than after listing them again", async () => {
+  const harness = hookHarness();
+  let listings = 0;
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "react/jsx-runtime": typedJsx,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: () => {
+        listings++;
+        return listings === 1 ? Promise.reject(sessionLocked()) : new Promise(() => undefined);
+      },
+    },
+    "./search-items-view": {},
+    "./error-views": { CliPathErrorView: () => null },
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+      getCachedSharing: async () => null,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  type Screen = { type: unknown; props: Element["props"] };
+  const render = () => harness.render(VaultsView, { startOnItems: false }) as unknown as Screen;
+  render();
+  harness.effects[0]();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  const locked = render();
+  assert.equal(locked.type, sessionLockStub.SessionLockedView);
+
+  void (locked.props.reload as (options: { isUnlocked: boolean }) => Promise<void>)({ isUnlocked: true });
+  assert.notEqual(render().type, sessionLockStub.SessionLockedView);
+});
+
+test("once unlocked, Get TOTP Code shows its items at once, their codes following with the listing", async () => {
+  const totp = hookHarness();
+  let listings = 0;
+  const reloads: ((options?: { isUnlocked?: boolean }) => Promise<void>)[] = [];
+  const { default: Command } = loadView("../get-totp.tsx", {
+    react: totp.react,
+    "@raycast/api": {
+      List: { Section: {}, EmptyView: {} },
+      Action: {},
+      ActionPanel: {},
+      Icon: {},
+      Color: { Green: "green" },
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      getPreferenceValues: () => ({}),
+    },
+    "./lib/pass-cli": {
+      getTotp: async () => {
+        throw sessionLocked();
+      },
+      listVaultsAndItems: () => {
+        listings++;
+        return listings === 1 ? Promise.reject(sessionLocked()) : new Promise(() => undefined);
+      },
+      localTotpCode: () => undefined,
+    },
+    "./lib/types": { PassCliError },
+    "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+    "./lib/item-icon": { getListIcon: () => "" },
+    "./lib/shortcuts": shortcuts,
+    "@raycast/utils": { useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }) },
+    "./lib/utils": {
+      getTotpRemainingSeconds: () => 30,
+      totpProgressIcon: () => "",
+      totpTimerColor: () => "",
+      getItemIcon: () => "",
+      formatTotpCode: (code: string) => code,
+    },
+    "./lib/cache": {
+      getCachedItems: async () => ({ data: [{ ...item, hasTotp: true }] }),
+      setCachedItems: async () => undefined,
+      clearCache: async () => undefined,
+    },
+    "./lib/refresh": refresh,
+    "./lib/error-views": {
+      renderErrorView: (type: unknown, onRetry: (options?: { isUnlocked?: boolean }) => Promise<void>) => {
+        if (!type) return null;
+        reloads.push(onRetry);
+        return { props: { error: type } };
+      },
+    },
+  });
+  totp.render(Command, {});
+  totp.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(totp.render(Command, {}).props.error, "session_locked");
+
+  void reloads[reloads.length - 1]({ isUnlocked: true });
+  assert.equal(totp.render(Command, {}).props.error, undefined);
+});
+
+/**
+ * pass-cli.ts with a session check that answers when told, the saved Has Lock Code as given, and its waits done when
+ * told: `elapse` ends those of up to `ms`. `lock` gives the lock's saved delay, in seconds, and how long ago the
+ * extension last used the session.
+ */
+function passCliWithSessionWaits(savedLockCode: boolean, lock: { afterSeconds?: number; usedAgoMs?: number } = {}) {
+  const now = 1_800_000_000_000;
+  let answer: (state: { state: string; hasLock: boolean }) => void = () => undefined;
+  let toldLockCode: () => void = () => undefined;
+  const saved: boolean[] = [];
+  const toasts: { style: string; title: string; hidden: boolean }[] = [];
+  const timers: { run: () => void; ms: number }[] = [];
+  const api = loadView(
+    "pass-cli.ts",
+    {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({}),
+        showToast: async ({ style, title }: { style: string; title: string }) => {
+          const toast = { style, title, hidden: false };
+          toasts.push(toast);
+          return { hide: async () => void (toast.hidden = true) };
+        },
+        Toast: { Style: { Animated: "animated" } },
+      },
+      "node:os": { homedir: () => "/fixture" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": {
+        getSessionHasLock: async () => savedLockCode,
+        setSessionHasLock: async (hasLock: boolean) => {
+          saved.push(hasLock);
+        },
+        getSessionLockAfter: async () => lock.afterSeconds,
+        getSessionUsedAt: async () => (lock.usedAgoMs === undefined ? undefined : now - lock.usedAgoMs),
+        setSessionUsedAt: async () => undefined,
+      },
+      "./cli": { ensureCli: async () => "/fixture-cli" },
+      "./core/adapter": {
+        createPassCliAdapter: () => ({
+          checkSession: (onLockCode: () => void) => {
+            toldLockCode = onLockCode;
+            return new Promise((resolve) => {
+              answer = resolve;
+            });
+          },
+        }),
+      },
+      "./core/login": { isDetachedLoginRunning: async () => false },
+      "./mock-data": {},
+    },
+    {
+      setTimeout: (run: () => void, ms: number) => {
+        timers.push({ run, ms });
+        return 0;
+      },
+      Date: { now: () => now },
+    },
+  ) as unknown as {
+    SESSION_CHECK_WAIT_MS: number;
+    endedSessionError: () => Promise<PassCliError | undefined>;
+    waitForSessionCheck: (
+      check: Promise<PassCliError | undefined>,
+      onLockDue?: (locked: PassCliError) => void,
+    ) => Promise<PassCliError | undefined>;
+    lockedSessionError: (onLockDue?: (locked: PassCliError) => void) => Promise<PassCliError | undefined>;
+  };
+  const elapse = async (ms: number) => {
+    for (let round = 0; round < 5; round++) {
+      await new Promise(setImmediate);
+      timers.splice(0).forEach((timer) => (timer.ms <= ms ? timer.run() : timers.push(timer)));
+    }
+    await new Promise(setImmediate);
+  };
+  return {
+    api,
+    answer: (state: string, hasLock = true) => answer({ state, hasLock }),
+    toldLockCode: () => toldLockCode(),
+    saved,
+    toasts: () => JSON.stringify(toasts),
+    elapse,
+  };
+}
+
+/** Whether a promise has settled, once what's pending ran. */
+async function settledOf(promise: Promise<unknown>) {
+  let settled = false;
+  void promise.then(() => (settled = true));
+  await new Promise(setImmediate);
+  return settled;
+}
+
+test("the saved items of a session with a lock code wait until pass-cli says whether it's locked, past the usual wait", async () => {
+  // Without a lock code, they show after the usual wait.
+  const plain = passCliWithSessionWaits(false);
+  const withoutLock = plain.api.waitForSessionCheck(plain.api.endedSessionError());
+  await plain.elapse(plain.api.SESSION_CHECK_WAIT_MS);
+  assert.equal(await settledOf(withoutLock), true);
+  assert.equal(await withoutLock, undefined);
+
+  // Found by pass-cli's info just now: the lock check that follows is waited for, and the next opening waits too.
+  const found = passCliWithSessionWaits(false);
+  const justFound = found.api.waitForSessionCheck(found.api.endedSessionError());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  found.toldLockCode();
+  await found.elapse(found.api.SESSION_CHECK_WAIT_MS);
+  assert.equal(await settledOf(justFound), false);
+  assert.deepEqual(found.saved, [true]);
+  found.answer("locked");
+  assert.equal((await justFound)?.type, "session_locked");
+
+  // Saved from an earlier opening: waited for before pass-cli says so again.
+  const known = passCliWithSessionWaits(true);
+  const alreadyKnown = known.api.waitForSessionCheck(known.api.endedSessionError());
+  await known.elapse(known.api.SESSION_CHECK_WAIT_MS);
+  assert.equal(await settledOf(alreadyKnown), false);
+  known.answer("open");
+  assert.equal(await alreadyKnown, undefined);
+
+  // Unless pass-cli can't tell for long, e.g. offline: they show then.
+  const offline = passCliWithSessionWaits(true);
+  const neverAnswered = offline.api.waitForSessionCheck(offline.api.endedSessionError());
+  await offline.elapse(60_000);
+  assert.equal(await settledOf(neverAnswered), true);
+  assert.equal(await neverAnswered, undefined);
+});
+
+test("a session with a lock code waits for pass-cli up to 30 seconds, with Checking Session… at the bottom meanwhile", async () => {
+  const checking = (hidden: boolean) => JSON.stringify([{ style: "animated", title: "Checking Session…", hidden }]);
+
+  // E.g. after a while unused, when pass-cli took 18 seconds to answer: nothing shows meanwhile, but the toast.
+  const slow = passCliWithSessionWaits(true);
+  const slowCheck = slow.api.waitForSessionCheck(slow.api.endedSessionError());
+  await slow.elapse(slow.api.SESSION_CHECK_WAIT_MS);
+  assert.equal(slow.toasts(), checking(false));
+  await slow.elapse(18_000);
+  assert.equal(await settledOf(slowCheck), false);
+  slow.answer("locked");
+  assert.equal((await slowCheck)?.type, "session_locked");
+  await new Promise(setImmediate);
+  assert.equal(slow.toasts(), checking(true));
+
+  // Offline: the saved items show after 30 seconds, and the toast goes.
+  const offline = passCliWithSessionWaits(true);
+  const offlineCheck = offline.api.waitForSessionCheck(offline.api.endedSessionError());
+  await offline.elapse(offline.api.SESSION_CHECK_WAIT_MS);
+  await offline.elapse(29_000);
+  assert.equal(await settledOf(offlineCheck), true);
+  assert.equal(await offlineCheck, undefined);
+  await new Promise(setImmediate);
+  assert.equal(offline.toasts(), checking(true));
+
+  // No toast for an answer within the usual wait, nor for a session without a lock code.
+  const quick = passCliWithSessionWaits(true);
+  const quickCheck = quick.api.waitForSessionCheck(quick.api.endedSessionError());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  quick.answer("open");
+  assert.equal(await quickCheck, undefined);
+  assert.equal(quick.toasts(), "[]");
+
+  const plain = passCliWithSessionWaits(false);
+  const plainCheck = plain.api.waitForSessionCheck(plain.api.endedSessionError());
+  await plain.elapse(plain.api.SESSION_CHECK_WAIT_MS);
+  assert.equal(await plainCheck, undefined);
+  assert.equal(plain.toasts(), "[]");
+});
+
+test("a session unused for longer than its lock's delay shows Session Locked after the usual wait, while pass-cli confirms", async () => {
+  // Unused for longer than its 5 minutes: Proton has most likely locked it, and pass-cli can take many seconds to say so.
+  const due = passCliWithSessionWaits(true, { afterSeconds: 300, usedAgoMs: 301_000 });
+  const shown: string[] = [];
+  const dueCheck = due.api.waitForSessionCheck(due.api.endedSessionError(), (locked) => shown.push(locked.type));
+  await due.elapse(due.api.SESSION_CHECK_WAIT_MS);
+  assert.deepEqual(shown, ["session_locked"]);
+  assert.equal(due.toasts(), "[]");
+  // pass-cli's answer still comes: here, used meanwhile in a terminal, the session is open and its items show.
+  assert.equal(await settledOf(dueCheck), false);
+  due.answer("open");
+  assert.equal(await dueCheck, undefined);
+
+  // Within the delay, or with no delay or use saved yet, the check is waited for, as before.
+  for (const lock of [{ afterSeconds: 300, usedAgoMs: 299_000 }, { afterSeconds: 300 }, { usedAgoMs: 301_000 }]) {
+    const waiting = passCliWithSessionWaits(true, lock);
+    const notShown: string[] = [];
+    const check = waiting.api.waitForSessionCheck(waiting.api.endedSessionError(), (locked) =>
+      notShown.push(locked.type),
+    );
+    await waiting.elapse(waiting.api.SESSION_CHECK_WAIT_MS);
+    assert.deepEqual(notShown, []);
+    assert.equal(waiting.toasts(), JSON.stringify([{ style: "animated", title: "Checking Session…", hidden: false }]));
+    waiting.answer("locked");
+    assert.equal((await check)?.type, "session_locked");
+  }
+
+  // Get TOTP Code shows it the same way.
+  const totp = passCliWithSessionWaits(true, { afterSeconds: 30, usedAgoMs: 31_000 });
+  const totpShown: string[] = [];
+  const totpCheck = totp.api.lockedSessionError((locked) => totpShown.push(locked.type));
+  await totp.elapse(totp.api.SESSION_CHECK_WAIT_MS);
+  assert.deepEqual(totpShown, ["session_locked"]);
+  totp.answer("locked");
+  assert.equal((await totpCheck)?.type, "session_locked");
+});
+
+test("a session whose lock code was removed stops waiting for the lock check at its next opening", async () => {
+  const removed = passCliWithSessionWaits(true);
+  const check = removed.api.endedSessionError();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  removed.answer("open", false);
+  assert.equal(await check, undefined);
+  assert.deepEqual(removed.saved, [false]);
+});
+
+test("Get TOTP Code checks a session with a lock code before its saved items show, and only then", async () => {
+  const withLock = passCliWithSessionWaits(true);
+  const locked = withLock.api.lockedSessionError();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  withLock.answer("locked");
+  assert.equal((await locked)?.type, "session_locked");
+
+  // Without one, as before: nothing asked of pass-cli.
+  const plain = passCliWithSessionWaits(false);
+  assert.equal(await plain.api.lockedSessionError(), undefined);
+  plain.answer("locked");
+});
+
+test("Browse Items shows nothing of a locked session while pass-cli says so, however long it takes", async () => {
+  let shownSaved = false;
+  let listings = 0;
+  let answer: (error: PassCliError) => void = () => undefined;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: () =>
+        new Promise((resolve) => {
+          answer = resolve;
+        }),
+      // As pass-cli.ts waits for a session with a lock code.
+      waitForSessionCheck: (check: Promise<unknown>) => check,
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [], items: [], failedVaults: [] };
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+    "./item-counts": {
+      ...itemCounts,
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(shownSaved, false);
+
+  answer(sessionLocked());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(shownSaved, false);
+  assert.equal(render().props.error, "session_locked");
+  assert.equal(listings, 0);
+});
+
+test("Browse Items shows Session Locked at once when the session has most likely locked itself, then its items if it hasn't", async () => {
+  let shownSaved = false;
+  let answer: (error: PassCliError | undefined) => void = () => undefined;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: () =>
+        new Promise((resolve) => {
+          answer = resolve;
+        }),
+      // As pass-cli.ts does for a session unused for longer than its lock's delay.
+      waitForSessionCheck: (check: Promise<unknown>, onLockDue: (locked: PassCliError) => void) => {
+        onLockDue(sessionLocked());
+        return check;
+      },
+      listItems: async () => [],
+      listVaultsAndItems: async () => ({ vaults: [], items: [], failedVaults: [] }),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+      setCachedFolders: async () => undefined,
+    },
+    "./item-counts": {
+      ...itemCounts,
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(render().props.error, "session_locked");
+  assert.equal(shownSaved, false);
+
+  // E.g. used in a terminal meanwhile.
+  answer(undefined);
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(render().props.error, undefined);
+  assert.equal(shownSaved, true);
+});
+
+test("the vault list shows nothing of a locked session while pass-cli says so, however long it takes", async () => {
+  let answer: (error: PassCliError) => void = () => undefined;
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "react/jsx-runtime": typedJsx,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: () =>
+        new Promise((resolve) => {
+          answer = resolve;
+        }),
+      waitForSessionCheck: (check: Promise<unknown>) => check,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => assert.fail("a locked session lists nothing"),
+    },
+    "./search-items-view": {},
+    "./error-views": { CliPathErrorView: () => null },
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedFolders: async () => null,
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+      getCachedSharing: async () => null,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  const render = () =>
+    harness.render(VaultsView, { startOnItems: false }) as unknown as { type: unknown; props: Element["props"] };
+  render();
+  harness.effects[0]();
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.deepEqual(
+    actions(render()).filter((entry) => entry.title === "Personal"),
+    [],
+  );
+
+  answer(sessionLocked());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(render().type, sessionLockStub.SessionLockedView);
+});
+
+test("Get TOTP Code shows nothing of a locked session with a lock code, rather than its saved items first", async () => {
+  const totp = hookHarness();
+  let shownSaved = false;
+  let listings = 0;
+  const { default: Command } = loadView("../get-totp.tsx", {
+    react: totp.react,
+    "@raycast/api": {
+      List: { Section: {}, EmptyView: {} },
+      Action: {},
+      ActionPanel: {},
+      Icon: {},
+      Color: { Green: "green" },
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      getPreferenceValues: () => ({}),
+    },
+    "./lib/pass-cli": {
+      lockedSessionError: async () => sessionLocked(),
+      listVaultsAndItems: async () => {
+        listings++;
+        return { items: [], failedVaults: [] };
+      },
+      localTotpCode: () => undefined,
+    },
+    "./lib/types": { PassCliError },
+    "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+    "./lib/item-icon": { getListIcon: () => "" },
+    "./lib/shortcuts": shortcuts,
+    "@raycast/utils": { useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }) },
+    "./lib/utils": {
+      getTotpRemainingSeconds: () => 30,
+      totpProgressIcon: () => "",
+      totpTimerColor: () => "",
+      getItemIcon: () => "",
+      formatTotpCode: (code: string) => code,
+    },
+    "./lib/cache": {
+      getCachedItems: async () => {
+        shownSaved = true;
+        return { data: [{ ...item, hasTotp: true }] };
+      },
+      setCachedItems: async () => undefined,
+      clearCache: async () => undefined,
+    },
+    "./lib/refresh": refresh,
+    "./lib/error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
+  });
+  totp.render(Command, {});
+  totp.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(totp.render(Command, {}).props.error, "session_locked");
+  assert.equal(shownSaved, false);
+  assert.equal(listings, 0);
 });

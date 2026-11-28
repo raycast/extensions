@@ -8,6 +8,7 @@ import {
   getPreferenceValues,
   showHUD,
   showToast,
+  useNavigation,
 } from "@raycast/api";
 import { memo, type ReactElement } from "react";
 import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
@@ -21,7 +22,8 @@ import { rowIcon } from "./row-icons";
 import { platformShortcut } from "./shortcuts";
 import { SortByMenu, SortOrder } from "./sort";
 import { generateTotp, parseOtpauthUri } from "./totp";
-import { CustomField, Item, ItemDetail } from "./types";
+import { SessionLockedView } from "./session-lock-view";
+import { CustomField, Item, ItemDetail, PassCliError } from "./types";
 import { getCurrentTotpCode } from "./use-totp-code";
 
 /** What Copy gives for a custom field: a TOTP field's current code rather than its secret. */
@@ -58,6 +60,7 @@ export const ItemActions = memo(function ItemActions({
   onSortOrderChange,
 }: ItemActionsProps) {
   const preferences = getPreferenceValues<Preferences>();
+  const { push, pop } = useNavigation();
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = preferences.copyPasswordTransient ?? true;
   // Loaded details are newer than the cached item, e.g. when a password was added since.
@@ -75,6 +78,31 @@ export const ItemActions = memo(function ItemActions({
   const typeFields = fieldsOf(item.type).filter((spec) =>
     detail ? detail.fields?.[spec.id] !== undefined : !spec.optional,
   );
+
+  /**
+   * Says why an action failed. A locked session offers to unlock it, after which the action can run again: the list
+   * loads again meanwhile, which also shows the login screen if Logout was chosen instead.
+   */
+  async function showFailure(title: string, error: unknown) {
+    if (error instanceof PassCliError && error.type === "session_locked") {
+      const backToList = () => {
+        pop();
+        onRefresh?.();
+      };
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Session Locked",
+        message: "Unlock it, then try again.",
+        primaryAction: { title: "Unlock Session", onAction: () => push(<SessionLockedView reload={backToList} />) },
+      });
+      return;
+    }
+    await showToast({
+      style: Toast.Style.Failure,
+      title,
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   async function loadDetail(): Promise<ItemDetail> {
     const loaded = store.peek(item);
@@ -96,11 +124,7 @@ export const ItemActions = memo(function ItemActions({
       // The HUD closes Raycast's window.
       await showHUD(`${label} Copied`);
     } catch (error: unknown) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to Copy ${label}`,
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailure(`Failed to Copy ${label}`, error);
     }
   }
 
@@ -143,11 +167,7 @@ export const ItemActions = memo(function ItemActions({
         clipboardValueFailureHud: "Filled, but couldn't copy the TOTP code",
       });
     } catch (error: unknown) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Fill",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailure("Failed to Fill", error);
     }
   }
 
@@ -160,11 +180,7 @@ export const ItemActions = memo(function ItemActions({
       onUse(item);
       await fillApp(target, { values: [code] });
     } catch (error: unknown) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Paste TOTP Code",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailure("Failed to Paste TOTP Code", error);
     }
   }
 

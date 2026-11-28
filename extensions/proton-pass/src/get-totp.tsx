@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useFrecencySorting } from "@raycast/utils";
-import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
+import { listVaultsAndItems, getTotp, localTotpCode, lockedSessionError } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./lib/types";
 import {
   getTotpRemainingSeconds,
@@ -32,6 +32,7 @@ import { countItemsByVault } from "./lib/item-counts";
 import { listedUnder, SHARED_WITH_ME } from "./lib/shared-items";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
+import type { ReloadOptions } from "./lib/session-lock-view";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
 
 interface TotpItem extends Item {
@@ -67,7 +68,7 @@ async function loadCode(item: TotpItem): Promise<TotpItem> {
     const code = await getTotp(item.shareId, item.itemId);
     return { ...item, currentTotp: timeStep === getTotpTimeStep() ? code : undefined, currentTotpTimeStep: timeStep };
   } catch (error) {
-    if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
+    if (error instanceof PassCliError && PassCliError.isSessionBlocked(error.type)) throw error;
     return { ...item, currentTotp: currentCode(item) };
   }
 }
@@ -132,13 +133,30 @@ export default function Command() {
     };
   }, []);
 
-  async function loadTotpItems() {
+  async function loadTotpItems(options?: ReloadOptions) {
     const isLatest = loads.start();
-    // The login screen stays while loading after a login or Check Again, until there's something to show.
-    if (error !== "not_authenticated") setError(null);
+    // The login and Session Locked screens stay while loading after a login or Check Again, until there's something to
+    // show. Once unlocked, the items already here show at once, until their codes come with the listing.
+    if (!PassCliError.isSessionBlocked(error) || (options?.isUnlocked === true && itemsRef.current.length > 0)) {
+      setError(null);
+    }
     setIsLoading(true);
 
     try {
+      // The saved items of a session with a lock code show once pass-cli says it isn't locked.
+      if (!hasLoadedFromCache.current && options?.isUnlocked !== true) {
+        // Session Locked shows at once when the session has most likely locked itself, until pass-cli says.
+        let showsLockDue = false;
+        const blocked = await lockedSessionError((locked) => {
+          if (!isLatest()) return;
+          showsLockDue = true;
+          setError(locked.type);
+        });
+        if (!isLatest()) return;
+        if (blocked) throw blocked;
+        // E.g. used in a terminal meanwhile: it isn't locked.
+        if (showsLockDue) setError(null);
+      }
       const cachedItems = !hasLoadedFromCache.current ? (await getCachedItems())?.data : undefined;
       if (!isLatest()) return;
       hasLoadedFromCache.current = true;
@@ -189,15 +207,19 @@ export default function Command() {
           style: Toast.Style.Failure,
           title: failedVaultsTitle(failedVaults.map(({ vault }) => vault.name)),
           message: failedVaults[0].message,
-          primaryAction: { title: "Retry", onAction: loadTotpItems },
+          primaryAction: { title: "Retry", onAction: () => loadTotpItems() },
         });
       }
     } catch (e: unknown) {
       if (!isLatest()) return;
       if (e instanceof PassCliError && e.type === "not_authenticated") {
         await resetSession();
-      } else if (itemsRef.current.length === 0 || (e instanceof PassCliError && PassCliError.isCliPath(e.type))) {
-        // Without pass-cli, no code can load: the screen saying how to fix it comes first.
+      } else if (
+        itemsRef.current.length === 0 ||
+        (e instanceof PassCliError && (PassCliError.isCliPath(e.type) || e.type === "session_locked"))
+      ) {
+        // Without pass-cli, or while the session is locked, no code can load: the screen saying how to fix it comes
+        // first. A locked session's items stay saved, for once it's unlocked.
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {
@@ -208,7 +230,7 @@ export default function Command() {
           style: Toast.Style.Failure,
           title: "Couldn't Load TOTP Items",
           message: e instanceof Error ? e.message : "Unknown error",
-          primaryAction: { title: "Retry", onAction: loadTotpItems },
+          primaryAction: { title: "Retry", onAction: () => loadTotpItems() },
         });
       }
     } finally {
@@ -244,6 +266,10 @@ export default function Command() {
           if (itemsRef.current !== currentItems) continue;
           if (error instanceof PassCliError && error.type === "not_authenticated") {
             await resetSession();
+            break;
+          }
+          if (error instanceof PassCliError && error.type === "session_locked") {
+            setError(error.type);
             break;
           }
           throw error;
