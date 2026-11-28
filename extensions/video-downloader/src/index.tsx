@@ -51,6 +51,8 @@ import { Video } from "./types.js";
 import { MP3_FORMAT_ID } from "./utils.js";
 import Installer from "./views/installer.js";
 import Updater from "./views/updater.js";
+import { getBatchTools } from "./batch-tools.js";
+import { Workspace } from "./workspace.js";
 
 const {
   downloadPath,
@@ -77,7 +79,7 @@ function logFormats(video: Video) {
   );
 }
 
-export default function DownloadVideo() {
+export function DownloadVideo() {
   const { push } = useNavigation();
   const [error, setError] = useState(0);
   const [warning, setWarning] = useState("");
@@ -523,6 +525,11 @@ export default function DownloadVideo() {
                 onAction={() => revalidate()}
               />
             )}
+            <Action.Push
+              icon={Icon.List}
+              title="Batch Download & Convert"
+              target={<Workspace tools={getBatchTools()} advanced={<DownloadVideo />} />}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
@@ -581,3 +588,5 @@ export default function DownloadVideo() {
     </Form>
   );
 }
+
+export default DownloadVideo;

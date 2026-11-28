@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Unreleased] - 2026-11-22
+
+- Add a Batch Download & Convert command with playlist selection, bounded concurrent downloads, and local media conversion.
+
 ## [Fix] - 2026-10-31
 
 - Auto-dubbed YouTube videos no longer fill the Format dropdown with identical-looking copies of each format, one per dubbed language. Each format is listed once, and a new Audio Language dropdown (shown only for dubbed videos) picks the soundtrack, defaulting to the original.

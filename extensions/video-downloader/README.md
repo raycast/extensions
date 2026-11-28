@@ -10,6 +10,7 @@
 - **Auto-fill the URL** — optionally load the link from your clipboard, selected text, or the active browser tab (see preferences).
 - **Use your browser's cookies** — work around auth-protected media, age restrictions, and "Bad guest token" rate-limit errors on X/Twitter by passing your logged-in browser's cookies (see the _Use Cookies from Browser_ preference).
 - **Playlists, opt-in** — for a playlist URL, a _Download entire playlist_ checkbox appears; leave it unchecked to grab just the linked video.
+- **Batch downloads and conversion** — use _Batch Download & Convert_ to analyze multiple links, preview and select playlist entries, download up to three items concurrently, or convert local media to MP4, MKV, MP3, or M4A. The command reuses the executable paths configured for this extension.
 - **Recover from hiccups** — transient failures show a _Try Again_ action (⌘R) and a _Copy Logs_ action, plus a one-key jump to update yt-dlp and ffmpeg.
 - **Extract transcripts** — pull a video's subtitles as Markdown, with language selection.
 - **AI tools** — `@video-downloader` can download a video or extract a transcript from a chat command.
