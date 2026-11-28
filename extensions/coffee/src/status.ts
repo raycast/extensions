@@ -4,6 +4,8 @@ import {
   Schedule,
   startCaffeinate,
   getSchedule,
+  parseSchedule,
+  schedulesEqual,
   stopCaffeinateIfMatches,
   isCoffeeRunning,
   getCaffeinationState,
@@ -87,6 +89,10 @@ function getRaycastSessionId(): string {
   return `ppid:${process.ppid}`;
 }
 
+async function isStillStored(schedule: Schedule): Promise<boolean> {
+  return schedulesEqual(parseSchedule(await LocalStorage.getItem(schedule.day)), schedule);
+}
+
 async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
     return false;
@@ -106,11 +112,21 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
 
   // Change isRunning to false when the schedule has finished its run
   if (isWithinSchedule === false && schedule.IsRunning === true) {
-    if (state.sessionId && state.reason?.kind === "schedule" && state.reason.day === schedule.day) {
+    const reason = state.reason;
+    if (
+      state.sessionId &&
+      reason?.kind === "schedule" &&
+      reason.day === schedule.day &&
+      // A session with other times may be a newer version's, so stop it only if the schedule is unchanged.
+      ((reason.from === schedule.from && reason.to === schedule.to) || (await isStillStored(schedule)))
+    ) {
       await stopCaffeinateIfMatches({ menubar: true, status: false }, state.sessionId);
     }
-    schedule.IsRunning = false;
-    await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+    // LocalStorage has no compare-and-set; re-reading narrows, but can't close, the window for losing an edit.
+    if (await isStillStored(schedule)) {
+      schedule.IsRunning = false;
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+    }
     return false;
   }
 

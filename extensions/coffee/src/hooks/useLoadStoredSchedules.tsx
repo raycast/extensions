@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { Schedule } from "../interfaces";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import { numberToDayString, parseSchedule } from "../utils";
+import { numberToDayString, parseSchedule, schedulesEqual } from "../utils";
 
 const SCHEDULE_REFRESH_INTERVAL_MS = 15_000;
 
@@ -90,16 +90,4 @@ export function useLoadStoredSchedules(
 
 function compareSchedulesByDay(a: Schedule, b: Schedule): number {
   return (dayOrder[a.day] ?? -1) - (dayOrder[b.day] ?? -1);
-}
-
-function schedulesEqual(a: Schedule | undefined, b: Schedule | undefined): boolean {
-  if (a === undefined || b === undefined) return a === b;
-
-  return (
-    a.day === b.day &&
-    a.from === b.from &&
-    a.to === b.to &&
-    a.IsManuallyDecafed === b.IsManuallyDecafed &&
-    a.IsRunning === b.IsRunning
-  );
 }

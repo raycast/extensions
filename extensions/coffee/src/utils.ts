@@ -294,6 +294,18 @@ export function parseSchedule(value: unknown): Schedule | undefined {
   return undefined;
 }
 
+export function schedulesEqual(a: Schedule | undefined, b: Schedule | undefined): boolean {
+  if (a === undefined || b === undefined) return a === b;
+
+  return (
+    a.day === b.day &&
+    a.from === b.from &&
+    a.to === b.to &&
+    a.IsManuallyDecafed === b.IsManuallyDecafed &&
+    a.IsRunning === b.IsRunning
+  );
+}
+
 export async function changeScheduleState(operation: "caffeinate" | "decaffeinate", schedule: Schedule) {
   switch (operation) {
     case "caffeinate": {

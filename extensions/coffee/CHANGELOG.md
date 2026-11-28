@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Keep a schedule extended as it ends] - {PR_MERGE_DATE}
+
+- Extending today's schedule just as it ended could stop the extended session and restore the old end time. Coffee now stops only the ended schedule's session and no longer saves over a schedule changed meanwhile ([#34021](https://github.com/raycast/extensions/issues/34021)).
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
