@@ -1,5 +1,13 @@
 # 2Do Changelog
 
+## [Cancel Task] - {PR_MERGE_DATE}
+
+- Cancel Task action (⇧⌘D), with preferences for Complete and Tag, Tag Only, Move to List and Complete, or Delete
+- Mark as Not Done on a cancelled task removes the cancel tag, or asks which list to restore after Move to List and Complete
+- On a done task, Mark as Cancelled Instead or Mark as Complete Instead (⇧⌘D) switches the cancel mark without reopening
+- Completing a project or checklist with open items can complete them or cancel them using Cancel Task settings
+- Cancelled tasks show a gray ✕ in Done; repeating tasks cancel only this occurrence, except with Tag Only, which tags the task without completing it
+
 ## [Refresh View Tasks] - 2026-11-27
 
 - Refresh action (⌘R) in View Tasks to reload tasks, lists, and smart lists from 2Do

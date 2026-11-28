@@ -1,7 +1,36 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { getProgressIcon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
-import { actionURL, repeatRule, Task, taskLinks, twoDo } from "./2do";
+import {
+  actionURL,
+  applyCancelMark,
+  cancelTask,
+  clearCancelMark,
+  completeParent,
+  inCancelList,
+  isCancelled,
+  isRepeating,
+  List as TwoDoList,
+  reopenTask,
+  repeatRule,
+  Task,
+  taskLinks,
+  twoDo,
+} from "./2do";
 import { ItemsView } from "./items-view";
 import { TaskForm } from "./task-form";
 
@@ -98,6 +127,7 @@ export function TaskItem({
     seenEpoch.current = refreshEpoch;
     if (isParent && !t.completed) void revalidateItems();
   }, [refreshEpoch, isParent, t.completed, revalidateItems]);
+  const prefs = getPreferenceValues<Preferences>();
   const links = taskLinks(t);
   const actionTarget = actionURL(t.action);
   const primary = actionTarget
@@ -115,25 +145,93 @@ export function TaskItem({
     }
   }
 
+  async function reopen() {
+    try {
+      await reopenTask(t, prefs);
+      await showToast({ style: Toast.Style.Success, title: "Marked not done" });
+      onChange();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not mark as not done" });
+    }
+  }
+
+  async function markCompleteInstead() {
+    try {
+      await clearCancelMark(t, prefs);
+      await showToast({ style: Toast.Style.Success, title: "Marked complete" });
+      onChange();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not mark as complete" });
+    }
+  }
+
+  async function markCancelledInstead() {
+    try {
+      await applyCancelMark(t, prefs);
+      await showToast({ style: Toast.Style.Success, title: "Marked cancelled" });
+      onChange();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not mark as cancelled" });
+    }
+  }
+
   // 2Do completes a project's or checklist's open items along with it, so this asks first when the
-  // items, read fresh from 2Do rather than from the cached ring, include open ones.
-  async function completeWithItems() {
+  // items, read fresh from 2Do rather than from the cached ring, include open ones. Cancel Remaining
+  // Items cancels each open item per Cancel Task preferences, then completes the parent.
+  async function completeWithItems(cancelItems: boolean) {
     try {
       const { tasks } = await twoDo<{ tasks: Task[] }>("list_subtasks", { task_id: t.task_id });
       const open = tasks.filter((i) => !i.completed).length;
+      const what = open === 1 ? "its open item" : `its ${open} open items`;
       const ok =
         open === 0 ||
         (await confirmAlert({
-          title: `Complete "${t.title}" and ${open === 1 ? "its open item" : `its ${open} open items`}?`,
-          primaryAction: { title: "Complete All" },
+          title: cancelItems ? `Complete "${t.title}" and cancel ${what}?` : `Complete "${t.title}" and ${what}?`,
+          message: cancelItems ? "Each item is cancelled the way Cancel Task is set up." : undefined,
+          primaryAction: { title: cancelItems ? "Cancel Items and Complete" : "Complete All" },
           dismissAction: { title: "Not Now" },
         }));
       if (!ok) return;
-      await twoDo("complete_task", { task_id: t.task_id });
+      await completeParent(t, cancelItems, prefs);
       await showToast({ style: Toast.Style.Success, title: "Completed" });
       onChange();
     } catch (error) {
+      onChange(); // Some items may already be cancelled.
       await showFailureToast(error, { title: "Could not complete task" });
+    }
+  }
+
+  async function cancel() {
+    const deletes = prefs.cancelBehavior === "delete";
+    try {
+      if (deletes) {
+        const ok = await confirmAlert({
+          title: isRepeating(t) ? `Delete this occurrence of "${t.title}"?` : `Delete "${t.title}"?`,
+          message: isRepeating(t)
+            ? "Cancel Task is set to delete tasks. This occurrence is deleted and the next one stays. This can't be undone from Raycast."
+            : "Cancel Task is set to delete tasks. This can't be undone from Raycast.",
+          primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+        });
+        if (!ok) return;
+      } else if (prefs.cancelBehavior !== "tag" && t.task_type !== "normal") {
+        const { tasks: subtasks } = await twoDo<{ tasks: Task[] }>("list_subtasks", { task_id: t.task_id });
+        const open = subtasks.filter((s) => !s.completed).length;
+        const ok =
+          open === 0 ||
+          (await confirmAlert({
+            title: `Cancel "${t.title}"?`,
+            message: `Its ${open === 1 ? "open subtask" : `${open} open subtasks`} will be completed too.`,
+            primaryAction: { title: "Cancel Task" },
+            dismissAction: { title: "Keep Task" },
+          }));
+        if (!ok) return;
+      }
+      await cancelTask(t, prefs);
+      await showToast({ style: Toast.Style.Success, title: deletes ? "Deleted" : "Cancelled" });
+      onChange();
+    } catch (error) {
+      onChange(); // The task may already be completed; show it as it is now.
+      await showFailureToast(error, { title: "Could not cancel task" });
     }
   }
 
@@ -143,11 +241,13 @@ export function TaskItem({
       subtitle={t.list_title}
       keywords={[t.notes, ...t.tags.map((tag) => tag.title), ...links, ...(t.action.value ? [t.action.value] : [])]}
       icon={
-        t.completed
-          ? { source: Icon.CheckCircle, tintColor: Color.Green }
-          : t.task_type !== "normal"
-            ? { source: PARENT_ICONS[t.task_type], tooltip: t.task_type === "project" ? "Project" : "Checklist" }
-            : Icon.Circle
+        isCancelled(t, prefs)
+          ? { source: Icon.XMarkCircle, tintColor: Color.SecondaryText }
+          : t.completed
+            ? { source: Icon.CheckCircle, tintColor: Color.Green }
+            : t.task_type !== "normal"
+              ? { source: PARENT_ICONS[t.task_type], tooltip: t.task_type === "project" ? "Project" : "Checklist" }
+              : Icon.Circle
       }
       accessories={[
         ...(isParent && !t.completed && items.data?.length
@@ -173,24 +273,69 @@ export function TaskItem({
             target={<TaskForm task={t} parent={parent} onSaved={onChange} />}
           />
           {isParent && !t.completed ? (
+            <ActionPanel.Submenu
+              title="Complete Task"
+              icon={Icon.CheckCircle}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+            >
+              <Action title="Complete All Items" icon={Icon.CheckCircle} onAction={() => completeWithItems(false)} />
+              <Action title="Cancel Remaining Items" icon={Icon.XMarkCircle} onAction={() => completeWithItems(true)} />
+            </ActionPanel.Submenu>
+          ) : inCancelList(t, prefs) ? (
+            <Action.Push
+              title="Mark as Not Done"
+              icon={Icon.Circle}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              target={<RelocateCancelledForm task={t} onDone={onChange} />}
+            />
+          ) : t.completed ? (
+            <Action
+              title="Mark as Not Done"
+              icon={Icon.Circle}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={reopen}
+            />
+          ) : (
             <Action
               title="Complete Task"
               icon={Icon.CheckCircle}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={completeWithItems}
-            />
-          ) : (
-            <Action
-              title={t.completed ? "Mark as Not Done" : "Complete Task"}
-              icon={t.completed ? Icon.Circle : Icon.CheckCircle}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={() =>
-                run(t.completed ? "Marked not done" : "Completed", t.completed ? "uncomplete_task" : "complete_task", {
-                  task_id: t.task_id,
-                })
-              }
+              onAction={() => run("Completed", "complete_task", { task_id: t.task_id })}
             />
           )}
+          {!t.completed && (
+            <Action
+              title="Cancel Task"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              onAction={cancel}
+            />
+          )}
+          {t.completed &&
+            (isCancelled(t, prefs) ? (
+              inCancelList(t, prefs) ? (
+                <Action.Push
+                  title="Mark as Complete Instead"
+                  icon={Icon.CheckCircle}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  target={<RelocateCancelledForm task={t} onDone={onChange} stayCompleted />}
+                />
+              ) : (
+                <Action
+                  title="Mark as Complete Instead"
+                  icon={Icon.CheckCircle}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  onAction={markCompleteInstead}
+                />
+              )
+            ) : prefs.cancelBehavior !== "delete" ? (
+              <Action
+                title="Mark as Cancelled Instead"
+                icon={Icon.XMarkCircle}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                onAction={markCancelledInstead}
+              />
+            ) : null)}
           {primary && (
             <Action.Open
               title={primary.title}
@@ -250,5 +395,65 @@ export function TaskItem({
         </ActionPanel>
       }
     />
+  );
+}
+
+// For a task cancelled into the Cancel List: 2Do doesn't record where it came from, so this asks
+// which list it goes back to. With `stayCompleted`, it only clears the cancel mark (Mark as Complete
+// Instead); otherwise it also marks the task not done.
+function RelocateCancelledForm({
+  task,
+  onDone,
+  stayCompleted = false,
+}: {
+  task: Task;
+  onDone: () => void;
+  stayCompleted?: boolean;
+}) {
+  const { pop } = useNavigation();
+  const prefs = getPreferenceValues<Preferences>();
+  const lists = useCachedPromise(() => twoDo<{ list: TwoDoList[] }>("list_lists").then((r) => r.list));
+  const title = stayCompleted ? "Mark as Complete Instead" : "Mark as Not Done";
+
+  async function submit({ list_id }: { list_id: string }) {
+    // Without a destination, clearCancelMark would skip the move and leave the task cancelled.
+    if (!lists.data?.some((l) => l.list_id === list_id && l.list_id !== task.list_id)) {
+      await showFailureToast(new Error("Choose the list the task goes back to."), { title: "No list chosen" });
+      return;
+    }
+    try {
+      if (stayCompleted) await clearCancelMark(task, prefs, list_id);
+      else await reopenTask(task, prefs, list_id);
+      await showToast({ style: Toast.Style.Success, title: stayCompleted ? "Marked complete" : "Marked not done" });
+      onDone();
+      pop();
+    } catch (error) {
+      await showFailureToast(error, {
+        title: stayCompleted ? "Could not mark as complete" : "Could not mark as not done",
+      });
+    }
+  }
+
+  return (
+    <Form
+      navigationTitle={title}
+      isLoading={lists.isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title={title} icon={stayCompleted ? Icon.CheckCircle : Icon.Circle} onSubmit={submit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description
+        text={`"${task.title}" was cancelled into ${task.list_title}. Choose the list it goes back to.`}
+      />
+      <Form.Dropdown id="list_id" title="List">
+        {lists.data
+          ?.filter((l) => l.list_id !== task.list_id)
+          .map((l) => (
+            <Form.Dropdown.Item key={l.list_id} value={l.list_id} title={l.title} />
+          ))}
+      </Form.Dropdown>
+    </Form>
   );
 }

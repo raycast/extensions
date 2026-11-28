@@ -41,7 +41,7 @@ Either way, the task form opens with the address as the task's Link action, so 2
 
 Jump straight to the work that matters: **Now**, **Later Today**, **Today**, **Tomorrow**, **Starred**, **Scheduled**, **Deadlines**, **Done**, any list, or any smart list. Each scope shows how many tasks it has, like **Today (2)**. Paused tags (Someday, Blocked, and the rest) appear as **Paused: {tag}**, so deferred work stays one pick away. Start and due dates show on each row; overdue dues are red. Type to filter by title, notes, tag, or link. **Refresh** (⌘R) reloads tasks, lists, and smart lists from 2Do.
 
-Projects and checklists show progress at a glance. **Show Items** (⌘I) opens what's inside; **Add Item** (⌘N) adds another. Completing a project or checklist with open items asks first. Repeating tasks show their rule on hover.
+Projects and checklists show progress at a glance. **Show Items** (⌘I) opens what's inside; **Add Item** (⌘N) adds another. Completing a project or checklist with open items (⌘D) asks whether to complete them too or cancel them, using your Cancel Task settings. Repeating tasks show their rule on hover.
 
 ⌘L runs the task's 2Do action—open a link, call or message, email, Maps, or Google—or the first link in the notes when there is no action. Choose Link lists every link on the task.
 
@@ -51,8 +51,25 @@ Projects and checklists show progress at a glance. **Show Items** (⌘I) opens w
 | Run Action (or open the first link) | ⌘L       |
 | Choose Link (2 or more)             | ⇧⌘L      |
 | Complete / Mark as Not Done         | ⌘D       |
+| Cancel Task                         | ⇧⌘D      |
 | Show Items (projects, checklists)   | ⌘I       |
 | Add Item (projects, checklists)     | ⌘N       |
 | Star / Unstar                       | ⌘.       |
 | Open in 2Do                         | ⌘O       |
 | Refresh                             | ⌘R       |
+
+### Cancel Task
+
+By default, Cancel Task follows this convention: it adds the **Cancelled** tag and completes the task, so it shows in Done with an ✕ instead of a check. Change what it does in the extension's preferences:
+
+- **Cancel Task:** Complete and Tag (default), Tag Only, Move to List and Complete, or Delete. Delete always asks first.
+- **Cancel Tag:** the tag to add (default "Cancelled"). It must already exist in 2Do; if it doesn't, Cancel Task says so. Add it in 2Do, or set this to the tag you use for cancelled tasks.
+- **Cancel List:** the list to move cancelled tasks to, for Move to List and Complete.
+
+Cancelling a project or checklist that still has open subtasks asks first, because completing it completes them too.
+
+For a repeating task, Complete and Tag, Move to List and Complete, and Delete cancel only this occurrence. They complete the task, then tag, move or delete only the completed occurrence, so the next one is left as it was. Tag Only doesn't complete anything, so it tags the repeating task itself and leaves it at its current date.
+
+**Mark as Not Done** (⌘D) on a cancelled task undoes the cancel: it removes the cancel tag. A task cancelled into the Cancel List asks which list it goes back to, since 2Do doesn't record where it came from.
+
+On a done task, **Mark as Cancelled Instead** or **Mark as Complete Instead** (⇧⌘D) switches the cancel mark without reopening the task. Only one appears, matching how the task is marked now. Delete has no cancel mark, so Mark as Cancelled Instead is hidden for that preference.
