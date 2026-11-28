@@ -8,11 +8,21 @@ test("Windows startup returns the exact native session identity without rounding
   const h = createHarness({ platform: "win32" });
   const start = mock.fn(async () => sessionId);
   const adapter = h.load("windowsApi.ts", { "rust:../rust": { start_caffeinate: start } });
-  assert.equal(await adapter.windowsStartCaffeinate("-t 90"), sessionId);
+  assert.equal((await adapter.windowsStartCaffeinate("-t 90")).sessionId, sessionId);
   const config = start.mock.calls[0].arguments[0];
   assert.equal(config.durationSeconds, 90);
   assert.equal(config.pid, null);
   assert.equal(config.windowHandle, null);
+});
+
+test("Windows startup reports what it asks the worker to prevent", async () => {
+  const h = createHarness({ platform: "win32", preferences: { preventSystem: false } });
+  const start = mock.fn(async () => sessionId);
+  const adapter = h.load("windowsApi.ts", { "rust:../rust": { start_caffeinate: start } });
+  const { prevention } = await adapter.windowsStartCaffeinate();
+  const { preventDisplay, preventSystem } = start.mock.calls[0].arguments[0];
+  assert.deepEqual([preventDisplay, preventSystem], [true, false]);
+  assert.deepEqual({ ...prevention }, { display: true, system: false, systemOnAC: false });
 });
 
 for (const args of ["-t 1.5", "-t -1", "-t 0", "-t", "-t 30 -t 60", "-t 9007199254740992"]) {

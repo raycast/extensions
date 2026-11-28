@@ -1,4 +1,4 @@
-import { startCaffeinate, deviceName } from "../utils";
+import { startCaffeinate, caffeinationReply } from "../utils";
 import { calculateDuration } from "../duration";
 
 type Input = {
@@ -29,10 +29,10 @@ export default async function (input: Input) {
   const totalSeconds = calculateDuration({ hours, minutes, seconds });
   const formattedTime = `${hours ? `${hours}h` : ""}${minutes ? `${minutes}m` : ""}${seconds ? `${seconds}s` : ""}`;
 
-  await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${totalSeconds}`, {
+  const prevention = await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${totalSeconds}`, {
     kind: "for",
     endsAt: new Date(Date.now() + totalSeconds * 1000).toISOString(),
   });
 
-  return `${deviceName()} will stay awake for ${formattedTime}`;
+  return caffeinationReply(`for ${formattedTime}`, prevention);
 }

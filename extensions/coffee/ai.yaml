@@ -17,6 +17,7 @@ instructions: |
   - User wants to stop caffeination → use decaffeinate. Interrupting a running schedule pauses it until resumed; mention that when it happens
 
   When confirming actions, mention the specific duration, end time, application, or schedule as applicable.
+  If a tool says Coffee isn't keeping the computer awake, tell the user why instead of saying it will stay awake.
 evals:
   - input: "@coffee keep my computer awake for 2 hours"
     mocks:
@@ -103,6 +104,16 @@ evals:
       - callsTool: check-caffeination-status
       - callsTool: caffeinate
       - meetsCriteria: Confirms that computer will stay awake
+
+  - input: "@coffee keep my Mac awake"
+    usedAsExample: false
+    mocks:
+      check-caffeination-status: "Coffee is inactive; no caffeinate processes were detected"
+      caffeinate: "Coffee is active until you manually disable it, but it isn't keeping your Mac awake because Prevent display sleep and Prevent system sleep are off for this session"
+    expected:
+      - callsTool: check-caffeination-status
+      - callsTool: caffeinate
+      - meetsCriteria: Says Coffee isn't keeping the Mac awake because Prevent display sleep and Prevent system sleep are off, instead of saying it will stay awake
 
   - input: "@coffee keep my computer awake until 6pm today"
     mocks:

@@ -1,5 +1,11 @@
 # Coffee Changelog
 
+## [AI replies say when Coffee isn't keeping your computer awake] - {PR_MERGE_DATE}
+
+- Coffee's AI tools always said your computer would stay awake, even when Coffee's session wasn't keeping it awake, for example when you asked Coffee to keep your Mac awake with only **Prevent disk sleep** on. They now say when it isn't, and why ([#34017](https://github.com/raycast/extensions/issues/34017)).
+- On Windows, they say so whenever **Prevent system sleep** is off, because keeping only the display on doesn't stop Windows from sleeping.
+- When you ask whether Coffee is keeping your computer awake, the answer now follows the options its session started with, even if you've changed them since.
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
