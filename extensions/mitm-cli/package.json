@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mitm-cli",
+  "title": "MITM Proxy",
+  "description": "Toggle a local mitmproxy intercept, browse captured HTTP/HTTPS flows, and manage the macOS system proxy and root CA.",
+  "icon": "icon.png",
+  "author": "triuzzi",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "setup",
+      "title": "Set up MITM Proxy",
+      "description": "Install mitmproxy and jq with Homebrew",
+      "mode": "view",
+      "subtitle": "MITM Proxy"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Proxy",
+      "description": "Start or stop mitmproxy and the system proxy",
+      "mode": "no-view",
+      "subtitle": "MITM Proxy"
+    },
+    {
+      "name": "status",
+      "title": "Proxy Status",
+      "description": "Process, service, proxy and CA state",
+      "mode": "view",
+      "subtitle": "MITM Proxy"
+    },
+    {
+      "name": "flows",
+      "title": "Recent Flows",
+      "description": "Browse the requests mitmproxy captured",
+      "mode": "view",
+      "subtitle": "MITM Proxy"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mitmPath",
+      "title": "mitm CLI Path",
+      "description": "Optional. Defaults to the script bundled with the extension.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "react": "^19.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  }
+}
