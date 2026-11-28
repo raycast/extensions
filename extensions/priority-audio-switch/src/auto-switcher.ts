@@ -25,6 +25,7 @@ import {
 import { switchOnConnectUids } from "./priority/connect-mode";
 import { decide, makeSnapshot, sameSnapshot } from "./priority/decide";
 import { reconcile } from "./priority/list";
+import { runIfFree } from "./switch-lock";
 import { displayName } from "./priority/meta";
 
 /**
@@ -45,6 +46,12 @@ export const pinnedVolumeDrifted = (volume: number, level: number) =>
  * A direction without devices (a Mac mini has no microphone) has nothing to do.
  */
 export async function applyPriorities(type: IOType) {
+  // Serialized with manual switches and other runs (see switch-lock.ts). When another switch is in progress this run
+  // is skipped: that one does the same work, and a manual choice must not be undone.
+  await runIfFree(type, () => applyPrioritiesLocked(type));
+}
+
+async function applyPrioritiesLocked(type: IOType) {
   const [{ devices, current }, hidden, stored] = await Promise.all([
     getDeviceState(type),
     getHiddenDevices(type),
@@ -68,9 +75,9 @@ export async function applyPriorities(type: IOType) {
     switchOnConnect: switchOnConnectUids(type, devices, await getConnectOverrides(type), priorities),
   });
 
-  // A manual choice (Select Device, Cycle) or another run may have stored a newer snapshot while this run was reading
-  // the devices. This run's decision is then stale: switching or storing its snapshot would undo that choice. Leave
-  // everything as it is; the next run decides from the new snapshot.
+  // Safety net for a manual switch that went ahead without the lock (it waited too long): if the snapshot changed
+  // while this run was reading the devices, its decision is stale. Leave everything as it is; the next run decides
+  // from the new snapshot.
   if (!sameSnapshot(await getSnapshot(type), prev)) return;
 
   let currentUid = current.uid;

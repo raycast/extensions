@@ -114,9 +114,11 @@ export function decide({ prev, now, priorities, hidden, intervalMs, switchOnConn
   /** Best device with a priority; a "Switch on Connect" device only when none is connected. */
   const bestAvailable = () => bestOf(now.devices, priorities, hiddenSet, now.devices) ?? firstOnConnect(now.devices);
 
-  // 1. A hidden device became current → best available.
+  // 1. A hidden device became current → best available. A hidden device must never stay current, so when no device
+  // has a priority or Switch on Connect, any visible device is used (the first one macOS lists).
   if (hiddenSet.has(now.currentUid)) {
-    return pick(bestAvailable(), now.currentUid, "hidden-current");
+    const anyVisible = now.devices.find((d) => !hiddenSet.has(d.uid));
+    return pick(bestAvailable() ?? anyVisible, now.currentUid, "hidden-current");
   }
 
   // Nothing to compare with yet: just record a snapshot.

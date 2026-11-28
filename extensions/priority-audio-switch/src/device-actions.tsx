@@ -8,6 +8,7 @@ import { recordCurrentDevice } from "./device-preferences";
 import type { DeviceStore } from "./device-store";
 import { launchAutoSwitch } from "./launch-auto-switch";
 import { ACTION_ICON, PIN_ICON, UNPIN_ICON } from "./priority/icon-pool";
+import { runExclusive } from "./switch-lock";
 
 type DeviceProps = { device: AudioDevice; store: DeviceStore };
 
@@ -33,10 +34,13 @@ export function SelectDeviceAction({
       onAction={async () => {
         onSelect(device.uid);
         try {
-          await setDefaultDevice(ioType, device.id);
-          // A manual choice: Auto Switch keeps it until the next connect or disconnect. The device list is read
-          // fresh here: a stale list would make a device that connected meanwhile look new and undo the choice.
-          await recordCurrentDevice(ioType, device.uid);
+          // Waits for a running automatic switch, so this manual choice is applied last (see switch-lock.ts).
+          await runExclusive(ioType, async () => {
+            await setDefaultDevice(ioType, device.id);
+            // A manual choice: Auto Switch keeps it until the next connect or disconnect. The device list is read
+            // fresh here: a stale list would make a device that connected meanwhile look new and undo the choice.
+            await recordCurrentDevice(ioType, device.uid);
+          });
           await showToast(Toast.Style.Success, `Set "${store.nameOf(device)}" as ${ioType} device`);
           // Refreshes the Enable Auto Switch subtitle (devices in use); the manual choice itself is kept.
           await launchAutoSwitch("silent");

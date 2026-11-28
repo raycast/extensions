@@ -13,6 +13,7 @@ import { switchOnConnectUids } from "./priority/connect-mode";
 import { cycleCandidates, nextDevice } from "./priority/cycle";
 import { displayName } from "./priority/meta";
 import { reconcile } from "./priority/list";
+import { runExclusive } from "./switch-lock";
 
 /** Switch to the next connected, non-hidden device with a priority or "Switch on Connect", wrapping around. */
 export async function runCycle(type: IOType) {
@@ -37,9 +38,12 @@ export async function runCycle(type: IOType) {
       return;
     }
 
-    await setDefaultDevice(type, device.id);
-    // A deliberate choice: tell Auto Switch so it is not undone on the next run.
-    await recordCurrentDevice(type, device.uid);
+    // Waits for a running automatic switch, so this choice is applied last (see switch-lock.ts).
+    await runExclusive(type, async () => {
+      await setDefaultDevice(type, device.id);
+      // A deliberate choice: tell Auto Switch so it is not undone on the next run.
+      await recordCurrentDevice(type, device.uid);
+    });
 
     const name = displayName(device.name, (await getDeviceMeta(type))[device.uid]);
     // The toast shows the title on top and the message below: label first, device name underneath.
