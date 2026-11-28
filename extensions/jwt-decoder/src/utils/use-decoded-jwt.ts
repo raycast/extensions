@@ -14,6 +14,10 @@ export type DecodedJwtState = EmptyDecodedJwt | ErrorDecodedJwt | ReadyDecodedJw
 
 export default function useDecodedJwt(): DecodedJwtState {
   const { ready, clipboard } = useClipboard();
+  return useDecodedJwtValue(ready, clipboard);
+}
+
+export function useDecodedJwtValue(ready: boolean, clipboard: string | undefined): DecodedJwtState {
   const claims = useClaims();
 
   if (ready === false || clipboard === undefined || clipboard.length === 0) {

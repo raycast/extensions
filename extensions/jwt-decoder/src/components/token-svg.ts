@@ -13,11 +13,11 @@ import {
   twRegex,
 } from "../constants";
 import { displayValue } from "../utils/display-value";
-import { atob } from "buffer";
+import { Buffer } from "node:buffer";
 import { TokenItem } from "../utils/list-from-object";
 
 function partToJsonStringArray(part: string): string[] {
-  return JSON.stringify(JSON.parse(atob(part)), null, 2).split("\n");
+  return JSON.stringify(JSON.parse(Buffer.from(part, "base64url").toString("utf8")), null, 2).split("\n");
 }
 
 interface TokenSvgProps {

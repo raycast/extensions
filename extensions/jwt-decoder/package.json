@@ -12,7 +12,8 @@
     "pernielsentikaer",
     "ridemountainpig",
     "0xdhrv",
-    "itggood2420"
+    "itggood2420",
+    "dofy"
   ],
   "categories": [
     "Data",
@@ -34,6 +35,12 @@
       "mode": "view"
     },
     {
+      "name": "create-jwt-quicklink",
+      "title": "Create JWT Quicklink",
+      "description": "Save a local test token and create a quicklink to view its decoded contents.",
+      "mode": "view"
+    },
+    {
       "name": "debug",
       "title": "JWT Debugger",
       "description": "Decode, encode, edit, re-sign, and verify a JSON Web Token",
@@ -42,6 +49,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.3.3",
     "csv-parse": "^7.0.1",
     "jose": "^6.2.3",
     "raycast-hooks": "^1.0.4"
