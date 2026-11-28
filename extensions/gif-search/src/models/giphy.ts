@@ -33,6 +33,9 @@ export default async function giphy(type?: GiphyType) {
     async search(term: string, opt?: APIOpt) {
       const reqUrl = getGiphyUrl(type, opt);
       reqUrl.searchParams.set("q", term);
+      // Lets a description ("when the build finally passes") find GIFs, not only literal matches; the
+      // proxy searches 1–2 word queries as typed and falls back to them if its rewrite fails.
+      reqUrl.searchParams.set("smart", "1");
 
       const results = await fetchProviderJson<GiphyResults>(reqUrl, { provider, request: "search" });
       return { results: results.data.map(mapGiphyResponse) };

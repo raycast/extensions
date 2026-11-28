@@ -78,9 +78,24 @@ test("GIPHY Stickers searches the sticker catalog and labels its errors", async 
   assert.equal(requests[0].url.searchParams.get("type"), "stickers");
   assert.equal(requests[0].url.searchParams.get("q"), "side eye");
   assert.equal(requests[0].url.searchParams.get("limit"), "5");
+  assert.equal(requests[0].url.searchParams.get("smart"), "1");
   assert.equal(requests[0].options.provider, "GIPHY Stickers");
   assert.equal(results[0].url, "https://giphy.com/stickers/abc");
   assert.equal(results[0].download_name, "abc-title.gif");
+});
+
+test("GIF searches ask the proxy for smart search and trending does not", async () => {
+  const { requests, stub } = withFetch(() => ({ data: [], results: [] }));
+  const stubs = { "@raycast/api": raycastApi(), "lib/fetchProviderJson": stub };
+  const { default: giphy } = load("models/giphy", stubs);
+  const { default: klipy } = load("models/klipy", stubs);
+
+  await (await giphy()).search("when the build finally passes", { limit: 5 });
+  await (await klipy()).search("when the build finally passes", { limit: 5 });
+  await (await giphy()).trending({ limit: 5 });
+  await (await klipy()).trending({ limit: 5 });
+
+  assert.deepEqual(requests.map((request) => request.url.searchParams.get("smart")), ["1", "1", null, null]);
 });
 
 test("GIPHY GIFs and Clips keep their provider names", async () => {
