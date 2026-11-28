@@ -1,0 +1,182 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kiri",
+  "title": "Kiri Focus Timer",
+  "description": "Run focus blocks from the menu bar, play Kiri background sounds, and save each block to your Kiri history.",
+  "icon": "extension-icon.png",
+  "author": "Project-Kiri",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "focus",
+    "timer",
+    "pomodoro",
+    "background sounds",
+    "brown noise",
+    "menu bar"
+  ],
+  "commands": [
+    {
+      "name": "start-focus-block",
+      "title": "Start Focus Block",
+      "subtitle": "Kiri",
+      "description": "Pick a length, an optional task and a sound, then start a focus block.",
+      "mode": "view"
+    },
+    {
+      "name": "kiri-timer",
+      "title": "Kiri Timer",
+      "description": "Show the time left in the menu bar, with pause, stop and break controls.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "start-break",
+      "title": "Start Break",
+      "subtitle": "Kiri",
+      "description": "Start a break with your break length.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "subtitle": "Kiri",
+      "description": "Stop the running block or break.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-history",
+      "title": "Focus History",
+      "subtitle": "Kiri",
+      "description": "See the blocks you finished, and connect your Kiri account.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "focusMinutes",
+      "title": "Default Block Length",
+      "description": "The length picked first when you start a focus block.",
+      "type": "dropdown",
+      "required": false,
+      "default": "25",
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "25 minutes",
+          "value": "25"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45"
+        },
+        {
+          "title": "50 minutes",
+          "value": "50"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        },
+        {
+          "title": "90 minutes",
+          "value": "90"
+        }
+      ]
+    },
+    {
+      "name": "breakMinutes",
+      "title": "Break Length",
+      "description": "The length of a break after a focus block.",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "20 minutes",
+          "value": "20"
+        }
+      ]
+    },
+    {
+      "name": "autoStartBreak",
+      "title": "Breaks",
+      "label": "Start the break by itself when a block ends",
+      "description": "When off, the menu bar offers the break and waits for you.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "endSound",
+      "title": "End Alert",
+      "label": "Play a short sound when a block or break ends",
+      "description": "A notification is always shown.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "saveToKiri",
+      "title": "Kiri History",
+      "label": "Save finished blocks to my Kiri account",
+      "description": "Only when a Kiri account is connected in Focus History.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "pauseOnCall",
+      "title": "Calls",
+      "label": "Pause a focus block when a call starts",
+      "description": "Kiri pauses the block when an app starts using the microphone (FaceTime, Zoom, Google Meet, Teams and others) and waits for you to resume it. Dictation and voice recordings count too. Needs the Kiri Timer menu bar command turned on. Kiri only checks whether the microphone is in use; it never listens.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
