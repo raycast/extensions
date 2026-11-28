@@ -4,12 +4,13 @@ export interface WordReferenceErrorResponse {
   statusText: string;
 }
 
-// WordReference's bot check challenges clients that claim to be a browser, so identify as the extension instead
+/* WordReference answers HTTP 418 with a JavaScript challenge that sets nginx_wr_human=1 in the browser; Raycast runs no JavaScript, so the cookie is sent up front */
 export const wordReferenceRequestHeaders = {
   "User-Agent": "Raycast WordReference Extension",
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
   Referer: "https://www.wordreference.com/",
+  Cookie: "nginx_wr_human=1",
 };
 
 export function getErrorMarkdown(status: number, statusText: string): string {
