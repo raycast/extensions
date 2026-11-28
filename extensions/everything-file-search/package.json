@@ -1,0 +1,185 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "everything-file-search",
+  "title": "Everything Search",
+  "description": "Fast local file search powered by Everything: filter by file type, sort by name/path/size/date, preview text and images in the detail panel.",
+  "icon": "icon.png",
+  "author": "shaunwuu",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "keywords": [
+    "everything",
+    "voidtools",
+    "file search",
+    "file finder",
+    "ntfs",
+    "filename"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Files with Everything",
+      "subtitle": "File Search",
+      "description": "Search local files with Everything, with type filters, sorting and preview",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "File Name",
+          "type": "text",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "manage-types",
+      "title": "Configure File Types",
+      "subtitle": "Everything Search",
+      "description": "Add, edit and remove custom file type filters",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "title": "Everything HTTP Host",
+      "description": "Address of the Everything HTTP server (localhost only by default)",
+      "type": "textfield",
+      "default": "127.0.0.1",
+      "required": false
+    },
+    {
+      "name": "port",
+      "title": "Everything HTTP Port",
+      "description": "Defaults to 8085. The extension can enable the HTTP server for you if it's off",
+      "type": "textfield",
+      "default": "8085",
+      "required": false
+    },
+    {
+      "name": "maxResults",
+      "title": "Page Size",
+      "description": "Number of results fetched per page",
+      "type": "textfield",
+      "default": "300",
+      "required": false
+    },
+    {
+      "name": "showFolder",
+      "title": "Type: Folders",
+      "description": "Show the Folders filter in the type dropdown",
+      "type": "checkbox",
+      "label": "Folders",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showDoc",
+      "title": "Type: Documents",
+      "description": "Show the Documents filter (doc, docx, pdf, txt, md…)",
+      "type": "checkbox",
+      "label": "Documents",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showImage",
+      "title": "Type: Images",
+      "description": "Show the Images filter (jpg, png, gif, webp, svg…)",
+      "type": "checkbox",
+      "label": "Images",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showVideo",
+      "title": "Type: Videos",
+      "description": "Show the Videos filter (mp4, mkv, avi, mov…)",
+      "type": "checkbox",
+      "label": "Videos",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showAudio",
+      "title": "Type: Audio",
+      "description": "Show the Audio filter (mp3, flac, wav, aac…)",
+      "type": "checkbox",
+      "label": "Audio",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showArchive",
+      "title": "Type: Archives",
+      "description": "Show the Archives filter (zip, rar, 7z, tar, iso…)",
+      "type": "checkbox",
+      "label": "Archives",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showApp",
+      "title": "Type: Apps",
+      "description": "Show the Apps filter (exe, msi, bat, ps1…)",
+      "type": "checkbox",
+      "label": "Apps",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showCode",
+      "title": "Type: Code",
+      "description": "Show the Code filter (ts, js, py, java, json…)",
+      "type": "checkbox",
+      "label": "Code",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showFont",
+      "title": "Type: Fonts",
+      "description": "Show the Fonts filter (ttf, otf, woff, woff2…)",
+      "type": "checkbox",
+      "label": "Fonts",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showTorrent",
+      "title": "Type: Torrents",
+      "description": "Show the Torrents filter (torrent)",
+      "type": "checkbox",
+      "label": "Torrents",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.17.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "build:raycast": "ray build -o ./dist && node -e \"const fs=require('fs');for(const f of fs.readdirSync('dist').filter(f=>f.endsWith('.js')))fs.copyFileSync('dist/'+f,f)\""
+  }
+}
