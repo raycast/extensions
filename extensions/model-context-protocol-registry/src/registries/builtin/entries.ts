@@ -4082,6 +4082,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "stabledomains",
+    title: "StableDomains",
+    description:
+      "Search domain availability, get live price quotes, suggest names, check drop radar and domain history, estimate value, and look up WHOIS/RDAP, DNS and email records. 11 public domain tools with no purchases; it cannot buy, renew, transfer, or change DNS or forwarding. Authless hosted Streamable HTTP MCP at https://stabledomains.net/api/mcp/discover. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js. Built for AI agents and developers.",
+    icon: "https://stabledomains.net/icon.png",
+    homepage: "https://stabledomains.net",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://stabledomains.net/api/mcp/discover"],
+    },
+    remoteUrl: "https://stabledomains.net/api/mcp/discover",
+  },
+  {
     name: "statuz",
     title: "Statuz",
     description:
