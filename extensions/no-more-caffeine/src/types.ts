@@ -9,15 +9,13 @@ export interface CaffeineIntake {
 export type CaffeineStatus = "safe" | "warning" | "no-more-caffeine";
 
 export interface DrinkPreset {
-  name: string;
-  defaultCaffeineMg: number;
-}
-
-export interface CustomDrink {
   id: string;
   name: string;
   defaultCaffeineMg: number;
+  servingMl?: number;
 }
+
+export type CustomDrink = DrinkPreset;
 
 export interface Settings {
   bedtime: string; // time format like "22:00"

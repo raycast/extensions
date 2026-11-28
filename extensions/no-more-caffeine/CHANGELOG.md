@@ -1,5 +1,14 @@
 # No More Caffeine Changelog
 
+## [Caffeine Timeline, What If, and History] - {PR_MERGE_DATE}
+
+- Keep intake entries beyond 48 hours and exclude future drinks from current estimates and daily totals.
+- See estimated caffeine now and at bedtime on a 24-hour SVG timeline. The curve accounts for gradual absorption, marks logged drinks and bedtime, and shows your configured threshold.
+- Check an estimated last-cup cutoff and preview different drinks, servings, and times without saving them.
+- Quick-log built-in or favorite drinks. Log cold brew and matcha, scale presets by volume, and set default serving sizes for custom drinks.
+- View daily, weekly, and monthly SVG charts and export or import your full intake history as JSON.
+- Ask Raycast AI for caffeine estimates, last-cup times, drink previews, trends, and favorite presets. Log a drink from chat with confirmation.
+
 ## [Add Time to Entries] - 2026-07-03
 
 ### ✨ Features

@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Settings } from "../types";
+import { positiveAmount } from "./intakeData";
 
 /**
  * Get user preferences and convert them to Settings object
@@ -25,10 +26,12 @@ export function getSettings(): Settings {
     console.warn(`Invalid bedtime preference "${bedtimeRaw}", falling back to 22:00`);
   }
 
+  const bedtimeLimit = Number(preferences.maxCaffeineAtBedtime?.trim() || "50");
+
   return {
     bedtime,
-    halfLife: parseFloat(preferences.halfLife || "5"),
-    maxCaffeineAtBedtime: parseFloat(preferences.maxCaffeineAtBedtime || "50"),
-    dailyMaxCaffeine: preferences.dailyMaxCaffeine ? parseFloat(preferences.dailyMaxCaffeine) : undefined,
+    halfLife: positiveAmount(preferences.halfLife) ?? 5,
+    maxCaffeineAtBedtime: Number.isFinite(bedtimeLimit) && bedtimeLimit >= 0 ? bedtimeLimit : 50,
+    dailyMaxCaffeine: positiveAmount(preferences.dailyMaxCaffeine),
   };
 }

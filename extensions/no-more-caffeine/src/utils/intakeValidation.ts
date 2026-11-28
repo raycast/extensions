@@ -1,8 +1,9 @@
 import { showToast, Toast } from "@raycast/api";
+import { positiveAmount } from "./intakeData";
 
-export function parseAndValidateIntake(caffeineAmount: string, chosenTime: Date): number | null {
-  const caffeineMg = parseFloat(caffeineAmount);
-  if (isNaN(caffeineMg) || caffeineMg <= 0) {
+function parseAndValidateIntake(caffeineAmount: string, chosenTime: Date): number | null {
+  const caffeineMg = positiveAmount(caffeineAmount);
+  if (caffeineMg === undefined) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid caffeine amount",
@@ -11,7 +12,7 @@ export function parseAndValidateIntake(caffeineAmount: string, chosenTime: Date)
     return null;
   }
 
-  if (chosenTime > new Date()) {
+  if (!Number.isFinite(+chosenTime) || chosenTime > new Date()) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid time",
