@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "expiryregister",
+    title: "ExpiryRegister",
+    description:
+      "Keep a register of business expiry and renewal dates (certificates, licences, contracts, insurance, domains). Each date has a named owner who is emailed before it is due; if nobody acknowledges within 24 hours, the next contact is emailed until someone does, and the acknowledgement is recorded. List what is due, add or import items, set reminder schedules and escalation contacts, acknowledge, renew and read an item's history. Hosted Streamable HTTP server at https://mcp.expiryregister.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Paid service with a 7-day trial.",
+    icon: "https://expiryregister.com/android-chrome-512x512.png",
+    homepage: "https://expiryregister.com/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.expiryregister.com/mcp"],
+    },
+    remoteUrl: "https://mcp.expiryregister.com/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
