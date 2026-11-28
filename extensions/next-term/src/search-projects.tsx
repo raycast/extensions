@@ -26,7 +26,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           title={name(project.path)}
           subtitle={shown(project.path)}
           keywords={project.path.split("/").filter(Boolean)}
-          accessories={project.open ? [{ tag: "Open" }] : []}
+          accessories={[
+            ...(project.open ? [{ tag: "Open" }] : []),
+            ...(project.lastUsed ? [{ date: project.lastUsed, tooltip: "Last used" }] : []),
+          ]}
           actions={
             <ActionPanel>
               <Action

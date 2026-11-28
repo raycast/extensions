@@ -25,6 +25,14 @@ export interface Window {
 export interface Projects {
   open: string[];
   recent: string[];
+  /** Open and recent together, the one used last first; an older Next Term leaves it out. */
+  projects?: { path: string; open: boolean; last_used?: string }[];
+}
+
+export interface Project {
+  path: string;
+  open: boolean;
+  lastUsed?: Date;
 }
 
 const appPaths = ["/Applications/Next Term.app", `${homedir()}/Applications/Next Term.app`];
@@ -114,9 +122,18 @@ export function name(path: string): string {
   return path.split("/").filter(Boolean).pop() ?? path;
 }
 
-/** Projects worth listing: no agents' scratch folders. */
-export function projects(answer: Projects): { path: string; open: boolean }[] {
+/** Projects worth listing, the one used last first: no agents' scratch folders. */
+export function projects(answer: Projects): Project[] {
   const scratch = (path: string) => path.startsWith("/private/tmp/") || path.startsWith("/tmp/");
+  if (answer.projects) {
+    return answer.projects
+      .filter((project) => !scratch(project.path))
+      .map((project) => ({
+        path: project.path,
+        open: project.open,
+        lastUsed: project.last_used ? new Date(project.last_used) : undefined,
+      }));
+  }
   const open = answer.open.filter((path) => !scratch(path));
   const recent = answer.recent.filter((path) => !scratch(path) && !open.includes(path));
   return [...open.map((path) => ({ path, open: true })), ...recent.map((path) => ({ path, open: false }))];
