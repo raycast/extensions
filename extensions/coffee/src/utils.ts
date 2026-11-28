@@ -11,11 +11,13 @@ import { getUserStopDecision } from "./userStopPolicy";
 import {
   CaffeinationReason,
   CaffeinationState,
+  conditionalStopResult,
   ConditionalStopResult,
   getMacCaffeinationState,
   LegacySession,
   parseReason,
   startMacCaffeinate,
+  stateAfter,
   stopMacCaffeinate,
   stopMacCaffeinateIfMatches,
   stopMacLegacyCaffeinate,
@@ -114,8 +116,9 @@ export async function startCaffeinate(
     const sessionId = await windowsStartCaffeinate(additionalArgs);
     await setWindowsCaffeinationReason(sessionId, reason);
   } else {
+    const { preventDisplay, allowScreenSaver } = getPreferenceValues<Preferences>();
     const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
-    await startMacCaffeinate(args, reason);
+    await startMacCaffeinate(args, reason, { allowScreenSaver: preventDisplay && allowScreenSaver });
   }
 
   // showHUD closes the window and Raycast 2 unloads view commands, so spawn
@@ -134,11 +137,10 @@ export async function stopCaffeinate(
   options?: { pauseRunningSchedule?: boolean },
 ) {
   const pausedSchedule = options?.pauseRunningSchedule ? await pauseRunningSchedule() : undefined;
-  let state: CaffeinationState;
+  let state: CaffeinationState | undefined;
   try {
     if (process.platform === "win32") {
       await windowsStopCaffeinate();
-      state = await getCaffeinationState();
     } else {
       state = await stopMacCaffeinate();
     }
@@ -146,6 +148,7 @@ export async function stopCaffeinate(
     if (pausedSchedule) await restorePausedSchedule(pausedSchedule);
     throw e;
   }
+  state ??= await stateAfter(getCaffeinationState);
   // Windows reasons are tied to worker identity. Leave them in place so a
   // concurrent replacement cannot lose its metadata during this stop's cleanup.
   if (process.platform !== "win32") await LocalStorage.removeItem(CAFFEINATION_REASON_KEY);
@@ -199,7 +202,7 @@ export async function stopCaffeinateIfMatches(
     const state = await getCaffeinationState();
     if (state.sessionId !== expectedSessionId || state.reason?.kind !== "schedule") return { stopped: false, state };
     const stopped = await windowsStopCaffeinateIfMatches(expectedSessionId);
-    result = { stopped, state: await getCaffeinationState() };
+    result = await conditionalStopResult(stopped, getCaffeinationState);
   } else {
     result = await stopMacCaffeinateIfMatches(expectedSessionId);
   }

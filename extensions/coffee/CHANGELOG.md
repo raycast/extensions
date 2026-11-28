@@ -1,5 +1,11 @@
 # Coffee Changelog
 
+## [Allow the screen saver while the display stays awake] - {PR_MERGE_DATE}
+
+- Add the **Allow screen saver** preference. On macOS, **Prevent display sleep** also kept the screen saver from starting. With this option, Coffee keeps the display awake and starts the screen saver after the Lock Screen delay, following macOS's default rules, for example waiting while another app keeps the display awake during video playback or a call. Your Mac still locks if it requires a password after the screen saver begins.
+- Coffee no longer loses track of its own session when macOS briefly can't list running processes.
+- If Coffee can't check its state right after you start or stop it, the start or stop now stands, and a paused schedule stays paused.
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).

@@ -20,6 +20,7 @@ async function menu(options = {}) {
     error: options.error,
   };
   const optimisticStates = [];
+  let cached = options.cached ?? false;
   const react = {
     createElement: (type, props, ...children) => ({ type, props: props || {}, children }),
     useState: (initial) => [typeof initial === "function" ? initial() : initial, () => {}],
@@ -32,7 +33,7 @@ async function menu(options = {}) {
     react,
     "@raycast/api": { ...h.api, MenuBarExtra, Color: { PrimaryText: "primary" }, Icon: { Checkmark: "check" } },
     "@raycast/utils": {
-      useCachedState: () => [options.cached ?? false, () => {}],
+      useCachedState: () => [cached, (value) => (cached = value)],
       useCachedPromise: () => ({
         ...state,
         revalidate: async () => {},
@@ -44,10 +45,15 @@ async function menu(options = {}) {
           }
           try {
             await operation;
-            state.data = await h.load("utils.ts").getCaffeinationState();
           } catch (error) {
             state.data = previous;
             throw error;
+          }
+          // Like @raycast/utils, a failed refresh is recorded rather than thrown.
+          try {
+            state.data = await h.load("utils.ts").getCaffeinationState();
+          } catch (error) {
+            state.error = error;
           }
         },
       }),
@@ -360,3 +366,30 @@ test("with a managed session running, stopping the leftover never blocks or paus
   assert.equal(schedule.IsManuallyDecafed, false);
   assert.equal(schedule.IsRunning, true);
 });
+
+for (const [name, options, title, icon] of [
+  ["a stop", { coffee: true, external: true }, "Stop Coffee Caffeination", "pot-filled.svg"],
+  ["a stop of a previous session", { legacy: true, external: true }, "Stop Likely Coffee Session…", "pot-filled.svg"],
+  ["a stop of the only previous session", { legacy: true }, "Stop Likely Coffee Session…", "pot-empty.svg"],
+  [
+    "a stop of a previous session while Coffee runs",
+    { legacy: true, coffee: true },
+    "Stop Likely Coffee Session…",
+    "pot-filled.svg",
+  ],
+]) {
+  test(`after ${name} whose state reads fail, the icon still counts the processes it didn't stop`, async (t) => {
+    t.mock.method(console, "error", () => {});
+    const h = await menu(options);
+    h.fakeProcess.kill.mock.mockImplementation((pid) => {
+      h.table.delete(pid);
+      h.addProcess(950, { createdAt: "unreadable" });
+    });
+    await h
+      .items(h.render())
+      .find((item) => item.title === title)
+      .onAction();
+    assert.ok(h.state.error);
+    assert.equal(h.render().props.icon.source, icon);
+  });
+}

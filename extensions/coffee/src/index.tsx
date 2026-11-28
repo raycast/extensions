@@ -58,6 +58,12 @@ const EMPTY_STATE: CaffeinationState = {
   startTime: null,
 };
 
+// A stop whose follow-up read failed reports no count, but the processes it didn't stop still run.
+function withUntouched(stopped: CaffeinationState, untouched: number | null): CaffeinationState {
+  if (stopped.externalCount !== null || untouched === null) return stopped;
+  return { ...stopped, externalCount: untouched, isRunning: stopped.isManaged || untouched > 0 };
+}
+
 export default function Command(props: LaunchProps) {
   const [cachedCaffeinated, setCachedCaffeinated] = useCachedState<boolean>("caffeinateStatus");
   const { isLoading, data: state, mutate, error } = useCaffeinateInfo();
@@ -167,9 +173,11 @@ export default function Command(props: LaunchProps) {
         primaryAction: { title: "Stop Process", style: Alert.ActionStyle.Destructive },
       });
       if (!confirmed) return;
+      // The previous session was one of the counted processes.
+      const untouched = data.externalCount === null ? null : data.externalCount - 1;
       const operation = stopLegacyCaffeinate({ menubar: true, status: true }, legacy, {
         pauseRunningSchedule: decision.pauseRunningSchedule,
-      });
+      }).then((stopped) => withUntouched(stopped, untouched));
       await mutate(operation);
       const stopped = await operation;
       setCachedCaffeinated(stopped.isRunning);
@@ -198,7 +206,7 @@ export default function Command(props: LaunchProps) {
       if (!decision.allowed) return;
       const operation = stopCaffeinate({ menubar: true, status: true }, isHideEnabled, {
         pauseRunningSchedule: decision.pauseRunningSchedule,
-      });
+      }).then((stopped) => withUntouched(stopped, data.externalCount));
       await mutate(operation, {
         optimisticUpdate: () => ({
           ...data,
