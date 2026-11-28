@@ -118,6 +118,16 @@ export function evaluateAssetLinks(
     Array.isArray(e.target.sha256_cert_fingerprints)
       ? e.target.sha256_cert_fingerprints
       : [];
+  const malformedNames = apps.filter(
+    (e: any) =>
+      typeof e.target.package_name !== "string" ||
+      e.target.package_name.trim() === "",
+  ).length;
+  if (malformedNames)
+    return {
+      status: "warn",
+      detail: `${malformedNames} android_app statement(s) have no non-empty package_name.`,
+    };
   const names = apps.map((e: any) => e.target.package_name as string);
   if (androidPackage) {
     const hit = apps.find((e: any) => e.target.package_name === androidPackage);
