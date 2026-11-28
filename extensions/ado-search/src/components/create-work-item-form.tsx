@@ -179,20 +179,28 @@ export function CreateWorkItemForm({
   });
   // One Parent field: a picker of the sprint's backlog items once a sprint is set, else a work item ID.
   const pickParentFromSprint = sprintsAvailable && !!effectiveIteration;
-  // The sprint's backlog items, plus the selected parent when it isn't one of them (for example while they load,
-  // or when the form was opened under an item of another sprint). Same key for the same item, so the selection
-  // survives the list loading.
-  const selectedParent = parentId.trim();
+  // The parent the form was opened with is always the first option, in the same place while the sprint's backlog
+  // items load (an option that moves or is replaced makes the dropdown report an empty value and drop it).
+  // The rest are the sprint's backlog items. It is only pinned while the sprint is the one the form opened with.
+  const pinnedParent =
+    initial.parentId && effectiveIteration === (initial.iterationPath ?? "") ? String(initial.parentId) : "";
+  const pinnedStory = (stories ?? []).find((st) => String(st.id) === pinnedParent);
   const parentOptions = [
-    ...(selectedParent && !(stories ?? []).some((st) => String(st.id) === selectedParent)
+    ...(pinnedParent
       ? [
           {
-            id: selectedParent,
-            title: loadingStories ? `#${selectedParent}` : `#${selectedParent} (not in this sprint)`,
+            id: pinnedParent,
+            title: pinnedStory
+              ? `#${pinnedStory.id} ${pinnedStory.title}`
+              : loadingStories
+                ? `#${pinnedParent}`
+                : `#${pinnedParent} (not in this sprint)`,
           },
         ]
       : []),
-    ...(stories ?? []).map((st) => ({ id: String(st.id), title: `#${st.id} ${st.title}` })),
+    ...(stories ?? [])
+      .filter((st) => String(st.id) !== pinnedParent)
+      .map((st) => ({ id: String(st.id), title: `#${st.id} ${st.title}` })),
   ];
   // Only when the sprint really changes (not on mount, even if effects run twice): a parent chosen for another
   // sprint, or typed as an ID, would be hidden by the picker, so start over. The parent the form was opened
@@ -400,11 +408,7 @@ export function CreateWorkItemForm({
           title="Parent"
           info="Backlog items of the selected sprint"
           value={parentId.trim()}
-          onChange={(v) => {
-            // While the list loads, the dropdown can report "" because its items are changing: keep the parent.
-            if (v === "" && loadingStories) return;
-            setParentId(v);
-          }}
+          onChange={setParentId}
         >
           <Form.Dropdown.Item key="none" value="" title="— (no parent)" />
           {parentOptions.map((o) => (
