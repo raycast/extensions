@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
   "title": "Azure DevOps Repositories Search",
-  "description": "Search Azure DevOps repositories, pipelines, pull requests, PBIs and work items, and see open pull requests in the menu bar.",
+  "description": "Search Azure DevOps repositories, pipelines and pull requests, manage your work items and sprints, and create work items.",
   "icon": "Azure-DevOps.png",
   "author": "willem_van_lent",
   "contributors": [
     "fschaal",
     "Olivier-OG",
-    "stoumann"
+    "stoumann",
+    "alejandro_pascuale"
   ],
   "categories": [
     "Developer Tools",
@@ -28,6 +29,119 @@
       "description": "Browse work items assigned to you, change states, view attachments, and create linked branches",
       "subtitle": "Azure DevOps",
       "mode": "view"
+    },
+    {
+      "name": "sprint-work-items",
+      "title": "Azure DevOps Sprint Work Items",
+      "description": "Browse the work items of a sprint as the sprint backlog shows them, grouped by User Story or state, and comment, log hours or move them to another sprint",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "search-work-items",
+      "title": "Azure DevOps Search Work Items",
+      "description": "Find any work item of the project by number or by words in its title or description",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "create-work-item",
+      "title": "Azure DevOps Create Work Item",
+      "description": "Create a work item of any type, optionally planned in a sprint, under a parent and with an estimate",
+      "subtitle": "Azure DevOps",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultProject",
+          "title": "Default Project",
+          "description": "Project for new work items. When set, the form doesn't ask for it.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Ask in the form"
+        },
+        {
+          "name": "defaultType",
+          "title": "Default Type",
+          "description": "Work item type, e.g. Task. When set (and the project has it), the form doesn't ask for it.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Ask in the form"
+        },
+        {
+          "name": "defaultArea",
+          "title": "Default Area",
+          "description": "Area path for new work items, as shown in Azure DevOps, e.g. MyProject\\MyTeam. Used when it belongs to the item's project. Leave empty to use the project's default area.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Not set (project default area)"
+        },
+        {
+          "name": "defaultSprint",
+          "title": "Default Sprint",
+          "description": "Sprint for new work items of the project set in the extension preferences. Any option other than 'Ask in the form' hides the field.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask",
+          "data": [
+            {
+              "title": "Ask in the form",
+              "value": "ask"
+            },
+            {
+              "title": "Current sprint",
+              "value": "current"
+            },
+            {
+              "title": "No sprint (project default)",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "name": "defaultAssignee",
+          "title": "Default Assignee",
+          "description": "Who new work items are assigned to. Any option other than 'Ask in the form' hides the field.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask",
+          "data": [
+            {
+              "title": "Ask in the form",
+              "value": "ask"
+            },
+            {
+              "title": "Me",
+              "value": "me"
+            },
+            {
+              "title": "Unassigned",
+              "value": "unassigned"
+            }
+          ]
+        },
+        {
+          "name": "defaultCreateBranch",
+          "title": "Create Branch",
+          "description": "Whether to create a branch after the work item. Any option other than 'Ask in the form' hides the checkbox.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask",
+          "data": [
+            {
+              "title": "Ask in the form",
+              "value": "ask"
+            },
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-ado-pipelines",
@@ -91,16 +205,34 @@
       "required": true,
       "title": "Azure DevOps Email",
       "type": "textfield"
+    },
+    {
+      "description": "Team whose sprints the Sprint Work Items command shows (Project Settings → Teams). Leave empty to use the project's default team.",
+      "name": "team",
+      "placeholder": "Default team",
+      "required": false,
+      "title": "Team",
+      "type": "textfield"
+    },
+    {
+      "description": "Reference name of a custom field where your team keeps the estimate in hours, e.g. Custom.EstimatedWork. When set (and the type has it), it is used instead of Original Estimate in Sprint Work Items and the work item form. Leave empty to use Original Estimate.",
+      "name": "customEstimateField",
+      "placeholder": "Not set (uses Original Estimate)",
+      "required": false,
+      "title": "Custom Estimate Field",
+      "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.13.6"
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.19.1",
+    "turndown": "^7.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@types/turndown": "^5.0.6",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

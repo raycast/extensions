@@ -1,5 +1,16 @@
 # Azure DevOps Repository Search
 
+## [Sprint Work Items, Search Work Items and Create Work Item commands] - {PR_MERGE_DATE}
+- Added a "Sprint Work Items" command: the work items of the current or any other sprint, in the same order and hierarchy as the sprint backlog, grouped by User Story or by state, with story points and hours when the process has them. Its detail shows the description, acceptance criteria, comments, hours and links to related items, pull requests and commits. A "New Task" action creates a Task in the sprint under the selected story.
+- Added a "Search Work Items" command to find any work item of the project by number or by words in its title or description.
+- Added a "Create Work Item" command that opens the work item form directly, with optional defaults (project, type, area, sprint, assignee, create branch) that hide those fields. The "New Work Item" action of My Work Items is unchanged.
+- The work item form gets optional Area, Sprint, Parent picker and estimate fields. Left empty, items are created as before.
+- My Work Items gets new actions in their own sections at the end of the action panel: add comment, log hours, move to sprint, related items, pull requests and commits, and copy description or comments. Existing actions are unchanged, except that Copy Id moved from ⌘. (now Raycast's Pin shortcut) to ⌘⇧N.
+- New optional preferences: Team (defaults to the project's default team) and Custom Estimate Field.
+- Fixed My Open Pull Requests showing everyone's pull requests: the list was requested before the current user was known. The user now comes from the token itself, so the Identity scope is no longer needed.
+- Fixed My Open PBIs showing an error when there are no open PBIs, and capped its request at 200 items.
+- Fixed Pipelines Search with project names that need URL encoding.
+
 ## [Optional assigned-to-me filter for My Work Items] - 2026-09-10
 Added a setting to My Work Items to browse work items assigned to anyone, not just yourself. It is on by default (assigned-to-me only); when turned off, a project, state, or type filter is required to keep the result set bounded, and each item's assignee is shown in the list.
 

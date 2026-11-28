@@ -45,13 +45,6 @@ export type PullRequest = {
   supportsIterations: boolean;
 };
 
-export type AdoIdentityResponse = {
-  value: AdoIdentity[];
-};
-export type AdoIdentity = {
-  id: string;
-};
-
 export interface AdoWorkItemsResponse {
   queryType: string;
   queryResultType: string;

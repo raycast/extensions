@@ -5,7 +5,7 @@ import { AdoPipelinesResponse } from "./types";
 
 export default () => {
   const { data, isLoading } = useFetch<AdoPipelinesResponse>(
-    `${baseApiUrl()}/${projectName}/_apis/pipelines?api-version=7.1`,
+    `${baseApiUrl()}/${encodeURIComponent(projectName)}/_apis/pipelines?api-version=7.1`,
     {
       headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
     },
