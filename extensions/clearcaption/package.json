@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clearcaption",
+  "title": "ClearCaption YouTube Transcript",
+  "description": "Get YouTube transcripts, translate them with timestamps kept, and copy text or SRT subtitles using a free Apify account and API token.",
+  "icon": "icon.png",
+  "author": "andrii2203",
+  "categories": [
+    "Media",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "get-transcript",
+      "title": "Get YouTube Transcript",
+      "subtitle": "ClearCaption",
+      "description": "Fetch the transcript of a YouTube video (URL or ID), show it, copy as text or SRT.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "YouTube URL or ID",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "translateTo",
+          "placeholder": "Translate To (de, es ...)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apifyToken",
+      "title": "Apify API Token",
+      "description": "Free account: https://console.apify.com/sign-up (about 1,000 videos/month on the free plan)",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter Apify API Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
