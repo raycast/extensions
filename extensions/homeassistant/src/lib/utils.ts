@@ -44,7 +44,14 @@ export function formatToHumanDateTime(input: Date | string | undefined): string 
 }
 
 export function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "unknown error";
+  if (error instanceof Error) {
+    return error.message;
+  }
+  // home-assistant-js-websocket rejects with plain `{ code, message }` objects, not Error instances
+  if (typeof error === "object" && error !== null && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return "unknown error";
 }
 
 export function ensureMinMax(v1: number, v2: number): [min: number, max: number] {

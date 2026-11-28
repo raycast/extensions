@@ -1,5 +1,14 @@
 # Home Assistant Changelog
 
+## [Fix Assist pipeline selection, errors and conversation memory] - {PR_MERGE_DATE}
+
+- Assist now opens on Home Assistant's preferred pipeline instead of the first one in the list, and remembers the pipeline you pick
+- Fix "invalid agent ID" for pipelines saved with the legacy `homeassistant` conversation agent id, by sending `conversation.home_assistant` instead
+- Show Home Assistant's error message instead of "unknown error" when a WebSocket request is rejected
+- Send the `conversation_id` back with each request, so the agent remembers earlier turns of the conversation. It resets on Clear Conversation and when the pipeline changes
+- Clear the search field and show the request as soon as it is sent, ignore a second send while one is in flight, and put the text back in the field on an error
+- Show the selected message in full in a detail pane while the search field is empty
+
 ## [Fix controls for non-editable helpers] - 2026-11-11
 
 - Show Toggle, Turn On and Turn Off actions for `input_boolean` entities that are defined in YAML (or otherwise not editable in the UI). The `editable` attribute only says whether the helper's config can be edited, not whether it can be controlled

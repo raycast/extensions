@@ -1,9 +1,9 @@
 import { getHAWSConnection, ha } from "@lib/common";
 import { getTranslation } from "@lib/translation";
 import { getErrorMessage } from "@lib/utils";
-import { Action, ActionPanel, Color, Icon, Image, List, Toast, clearSearchBar, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface PlainSpeech {
   speech: string;
@@ -102,6 +102,19 @@ async function getHAWSCurrentUser(): Promise<HAUser | undefined> {
   return r;
 }
 
+/**
+ * Older pipelines store the built-in agent as the legacy id "homeassistant",
+ * which `conversation/process` rejects ("invalid agent ID").
+ * Map it to the current entity id.
+ */
+function getConversationAgentId(pipeline: HAAssistPipeline | undefined): string | undefined {
+  const engine = pipeline?.conversation_engine;
+  if (engine === "homeassistant") {
+    return "conversation.home_assistant";
+  }
+  return engine;
+}
+
 function getInitialConversations(language: string): ConversationContent[] {
   const ts = getTranslation({
     language: language,
@@ -126,7 +139,7 @@ function PipelinesDropdownList(props: {
     props.onChange(p.pipelines?.find((p) => p.id === newValue));
   };
   return (
-    <List.Dropdown tooltip="Assist" onChange={onAction}>
+    <List.Dropdown tooltip="Assist" onChange={onAction} defaultValue={p.preferred_pipeline} storeValue>
       {p?.pipelines?.map((a) => (
         <List.Dropdown.Item key={a.id} title={`${a.name} (${a.conversation_language})`} value={a.id} />
       ))}
@@ -140,45 +153,74 @@ export default function AssistCommand(): React.ReactElement {
   const [conversations, setConversations] = useState<ConversationContent[]>();
   const { data: currentUser } = useCachedPromise(getHAWSCurrentUser);
   const [selectedPipeline, setSelectedPipeline] = useState<HAAssistPipeline>();
+  const [isSending, setIsSending] = useState<boolean>(false);
+  // Sent back with each request so Assist remembers earlier turns of this conversation
+  const [conversationId, setConversationId] = useState<string>();
+  // A ref, so two sends before the next render can't both pass the guard
+  const sendingRef = useRef(false);
+  // Bumped when the conversation is cleared or the pipeline changes, so a late answer is dropped
+  const conversationGeneration = useRef(0);
 
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
 
   const process = async () => {
+    if (sendingRef.current) {
+      return;
+    }
+    const request = searchText.trim();
+    if (request.length <= 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Empty Requests are not allowed",
+      });
+      return;
+    }
+    sendingRef.current = true;
+    const generation = conversationGeneration.current;
+    // Clear the field and show the request right away, so it is clear it was sent
+    const sent: ConversationContent = { text: request, author: Author.Me, date: new Date() };
+    setSearchText("");
+    setConversations((convs) => [sent, ...(convs || [])]);
+    setIsSending(true);
     try {
-      if (searchText.length <= 0) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Empty Requests are not allowed",
-        });
-        return;
-      }
       const connection = await getHAWSConnection();
       const r: ConversationAnswer = await connection.sendMessagePromise({
         type: "conversation/process",
-        text: searchText,
-        agent_id: selectedPipeline?.conversation_engine,
+        text: request,
+        agent_id: getConversationAgentId(selectedPipeline),
         language: selectedPipeline?.language,
+        ...(conversationId ? { conversation_id: conversationId } : {}),
       });
-      clearSearchBar();
-      const convs = conversations || [];
+      if (generation !== conversationGeneration.current) {
+        // The conversation was cleared or the pipeline changed while this was in flight
+        return;
+      }
+      if (r.conversation_id) {
+        setConversationId(r.conversation_id);
+      }
       const assistAnswer = r.response?.speech?.plain?.speech;
       if (assistAnswer) {
-        setConversations([
+        setConversations((convs) => [
           { text: assistAnswer, author: Author.Assist, date: new Date() },
-          { text: searchText, author: Author.Me, date: new Date() },
-          ...convs,
+          ...(convs || []),
         ]);
-      } else {
-        setConversations([{ text: searchText, author: Author.Me, date: new Date() }, ...convs]);
       }
     } catch (error) {
+      if (generation === conversationGeneration.current) {
+        // Take the failed request out of the list and put it back in the field, so it can be sent again
+        setConversations((convs) => convs?.filter((c) => c !== sent));
+        setSearchText((current) => (current.length > 0 ? current : request));
+      }
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
         message: getErrorMessage(error),
       });
+    } finally {
+      sendingRef.current = false;
+      setIsSending(false);
     }
   };
   const userPicture = (): Image.ImageLike | undefined => {
@@ -189,17 +231,23 @@ export default function AssistCommand(): React.ReactElement {
     }
     return { source: "account.svg", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
   };
-  const isLoading = !error ? isLoadingPipeline || !conversations : false;
+  const isLoading = !error ? isLoadingPipeline || !conversations || isSending : false;
   return (
     <List
       searchBarPlaceholder="Enter your request"
       isLoading={isLoading}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
+      // List rows are single-line, so show the selected message in full in the detail pane,
+      // but only while not typing: the detail pane narrows the search bar
+      isShowingDetail={!!selectedPipeline && (conversations?.length ?? 0) > 0 && searchText.length === 0}
       searchBarAccessory={
         <PipelinesDropdownList
           pipelines={pipelines}
           onChange={(newLanguage: HAAssistPipeline | undefined) => {
             setSelectedPipeline(newLanguage);
+            conversationGeneration.current += 1;
+            setConversationId(undefined);
             setConversations(newLanguage ? getInitialConversations(newLanguage.conversation_language) : []);
           }}
         />
@@ -219,6 +267,7 @@ export default function AssistCommand(): React.ReactElement {
                 tooltip: c.author === Author.Assist ? "Assist" : (currentUser?.name ?? ""),
               }}
               accessories={[{ date: c.date }]}
+              detail={<List.Item.Detail markdown={c.text} />}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
@@ -230,7 +279,11 @@ export default function AssistCommand(): React.ReactElement {
                       title="Clear Conversation"
                       icon={Icon.DeleteDocument}
                       shortcut={{ modifiers: ["opt"], key: "x" }}
-                      onAction={() => setConversations(getInitialConversations(selectedPipeline.conversation_language))}
+                      onAction={() => {
+                        conversationGeneration.current += 1;
+                        setConversationId(undefined);
+                        setConversations(getInitialConversations(selectedPipeline.conversation_language));
+                      }}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
