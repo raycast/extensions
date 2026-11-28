@@ -1,5 +1,9 @@
 # Spaceship Changelog
 
+## [Add Pagination] - {PR_MERGE_DATE}
+
+- Fetch more than 20 items at a time thanks to `pagination`
+
 ## [Check Domain Availability] - 2025-11-25
 
 - New command to check if a domain is available

@@ -9,6 +9,7 @@ export const API_HEADERS = {
   "X-Api-Secret": apiSecret,
   "Content-Type": "application/json",
 };
+const LIMIT = 20;
 
 export async function parseResponse(response: Response) {
   if (!response.ok) {
@@ -20,16 +21,20 @@ export async function parseResponse(response: Response) {
   return result;
 }
 export function useSpaceship<T>(endpoint: string) {
-  const { isLoading, data, mutate, revalidate } = useFetch(`${API_URL}${endpoint}?take=20&skip=0`, {
-    headers: API_HEADERS,
-    parseResponse,
-    mapResult(result) {
-      const res = result as SuccessResult<T>;
-      return {
-        data: res.items,
-      };
+  const { isLoading, data, mutate, revalidate, pagination } = useFetch(
+    (options) => `${API_URL}${endpoint}?take=${LIMIT}&skip=${options.page * LIMIT}`,
+    {
+      headers: API_HEADERS,
+      parseResponse,
+      mapResult(result) {
+        const res = result as SuccessResult<T>;
+        return {
+          data: res.items,
+          hasMore: res.total === LIMIT,
+        };
+      },
+      initialData: [],
     },
-    initialData: [],
-  });
-  return { isLoading, data, mutate, revalidate };
+  );
+  return { isLoading, data, mutate, revalidate, pagination };
 }
