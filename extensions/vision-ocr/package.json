@@ -1,0 +1,453 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vision-ocr",
+  "title": "Vision OCR",
+  "description": "Copy text from any part of the screen, an image or a PDF with Apple's on-device Vision OCR. Keeps the layout, with no install and nothing running in the background.",
+  "icon": "extension-icon.png",
+  "author": "okgabe",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "recognize-text",
+      "title": "Recognize Text",
+      "subtitle": "Vision OCR",
+      "description": "Select an area of the screen and copy its text. Press Space while selecting to capture a window.",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "copy text",
+        "screenshot",
+        "live text",
+        "scan"
+      ]
+    },
+    {
+      "name": "recognize-clipboard",
+      "title": "Recognize Text in Clipboard",
+      "subtitle": "Vision OCR",
+      "description": "Copy the text from the image or PDF on the clipboard.",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "image",
+        "paste"
+      ]
+    },
+    {
+      "name": "recognize-selected-file",
+      "title": "Recognize Text in Selected File",
+      "subtitle": "Vision OCR",
+      "description": "Copy the text from the images or PDFs selected in Finder.",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "image",
+        "pdf",
+        "finder"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "format",
+      "title": "Format",
+      "description": "How the recognized text is laid out.",
+      "type": "dropdown",
+      "required": false,
+      "default": "lines",
+      "data": [
+        {
+          "title": "Keep Line Breaks",
+          "value": "lines"
+        },
+        {
+          "title": "Join Lines into Paragraphs",
+          "value": "paragraphs"
+        },
+        {
+          "title": "Single Line",
+          "value": "single"
+        },
+        {
+          "title": "No Spaces",
+          "value": "compact"
+        },
+        {
+          "title": "Links Only",
+          "value": "links"
+        },
+        {
+          "title": "Email Addresses Only",
+          "value": "emails"
+        }
+      ]
+    },
+    {
+      "name": "afterRecognition",
+      "title": "After Recognition",
+      "description": "What to do with the text.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Append to Clipboard",
+          "value": "append"
+        },
+        {
+          "title": "Paste into Active App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "The main language of the text. Automatic works for most Latin-script text; pick a language for Chinese, Japanese, Korean, Arabic, Thai and similar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en-US"
+        },
+        {
+          "title": "French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "German",
+          "value": "de-DE"
+        },
+        {
+          "title": "Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl-NL"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv-SE"
+        },
+        {
+          "title": "Danish",
+          "value": "da-DK"
+        },
+        {
+          "title": "Norwegian Bokmål",
+          "value": "nb-NO"
+        },
+        {
+          "title": "Norwegian Nynorsk",
+          "value": "nn-NO"
+        },
+        {
+          "title": "Polish",
+          "value": "pl-PL"
+        },
+        {
+          "title": "Czech",
+          "value": "cs-CZ"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro-RO"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr-TR"
+        },
+        {
+          "title": "Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk-UA"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar-SA"
+        },
+        {
+          "title": "Arabic (Najdi)",
+          "value": "ars-SA"
+        },
+        {
+          "title": "Thai",
+          "value": "th-TH"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi-VT"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id-ID"
+        },
+        {
+          "title": "Malay",
+          "value": "ms-MY"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "Cantonese (Simplified)",
+          "value": "yue-Hans"
+        },
+        {
+          "title": "Cantonese (Traditional)",
+          "value": "yue-Hant"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "Korean",
+          "value": "ko-KR"
+        }
+      ]
+    },
+    {
+      "name": "secondLanguage",
+      "title": "Second Language",
+      "description": "Another language to recognize alongside the first one.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "English",
+          "value": "en-US"
+        },
+        {
+          "title": "French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "German",
+          "value": "de-DE"
+        },
+        {
+          "title": "Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl-NL"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv-SE"
+        },
+        {
+          "title": "Danish",
+          "value": "da-DK"
+        },
+        {
+          "title": "Norwegian Bokmål",
+          "value": "nb-NO"
+        },
+        {
+          "title": "Norwegian Nynorsk",
+          "value": "nn-NO"
+        },
+        {
+          "title": "Polish",
+          "value": "pl-PL"
+        },
+        {
+          "title": "Czech",
+          "value": "cs-CZ"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro-RO"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr-TR"
+        },
+        {
+          "title": "Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk-UA"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar-SA"
+        },
+        {
+          "title": "Arabic (Najdi)",
+          "value": "ars-SA"
+        },
+        {
+          "title": "Thai",
+          "value": "th-TH"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi-VT"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id-ID"
+        },
+        {
+          "title": "Malay",
+          "value": "ms-MY"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "Cantonese (Simplified)",
+          "value": "yue-Hans"
+        },
+        {
+          "title": "Cantonese (Traditional)",
+          "value": "yue-Hant"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "Korean",
+          "value": "ko-KR"
+        }
+      ]
+    },
+    {
+      "name": "accuracy",
+      "title": "Recognition",
+      "description": "Accurate handles small print, symbols and every language. Fast is about 3× quicker and supports Latin-script languages only.",
+      "type": "dropdown",
+      "required": false,
+      "default": "accurate",
+      "data": [
+        {
+          "title": "Accurate",
+          "value": "accurate"
+        },
+        {
+          "title": "Fast",
+          "value": "fast"
+        }
+      ]
+    },
+    {
+      "name": "customWords",
+      "title": "Custom Words",
+      "description": "Comma-separated names, jargon or product terms to prefer when recognizing.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Raycast, Kubernetes, SwiftUI"
+    },
+    {
+      "name": "languageCorrection",
+      "label": "Correct spelling with a language model",
+      "description": "Turn off for code, serial numbers and random strings, so they are copied exactly as shown.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options"
+    },
+    {
+      "name": "keepIndentation",
+      "label": "Keep indentation",
+      "description": "Recreate leading spaces for indented lines, such as code.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "plainPunctuation",
+      "label": "Use plain punctuation",
+      "description": "Replace smart quotes, dashes, ellipses and non-breaking spaces with plain ASCII, for terminals and code editors.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "detectBarcodes",
+      "label": "Read QR codes and barcodes",
+      "description": "Include the contents of QR codes and barcodes in the selection.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.14.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.20.7",
+    "@types/react": "19.3.3",
+    "eslint": "9.39.5",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3"
+  }
+}
