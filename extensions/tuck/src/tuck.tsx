@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Action,
   ActionPanel,
@@ -38,6 +38,15 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Tuck }
   )
   const catalog = names?.ok ? names.catalog : null
   const status = names && !names.ok ? names.reason : "ready"
+  // Opening a picker without names asks Tuck again, so they come back once Tuck is open and
+  // unlocked, with nothing to press.
+  const pickerKind = pair ? (pickerRows(line, { catalog, status }).token?.kind ?? null) : null
+  const namesMissing = useRef(false)
+  namesMissing.current = names != null && !names.ok
+  // Only when a picker opens, never on each answer, or a closed Tuck would be asked in a loop.
+  useEffect(() => {
+    if (pickerKind && namesMissing.current) revalidate()
+  }, [pickerKind, revalidate])
 
   if (!pair) {
     return (
@@ -58,9 +67,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Tuck }
 
   const view = pickerRows(line, { catalog, status })
   token.current = view.token
-  // Until the first answer, a picker would list Create alone and Raycast would keep it selected
-  // once the real names arrive above it. Show the loading bar instead.
-  const rows = view.token && loading && !names ? [] : view.rows
+  // While names are on their way, a picker would list Create alone and Raycast would keep it
+  // selected once the real names arrive above it. Show the loading bar instead.
+  const rows = view.token && loading && !catalog ? [] : view.rows
 
   return (
     <List
@@ -108,14 +117,6 @@ function RowActions({
   onTuck: () => void
   onReload: () => void
 }) {
-  const reload = (
-    <Action
-      title="Reload Names"
-      icon={Icon.ArrowClockwise}
-      shortcut={Keyboard.Shortcut.Common.Refresh}
-      onAction={onReload}
-    />
-  )
   if (row.role === "insert" && row.slug) {
     const title = row.title.startsWith("Create ") ? row.title : `Insert ${row.subtitle}`
     return (
@@ -123,14 +124,19 @@ function RowActions({
         <Action title={title} icon={Icon.Plus} onAction={() => onInsert(row.slug!)} />
         {/* Second action, so Raycast gives it ⌘↩. */}
         <Action title="Tuck This" icon={Icon.Check} onAction={onTuck} />
-        {reload}
+        {/* Third at the earliest: Raycast gives ⌘↩ to whatever is second, shortcut or not. */}
+        <Action
+          title="Reload Names"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={onReload}
+        />
       </ActionPanel>
     )
   }
   return (
     <ActionPanel>
       <Action title="Tuck This" icon={Icon.Check} onAction={onTuck} />
-      {reload}
     </ActionPanel>
   )
 }
