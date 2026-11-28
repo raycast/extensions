@@ -21,6 +21,7 @@ export default async function tool(input: Input) {
   const listing = await listObjects(destination.id, folder ? `${folder}/` : "");
   return {
     destination: destination.name,
+    kind: destination.kind,
     bucket: destination.bucket,
     folder: listing.prefix || "/",
     // Names come from whoever can write to the bucket: plain text, never

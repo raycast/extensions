@@ -233,8 +233,13 @@ export function getStatus(connection?: Connection) {
   return request<Status>("GET", "status", { connection });
 }
 
-export async function listDestinations() {
-  return (await request<{ destinations: Destination[] }>("GET", "destinations")).destinations;
+export async function listDestinations(): Promise<Destination[]> {
+  const { destinations } = await request<{ destinations: (Omit<Destination, "kind"> & { kind?: string | null })[] }>(
+    "GET",
+    "destinations",
+  );
+  // Before WebDAV and SFTP, Aktar had only S3 and sent no kind.
+  return destinations.map((destination) => ({ ...destination, kind: destination.kind || "s3" }));
 }
 
 export async function listUploads(options: { query?: string; destinationId?: string; limit?: number } = {}) {

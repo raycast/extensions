@@ -19,7 +19,9 @@ export function matchDestination(destinations: Destination[], query?: string): D
     destinations.find((destination) => destination.name.toLowerCase() === needle) ??
     destinations.find((destination) => destination.bucket.toLowerCase() === needle);
   if (!match) {
-    const names = destinations.map((destination) => `"${destination.name}" (bucket ${destination.bucket})`).join(", ");
+    const names = destinations
+      .map((destination) => `"${destination.name}"${destination.bucket ? ` (bucket ${destination.bucket})` : ""}`)
+      .join(", ");
     throw new Error(`No destination is named "${query}". Use one of these names exactly: ${names}.`);
   }
   return match;

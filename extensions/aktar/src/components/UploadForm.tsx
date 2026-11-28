@@ -1,11 +1,13 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, useNavigation } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
+import { useState } from "react";
 import path from "node:path";
 import { listDestinations } from "../api/client";
 import { destinationIcon } from "../lib/format";
 import { onlyFiles, uploadPaths } from "../lib/upload";
 import { showAktarFailure } from "../lib/errors";
 import { DELETE_AFTER_OPTIONS, parseExpiry, preferredExpiry } from "../lib/expiry";
+import { canDeleteAfter, kindName } from "../lib/kinds";
 
 /** The destination choice that leaves picking to Aktar's Use For rules. */
 const AUTOMATIC = "automatic";
@@ -48,6 +50,10 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
   });
   // Opened for a bucket, the form uploads there; otherwise Aktar picks by Use For.
   const defaultDestination = destinationId ?? (destinations ? AUTOMATIC : undefined);
+  const [chosenId, setChosenId] = useState<string | undefined>(destinationId);
+  const chosen = (destinations ?? []).find((destination) => destination.id === (chosenId ?? defaultDestination));
+  // WebDAV and SFTP destinations can't delete files after a while, so the choice is hidden for them.
+  const deleteAfterAvailable = !chosen || canDeleteAfter(chosen);
 
   const { handleSubmit, itemProps, setValidationError, values } = useForm<Values>({
     initialValues: {
@@ -75,7 +81,9 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         return false;
       }
       setValidationError("folder", undefined);
-      const expires = parseExpiry(values.deleteAfter);
+      const target = (destinations ?? []).find((destination) => destination.id === values.destinationId);
+      // A hidden Delete After still has its default value; it doesn't apply here.
+      const expires = !target || canDeleteAfter(target) ? parseExpiry(values.deleteAfter) : 0;
       if (folder && expires) {
         setValidationError("deleteAfter", "Not available with a folder. Clear Folder or pick Never.");
         return false;
@@ -127,6 +135,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         // Rendered only once destinations load, so the default one is preselected.
         key={defaultDestination ?? "loading"}
         defaultValue={defaultDestination}
+        onChange={setChosenId}
         info="Automatic lets Aktar choose: each file goes to the destination whose Use For claims its type or extension, else to the one selected in Aktar. Use For needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0; older versions use the selected destination."
       >
         <Form.Dropdown.Item value={AUTOMATIC} title="Automatic" icon={Icon.Wand} />
@@ -136,6 +145,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
             value={destination.id}
             title={destination.isDefault ? `${destination.name} (Default)` : destination.name}
             icon={destinationIcon(destination)}
+            keywords={[destination.providerName, kindName(destination.kind)]}
           />
         ))}
       </Form.Dropdown>
@@ -145,15 +155,17 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         info="Leave empty to name files with the destination's path template, like a file dropped on Aktar. With a folder (or / for the bucket root), files keep their own names and are numbered instead of overwritten when a name is taken. Can't be combined with Delete After."
         {...itemProps.folder}
       />
-      <Form.Dropdown
-        title="Delete After"
-        info="Aktar deletes the files from your bucket after this time. Only works without a folder, and needs Aktar 0.5.0 for Mac or 0.1.2 for Windows with auto-delete set up for the destination (Delete after in Aktar's menu bar or tray panel)."
-        {...itemProps.deleteAfter}
-      >
-        {DELETE_AFTER_OPTIONS.map((option) => (
-          <Form.Dropdown.Item key={option.days} value={String(option.days)} title={option.title} />
-        ))}
-      </Form.Dropdown>
+      {deleteAfterAvailable && (
+        <Form.Dropdown
+          title="Delete After"
+          info="Aktar deletes the files from your bucket after this time. Only works without a folder, and needs Aktar 0.5.0 for Mac or 0.1.2 for Windows with auto-delete set up for the destination (Delete after in Aktar's menu bar or tray panel). WebDAV and SFTP destinations don't have it."
+          {...itemProps.deleteAfter}
+        >
+          {DELETE_AFTER_OPTIONS.map((option) => (
+            <Form.Dropdown.Item key={option.days} value={String(option.days)} title={option.title} />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.Dropdown
         title="Short Link"
         info="Destination's Setting makes a short link when the destination has a link shortener set up in Aktar and its rules apply to the file. Make a Short Link always makes one with that shortener (the upload fails if the destination has none), and Original Link makes none. The short link is what gets copied."

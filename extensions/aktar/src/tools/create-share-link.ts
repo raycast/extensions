@@ -1,6 +1,7 @@
 import { Tool } from "@raycast/api";
 import { createTemporaryLink } from "../api/client";
 import { findDestination } from "../lib/destinations";
+import { aKindName, canMakeTemporaryLinks, destinationLabel } from "../lib/kinds";
 import { cleanText } from "../lib/markdown";
 
 type Input = {
@@ -31,11 +32,13 @@ function describeHours(hours: number) {
 /** Anyone with the link can download the file until it expires, even from a private bucket, so the user confirms it first. */
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const destination = await findDestination(input.destination);
+  // Nothing to confirm: the tool says this destination can't make one.
+  if (!canMakeTemporaryLinks(destination)) return undefined;
   return {
     message: `Create a link to this file that anyone can open for ${describeHours(hoursFor(input))}?`,
     info: [
       { name: "File", value: cleanText(keyFor(input)) },
-      { name: "Destination", value: `${destination.name} (${destination.bucket})` },
+      { name: "Destination", value: destinationLabel(destination) },
     ],
   };
 };
@@ -48,6 +51,11 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  */
 export default async function tool(input: Input) {
   const destination = await findDestination(input.destination);
+  if (!canMakeTemporaryLinks(destination)) {
+    throw new Error(
+      `"${destination.name}" is ${aKindName(destination.kind)} destination, which can't make temporary links. Use the file's public link instead.`,
+    );
+  }
   const hours = hoursFor(input);
   const key = keyFor(input);
   const link = await createTemporaryLink(destination.id, key, Math.round(hours * 3600));

@@ -1,6 +1,6 @@
 # Aktar
 
-Upload files to your own S3-compatible storage (Amazon S3, Cloudflare R2, Backblaze B2, DigitalOcean Spaces, MinIO, and more) straight from Raycast, with [Aktar](https://getaktar.com), the free, open-source uploader for macOS and Windows.
+Upload files to your own storage (S3-compatible like Amazon S3, Cloudflare R2, Backblaze B2, DigitalOcean Spaces and MinIO, or a WebDAV or SFTP server) straight from Raycast, with [Aktar](https://getaktar.com), the free, open-source uploader for macOS and Windows.
 
 ## Requirements
 
@@ -26,6 +26,10 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 - **Watched Folders**: see the folders Aktar uploads from automatically and what each one is doing, enable or disable them, and pause or resume watching.
 - **Toggle Watching**: pauses all watched folders until you resume them, or resumes them.
 - **Connect to Aktar**: pairs the extension with the app.
+
+## WebDAV and SFTP Destinations
+
+Destinations can also be a WebDAV server (Aktar for Mac 0.23.0 or Aktar for Windows 0.17.0 and later) or an SFTP server, when your Aktar has them. Browse Buckets shows each destination's kind next to its provider. These servers have no temporary links and can't delete files after a while, so Browse Buckets leaves out the temporary link actions for them, Upload File leaves out Delete After, and the AI doesn't make temporary links there. If Aktar turns a request down because the destination can't do it, the message says so.
 
 ## QR Codes
 

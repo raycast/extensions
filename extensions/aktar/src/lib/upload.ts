@@ -5,6 +5,7 @@ import { getStatus, uploadFile } from "../api/client";
 import type { Upload } from "../api/types";
 import { showAktarFailure } from "./errors";
 import { expiryNote, expiryWarning, isExpiryNotSetUp } from "./expiry";
+import { isUnsupportedByDestination } from "./kinds";
 import { fetchFormat, formatUploads } from "./output";
 import { shortLinkWarning } from "./short-links";
 
@@ -71,10 +72,10 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
         await showAktarFailure(error, "Upload failed");
         return [];
       }
-      // Auto-delete not being set up applies to the whole destination, so the
-      // remaining files would fail the same way. Any other error is about this
-      // file only, and the rest still go up.
-      if (isExpiryNotSetUp(error)) {
+      // Auto-delete not being set up, or not existing for the destination's kind,
+      // applies to the whole destination, so the remaining files would fail the
+      // same way. Any other error is about this file only, and the rest still go up.
+      if (isExpiryNotSetUp(error) || isUnsupportedByDestination(error)) {
         if (uploads.length === 0) {
           await showAktarFailure(error, "Upload failed");
           return [];
