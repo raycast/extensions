@@ -19,6 +19,7 @@ const parser = new Parser({
 async function getFrontPageRanking() {
   const response = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json", {
     headers: { "User-Agent": USER_AGENT },
+    signal: AbortSignal.timeout(5_000),
   });
   if (!response.ok) {
     throw new Error(`Failed to fetch front page ranking: ${response.status}`);
