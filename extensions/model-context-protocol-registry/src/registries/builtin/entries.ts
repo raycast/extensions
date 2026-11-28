@@ -2407,6 +2407,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "gsc-wizard",
+    title: "GSC Wizard",
+    description:
+      "SEO analysis of your own Google Search Console properties, plus GA4, Bing Webmaster Tools, Google Merchant Center, Google Ads (read only) and Yandex where you link them: performance summaries, top queries and pages, ranking changes, content decay, keyword cannibalization, CTR curves, anomaly and change-point detection, forecasts, URL inspection and IndexNow. Analyses run server-side on a data warehouse, so the model gets results instead of raw rows. Official server run by GSC Wizard. Hosted remote Streamable HTTP server at https://mcp.gscwizard.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration), no API key to paste. A GSC Wizard plan is required (7-day free trial, no card needed).",
+    icon: "https://raw.githubusercontent.com/jbobbink/seo-gsc-wizard/main/assets/logo.png",
+    homepage: "https://www.gscwizard.com/docs/mcp-and-chatgpt.html",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gscwizard.com/mcp"],
+    },
+    remoteUrl: "https://mcp.gscwizard.com/mcp",
+  },
+  {
     name: "gtd-brain",
     title: "GTD Brain",
     description:

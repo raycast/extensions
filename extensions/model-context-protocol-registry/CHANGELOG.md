@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add GSC Wizard MCP Server] - {PR_MERGE_DATE}
+
+- Add GSC Wizard to the official registry: SEO analysis of your own Google Search Console properties, plus GA4, Bing Webmaster Tools, Merchant Center, Google Ads (read only) and Yandex. Hosted Streamable HTTP server at https://mcp.gscwizard.com/mcp with OAuth 2.1 sign-in (PKCE, client ID metadata documents or dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A GSC Wizard plan is required (7-day free trial).
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
@@ -15,6 +19,7 @@
 ## [Add Valkiria MCP Server] - 2026-11-27
 
 - Add Valkiria to the official registry: ask about the ad accounts connected to your Valkiria workspace (spend, results, campaign health), draft campaigns and propose changes that wait for your approval in Valkiria. Hosted Streamable HTTP server at https://valkiria.pro/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) through `mcp-remote`.
+
 ## [Add Ace Data Cloud media and search MCP servers] - 2026-11-27
 
 - Add separate install entries for the Ace Data Cloud music, image, video, speech, search and chat services. Choose the server for the task; the entries show account and billing requirements.
