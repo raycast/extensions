@@ -3,13 +3,17 @@ import { useDebounce } from "use-debounce";
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Detail,
   Icon,
+  Keyboard,
   List,
   Toast,
-  environment,
+  closeMainWindow,
+  confirmAlert,
   getPreferenceValues,
+  open,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -17,7 +21,7 @@ import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
 import type { Repository } from "@/types";
 import { useRepositories } from "@/hooks/useRepositories";
 import { useRepositoryReleases } from "@/hooks/useRepositoryReleases";
-import { clearVisitedRepositories, useVisitedRepositories } from "@/hooks/useVisitedRepositories";
+import { useVisitedRepositories } from "@/hooks/useVisitedRepositories";
 import { OpenInWebIDEAction } from "@/components/website";
 import { getAccessoryTitle, getIcon, getSubtitle } from "@/utils";
 
@@ -35,6 +39,9 @@ function CommandInner() {
   const {
     repositories: visitedRepositories,
     visitRepository,
+    removeVisitedRepository,
+    clearVisitedRepositories,
+    refreshVisitedRepositories,
     isLoading: isLoadingVisitedRepositories,
   } = useVisitedRepositories();
 
@@ -48,7 +55,20 @@ function CommandInner() {
     }
   }, [error]);
 
+  useEffect(() => {
+    if (!data?.nodes || !visitedRepositories) {
+      return;
+    }
+
+    void refreshVisitedRepositories(data.nodes);
+  }, [data?.nodes, refreshVisitedRepositories, visitedRepositories]);
+
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
+  const visibleVisitedRepositories = visitedRepositories?.filter((repository) =>
+    repository.nameWithOwner.includes(searchText ?? ""),
+  );
+  const visibleVisitedIds = new Set(visibleVisitedRepositories?.map((repository) => repository.id));
+  const foundRepositories = data?.nodes?.filter((repository) => !visibleVisitedIds.has(repository.id));
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText}>
@@ -56,20 +76,23 @@ function CommandInner() {
         title="Visited Repositories"
         subtitle={visitedRepositories ? String(visitedRepositories.length) : undefined}
       >
-        {visitedRepositories
-          ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
-          .map((repository) => (
-            <RepositoryListItem
-              key={repository.id}
-              repository={repository}
-              onVisit={visitRepository}
-              token={token}
-              baseUrl={baseUrl}
-            />
-          ))}
+        {visibleVisitedRepositories?.map((repository) => (
+          <RepositoryListItem
+            key={repository.id}
+            repository={repository}
+            onVisit={visitRepository}
+            onRemove={() => removeVisitedRepository(repository)}
+            onClear={clearVisitedRepositories}
+            token={token}
+            baseUrl={baseUrl}
+          />
+        ))}
       </List.Section>
-      <List.Section title="Found Repositories" subtitle={data ? String(data.repositoryCount) : undefined}>
-        {data?.nodes?.map((repository) => (
+      <List.Section
+        title="Found Repositories"
+        subtitle={foundRepositories ? String(foundRepositories.length) : undefined}
+      >
+        {foundRepositories?.map((repository) => (
           <RepositoryListItem
             key={repository.id}
             repository={repository}
@@ -87,7 +110,9 @@ export default withAccessToken(github)(CommandInner);
 
 function RepositoryListItem(props: {
   repository: Repository;
-  onVisit: (repository: Repository) => void;
+  onVisit: (repository: Repository) => Promise<void>;
+  onRemove?: () => Promise<void>;
+  onClear?: () => Promise<void>;
   token: string;
   baseUrl?: string;
 }) {
@@ -97,7 +122,14 @@ function RepositoryListItem(props: {
       title={props.repository.nameWithOwner}
       subtitle={getSubtitle(props.repository)}
       actions={
-        <Actions repository={props.repository} onVisit={props.onVisit} token={props.token} baseUrl={props.baseUrl} />
+        <Actions
+          repository={props.repository}
+          onVisit={props.onVisit}
+          onRemove={props.onRemove}
+          onClear={props.onClear}
+          token={props.token}
+          baseUrl={props.baseUrl}
+        />
       }
       accessories={[
         {
@@ -110,63 +142,120 @@ function RepositoryListItem(props: {
 
 function Actions(props: {
   repository: Repository;
-  onVisit: (repository: Repository) => void;
+  onVisit: (repository: Repository) => Promise<void>;
+  onRemove?: () => Promise<void>;
+  onClear?: () => Promise<void>;
   token: string;
   baseUrl?: string;
 }) {
   const { push } = useNavigation();
 
+  async function openRepository(url: string) {
+    await props.onVisit(props.repository);
+    await open(url);
+    await closeMainWindow();
+  }
+
+  async function clearVisitedRepositories() {
+    if (!props.onClear) {
+      return;
+    }
+
+    const confirmed = await confirmAlert({
+      title: "Clear All Visited Repositories?",
+      message: "This will permanently remove all repositories from your visit history.",
+      primaryAction: {
+        title: "Clear All",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      await props.onClear();
+    }
+  }
+
+  async function removeVisitedRepository() {
+    if (!props.onRemove) {
+      return;
+    }
+
+    const confirmed = await confirmAlert({
+      title: "Remove Visited Repository?",
+      message: `This will permanently remove ${props.repository.nameWithOwner} from your visit history.`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      await props.onRemove();
+    }
+  }
+
   return (
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
-        <OpenInWebIDEAction repository={props.repository} onOpen={() => props.onVisit(props.repository)} />
+        <Action title="Open in Browser" icon={Icon.Globe} onAction={() => openRepository(props.repository.url)} />
+        <OpenInWebIDEAction repository={props.repository} onOpen={openRepository} />
         <Action.OpenInBrowser
           icon="vscode-action-icon.png"
-          title="Clone in VSCode"
+          title="Clone in VS Code"
           url={`vscode://vscode.git/clone?url=${props.repository.url}`}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.OpenInBrowser
+        <Action
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
-          url={`${props.repository.url}/pulls`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-          onOpen={() => props.onVisit(props.repository)}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "o" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+          }}
+          onAction={() => openRepository(`${props.repository.url}/pulls`)}
         />
         {props.repository.hasIssuesEnabled && (
-          <Action.OpenInBrowser
+          <Action
             icon={{ source: "issue.png", tintColor: Color.PrimaryText }}
             title="Open Issues"
-            url={`${props.repository.url}/issues`}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-            onOpen={() => props.onVisit(props.repository)}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "i" },
+              Windows: { modifiers: ["ctrl"], key: "i" },
+            }}
+            onAction={() => openRepository(`${props.repository.url}/issues`)}
           />
         )}
         {props.repository.hasWikiEnabled && (
-          <Action.OpenInBrowser
+          <Action
             icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
-            url={`${props.repository.url}/wiki`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-            onOpen={() => props.onVisit(props.repository)}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "w" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+            }}
+            onAction={() => openRepository(`${props.repository.url}/wiki`)}
           />
         )}
         {props.repository.hasProjectsEnabled && (
-          <Action.OpenInBrowser
+          <Action
             icon={{ source: "project.png", tintColor: Color.PrimaryText }}
             title="Open Projects"
-            url={`${props.repository.url}/projects`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            onOpen={() => props.onVisit(props.repository)}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "p" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+            }}
+            onAction={() => openRepository(`${props.repository.url}/projects`)}
           />
         )}
         {props.repository.releases?.totalCount > 0 && (
           <Action
             icon={Icon.List}
             title="Browse Releases"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "r" },
+              Windows: { modifiers: ["ctrl"], key: "r" },
+            }}
             onAction={() =>
               push(<ReleaseView repository={props.repository} token={props.token} baseUrl={props.baseUrl} />)
             }
@@ -177,48 +266,50 @@ function Actions(props: {
         <Action.CopyToClipboard
           title="Copy Repository URL"
           content={props.repository.url}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "." },
+            Windows: { modifiers: ["ctrl"], key: "." },
+          }}
         />
         <Action.CopyToClipboard
           title="Copy Name with Owner"
           content={props.repository.nameWithOwner}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "." },
+            Windows: { modifiers: ["ctrl", "shift"], key: "." },
+          }}
         />
         <Action.CopyToClipboard
           title="Copy Clone Command"
           content={`git clone ${props.repository.url}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "," },
+            Windows: { modifiers: ["ctrl", "shift"], key: "," },
+          }}
         />
       </ActionPanel.Section>
-      <DevelopmentActionSection />
+      {props.onRemove && (
+        <ActionPanel.Section title="Visited Repositories">
+          <Action
+            icon={Icon.Trash}
+            title="Remove from Visited Repositories"
+            style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            onAction={removeVisitedRepository}
+          />
+          {props.onClear && (
+            <Action
+              icon={Icon.Trash}
+              title="Clear All Visited Repositories"
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.RemoveAll}
+              onAction={clearVisitedRepositories}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
-}
-
-function DevelopmentActionSection() {
-  async function handleClearVisitedRepositories() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Clearing visited repositories",
-    });
-
-    try {
-      await clearVisitedRepositories();
-      toast.style = Toast.Style.Success;
-      toast.title = "Cleared visited repositories";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed clearing visited repositories";
-      toast.message = error instanceof Error ? error.message : undefined;
-      console.error("Failed clearing visited repositories", error);
-    }
-  }
-
-  return environment.isDevelopment ? (
-    <ActionPanel.Section title="Development">
-      <Action icon={Icon.Trash} title="Clear Visited Repositories" onAction={handleClearVisitedRepositories} />
-    </ActionPanel.Section>
-  ) : null;
 }
 
 function ReleaseView(props: { repository: Repository; token: string; baseUrl?: string }) {
@@ -250,7 +341,10 @@ function ReleaseView(props: { repository: Repository; token: string; baseUrl?: s
                 {release.description && (
                   <Action.Push
                     title="View Release Detail"
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
                     icon={Icon.Eye}
                     target={
                       <Detail
