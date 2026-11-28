@@ -62,7 +62,8 @@ export const cleanOutput = (output: string, input: string) =>
 /**
  * Markdown from the model is rendered by Raycast, which loads remote images by itself. A prompt
  * injected through the selected text could make the model emit an image URL carrying private text
- * to someone else's server, so images are removed before rendering.
+ * to someone else's server, so images are removed before rendering. Applied to the whole page,
+ * the user's own text included.
  */
 export const stripImages = (markdown: string) =>
   markdown
@@ -70,7 +71,11 @@ export const stripImages = (markdown: string) =>
     .replace(/!\[[^\]]*\](\([^)]*\)|\[[^\]]*\])?/g, "")
     // Reference definitions ([ref]: url), which a shortcut image elsewhere could point at
     .replace(/^ {0,3}\[[^\]]+\]:[ \t]*\S+.*$/gm, "")
-    .replace(/<(img|picture|source|image|svg)\b[^>]*>/gi, "");
+    .replace(/<(img|picture|source|image|svg|video|audio|iframe|object|embed)\b[^>]*>/gi, "")
+    // Catch-all: every Markdown image starts with "![". Any left (nested brackets, odd spacing) is
+    // escaped, so it shows as text and can never load anything.
+    .replace(/!\[/g, "!\\[")
+    .replace(/<(?=\s*\/?\s*(img|picture|source|image|svg|video|audio|iframe|object|embed)\b)/gi, "&lt;");
 
 // On an error: the provider, key or model is the usual cause. Fix it, come back, then ⌘R.
 const settingsAction = <Action.Push title="AI Setup" icon={Icon.Plug} target={<AISetup />} />;
