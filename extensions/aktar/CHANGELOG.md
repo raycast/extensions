@@ -1,5 +1,12 @@
 # Aktar Changelog
 
+## [WebDAV and SFTP Destinations] - {PR_MERGE_DATE}
+
+- Destinations can be WebDAV or SFTP servers as well as S3-compatible buckets (WebDAV needs Aktar for Mac 0.23.0 or Aktar for Windows 0.17.0, SFTP Aktar for Mac 0.24.0 or Aktar for Windows 0.18.0). Browse Buckets shows each destination's kind next to its provider, with its own icon, and you can search destinations by kind
+- WebDAV and SFTP destinations have no temporary links and can't delete files after a while, so Browse Buckets leaves out Copy Temporary Link and the temporary link QR codes for them, and Upload File hides Delete After when one is picked
+- When Aktar turns a request down because the destination can't do it, the toast says "Not Available for This Destination" with Aktar's message, and the rest of a batch isn't tried
+- The AI tools tell the kind of each destination, and the AI doesn't offer temporary links for WebDAV or SFTP destinations
+
 ## [Short Links] - 2026-10-12
 
 - Uploads get the short link from the link shortener set up for their destination in Aktar (Shlink, YOURLS, Kutt, Dub, Short.io, or your own HTTP request), and the extension copies and pastes it like Aktar does. Show QR Code uses it too

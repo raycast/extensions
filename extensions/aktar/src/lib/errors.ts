@@ -1,6 +1,7 @@
 import { Application, launchCommand, LaunchType, open, showToast, Toast } from "@raycast/api";
 import { AktarError } from "../api/client";
 import { isExpiryNotSetUp } from "./expiry";
+import { isUnsupportedByDestination } from "./kinds";
 
 const AKTAR_BUNDLE_ID = "com.getaktar.mac";
 /** Aktar for Windows from the Microsoft Store (MSIX package family). */
@@ -74,6 +75,9 @@ export async function showAktarFailure(error: unknown, title: string) {
       toast.title = describeConnectionError(error).title;
       toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };
       toast.secondaryAction = { title: "Download Aktar", onAction: () => open(AKTAR_DOWNLOAD_URL) };
+    } else if (isUnsupportedByDestination(error)) {
+      // WebDAV and SFTP destinations can't make temporary links or delete files after a while.
+      toast.title = "Not Available for This Destination";
     } else if (isExpiryNotSetUp(error)) {
       // Aktar's message says where to set auto-delete up.
       toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };

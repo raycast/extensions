@@ -25,6 +25,7 @@ import {
 } from "../api/client";
 import type { BucketFolder, BucketObject, Destination } from "../api/types";
 import { showAktarFailure } from "../lib/errors";
+import { canMakeTemporaryLinks, destinationLabel, storageName } from "../lib/kinds";
 import { FORMAT_TITLES, formatBytes, formatLink, isImageName } from "../lib/format";
 import { escapeMarkdown, markdownURL } from "../lib/markdown";
 import { isWindows, primaryShortcut } from "../lib/platform";
@@ -77,7 +78,9 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
 
   const folders = (data ?? []).flatMap((entry) => (entry.type === "folder" ? [entry.folder] : []));
   const objects = (data ?? []).flatMap((entry) => (entry.type === "object" ? [entry.object] : []));
-  const location = `${destination.bucket}/${prefix}`;
+  const location = `${storageName(destination)}/${prefix}`;
+  // WebDAV and SFTP destinations have no presigned links.
+  const temporaryLinks = canMakeTemporaryLinks(destination);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const icons = useThumbnailIcons(
     objects.map((object) => ({ id: object.key, source: { kind: "object", destinationId: destination.id, object } })),
@@ -121,7 +124,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
       isShowingDetail={isShowingDetail && objects.length > 0}
       onSelectionChange={setSelectedKey}
       navigationTitle={location}
-      searchBarPlaceholder={`Filter ${prefix ? prefix : destination.bucket}`}
+      searchBarPlaceholder={`Filter ${prefix ? prefix : storageName(destination)}`}
     >
       {error && isConnectionError(error) ? (
         <ConnectionEmptyView error={error} onRetry={revalidate} />
@@ -199,7 +202,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                         target={<QRCodeView name={object.name} link={object.url} />}
                       />
                     </>
-                  ) : (
+                  ) : temporaryLinks ? (
                     <>
                       <TemporaryLinkAction
                         destination={destination}
@@ -214,7 +217,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                         target={<TemporaryLinkQRCode destination={destination} object={object} seconds={3600} />}
                       />
                     </>
-                  )}
+                  ) : null}
                   <Action
                     title={isShowingDetail ? "Hide Preview" : "Show Preview"}
                     icon={Icon.Sidebar}
@@ -237,33 +240,45 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       <Action.CopyToClipboard title="Copy HTML" content={formatLink(object.url, object.name, "html")} />
                     </>
                   )}
-                  <ActionPanel.Submenu title="Copy Temporary Link" icon={Icon.Clock} shortcut={primaryShortcut("t")}>
-                    {TEMPORARY_LINK_DURATIONS.map((duration) => (
-                      <TemporaryLinkAction
-                        key={duration.seconds}
-                        destination={destination}
-                        object={object}
-                        seconds={duration.seconds}
-                        title={duration.title}
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
-                  <ActionPanel.Submenu
-                    title="Show Temporary Link QR Code"
-                    icon={Icon.Mobile}
-                    shortcut={primaryShortcut("t", "shift")}
-                  >
-                    {TEMPORARY_LINK_DURATIONS.map((duration) => (
-                      <Action.Push
-                        key={duration.seconds}
-                        title={duration.title}
+                  {temporaryLinks && (
+                    <>
+                      <ActionPanel.Submenu
+                        title="Copy Temporary Link"
                         icon={Icon.Clock}
-                        target={
-                          <TemporaryLinkQRCode destination={destination} object={object} seconds={duration.seconds} />
-                        }
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
+                        shortcut={primaryShortcut("t")}
+                      >
+                        {TEMPORARY_LINK_DURATIONS.map((duration) => (
+                          <TemporaryLinkAction
+                            key={duration.seconds}
+                            destination={destination}
+                            object={object}
+                            seconds={duration.seconds}
+                            title={duration.title}
+                          />
+                        ))}
+                      </ActionPanel.Submenu>
+                      <ActionPanel.Submenu
+                        title="Show Temporary Link QR Code"
+                        icon={Icon.Mobile}
+                        shortcut={primaryShortcut("t", "shift")}
+                      >
+                        {TEMPORARY_LINK_DURATIONS.map((duration) => (
+                          <Action.Push
+                            key={duration.seconds}
+                            title={duration.title}
+                            icon={Icon.Clock}
+                            target={
+                              <TemporaryLinkQRCode
+                                destination={destination}
+                                object={object}
+                                seconds={duration.seconds}
+                              />
+                            }
+                          />
+                        ))}
+                      </ActionPanel.Submenu>
+                    </>
+                  )}
                   <Action.CopyToClipboard
                     title="Copy Key"
                     content={object.key}
@@ -336,7 +351,7 @@ function ObjectDetail({
           {object.lastModified && (
             <List.Item.Detail.Metadata.Label title="Modified" text={new Date(object.lastModified).toLocaleString()} />
           )}
-          <List.Item.Detail.Metadata.Label title="Destination" text={`${destination.name} (${destination.bucket})`} />
+          <List.Item.Detail.Metadata.Label title="Destination" text={destinationLabel(destination)} />
           {object.url ? (
             <List.Item.Detail.Metadata.Link title="Public Link" text={object.url} target={object.url} />
           ) : (
@@ -407,7 +422,7 @@ function TemporaryLinkQRCode({
 async function confirmAndDelete(destination: Destination, object: BucketObject, onDeleted: () => void) {
   const confirmed = await confirmAlert({
     title: `Delete “${object.name}”?`,
-    message: `It will be removed from ${destination.bucket} for good, and anyone with its link will get an error.`,
+    message: `It will be removed from ${storageName(destination)} for good, and anyone with its link will get an error.`,
     icon: Icon.Trash,
     primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
   });
@@ -507,7 +522,7 @@ function NewFolderForm({
 
   return (
     <Form
-      navigationTitle={`New Folder in ${destination.bucket}/${prefix}`}
+      navigationTitle={`New Folder in ${storageName(destination)}/${prefix}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Folder" icon={Icon.NewFolder} onSubmit={handleSubmit} />

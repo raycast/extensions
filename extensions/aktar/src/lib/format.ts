@@ -91,6 +91,10 @@ export function thumbnail(filename: string, url: string | null): Image.ImageLike
 
 export function destinationIcon(destination: Pick<Destination, "provider">): Image.ImageLike {
   switch (destination.provider) {
+    case "webdav":
+      return Icon.Network;
+    case "sftp":
+      return Icon.Terminal;
     case "cloudflareR2":
       return Icon.Cloud;
     case "amazonS3":

@@ -6,6 +6,7 @@ import { ConnectionEmptyView } from "./components/ConnectionEmptyView";
 import { UploadForm } from "./components/UploadForm";
 import { showAktarFailure } from "./lib/errors";
 import { destinationIcon } from "./lib/format";
+import { kindName, providerText } from "./lib/kinds";
 import { primaryShortcut } from "./lib/platform";
 
 export default function Command() {
@@ -33,7 +34,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Cloud}
           title="No Destinations"
-          description="Add your S3-compatible storage in Aktar's Settings first."
+          description="Add your storage (S3-compatible, WebDAV, or SFTP) in Aktar's Settings first."
           actions={
             <ActionPanel>
               <Action title="Open Aktar Settings" icon={Icon.Gear} onAction={() => open("aktar://settings")} />
@@ -47,12 +48,15 @@ export default function Command() {
           icon={destinationIcon(destination)}
           title={destination.name}
           subtitle={destination.bucket}
-          keywords={[destination.bucket, destination.providerName]}
-          accessories={[...(destination.isDefault ? [{ tag: "Default" }] : []), { text: destination.providerName }]}
+          keywords={[destination.bucket, destination.providerName, kindName(destination.kind)]}
+          accessories={[
+            ...(destination.isDefault ? [{ tag: "Default" }] : []),
+            { text: providerText(destination), tooltip: `Kind: ${kindName(destination.kind)}` },
+          ]}
           actions={
             <ActionPanel>
               <Action.Push
-                title="Browse Bucket"
+                title={destination.bucket ? "Browse Bucket" : "Browse Files"}
                 icon={Icon.ArrowRight}
                 target={<BucketBrowser destination={destination} />}
               />

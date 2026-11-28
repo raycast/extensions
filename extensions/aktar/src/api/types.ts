@@ -11,12 +11,21 @@ export type Status = {
   watching?: { paused: boolean; folders: number };
 };
 
+/**
+ * The kind of storage: S3-compatible, WebDAV, or SFTP. Aktar for Mac 0.23.0
+ * and Aktar for Windows 0.17.0 send it; the client fills in "s3" for older
+ * versions, which only had S3. Left open for kinds a newer Aktar adds.
+ */
+export type DestinationKind = "s3" | "webdav" | "sftp" | (string & {});
+
 export type Destination = {
   id: string;
   name: string;
-  /** Aktar's preset ID, e.g. "cloudflareR2" or "amazonS3". */
+  kind: DestinationKind;
+  /** Aktar's preset ID, e.g. "cloudflareR2", "amazonS3", "webdav" or "sftp". */
   provider: string;
   providerName: string;
+  /** Empty for WebDAV; the base folder on the server for SFTP. */
   bucket: string;
   publicBaseURL: string;
   isDefault: boolean;
