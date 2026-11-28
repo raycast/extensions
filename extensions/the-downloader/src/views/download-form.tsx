@@ -40,7 +40,7 @@ import {
   LiveStreamError,
   PLAYLIST_PICK_LIMIT,
   PlaylistInfo,
-  clipTemplateIn,
+  suffixedTemplateIn,
   fetchPlaylist,
   fetchVideoInfo,
   isLiveStream,
@@ -50,7 +50,8 @@ import {
   runThumbnailDownload,
   runVideoDownload,
 } from "../lib/ytdlp.js";
-import { clipLabel, parseClip } from "../lib/clip.js";
+import { clipLabel, clipSuffix, parseClip } from "../lib/clip.js";
+import { audioLanguages, languageSuffix } from "../lib/audio-language.js";
 import { parseSubtitleValue, subtitleTracks, subtitleValue } from "../lib/subtitles.js";
 import { getVideoExtras } from "../lib/config.js";
 import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
@@ -599,6 +600,8 @@ export function DownloadForm({ initialUrl, initialClip }: DownloadFormProps) {
   const mediaFiletype = ytdlpBound && (filetype === "video" || filetype === "audio");
   const { clip, error: clipError } = mediaFiletype && !asPlaylist ? parseClip(clipText, video?.duration) : {};
   const tracks = metaReady && video && !playlistLink ? subtitleTracks(video) : [];
+  // The soundtracks of a video that has several (dubbed audio); empty for the usual single one.
+  const soundtracks = metaReady && video && !playlistLink ? audioLanguages(video) : [];
 
   const toMarkdownFolder = filetype === "website" && isMarkdownMode(saveMode) && markdownPath !== downloadPath;
 
@@ -965,6 +968,9 @@ export function DownloadForm({ initialUrl, initialClip }: DownloadFormProps) {
     const picked = ((values.playlistItems as string[] | undefined) ?? []).map(Number).filter(Number.isInteger);
     const list = asPlaylist ? { items: picked } : undefined;
     const cut = list ? undefined : clip;
+    // A soundtrack other than the original, from the ones this link offered.
+    const dub = list ? undefined : soundtracks.find((s) => s.code === values.audioLanguage && !s.original);
+    const suffix = `${cut ? clipSuffix(cut) : ""}${dub ? languageSuffix(dub) : ""}`;
     const wanted = ft === "video" && !list && !cut ? parseSubtitleValue(values.subtitles) : undefined;
     // Only a track this link offered: the dropdown's value could be an earlier link's.
     const subtitles =
@@ -983,6 +989,7 @@ export function DownloadForm({ initialUrl, initialClip }: DownloadFormProps) {
           ? `Format ${String(values.exactFormat).split("#")[0]}`
           : `${QUALITY_TITLE[String(values.quality ?? prefs.videoQuality)] ?? "Best"} · ${formatTitle(String(values.container ?? prefs.videoContainer))}`,
       cut ? `Clip ${clipLabel(cut)}` : undefined,
+      dub ? `Audio: ${dub.title}` : undefined,
       subtitles ? "Subtitles" : undefined,
       list ? (picked.length > 0 ? `${plural(picked.length, noun)} picked` : "Whole playlist") : undefined,
     ]
@@ -1002,10 +1009,11 @@ export function DownloadForm({ initialUrl, initialClip }: DownloadFormProps) {
           format,
           outputTemplate: list
             ? playlistTemplateIn(folder)
-            : cut
-              ? clipTemplateIn(folder, cut)
+            : suffix
+              ? suffixedTemplateIn(folder, suffix)
               : outputTemplateIn(folder),
           clip: cut,
+          audioLanguage: dub?.code,
           subtitles,
           playlist: list,
           ffmpegPath: getffmpegPath(),
@@ -1265,6 +1273,25 @@ export function DownloadForm({ initialUrl, initialClip }: DownloadFormProps) {
               <Form.Dropdown.Item value="opus" title="Opus" />
               <Form.Dropdown.Item value="flac" title="FLAC" />
               {source !== "spotify" && <Form.Dropdown.Item value="wav" title="WAV" />}
+            </Form.Dropdown>
+          )}
+
+          {mediaFiletype && !asPlaylist && soundtracks.length > 1 && (
+            <Form.Dropdown
+              id="audioLanguage"
+              // A new link starts at its own original soundtrack.
+              key={`audioLanguage-${url}`}
+              title="Audio Language"
+              defaultValue={soundtracks[0].code}
+              info="This video has more than one soundtrack. A dubbed one is saved under its own file name."
+            >
+              {soundtracks.map((s) => (
+                <Form.Dropdown.Item
+                  key={s.code}
+                  value={s.code}
+                  title={s.original ? `${s.title} (original)` : s.title}
+                />
+              ))}
             </Form.Dropdown>
           )}
 

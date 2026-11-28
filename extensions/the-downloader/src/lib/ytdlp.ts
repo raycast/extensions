@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execa } from "execa";
 import { Video } from "../types.js";
+import { withAudioLanguage } from "./audio-language.js";
 import { Clip, clipSuffix, sectionArg } from "./clip.js";
 import { PROGRESS_TEMPLATE, YtdlpEvent, parseYtdlpLine } from "./progress.js";
 import { SubtitlePick, isSubtitleFile, subtitleArgs } from "./subtitles.js";
@@ -49,11 +50,17 @@ export function outputTemplateIn(folder: string, name = "%(title).180B (%(id)s).
 }
 
 /**
- * The `-o` template for a clip: the usual name plus the clip's times, so it
- * doesn't replace (or get skipped as) the whole video saved in the same folder.
+ * The `-o` template for a download that isn't the plain whole video: the usual
+ * name plus `suffix` (a clip's times, a dubbed soundtrack's language), so it
+ * doesn't replace (or get skipped as) the video saved in the same folder.
  */
+export function suffixedTemplateIn(folder: string, suffix: string): string {
+  return outputTemplateIn(folder, `%(title).160B (%(id)s)${suffix.replace(/%/g, "%%")}.%(ext)s`);
+}
+
+/** The `-o` template for a clip (see `suffixedTemplateIn`). */
 export function clipTemplateIn(folder: string, clip: Clip): string {
-  return outputTemplateIn(folder, `%(title).160B (%(id)s)${clipSuffix(clip).replace(/%/g, "%%")}.%(ext)s`);
+  return suffixedTemplateIn(folder, clipSuffix(clip));
 }
 
 /**
@@ -295,6 +302,8 @@ export type VideoDownloadArgs = {
   clip?: Clip;
   /** A caption track to embed in the video or save next to it. */
   subtitles?: SubtitlePick;
+  /** The soundtrack to take when the video has several (`de-DE`); the site's original when unset. */
+  audioLanguage?: string;
   /**
    * The link is a playlist or channel and is downloaded as one: `items` are the
    * 1-based places of the videos to fetch, all of them when empty or missing.
@@ -384,11 +393,14 @@ export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
     // Without an explicit selector yt-dlp would download its default best
     // video+audio and then strip the audio — many times the bytes needed.
     // `/best` covers sites that publish no audio-only stream.
-    args.push("--format", "bestaudio/best", "--extract-audio", "--audio-format", target, "--audio-quality", "0");
+    // A picked soundtrack has no `/best` behind it: that file would be in the site's default language.
+    const selector = a.audioLanguage ? withAudioLanguage("bestaudio", a.audioLanguage) : "bestaudio/best";
+    args.push("--format", selector, "--extract-audio", "--audio-format", target, "--audio-quality", "0");
   } else {
     // "webm/mkv": when the selector had to fall back to streams WebM can't hold
     // (e.g. H.264 + AAC), yt-dlp merges into mkv instead of failing the merge.
-    args.push("--format", downloadFormat, "--merge-output-format", target === "webm" ? "webm/mkv" : target);
+    const selector = a.audioLanguage ? withAudioLanguage(downloadFormat, a.audioLanguage) : downloadFormat;
+    args.push("--format", selector, "--merge-output-format", target === "webm" ? "webm/mkv" : target);
     // Captions go with a whole video only: an extracted audio file has no place
     // for them, and a clip's would keep the whole video's timing.
     if (a.subtitles && !a.clip) args.push(...subtitleArgs(a.subtitles));

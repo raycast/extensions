@@ -16,6 +16,9 @@ export type Format = {
   width?: number | null;
   fps?: number | null;
   audio_ext?: string | null;
+  /** The soundtrack's language (`de-DE`) and how much the site prefers it: the original track ranks highest. */
+  language?: string | null;
+  language_preference?: number | null;
 };
 
 export type Video = {
