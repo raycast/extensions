@@ -1,0 +1,7 @@
+node_modules
+dist
+package-lock.json
+raycast-env.d.ts
+*.rayext
+*.zip
+.pocket-ai-install
