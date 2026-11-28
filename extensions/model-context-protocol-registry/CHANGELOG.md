@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Edgepedia MCP Server] - {PR_MERGE_DATE}
+
+- Update the Edgepedia entry to its dedicated endpoint `https://www.edgepedia.org/mcp`, new Edgepedia mark icon, and current 519,000+ articles across 31 languages with five read-only tools (`search`, `fetch`, `related`, `connect`, and `resolve`).
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.

@@ -2454,13 +2454,13 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "edgepedia",
     title: "Edgepedia",
     description:
-      "Search and read Edgepedia, a free and growing encyclopedia with citations. Remote Streamable HTTP server at https://www.edgechat.ai/mcp; no sign-in, no API key.",
-    icon: "https://raw.githubusercontent.com/EdgePlat/edgepedia-mcp/main/logo-400.png",
+      "Search and read Edgepedia, a free and growing encyclopedia with citations across 519,000+ articles and 31 languages (five read-only tools: search, fetch, related, connect, and resolve). Remote Streamable HTTP server at https://www.edgepedia.org/mcp; no sign-in, no API key.",
+    icon: "https://www.edgepedia.org/assets/edgepedia-mark-512.png",
     homepage: "https://github.com/EdgePlat/edgepedia-mcp",
-    remoteUrl: "https://www.edgechat.ai/mcp",
+    remoteUrl: "https://www.edgepedia.org/mcp",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://www.edgechat.ai/mcp"],
+      args: ["-y", "mcp-remote", "https://www.edgepedia.org/mcp"],
     },
   },
   {
