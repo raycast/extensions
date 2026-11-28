@@ -3,6 +3,7 @@ import { execFile } from "child_process";
 import { join } from "path";
 
 export type WindowsOperation =
+  | "search-tabs"
   | "tabs"
   | "focused-tab"
   | "spaces"
@@ -36,7 +37,12 @@ export function runWindowsAutomation<T>(operation: WindowsOperation, params: Rec
         "-RequestBase64",
         request,
       ],
-      { windowsHide: true, timeout: 15000, maxBuffer: 2 * 1024 * 1024, encoding: "utf8" },
+      {
+        windowsHide: true,
+        timeout: operation === "search-tabs" ? 60000 : 15000,
+        maxBuffer: 2 * 1024 * 1024,
+        encoding: "utf8",
+      },
       (error, stdout) => {
         try {
           const response = JSON.parse(stdout.trim().replace(/^\uFEFF/, "")) as {
@@ -51,7 +57,7 @@ export function runWindowsAutomation<T>(operation: WindowsOperation, params: Rec
           reject(
             new Error(
               error?.killed
-                ? "Dia automation timed out. Close dialogs in Dia and try again."
+                ? "Dia automation timed out. Check the active space, sidebar, and requested action before refreshing."
                 : "Could not run Dia's PowerShell helper. Check that Windows PowerShell is available and your script policy permits the bundled script.",
             ),
           );

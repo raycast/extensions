@@ -1,4 +1,4 @@
-import { DIA_APPLICATION } from "../platform";
+import { DIA_APPLICATION, isWindows } from "../platform";
 import {
   Action,
   ActionPanel,
@@ -10,7 +10,7 @@ import {
   Keyboard,
   List,
 } from "@raycast/api";
-import { getFavicon, showFailureToast, type MutatePromise } from "@raycast/utils";
+import { getFavicon, showFailureToast } from "@raycast/utils";
 import { closeTab, focusSpace, focusTab, TabNotFoundError, type Tab } from "../dia";
 import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
 import { getAccessories, getSubtitle, type SpaceLabel } from "../utils";
@@ -19,7 +19,14 @@ interface TabListItemProps {
   tab: Tab;
   searchText?: string;
   onTabAction?: () => void;
-  mutateTabs?: MutatePromise<Tab[] | undefined>;
+  mutateTabs?: (
+    update: Promise<unknown>,
+    options: {
+      optimisticUpdate: (data: Tab[] | undefined) => Tab[] | undefined;
+      rollbackOnError: boolean;
+      shouldRevalidateAfter: boolean;
+    },
+  ) => Promise<unknown>;
   /** Color of the tab's space; when set, the row shows the space as `spaceLabel` in that color. */
   spaceTint?: Color.ColorLike;
   spaceLabel?: SpaceLabel;
@@ -48,8 +55,9 @@ export function TabListItem({
         try {
           await focusTab(tab);
           await closeMainWindow();
-          onTabAction?.();
+          if (!isWindows) onTabAction?.();
         } catch (error) {
+          if (error instanceof TabNotFoundError) onTabAction?.();
           await showFailureToast(error, {
             title: "Failed focusing tab",
           });
@@ -109,7 +117,7 @@ export function TabListItem({
                     try {
                       await focusSpace(space.name, tab.windowId);
                       await closeMainWindow();
-                      onTabAction?.();
+                      if (!isWindows) onTabAction?.();
                     } catch (error) {
                       await showFailureToast(error, { title: `Failed switching to space ${space.name}` });
                     }
@@ -134,7 +142,9 @@ export function TabListItem({
                     // roll back and refetch only if the browser rejects the close.
                     await mutateTabs(closeTab(tab), {
                       optimisticUpdate: (data) =>
-                        data?.filter((t) => !(t.windowId === tab.windowId && t.tabId === tab.tabId)),
+                        data?.filter(
+                          (t) => !(t.windowId === tab.windowId && t.space === tab.space && t.tabId === tab.tabId),
+                        ),
                       rollbackOnError: true,
                       shouldRevalidateAfter: false,
                     });

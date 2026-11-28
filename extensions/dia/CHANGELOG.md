@@ -1,5 +1,11 @@
 # Dia Changelog
 
+## [Search Tabs Across Spaces on Windows] - {PR_MERGE_DATE}
+
+- Search Tabs visits each space and restores the original space after searching. Selecting a result opens its space.
+- Tab and space commands can temporarily reveal a hidden sidebar and restore it afterward.
+- Close Tab respects custom shortcuts and removes a closed tab from the results without searching every space again.
+
 ## [Windows Support] - {PR_MERGE_DATE}
 
 - Added Windows support for searching history, bookmarks, and installed extensions, and opening URLs in Dia.

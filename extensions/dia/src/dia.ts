@@ -595,7 +595,7 @@ function findTabAppleScript(onFound: string) {
  */
 export async function focusTab(tab: Tab) {
   if (isWindows)
-    return runWindowsAutomation("focus-tab", { windowId: tab.windowId, tabId: tab.tabId }).catch(
+    return runWindowsAutomation("focus-tab", { windowId: tab.windowId, tabId: tab.tabId, space: tab.space }).catch(
       rethrowWindowsTabError,
     );
   let result: string;
@@ -674,7 +674,7 @@ export class TabNotFoundError extends Error {
 
 export async function closeTab(tab: Tab) {
   if (isWindows)
-    return runWindowsAutomation("close-tab", { windowId: tab.windowId, tabId: tab.tabId }).catch(
+    return runWindowsAutomation("close-tab", { windowId: tab.windowId, tabId: tab.tabId, space: tab.space }).catch(
       rethrowWindowsTabError,
     );
   let result: string;

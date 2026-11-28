@@ -206,6 +206,11 @@ for (const command of manifest.commands) {
     assert.equal(h.calls.apple.length, 0);
     assert.equal(h.calls.shell.length, 0);
     if (command.name === "open-url") assert.equal(h.calls.open[0][1], "TheBrowserCompany.Dia_ttt1ap7aakyb4!Dia");
+    if (command.name === "search-tabs")
+      assert.deepEqual(
+        h.calls.windows.map((call) => call.operation),
+        ["search-tabs"],
+      );
     if (command.name.startsWith("new-")) assert.equal(h.calls.windows[0].operation, command.name);
   });
 }
