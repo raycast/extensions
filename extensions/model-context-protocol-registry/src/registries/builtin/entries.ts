@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "diffci",
+    title: "DiffCI",
+    description:
+      "Find which tests and checks a code change affects before you push, and verify GitHub Actions workflows. Plan a local affected-test run for a change, interpret a DiffCI observation report, and check that a workflow isolates the DiffCI job safely. 3 read-only tools. Official server run by DiffCI. Hosted Streamable HTTP server with no sign-in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://diffci.com/assets/diffci-mark.svg",
+    homepage: "https://diffci.com/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://diffci.com/mcp/v1"],
+    },
+    remoteUrl: "https://diffci.com/mcp/v1",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
