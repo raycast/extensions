@@ -1,0 +1,206 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-buddy",
+  "title": "AI Buddy",
+  "description": "Read, reply and polish English at work with AI, and learn as you go: dictionary cards and grammar lessons in your language.",
+  "icon": "buddy.png",
+  "author": "hoangtran2",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "translate",
+    "translator",
+    "dictionary",
+    "pronunciation",
+    "grammar",
+    "english",
+    "reply",
+    "writing",
+    "gemini",
+    "openai",
+    "claude",
+    "llm"
+  ],
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Buddy Translate",
+      "subtitle": "English ⇄ Your Language",
+      "description": "Translate selected text between English and your language",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text to translate",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "icon": "buddy-translate.png"
+    },
+    {
+      "name": "reply",
+      "title": "Buddy Draft Reply",
+      "subtitle": "Reply in Your Words",
+      "description": "Draft a reply for the selected chat messages; tweak it with your own idea",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Message to reply to",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "icon": "buddy-draft-reply.png",
+      "preferences": [
+        {
+          "name": "replyLanguage",
+          "title": "Reply Language",
+          "description": "Match their language: reply in the language they wrote in.",
+          "type": "dropdown",
+          "default": "match",
+          "required": false,
+          "data": [
+            {
+              "title": "Match their language",
+              "value": "match"
+            },
+            {
+              "title": "Always English",
+              "value": "english"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "title": "Buddy Polish English",
+      "subtitle": "Fix Grammar & Learn",
+      "description": "Polish the selected English draft: correct grammar, natural wording, plus lessons to learn",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "English draft",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "icon": "buddy-polish.png",
+      "preferences": [
+        {
+          "name": "quickReplace",
+          "title": "Quick Replace",
+          "label": "Replace the draft in the chat box instantly",
+          "description": "The polished text goes straight into your chat box, skipping the result and lessons. Undo with ⌘Z.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "home",
+      "title": "AI Buddy",
+      "subtitle": "Setup, Models & Prompts",
+      "description": "Run any buddy on typed text, check your API key, choose models and edit prompts",
+      "mode": "view",
+      "icon": "buddy-home.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "yourLanguage",
+      "title": "Native Language",
+      "description": "Pick yours: Buddy Translate translates between English and it. Word meanings and grammar lessons use it too.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        }
+      ]
+    },
+    {
+      "name": "fastMode",
+      "title": "Speed",
+      "label": "Skip model thinking (faster)",
+      "description": "Answers come faster. Turn off if your model gives poor results.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
