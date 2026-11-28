@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "alter-ego",
+    title: "Alter Ego",
+    description:
+      "Shared memory for your AI chats: rules, profile and work history that every connected chat can read, with questions logged automatically through the connector. Instructions can be saved per client, project, task or tool. Files stay in your own OneDrive, Google Drive, Dropbox, GitHub or Azure DevOps. Hosted Streamable HTTP server with OAuth sign-in (PKCE and Dynamic Client Registration).",
+    icon: "https://cloudalterego.cafeboon.com/apple-touch-icon.png",
+    homepage: "https://cloudalterego.cafeboon.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://cloudalterego.cafeboon.com/mcp"],
+    },
+    remoteUrl: "https://cloudalterego.cafeboon.com/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
