@@ -249,19 +249,17 @@ export const ItemActions = memo(function ItemActions({
     />
   ) : null;
 
+  const typeFieldActions = typeFields.map((spec) => (
+    <Action
+      key={spec.id}
+      title={`Copy ${spec.title}`}
+      icon={rowIcon(spec.id) ?? Icon.Clipboard}
+      shortcut={spec.isMain ? Keyboard.Shortcut.Common.Copy : undefined}
+      onAction={() => copy(spec.title, async () => (await loadDetail()).fields?.[spec.id], Boolean(spec.secret))}
+    />
+  ));
+  // In the order of the details panel's rows, the title last.
   const copyActions = [
-    copyPasswordAction,
-    isNote && showNoteAction,
-    isNote && copyNoteAction,
-    ...typeFields.map((spec) => (
-      <Action
-        key={spec.id}
-        title={`Copy ${spec.title}`}
-        icon={rowIcon(spec.id) ?? Icon.Clipboard}
-        shortcut={spec.isMain ? Keyboard.Shortcut.Common.Copy : undefined}
-        onAction={() => copy(spec.title, async () => (await loadDetail()).fields?.[spec.id], Boolean(spec.secret))}
-      />
-    )),
     username && (
       <Action
         key="copy-username"
@@ -280,6 +278,10 @@ export const ItemActions = memo(function ItemActions({
         onAction={() => copy("Email", async () => email, false)}
       />
     ),
+    copyPasswordAction,
+    isNote && showNoteAction,
+    isNote && copyNoteAction,
+    ...typeFieldActions,
     copyTotpAction,
     <Action
       key="copy-title"
@@ -290,14 +292,14 @@ export const ItemActions = memo(function ItemActions({
       onAction={() => copy("Title", async () => title, false)}
     />,
   ];
-  // Fill Login heads the Paste section where it isn't Enter's action.
+  // Fill Login heads the Paste section where it isn't Enter's action; the rest follows the Copy actions.
   const pasteActions = canFillFrontmostApp
     ? [
         fillAction,
-        email && <Action key="paste-email" title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />,
         username && (
           <Action key="paste-username" title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />
         ),
+        email && <Action key="paste-email" title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />,
         pastePasswordAction,
         pasteTotpAction,
       ]
@@ -315,10 +317,11 @@ export const ItemActions = memo(function ItemActions({
     openWebsite: [openWebsiteAction],
   };
   // Where the item lacks the chosen action, an item opens its details and a note shows its note. The item view has
-  // neither: its first Copy action takes Enter.
+  // neither: Copy Password takes Enter, or a note's Copy Note, or the type's first field, or else the first Copy action.
   const enterAction =
     (enterChoices[preferences.primaryAction ?? "details"] ?? []).find(Boolean) ??
     (isNote ? showNoteAction : viewDetailsAction) ??
+    [copyPasswordAction, isNote && copyNoteAction, ...typeFieldActions].find(Boolean) ??
     copyActions.find(Boolean);
   /** The actions of a section, without Enter's, which stands alone at the top. */
   const without = (actions: (ReactElement | null | false | undefined | "")[]) =>

@@ -25,18 +25,15 @@ const CREDIT_CARD_FIELDS: FieldSpec[] = [
   { id: "pin", title: "PIN", secret: true },
 ];
 
-/** In the order of Proton Pass: personal details, address, contact details, then work details. */
+/**
+ * In the order of Proton Pass: personal details, address, contact details, then work details. The parts of the address
+ * have no row of their own: they're copied right after the Address row's whole address.
+ */
 const IDENTITY_FIELDS: FieldSpec[] = [
   { id: "fullName", title: "Full Name" },
   { id: "identityEmail", title: "Email" },
   { id: "phoneNumber", title: "Phone Number" },
   { id: "address", title: "Address" },
-  { id: "firstName", title: "First Name", optional: true },
-  { id: "middleName", title: "Middle Name", optional: true },
-  { id: "lastName", title: "Last Name", optional: true },
-  { id: "birthdate", title: "Birthdate", optional: true },
-  { id: "gender", title: "Gender", optional: true },
-  { id: "organization", title: "Organization", optional: true },
   { id: "streetAddress", title: "Street Address", optional: true, copyOnly: true },
   { id: "floor", title: "Floor", optional: true, copyOnly: true },
   { id: "zipOrPostalCode", title: "ZIP or Postal Code", optional: true, copyOnly: true },
@@ -44,6 +41,12 @@ const IDENTITY_FIELDS: FieldSpec[] = [
   { id: "stateOrProvince", title: "State or Province", optional: true, copyOnly: true },
   { id: "county", title: "County", optional: true, copyOnly: true },
   { id: "countryOrRegion", title: "Country or Region", optional: true, copyOnly: true },
+  { id: "firstName", title: "First Name", optional: true },
+  { id: "middleName", title: "Middle Name", optional: true },
+  { id: "lastName", title: "Last Name", optional: true },
+  { id: "birthdate", title: "Birthdate", optional: true },
+  { id: "gender", title: "Gender", optional: true },
+  { id: "organization", title: "Organization", optional: true },
   { id: "socialSecurityNumber", title: "Social Security Number", optional: true, secret: true },
   { id: "passportNumber", title: "Passport Number", optional: true, secret: true },
   { id: "licenseNumber", title: "License Number", optional: true, secret: true },

@@ -1,5 +1,12 @@
 # proton-pass Changelog
 
+## [Actions in the Order of the Details] - {PR_MERGE_DATE}
+
+- An item's Copy actions follow the order of its details: Copy Username, Copy Email, Copy Password and Copy TOTP Code, then Copy Title. Copy Password used to come first
+- The Paste section follows the same order below Fill Login: Paste Username, Paste Email, Paste Password and Paste TOTP Code. Paste Email used to come before Paste Username
+- An identity's address parts, such as its street address and city, are copied right after its whole address
+- Each action keeps its shortcut, such as ⌘⇧C for Copy Password, and Enter's action stays the same
+
 ## [Proton Pass CLI 2.7.1] - 2026-11-22
 
 - The extension downloads Proton Pass CLI 2.7.1 instead of 2.5.1. On Apple silicon Macs, it's the first pass-cli whose signature keeps the same name from one version to the next, so macOS shouldn't ask for keychain access again when the extension later moves to a newer one. This once, macOS asks for the new pass-cli: choose Always Allow. You stay logged in

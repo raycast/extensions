@@ -24,6 +24,7 @@ import * as installer from "./core/installer";
 import * as which from "./core/which";
 import * as itemFields from "./item-fields";
 import * as generatorDefaults from "./generator-defaults";
+import { getPanelRows } from "./item-panel";
 import { normalizeItemDetail } from "./pass-cli-normalize";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
@@ -283,19 +284,19 @@ test("Enter's action stands alone at the top, each action shows once, and Fill L
   const login: Item = { ...item, username: "user", hasTotp: true, urls: ["https://example.com"] };
   const byDefault = itemMenu(undefined, login);
   assert.deepEqual(byDefault[0].actions, ["View Details"]);
-  // Second in the menu, Copy Password keeps ⌘↵.
-  assert.equal(byDefault[1].actions[0], "Copy Password");
+  // Below Enter's action comes the first Copy action: Copy Username, as the username is the panel's first row.
+  assert.equal(byDefault[1].actions[0], "Copy Username");
   assert.deepEqual(byDefault.find((section) => section.title === "Paste")?.actions, [
     "Fill Login",
-    "Paste Email",
     "Paste Username",
+    "Paste Email",
     "Paste Password",
     "Paste TOTP Code",
   ]);
   const filling = itemMenu("fill", login);
   assert.deepEqual(filling[0].actions, ["Fill Login"]);
-  assert.equal(filling[1].actions[0], "Copy Password");
-  assert.equal(filling.find((section) => section.title === "Paste")?.actions[0], "Paste Email");
+  assert.equal(filling[1].actions[0], "Copy Username");
+  assert.equal(filling.find((section) => section.title === "Paste")?.actions[0], "Paste Username");
   for (const choice of [
     undefined,
     "details",
@@ -317,6 +318,87 @@ test("Enter's action stands alone at the top, each action shows once, and Fill L
   assert.deepEqual(itemMenu(undefined, login, undefined, { isInList: false })[0].actions, ["Copy Password"]);
   const noteView = itemMenu(undefined, { ...item, type: "note" }, undefined, { isInList: false });
   assert.deepEqual(noteView[0].actions, ["Copy Note"]);
+});
+
+test("the Copy and Paste actions follow the rows of the details panel, Copy Title last, with their shortcuts kept", () => {
+  const login: Item = { ...item, username: "user", hasTotp: true, urls: ["https://example.com"] };
+  const menu = itemMenu(undefined, login);
+  assert.deepEqual(menu[1].actions, ["Copy Username", "Copy Email", "Copy Password", "Copy TOTP Code", "Copy Title"]);
+  assert.deepEqual(menu.find((section) => section.title === "Paste")?.actions, [
+    "Fill Login",
+    "Paste Username",
+    "Paste Email",
+    "Paste Password",
+    "Paste TOTP Code",
+  ]);
+  const { entries } = itemActions(undefined, login);
+  const shortcutOf = (title: string) => JSON.stringify(entries.find((entry) => entry.title === title)?.shortcut);
+  assert.equal(shortcutOf("Copy Password"), JSON.stringify("copy-shortcut"));
+  assert.equal(shortcutOf("Copy Username"), JSON.stringify(shortcuts.platformShortcut(["cmd", "shift"], "u")));
+  assert.equal(shortcutOf("Copy Email"), JSON.stringify(shortcuts.platformShortcut(["cmd", "opt"], "c")));
+  assert.equal(shortcutOf("Copy TOTP Code"), JSON.stringify(shortcuts.platformShortcut(["cmd"], "t")));
+  assert.equal(shortcutOf("Paste Password"), JSON.stringify(shortcuts.platformShortcut(["cmd", "shift"], "p")));
+  assert.equal(shortcutOf("Paste TOTP Code"), JSON.stringify(shortcuts.platformShortcut(["cmd", "shift"], "t")));
+
+  // Every type's Copy actions come in the order of its rows, whose values they copy.
+  const other = { ...item, email: undefined, hasPassword: undefined };
+  const identity: ItemDetail = {
+    ...other,
+    type: "identity",
+    fields: {
+      fullName: "Alex Example",
+      identityEmail: "alex@example.com",
+      address: "12 Example Street, 75000 Paris",
+      streetAddress: "12 Example Street",
+      zipOrPostalCode: "75000",
+      city: "Paris",
+      firstName: "Alex",
+      workEmail: "work@example.com",
+    },
+  };
+  const cases: [Item, ItemDetail | undefined][] = [
+    [login, undefined],
+    [{ ...login, username: undefined }, undefined],
+    [{ ...other, type: "note", hasNote: true }, undefined],
+    [{ ...other, type: "credit_card" }, undefined],
+    [identity, identity],
+    [
+      { ...other, type: "wifi" },
+      { ...other, type: "wifi", fields: { ssid: "Example", wifiPassword: "secret" } },
+    ],
+    [
+      { ...other, type: "alias" },
+      { ...other, type: "alias", fields: { aliasAddress: "news@example.com" } },
+    ],
+    [
+      { ...other, type: "ssh_key" },
+      { ...other, type: "ssh_key", fields: { publicKey: "ssh-ed25519 AAAA" } },
+    ],
+  ];
+  for (const [selected, detail] of cases) {
+    const rows = getPanelRows({ item: selected, detail, isLoading: false }).main.map((row) => `Copy ${row.title}`);
+    const copies = itemMenu(undefined, selected, detail)[1].actions.map(String);
+    assert.deepEqual(
+      copies.filter((title) => rows.includes(title)),
+      rows.filter((title) => copies.includes(title)),
+      `${selected.type}: ${copies.join(", ")}`,
+    );
+    assert.equal(copies[copies.length - 1], "Copy Title");
+  }
+  // The item view's Enter stays what it was: Copy Password, a note's Copy Note, or the type's first field.
+  for (const [selected, enter] of [
+    [login, "Copy Password"],
+    [{ ...other, type: "note" as const, hasNote: true }, "Copy Note"],
+    [{ ...other, type: "credit_card" as const }, "Copy Cardholder Name"],
+  ] as const) {
+    assert.deepEqual(itemMenu(undefined, selected, undefined, { isInList: false })[0].actions, [enter]);
+  }
+  // An identity's address parts have no row: they're copied right after the whole address.
+  const identityCopies = itemMenu(undefined, identity, identity)[1].actions;
+  assert.deepEqual(
+    identityCopies.slice(identityCopies.indexOf("Copy Address"), identityCopies.indexOf("Copy First Name")),
+    ["Copy Address", "Copy Street Address", "Copy ZIP or Postal Code", "Copy City"],
+  );
 });
 
 test("Enter can paste the password, copy or paste the TOTP code, or open the website, which saved choices keep", async () => {
