@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { type IOType, errorMessage, getDeviceState, setDefaultDevice } from "./audio-device";
 import {
   getConnectOverrides,
@@ -47,6 +48,6 @@ export async function runCycle(type: IOType) {
     await launchAutoSwitch("silent");
   } catch (error) {
     console.error(`Cycle ${type} failed:`, error);
-    await showToast(Toast.Style.Failure, `Could not cycle the ${type} device`, errorMessage(error));
+    await showFailureToast(error, { title: `Could not cycle the ${type} device`, message: errorMessage(error) });
   }
 }

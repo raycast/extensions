@@ -42,6 +42,6 @@ export function switchOnConnectUids(
   priorities: PriorityEntry[],
 ): string[] {
   return devices
-    .filter((d) => rankOf(d, priorities) === -1 && connectMode(direction, d, overrides) === "switch")
+    .filter((d) => rankOf(d, priorities, devices) === -1 && connectMode(direction, d, overrides) === "switch")
     .map((d) => d.uid);
 }

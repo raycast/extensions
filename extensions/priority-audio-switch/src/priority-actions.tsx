@@ -1,6 +1,7 @@
 // Priority actions in the device list: Switch on Connect, Set as Top Priority, Raise / Lower, Set Priority….
 // Changes go through the device store, so the list updates at once.
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { AudioDevice } from "./audio-device";
 import { actionIcon } from "./device-icon-assets";
 import type { DeviceStore, PriorityChange } from "./device-store";
@@ -35,11 +36,27 @@ const droppedMessage = (dropped: PriorityEntry[]) =>
     ? `${dropped.map((d) => `"${d.name}"`).join(", ")} lost its priority (${MAX_PRIORITY} at most)`
     : undefined;
 
-/** Apply a change; Auto Switch runs once afterwards so the new order takes effect. */
-async function apply(store: DeviceStore, change: PriorityChange, title: string, message?: string) {
-  await store.changePriorities(change);
+/**
+ * Apply a change; Auto Switch runs once afterwards so the new order takes effect. `onSaved` runs once the change is
+ * stored (the form closes there, so a failed save keeps it open with the values). Returns whether it was saved.
+ */
+async function apply(
+  store: DeviceStore,
+  change: PriorityChange,
+  title: string,
+  message?: string,
+  onSaved?: () => void,
+): Promise<boolean> {
+  try {
+    await store.changePriorities(change);
+  } catch (error) {
+    await showFailureToast(error, { title: `Could not update the ${store.ioType} priority` });
+    return false;
+  }
+  onSaved?.();
   await showToast(Toast.Style.Success, title, message);
   await launchAutoSwitch("priorities");
+  return true;
 }
 
 export function SetTopPriorityAction({ device, store }: PriorityActionProps) {
@@ -145,7 +162,6 @@ function SetPriorityForm({ device, store, connectMode }: PriorityActionProps) {
           <Action.SubmitForm
             title="Save Priority"
             onSubmit={async (values: { position: string }) => {
-              pop();
               if (values.position === NOT_SET || values.position === SWITCH_ON_CONNECT) {
                 // Stored explicitly: "Not Set" must stay off for a device whose default is Switch on Connect.
                 const mode = values.position === NOT_SET ? "none" : "switch";
@@ -153,6 +169,8 @@ function SetPriorityForm({ device, store, connectMode }: PriorityActionProps) {
                   store,
                   { priorities: removeEntry(store.priorities, device.uid), connect: { uid: device.uid, mode } },
                   `Updated ${store.ioType} priority for "${store.nameOf(device)}"`,
+                  undefined,
+                  pop,
                 );
               } else {
                 const next = setPosition(store.priorities, entryOf(device), Number(values.position));
@@ -161,6 +179,7 @@ function SetPriorityForm({ device, store, connectMode }: PriorityActionProps) {
                   { priorities: next, connect: { uid: device.uid, mode: undefined } },
                   `Updated ${store.ioType} priority for "${store.nameOf(device)}"`,
                   droppedMessage(droppedEntries(store.priorities, next, device.uid)),
+                  pop,
                 );
               }
             }}

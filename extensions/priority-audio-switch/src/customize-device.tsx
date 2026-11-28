@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Form, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { AudioDevice } from "./audio-device";
 import { actionIcon, deviceIconSource, getIconPool } from "./device-icon-assets";
 import type { DeviceStore } from "./device-store";
@@ -26,8 +27,14 @@ function CustomizeDeviceForm({ device, store }: Props) {
           <Action.SubmitForm
             title="Save"
             onSubmit={async (values: { name: string; icon: string }) => {
+              // Close only after the save: a failed save keeps the form open with what was entered.
+              try {
+                await store.updateMeta(device.uid, { name: values.name, icon: values.icon || undefined }, device.name);
+              } catch (error) {
+                await showFailureToast(error, { title: `Could not update "${store.nameOf(device)}"` });
+                return;
+              }
               pop();
-              await store.updateMeta(device.uid, { name: values.name, icon: values.icon || undefined }, device.name);
               await showToast(Toast.Style.Success, `Updated "${values.name.trim() || device.name}"`);
             }}
           />

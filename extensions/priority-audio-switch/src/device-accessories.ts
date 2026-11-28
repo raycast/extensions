@@ -63,11 +63,12 @@ function volumeAccessory(
     // The tag API has no icon of its own, so the pin icon is the accessory's icon, shown next to the badge.
     return {
       icon: systemIcon(PIN_ICON, Icon.Pin, dimmed ? DISCONNECTED_TINT : Color.Orange),
+      // The pinned level, not the current volume: a change is set back, so the badge does not follow it.
       tag: {
-        value: volumeInfo?.muted ? "Muted" : (percent ?? `${pinnedLevel}%`),
+        value: volumeInfo?.muted ? "Muted" : `${pinnedLevel}%`,
         color: dimmed ? DISCONNECTED_TINT : Color.Orange,
       },
-      tooltip: `Volume pinned at ${pinnedLevel}% — enforced automatically`,
+      tooltip: `Volume pinned at ${pinnedLevel}%: set back at once while this list is open, otherwise within a minute`,
     };
   }
   if (!volumeInfo) return undefined;

@@ -1,5 +1,6 @@
 // The Output Device / Input Device list.
-import { Action, ActionPanel, Cache, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type AudioDevice,
@@ -10,7 +11,7 @@ import {
   getDeviceState,
   transportLabel,
 } from "./audio-device";
-import { applyPriorities } from "./auto-switcher";
+import { applyPriorities, pinnedVolumeDrifted, restorePinnedVolumes } from "./auto-switcher";
 import { CustomizeDeviceAction } from "./customize-device";
 import { DISCONNECTED_TINT, getAccessories, getDisconnectedAccessories } from "./device-accessories";
 import {
@@ -30,78 +31,54 @@ import {
   SwitchOnConnectAction,
 } from "./priority-actions";
 import { connectMode, type ConnectMode } from "./priority/connect-mode";
-import { normalizeName, type PriorityEntry } from "./priority/decide";
+import type { PriorityEntry } from "./priority/decide";
 import { resolveDeviceIcon } from "./priority/icon-pool";
-import { priorityNumber } from "./priority/list";
+import { priorityNumber, reconcile } from "./priority/list";
 import { displayName } from "./priority/meta";
 
 /** How often the open list re-reads devices and volumes, to show changes made outside the list. */
 const REFRESH_MS = 2000;
 
-const cache = new Cache();
+/** `current` is missing when the direction has no devices. Volumes are keyed by Core Audio ID. */
+type AudioState = { devices: AudioDevice[]; current?: AudioDevice; volumes: Record<string, VolumeInfo> };
 
-function readCache<T>(key: string): T | undefined {
-  const raw = cache.get(key);
-  if (!raw) return undefined;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return undefined;
-  }
+async function readAudioState(ioType: IOType): Promise<AudioState> {
+  const [{ devices, current }, volumes] = await Promise.all([getDeviceState(ioType), getAllVolumeInfo(ioType)]);
+  return { devices, current, volumes };
 }
 
-/** `current` is missing when the direction has no devices. */
-type DeviceState = { devices: AudioDevice[]; current?: AudioDevice };
+/** The same object for the same content, so effects that depend on it do not run on every periodic read. */
+function useStable<T>(value: T): T {
+  const last = useRef<{ json: string; value: T }>(undefined);
+  const json = JSON.stringify(value) ?? "";
+  if (last.current?.json !== json) last.current = { json, value };
+  return last.current.value;
+}
 
 /**
- * Devices, the current device and volumes. The last result is cached so the list opens without a spinner, and it
- * is re-read every REFRESH_MS while the list is open (a device connects, macOS or Auto Switch changes the device).
- * State only changes when the data does, so the periodic read does not re-render the list. `error` is the message of
- * the last failed read, cleared by the next good one.
+ * Devices, the current device and volumes, through `useCachedPromise`: the last result is cached so the list opens
+ * without a spinner, and it is re-read every REFRESH_MS while the list is open (a device connects, macOS or Auto
+ * Switch changes the device). `error` is the message of the last failed read, cleared by the next good one; it is
+ * shown by the list, not as a toast on every failed read.
  */
-function useAudioState(ioType: IOType) {
-  const devicesKey = `devices_${ioType}`;
-  const volumesKey = `volumes_${ioType}`;
-  const [devices, setDevices] = useState(() => readCache<DeviceState>(devicesKey));
-  const [volumes, setVolumes] = useState(() => readCache<Record<string, VolumeInfo>>(volumesKey) ?? {});
-  const [error, setError] = useState<string>();
-  const last = useRef({ devices: cache.get(devicesKey) ?? "", volumes: cache.get(volumesKey) ?? "" });
+function useAudioState(ioType: IOType, onPrioritiesApplied?: () => void) {
+  const { data, error, isLoading, revalidate } = useCachedPromise(readAudioState, [ioType], {
+    keepPreviousData: true,
+    onError: (error) => console.error("Reading audio devices failed:", error),
+  });
 
-  const refresh = useCallback(async () => {
-    const [{ devices: list, current }, info] = await Promise.all([getDeviceState(ioType), getAllVolumeInfo(ioType)]);
-    const devicesJson = JSON.stringify({ devices: list, current });
-    if (devicesJson !== last.current.devices) {
-      last.current.devices = devicesJson;
-      cache.set(devicesKey, devicesJson);
-      setDevices({ devices: list, current });
-    }
-    const volumesJson = JSON.stringify(info);
-    if (volumesJson !== last.current.volumes) {
-      last.current.volumes = volumesJson;
-      cache.set(volumesKey, volumesJson);
-      setVolumes(info);
-    }
-  }, [ioType, devicesKey, volumesKey]);
-
+  // Periodic re-read; skipped while a read is still running.
+  const loading = useRef(isLoading);
+  loading.current = isLoading;
   useEffect(() => {
-    let busy = false;
-    const tick = async () => {
-      if (busy) return;
-      busy = true;
-      try {
-        await refresh();
-        setError(undefined);
-      } catch (error) {
-        console.error("Reading audio devices failed:", error);
-        setError(errorMessage(error));
-      } finally {
-        busy = false;
-      }
-    };
-    void tick();
-    const timer = setInterval(tick, REFRESH_MS);
+    const timer = setInterval(() => {
+      if (!loading.current) revalidate();
+    }, REFRESH_MS);
     return () => clearInterval(timer);
-  }, [refresh]);
+  }, [revalidate]);
+
+  const devices = useStable(data ? { devices: data.devices, current: data.current } : undefined);
+  const volumes = useStable(data?.volumes ?? {});
 
   // While the list is open, react to connects and disconnects at once instead of waiting for the background run
   // (about once a minute): run the same priority logic when the set of connected devices changes.
@@ -111,34 +88,46 @@ function useAudioState(ioType: IOType) {
     .join("|");
   const lastSet = useRef<string | undefined>(undefined);
   const running = useRef(false);
-  useEffect(() => {
-    if (!deviceSet || deviceSet === lastSet.current || running.current) return;
-    const isFirst = lastSet.current === undefined;
-    lastSet.current = deviceSet;
-    if (isFirst) return;
+  // A change seen while a run is in progress: run once more when it finishes, with the devices as they are then.
+  const pending = useRef(false);
+  // applyPriorities can store corrected UIDs (a USB device on another port): the list must re-read them.
+  const onApplied = useRef(onPrioritiesApplied);
+  onApplied.current = onPrioritiesApplied;
+  const runPriorities = useCallback(() => {
+    if (running.current) {
+      pending.current = true;
+      return;
+    }
     running.current = true;
     applyPriorities(ioType)
-      .then(refresh)
+      .then(() => {
+        onApplied.current?.();
+        revalidate();
+      })
       .catch((error) => console.error("Applying priorities failed:", error))
-      .finally(() => (running.current = false));
-  }, [deviceSet, ioType, refresh]);
+      .finally(() => {
+        running.current = false;
+        if (pending.current) {
+          pending.current = false;
+          runPriorities();
+        }
+      });
+  }, [ioType, revalidate]);
+  useEffect(() => {
+    if (!deviceSet || deviceSet === lastSet.current) return;
+    const isFirst = lastSet.current === undefined;
+    lastSet.current = deviceSet;
+    if (!isFirst) runPriorities();
+  }, [deviceSet, runPriorities]);
 
-  const retry = useCallback(() => {
-    refresh()
-      .then(() => setError(undefined))
-      .catch((error) => setError(errorMessage(error)));
-  }, [refresh]);
-
-  /** `volumes` is keyed by Core Audio ID. */
-  return { data: devices, volumes, error, retry };
+  return { data: devices, volumes, error: error ? errorMessage(error) : undefined, retry: revalidate };
 }
 
 /** Ranked devices that are not connected, shown dimmed so they can still be reordered. */
+/** `priorities` must be reconciled with `connected` (UIDs that changed are already updated). */
 function disconnectedRanked(priorities: PriorityEntry[], connected: AudioDevice[], ioType: IOType): AudioDevice[] {
   return priorities
-    .filter(
-      (entry) => !connected.some((d) => d.uid === entry.uid || normalizeName(d.name) === normalizeName(entry.name)),
-    )
+    .filter((entry) => !connected.some((d) => d.uid === entry.uid))
     .map((entry) => ({
       id: entry.uid,
       uid: entry.uid,
@@ -151,8 +140,24 @@ function disconnectedRanked(priorities: PriorityEntry[], connected: AudioDevice[
 const fallbackIcon = (ioType: IOType) => (ioType === "input" ? Icon.Microphone : Icon.SpeakerOn);
 
 export function DeviceList({ ioType }: { ioType: IOType }) {
-  const audio = useAudioState(ioType);
   const store = useDeviceStore(ioType);
+  const audio = useAudioState(ioType, store.reloadPriorities);
+
+  // A ranked device that came back with a new UID (USB on another port) keeps its rank: store the new UID at once,
+  // so the actions below work on it and do not add a second entry for the same device.
+  const connectedDevices = audio.data?.devices;
+  const reconciled = connectedDevices && !store.isLoading ? reconcile(store.priorities, connectedDevices) : undefined;
+  const reconciledJson = reconciled && JSON.stringify(reconciled);
+  const lastReconciled = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!reconciled || !reconciledJson || reconciledJson === JSON.stringify(store.priorities)) return;
+    if (reconciledJson === lastReconciled.current) return; // already tried; a failed write is not retried in a loop
+    lastReconciled.current = reconciledJson;
+    store
+      .changePriorities({ priorities: reconciled })
+      .catch((error) => console.error("Saving priorities failed:", error));
+    // Runs when the reconciled list changes; `reconciled` and `store` are read from that render.
+  }, [reconciledJson]);
 
   // Device chosen in the list, shown as current until the system reports it (or the switch fails).
   const [selectedUid, setSelectedUid] = useState<string>();
@@ -196,11 +201,31 @@ export function DeviceList({ ioType }: { ioType: IOType }) {
     .sort((a, b) => sortKey(a) - sortKey(b))
     .filter((device) => store.isShowingHidden || !hidden.has(device.uid));
 
+  // A pinned volume that changed (volume keys, another app) is set back at once while the list is open; otherwise
+  // the background run does it within a minute.
+  const pinnedKey = JSON.stringify([...store.pinned]);
+  const restoring = useRef(false);
+  useEffect(() => {
+    if (restoring.current) return;
+    const drifted = connected.some((device) => {
+      const level = store.pinned.get(device.uid);
+      const volume = audio.volumes[device.id]?.volume;
+      return level != null && volume != null && pinnedVolumeDrifted(volume, level);
+    });
+    if (!drifted) return;
+    restoring.current = true;
+    restorePinnedVolumes(ioType)
+      .then(audio.retry)
+      .catch((error) => console.error("Restoring pinned volumes failed:", error))
+      .finally(() => (restoring.current = false));
+    // Runs when the volumes or the pinned levels change; the device list comes from the same render.
+  }, [audio.volumes, pinnedKey]);
+
   // Reads keep failing while the last known devices are shown: say so once, not on every refresh.
   const hasData = !!audio.data;
   useEffect(() => {
     if (audio.error && hasData) {
-      void showToast(Toast.Style.Failure, "Showing the last known devices", audio.error);
+      void showFailureToast(audio.error, { title: "Showing the last known devices" });
     }
   }, [audio.error, hasData]);
 

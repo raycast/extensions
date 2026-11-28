@@ -1,10 +1,7 @@
-// Audio devices on macOS, through two command-line tools in assets/ (copied to the support folder before use):
-// - audio-devices: the npm package @spotxyz/macos-audio-devices (MIT). Lists devices and sets the default ones.
-// - sound-control: built from swift/sound-control.swift. Volume and mute.
-import { environment, getPreferenceValues } from "@raycast/api";
-import { execa } from "execa";
-import fs from "fs";
-import path from "path";
+// Audio devices on macOS, through the Swift package in swift/ (Core Audio). `ray build` compiles it because of the
+// `swift:` import below; each Swift function returns a Promise and rejects with the Swift error's message.
+import { getPreferenceValues } from "@raycast/api";
+import * as swift from "swift:../swift";
 
 export type IOType = "input" | "output";
 
@@ -43,67 +40,40 @@ const TRANSPORT_LABELS: Record<string, string> = {
 export const transportLabel = (device: AudioDevice): string | undefined =>
   device.transportType ? TRANSPORT_LABELS[device.transportType] : undefined;
 
-/** Tools already checked against assets/ in this process. */
-const checkedTools = new Set<string>();
-
-const sameContent = (a: string, b: string) =>
-  fs.existsSync(b) && fs.statSync(a).size === fs.statSync(b).size && fs.readFileSync(a).equals(fs.readFileSync(b));
-
 /**
- * The tool's path in the support folder, copied from assets/ when missing or different. The copy goes to a temporary
- * file that is then renamed: overwriting a binary in place keeps its inode, and macOS kills it ("Killed: 9")
- * because the cached code signature no longer matches.
- */
-async function tool(name: "audio-devices" | "sound-control"): Promise<string> {
-  const target = path.join(environment.supportPath, name);
-  if (checkedTools.has(name)) return target;
-
-  const source = path.join(environment.assetsPath, name);
-  if (!sameContent(source, target)) {
-    const temp = `${target}.${process.pid}.tmp`;
-    fs.copyFileSync(source, temp);
-    fs.chmodSync(temp, 0o755);
-    fs.renameSync(temp, target);
-  }
-  checkedTools.add(name);
-  return target;
-}
-
-async function run(name: "audio-devices" | "sound-control", args: string[]): Promise<string> {
-  // Both tools exit with a non-zero code on failure, and execa then throws with their stderr.
-  const { stdout } = await execa(await tool(name), args);
-  return stdout;
-}
-
-/**
- * A short, readable message for a toast: the tool's own error text ("No device exists with id 123") instead of
- * execa's "Command failed with exit code 1: …/audio-devices …". The full error still goes to the console.
+ * A short, readable message for a toast ("No output device exists with id 123"): a Swift error carries its message
+ * in `stderr`; anything else uses its own message.
  */
 export function errorMessage(error: unknown): string {
   if (error && typeof error === "object") {
     const stderr = (error as { stderr?: unknown }).stderr;
-    if (typeof stderr === "string" && stderr.trim()) return stderr.trim().replace(/^Error:\s*/, "");
+    if (typeof stderr === "string" && stderr.trim()) return stderr.trim();
     if (error instanceof Error) return error.message;
   }
   return String(error);
 }
 
-export async function getDevices(type: IOType): Promise<AudioDevice[]> {
-  return JSON.parse(await run("audio-devices", ["list", `--${type}`, "--json"]));
-}
-
-export async function getDefaultDevice(type: IOType): Promise<AudioDevice> {
-  return JSON.parse(await run("audio-devices", [type, "get", "--json"]));
-}
-
 /**
  * The devices of a direction and the current one. With no devices (a Mac mini has no microphone) there is no
- * current device either, and it is not asked for: that call would fail.
+ * current device either.
  */
 export async function getDeviceState(type: IOType): Promise<{ devices: AudioDevice[]; current?: AudioDevice }> {
-  const devices = await getDevices(type);
-  if (devices.length === 0) return { devices };
-  return { devices, current: await getDefaultDevice(type) };
+  const { devices, current } = (await swift.deviceState(type)) as {
+    devices: AudioDevice[];
+    current: AudioDevice | null;
+  };
+  return { devices, current: current ?? undefined };
+}
+
+export async function getDevices(type: IOType): Promise<AudioDevice[]> {
+  return (await getDeviceState(type)).devices;
+}
+
+/** The current device; fails when the direction has none. */
+export async function getDefaultDevice(type: IOType): Promise<AudioDevice> {
+  const { current } = await getDeviceState(type);
+  if (!current) throw new Error(`No ${type} device`);
+  return current;
 }
 
 /**
@@ -111,19 +81,14 @@ export async function getDeviceState(type: IOType): Promise<{ devices: AudioDevi
  * preference also moves system sounds to it.
  */
 export async function setDefaultDevice(type: IOType, deviceId: string) {
-  await run("audio-devices", [type, "set", deviceId]);
-  if (type === "output" && getPreferenceValues<Preferences>().systemOutput) {
-    await run("audio-devices", ["system", "set", deviceId]);
-  }
+  const systemSounds = type === "output" && getPreferenceValues<Preferences>().systemOutput;
+  await swift.setDefaultDevice(type, deviceId, systemSounds);
 }
 
 /** Volume (0–1) and mute of every device in this direction, keyed by Core Audio ID. Empty on failure. */
 export async function getAllVolumeInfo(type: IOType): Promise<Record<string, VolumeInfo>> {
   try {
-    const raw = JSON.parse(await run("sound-control", ["all", type])) as Record<
-      string,
-      { volume?: number | null; muted?: boolean | null }
-    >;
+    const raw = (await swift.volumes(type)) as Record<string, { volume?: number | null; muted?: boolean | null }>;
     return Object.fromEntries(
       Object.entries(raw).map(([id, info]) => [
         id,
@@ -137,11 +102,10 @@ export async function getAllVolumeInfo(type: IOType): Promise<Record<string, Vol
 
 /** Set the volume (0–1). */
 export async function setVolume(type: IOType, deviceId: string, volume: number) {
-  const percent = Math.round(Math.min(Math.max(volume, 0), 1) * 100);
-  await run("sound-control", ["volume", type, deviceId, String(percent)]);
+  await swift.setVolume(type, deviceId, Math.round(Math.min(Math.max(volume, 0), 1) * 100));
 }
 
 /** Toggle mute and return the new state. */
 export async function toggleMute(type: IOType, deviceId: string): Promise<boolean> {
-  return (await run("sound-control", ["mute", type, deviceId, "toggle"])).trim() === "true";
+  return swift.toggleMute(type, deviceId);
 }

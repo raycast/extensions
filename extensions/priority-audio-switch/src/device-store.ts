@@ -106,6 +106,8 @@ export function useDeviceStore(ioType: IOType) {
     pinned: pinned.data ?? new Map<string, number>(),
     meta: meta.data ?? {},
     isLoading: hidden.isLoading || showHidden.isLoading,
+    /** Re-read the priorities, after something outside the store (Auto Switch) changed them. */
+    reloadPriorities: priorities.revalidate,
     changePriorities,
     toggleHidden,
     setShowHidden,

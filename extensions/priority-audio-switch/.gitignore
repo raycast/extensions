@@ -11,3 +11,6 @@ compiled_raycast_rust
 # misc
 .DS_Store
 
+
+# Swift package build output (swift build)
+.build

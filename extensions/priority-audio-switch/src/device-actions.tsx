@@ -1,6 +1,7 @@
 // Device actions in the Output Device / Input Device list (priority actions live in priority-actions.tsx).
 // The list updates first; the change is then applied and undone if it fails.
 import { Action, Icon, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { type AudioDevice, type VolumeInfo, errorMessage, setDefaultDevice, toggleMute } from "./audio-device";
 import { actionIcon } from "./device-icon-assets";
 import { recordCurrentDevice } from "./device-preferences";
@@ -41,7 +42,10 @@ export function SelectDeviceAction({
           await launchAutoSwitch("silent");
         } catch (error) {
           onSelect(undefined);
-          await showToast(Toast.Style.Failure, `Could not select "${store.nameOf(device)}"`, errorMessage(error));
+          await showFailureToast(error, {
+            title: `Could not select "${store.nameOf(device)}"`,
+            message: errorMessage(error),
+          });
         }
       }}
     />
@@ -106,11 +110,10 @@ export function ToggleMuteAction({
           );
         } catch (error) {
           onChange({ muted: isMuted });
-          await showToast(
-            Toast.Style.Failure,
-            `Could not change mute for ${store.nameOf(device)}`,
-            errorMessage(error),
-          );
+          await showFailureToast(error, {
+            title: `Could not change mute for ${store.nameOf(device)}`,
+            message: errorMessage(error),
+          });
         }
       }}
     />

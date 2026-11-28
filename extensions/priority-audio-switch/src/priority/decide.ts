@@ -50,22 +50,45 @@ export const normalizeName = (name: string) => name.replace(/[‘’ʼ]/g, "'");
 
 /**
  * Index of the device in the priority list (lower is better), or -1 when unranked.
- * Matches by UID first; falls back to name because USB UIDs can change with the port.
+ * Matches by UID first. Falls back to the name, because USB UIDs can change with the port, but only when the match
+ * is unambiguous: exactly one entry and exactly one connected device have that name, and the entry's UID is not
+ * another connected device. Two "USB Audio Device"s never share a rank.
+ * `devices` is everything connected in this direction (defaults to the device alone).
  */
-export function rankOf(device: DeviceRef, priorities: PriorityEntry[]): number {
+export function rankOf(device: DeviceRef, priorities: PriorityEntry[], devices: DeviceRef[] = [device]): number {
   const byUid = priorities.findIndex((p) => p.uid === device.uid);
   if (byUid !== -1) return byUid;
+
   const name = normalizeName(device.name);
-  return priorities.findIndex((p) => normalizeName(p.name) === name);
+  const sameName = priorities.flatMap((p, index) => (normalizeName(p.name) === name ? [index] : []));
+  if (sameName.length !== 1) return -1;
+  const entry = priorities[sameName[0]];
+  if (devices.some((d) => d.uid === entry.uid)) return -1;
+  if (devices.filter((d) => normalizeName(d.name) === name).length > 1) return -1;
+  return sameName[0];
 }
 
-/** Best ranked, non-hidden device among candidates. Unranked devices never win. */
-function bestOf(candidates: DeviceRef[], priorities: PriorityEntry[], hidden: Set<string>): DeviceRef | undefined {
+/**
+ * Whether two snapshots are the same. An automatic run compares the snapshot it started from with the stored one
+ * before it switches: a manual choice (or another run) in between changed it, and the run must not undo that.
+ */
+export function sameSnapshot(a: Snapshot | null, b: Snapshot | null): boolean {
+  if (!a || !b) return a === b;
+  return a.currentUid === b.currentUid && a.ts === b.ts && a.uids.join("\n") === b.uids.join("\n");
+}
+
+/** Best ranked, non-hidden device among candidates. Unranked devices never win. `all` = every connected device. */
+function bestOf(
+  candidates: DeviceRef[],
+  priorities: PriorityEntry[],
+  hidden: Set<string>,
+  all: DeviceRef[],
+): DeviceRef | undefined {
   let best: DeviceRef | undefined;
   let bestRank = Infinity;
   for (const device of candidates) {
     if (hidden.has(device.uid)) continue;
-    const rank = rankOf(device, priorities);
+    const rank = rankOf(device, priorities, all);
     if (rank !== -1 && rank < bestRank) {
       best = device;
       bestRank = rank;
@@ -89,7 +112,7 @@ export function decide({ prev, now, priorities, hidden, intervalMs, switchOnConn
   const onConnect = new Set(switchOnConnect.filter((uid) => !hiddenSet.has(uid)));
   const firstOnConnect = (devices: DeviceRef[]) => devices.find((d) => onConnect.has(d.uid));
   /** Best device with a priority; a "Switch on Connect" device only when none is connected. */
-  const bestAvailable = () => bestOf(now.devices, priorities, hiddenSet) ?? firstOnConnect(now.devices);
+  const bestAvailable = () => bestOf(now.devices, priorities, hiddenSet, now.devices) ?? firstOnConnect(now.devices);
 
   // 1. A hidden device became current → best available.
   if (hiddenSet.has(now.currentUid)) {
@@ -129,7 +152,7 @@ export function decide({ prev, now, priorities, hidden, intervalMs, switchOnConn
     }
     const previous = now.devices.find((d) => d.uid === prev.currentUid);
     const candidates = previous ? [previous, ...appeared] : appeared;
-    return pick(bestOf(candidates, priorities, hiddenSet), now.currentUid, "device-added", "no-change");
+    return pick(bestOf(candidates, priorities, hiddenSet, now.devices), now.currentUid, "device-added", "no-change");
   }
 
   // 4. Same devices, different current device → the user switched manually. Respect it.

@@ -1,6 +1,7 @@
 // Enable Auto Switch: one background run for both directions. Applies the priorities with decide() and keeps
 // pinned volumes in place.
 import { environment, LaunchType, showToast, Toast, updateCommandMetadata } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   type IOType,
   errorMessage,
@@ -22,7 +23,7 @@ import {
   setSnapshot,
 } from "./device-preferences";
 import { switchOnConnectUids } from "./priority/connect-mode";
-import { decide, makeSnapshot } from "./priority/decide";
+import { decide, makeSnapshot, sameSnapshot } from "./priority/decide";
 import { reconcile } from "./priority/list";
 import { displayName } from "./priority/meta";
 
@@ -33,7 +34,11 @@ import { displayName } from "./priority/meta";
 const INTERVAL_MS = 60_000;
 
 /** A pinned volume is restored when it drifts by this many percentage points or more. */
-const PINNED_VOLUME_TOLERANCE = 2;
+export const PINNED_VOLUME_TOLERANCE = 2;
+
+/** Whether a pinned volume has drifted far enough to be restored (`volume` 0–1, `level` 0–100). */
+export const pinnedVolumeDrifted = (volume: number, level: number) =>
+  Math.abs(Math.round(volume * 100) - level) >= PINNED_VOLUME_TOLERANCE;
 
 /**
  * One decide() run for a direction: switch if needed and store the snapshot. Also used by the open device list.
@@ -53,14 +58,20 @@ export async function applyPriorities(type: IOType) {
   if (JSON.stringify(priorities) !== JSON.stringify(stored)) await setPriorityList(type, priorities);
 
   const now = { devices: refs, currentUid: current.uid, ts: Date.now() };
+  const prev = await getSnapshot(type);
   const { target } = decide({
-    prev: await getSnapshot(type),
+    prev,
     now,
     priorities,
     hidden,
     intervalMs: INTERVAL_MS,
     switchOnConnect: switchOnConnectUids(type, devices, await getConnectOverrides(type), priorities),
   });
+
+  // A manual choice (Select Device, Cycle) or another run may have stored a newer snapshot while this run was reading
+  // the devices. This run's decision is then stale: switching or storing its snapshot would undo that choice. Leave
+  // everything as it is; the next run decides from the new snapshot.
+  if (!sameSnapshot(await getSnapshot(type), prev)) return;
 
   let currentUid = current.uid;
   const device = target ? devices.find((d) => d.uid === target) : undefined;
@@ -72,7 +83,8 @@ export async function applyPriorities(type: IOType) {
   await setSnapshot(type, makeSnapshot(refs, currentUid, now.ts));
 }
 
-async function restorePinnedVolumes(type: IOType) {
+/** Set every connected device with a pinned volume back to it. Also used by the open device list. */
+export async function restorePinnedVolumes(type: IOType) {
   const pinned = await getAllPinnedVolumes(type);
   if (pinned.size === 0) return;
 
@@ -81,7 +93,7 @@ async function restorePinnedVolumes(type: IOType) {
     const level = pinned.get(device.uid);
     const volume = volumes[device.id]?.volume;
     if (level == null || volume == null) continue;
-    if (Math.abs(Math.round(volume * 100) - level) >= PINNED_VOLUME_TOLERANCE) {
+    if (pinnedVolumeDrifted(volume, level)) {
       await setVolume(type, device.id, level / 100).catch((error) =>
         console.error(`Could not restore the volume of ${device.name}:`, error),
       );
@@ -125,7 +137,7 @@ export async function runAutoSwitch() {
   await updateCommandMetadata({ subtitle });
 
   if (environment.launchType === LaunchType.UserInitiated) {
-    if (errors.length > 0) await showToast(Toast.Style.Failure, "Auto Switch failed", errors.join("\n"));
+    if (errors.length > 0) await showFailureToast(errors.join("\n"), { title: "Auto Switch failed" });
     else await showToast(Toast.Style.Success, "Auto Switch is running", subtitle);
   }
 }

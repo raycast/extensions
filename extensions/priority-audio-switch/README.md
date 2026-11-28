@@ -70,4 +70,4 @@ Priority Audio Switch is a fork of [Set Audio Device](https://www.raycast.com/be
 
 Set Audio Device keeps one default device in place. Priority Audio Switch takes a different approach: it switches devices for you by priority, and you can cycle through them by hand when you need to. The device and volume handling come from the original. Thank you for your work.
 
-Device switching uses [macos-audio-devices](https://github.com/spotxyz/macos-audio-devices) by George Karagkiaouris (MIT). Icons are from [Tabler Icons](https://tabler.io/icons) by Paweł Kuna (MIT). See `LICENSE` for the license notices.
+Earlier versions used [macos-audio-devices](https://github.com/spotxyz/macos-audio-devices) by George Karagkiaouris (MIT) for device switching; it is now done by a small Swift package in the extension. Icons are from [Tabler Icons](https://tabler.io/icons) by Paweł Kuna (MIT). See `THIRD_PARTY_NOTICES.md` for the license notices.
