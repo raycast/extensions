@@ -30,7 +30,7 @@ export function isLiveModel(model: Pick<WiroModel, "categories" | "dynamicprice"
   const categories = model.categories ?? [];
   if (categories.some((category) => /realtime/i.test(category))) return true;
   const prices = typeof model.dynamicprice === "string" ? model.dynamicprice : JSON.stringify(model.dynamicprice ?? []);
-  return prices.includes("cp-realtimeturn");
+  return prices.includes("per-realtime-turn");
 }
 
 export function allParameters(model: Pick<WiroModel, "parameters">): ToolParameter[] {
