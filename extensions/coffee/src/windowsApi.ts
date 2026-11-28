@@ -31,7 +31,7 @@ function parseArgs(additionalArgs?: string): ParsedCaffeinateArgs {
   return { durationSeconds, pid, windowHandle };
 }
 
-export async function windowsStartCaffeinate(additionalArgs?: string): Promise<string> {
+export async function windowsStartCaffeinate(additionalArgs?: string, endsAt?: number): Promise<string> {
   const { durationSeconds, pid, windowHandle } = parseArgs(additionalArgs);
   const preferences = getPreferenceValues<Preferences>();
 
@@ -39,6 +39,7 @@ export async function windowsStartCaffeinate(additionalArgs?: string): Promise<s
     preventDisplay: preferences.preventDisplay,
     preventSystem: preferences.preventSystem,
     durationSeconds,
+    endsAt: endsAt ?? null,
     pid,
     windowHandle,
   });

@@ -11,6 +11,7 @@ import { getUserStopDecision } from "./userStopPolicy";
 import {
   CaffeinationReason,
   CaffeinationState,
+  calendarEnd,
   ConditionalStopResult,
   getMacCaffeinationState,
   LegacySession,
@@ -111,7 +112,7 @@ export async function startCaffeinate(
 ) {
   parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
   if (process.platform === "win32") {
-    const sessionId = await windowsStartCaffeinate(additionalArgs);
+    const sessionId = await windowsStartCaffeinate(additionalArgs, calendarEnd(reason));
     await setWindowsCaffeinationReason(sessionId, reason);
   } else {
     const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];

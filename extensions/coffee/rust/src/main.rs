@@ -26,6 +26,9 @@ struct KeepAwakeConfig {
     prevent_system: bool,
     #[serde(rename = "durationSeconds")]
     duration_seconds: Option<u64>,
+    /// When an Until or schedule session ends, in milliseconds since the Unix epoch.
+    #[serde(rename = "endsAt")]
+    ends_at: Option<u64>,
     pid: Option<u32>,
     #[serde(rename = "windowHandle")]
     window_handle: Option<u64>,
@@ -50,6 +53,11 @@ struct StoredState {
 fn session_id(state: &StoredState) -> String {
     // Keep FILETIME ticks out of JavaScript numbers, which would lose precision.
     format!("{}:{}", state.pid, state.start_ticks)
+}
+
+/// Milliseconds since the Unix epoch on the wall clock, which follows clock changes.
+fn unix_millis() -> u64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |since| since.as_millis() as u64)
 }
 
 fn state_dir() -> Result<PathBuf, String> {
@@ -309,6 +317,17 @@ fn start_caffeinate(config: KeepAwakeConfig) -> Result<String, String> {
     }
 }
 
+/// Whether a worker that has run for `elapsed` has reached its time limit, while the
+/// wall clock reads `now_ms`.
+fn time_limit_reached(config: &KeepAwakeConfig, elapsed: Duration, now_ms: u64) -> bool {
+    match config.ends_at {
+        // The wall clock follows clock changes, as a time of day does. Run at least a second, as
+        // caffeinate -t 1 does on macOS, so start_caffeinate sees this worker even if its end has passed.
+        Some(end) => elapsed >= Duration::from_secs(1) && now_ms >= end,
+        None => config.duration_seconds.is_some_and(|secs| elapsed.as_secs() >= secs),
+    }
+}
+
 /// Worker entry point spawned by start_caffeinate.
 #[raycast]
 async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> {
@@ -337,12 +356,16 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
         pid,
         start_time: now,
         start_ticks,
-        duration_seconds: config.duration_seconds,
+        duration_seconds: match config.ends_at {
+            // Status shows the end as start_time plus this, so measure it from the end as the worker starts.
+            Some(end) => Some(end.saturating_sub(unix_millis()).div_ceil(1000).max(1)),
+            None => config.duration_seconds,
+        },
     })?;
 
     let started = Instant::now();
     loop {
-        let timed_out = config.duration_seconds.is_some_and(|secs| started.elapsed().as_secs() >= secs);
+        let timed_out = time_limit_reached(&config, started.elapsed(), unix_millis());
         let app_gone = config.pid.is_some_and(|target_pid| !process_alive(target_pid))
             || config.window_handle.is_some_and(|hwnd| !window_alive(hwnd as usize, config.pid));
         if timed_out || app_gone || stop_requested() {
@@ -833,5 +856,38 @@ mod tests {
         };
         let serialized = serde_json::to_value(status).expect("serialize bridge state");
         assert_eq!(serialized["sessionId"].as_str(), Some("400:134370180001234567"));
+    }
+
+    fn timed_config(duration_seconds: Option<u64>, ends_at: Option<u64>) -> KeepAwakeConfig {
+        KeepAwakeConfig {
+            prevent_display: true,
+            prevent_system: true,
+            duration_seconds,
+            ends_at,
+            pid: None,
+            window_handle: None,
+        }
+    }
+
+    #[test]
+    fn an_end_time_follows_the_wall_clock() {
+        const END: u64 = 1_700_000_060_000;
+        let until = timed_config(Some(60), Some(END));
+        // The clock was set back: the duration has elapsed, but the end hasn't come.
+        assert!(!time_limit_reached(&until, Duration::from_secs(120), END - 1));
+        // The clock was set forward: the end has come before the duration elapsed.
+        assert!(time_limit_reached(&until, Duration::from_secs(5), END));
+        // An end that had passed before the worker started still gets a second.
+        assert!(!time_limit_reached(&until, Duration::from_millis(999), END + 10_000));
+        assert!(time_limit_reached(&until, Duration::from_secs(1), END + 10_000));
+    }
+
+    #[test]
+    fn a_duration_alone_ignores_the_wall_clock() {
+        let duration = timed_config(Some(60), None);
+        assert!(!time_limit_reached(&duration, Duration::from_millis(59_999), u64::MAX));
+        assert!(time_limit_reached(&duration, Duration::from_secs(60), 0));
+        let indefinite = timed_config(None, None);
+        assert!(!time_limit_reached(&indefinite, Duration::from_secs(365 * 86_400), u64::MAX));
     }
 }

@@ -125,6 +125,7 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
       day: schedule.day,
       from: schedule.from,
       to: schedule.to,
+      endsAt: endTime.toISOString(),
     });
     schedule.IsRunning = true;
     await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
