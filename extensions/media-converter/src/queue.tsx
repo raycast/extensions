@@ -36,6 +36,12 @@ export default function Command() {
       await reload();
       const startedAt = Date.now();
       try {
+        let inputBytes = 0;
+        try {
+          inputBytes = fs.statSync(job.input).size;
+        } catch {
+          inputBytes = 0;
+        }
         const quality = job.targetSizeMb
           ? (await resolveTargetSizeQuality(job.input, job.outputFormat, job.quality, job.targetSizeMb, job.trim))
               .quality
@@ -43,6 +49,7 @@ export default function Command() {
         const output = await convertMedia(job.input, job.outputFormat, quality, {
           outputDir: job.outputDir,
           stripMetadata: job.stripMetadata,
+          replaceOriginal: job.replaceOriginal,
           trim: job.trim,
           signal: controller.signal,
           onProgress: (progress) => {
@@ -64,6 +71,7 @@ export default function Command() {
             stripMetadata: job.stripMetadata,
             outputDir: job.outputDir,
             durationMs: Date.now() - startedAt,
+            inputBytes,
           });
         } catch (historyError) {
           console.warn("Failed to write queue conversion history:", historyError);

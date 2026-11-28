@@ -17,6 +17,7 @@ type RawPreset = {
   quality: unknown;
   trim?: TrimOptions;
   stripMetadata?: boolean;
+  replaceOriginal?: boolean;
   outputDir?: string;
   description?: string;
 };
@@ -37,6 +38,7 @@ function normaliseRaw(raw: RawPreset, markBuiltIn: boolean): Preset | null {
     quality: raw.quality,
     trim,
     stripMetadata: raw.stripMetadata,
+    replaceOriginal: typeof raw.replaceOriginal === "boolean" ? raw.replaceOriginal : undefined,
     outputDir: raw.outputDir,
     description: raw.description,
   };
@@ -125,6 +127,7 @@ export async function duplicatePreset(id: string, newName?: string): Promise<Pre
     quality: source.quality,
     trim: source.trim,
     stripMetadata: source.stripMetadata,
+    replaceOriginal: source.replaceOriginal,
     outputDir: source.outputDir,
     description: source.description,
   });

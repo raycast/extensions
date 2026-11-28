@@ -233,4 +233,90 @@ describe("edit command construction", () => {
       );
     }
   });
+
+  it("builds lossless stream-copy trim commands for video and audio", () => {
+    const mp4 = buildEditProcessSpec(
+      "/ffmpeg",
+      "/tmp/in.mp4",
+      "/tmp/in-trimmed.mp4",
+      { operation: "trim", start: "0:10", end: "0:25" },
+      { hasAudio: true, hasVideo: true },
+    );
+    assert.deepEqual(mp4.args, [
+      "-ss",
+      "00:00:10.000",
+      "-t",
+      "00:00:15.000",
+      "-i",
+      "/tmp/in.mp4",
+      "-map",
+      "0",
+      "-c",
+      "copy",
+      "-movflags",
+      "+faststart",
+      "-map_metadata",
+      "0",
+      "-y",
+      "/tmp/in-trimmed.mp4",
+    ]);
+
+    const mkv = buildEditProcessSpec(
+      "/ffmpeg",
+      "/tmp/in.mkv",
+      "/tmp/in-trimmed.mkv",
+      { operation: "trim", end: "30" },
+      { hasAudio: true, hasVideo: true },
+    );
+    assert.deepEqual(mkv.args, [
+      "-to",
+      "00:00:30.000",
+      "-i",
+      "/tmp/in.mkv",
+      "-map",
+      "0",
+      "-c",
+      "copy",
+      "-map_metadata",
+      "0",
+      "-y",
+      "/tmp/in-trimmed.mkv",
+    ]);
+  });
+
+  it("rejects empty, reversed, or image trim requests", () => {
+    assert.throws(
+      () =>
+        buildEditProcessSpec(
+          "/ffmpeg",
+          "/tmp/in.mp4",
+          "/tmp/out.mp4",
+          { operation: "trim" },
+          { hasAudio: true, hasVideo: true },
+        ),
+      /Enter a start time, end time, or both/,
+    );
+    assert.throws(
+      () =>
+        buildEditProcessSpec(
+          "/ffmpeg",
+          "/tmp/in.mp4",
+          "/tmp/out.mp4",
+          { operation: "trim", start: "20", end: "10" },
+          { hasAudio: true, hasVideo: true },
+        ),
+      /End time must be after start time/,
+    );
+    assert.throws(
+      () =>
+        buildEditProcessSpec(
+          "/ffmpeg",
+          "/tmp/in.png",
+          "/tmp/out.png",
+          { operation: "trim", start: "0", end: "5" },
+          { hasAudio: false, hasVideo: true },
+        ),
+      /Trim requires a video or audio file/,
+    );
+  });
 });

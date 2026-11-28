@@ -7,6 +7,7 @@ import {
   GIF_FPS,
   GIF_WIDTH,
   OUTPUT_ALL_EXTENSIONS,
+  VIDEO_CODECS,
   VIDEO_ENCODING_MODES,
   type AllOutputExtension,
   type MediaType,
@@ -76,6 +77,7 @@ export function isQualitySettings(format: AllOutputExtension, value: unknown): v
       return isRecord(q) && hasString(q.variant, ["4444xq", "4444", "hq", "standard", "lt", "proxy"]);
     default:
       if (!isRecord(q)) return false;
+      if (q.codec !== undefined && !hasString(q.codec, VIDEO_CODECS)) return false;
       if (!hasString(q.encodingMode, VIDEO_ENCODING_MODES)) return false;
       if (q.encodingMode === "crf") return hasPercent(q.crf);
       return typeof q.bitrate === "string" && (q.maxBitrate === undefined || typeof q.maxBitrate === "string");

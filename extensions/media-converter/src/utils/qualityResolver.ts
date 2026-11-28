@@ -17,6 +17,7 @@ import {
   type QualityLevel,
   type QualitySettings,
   type VideoBitrate,
+  type VideoCodec,
   type VideoEncodingMode,
   type VideoMaxBitrate,
   type VideoPreset,
@@ -34,6 +35,7 @@ export type QualityOverrides = {
   audioSampleRate?: (typeof AUDIO_SAMPLE_RATES)[number];
   audioBitDepth?: (typeof AUDIO_BIT_DEPTH)[number];
   flacCompressionLevel?: (typeof AUDIO_COMPRESSION_LEVEL)[number];
+  videoCodec?: VideoCodec;
   videoEncodingMode?: VideoEncodingMode;
   videoCrf?: number;
   videoBitrate?: VideoBitrate;
@@ -163,6 +165,7 @@ export function resolveQualitySettings(
   const built = buildVideoQuality(
     format,
     {
+      codec: overrides.videoCodec,
       encodingMode: overrides.videoEncodingMode,
       crf: clampPercent(overrides.videoCrf),
       bitrate: overrides.videoBitrate,

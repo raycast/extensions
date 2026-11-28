@@ -23,6 +23,7 @@ export type QueueJob = {
   mediaType: MediaType;
   outputDir?: string;
   stripMetadata?: boolean;
+  replaceOriginal?: boolean;
   trim?: TrimOptions;
   targetSizeMb?: number;
   status: QueueStatus;
@@ -60,6 +61,7 @@ export async function enqueueConversionJobs(
     quality: QualitySettings;
     outputDir?: string;
     stripMetadata?: boolean;
+    replaceOriginal?: boolean;
     trim?: TrimOptions;
     targetSizeMb?: number;
   },
@@ -78,6 +80,7 @@ export async function enqueueConversionJobs(
       mediaType,
       outputDir: settings.outputDir,
       stripMetadata: settings.stripMetadata,
+      replaceOriginal: settings.replaceOriginal,
       trim: settings.trim,
       targetSizeMb: settings.targetSizeMb,
       status: "pending",
@@ -169,6 +172,7 @@ function normaliseQueueJob(value: unknown): QueueJob | null {
     mediaType,
     outputDir: typeof value.outputDir === "string" ? value.outputDir : undefined,
     stripMetadata: typeof value.stripMetadata === "boolean" ? value.stripMetadata : undefined,
+    replaceOriginal: typeof value.replaceOriginal === "boolean" ? value.replaceOriginal : undefined,
     trim,
     targetSizeMb: typeof value.targetSizeMb === "number" && value.targetSizeMb > 0 ? value.targetSizeMb : undefined,
     status: value.status as QueueStatus,

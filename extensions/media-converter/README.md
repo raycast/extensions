@@ -8,7 +8,9 @@
 - Convert videos, images, and audio files with a simple interface
 - Support for all popular media formats
 - **Video → Animated GIF** with quality palette generation
-- **Trim** videos and audio via Start / End fields
+- **Trim** videos and audio via Start / End fields in Convert Media, or use lossless **Trim** (`-c copy`, with optional in-place replacement via Trash / Recycle Bin) in **Edit Media**
+- **Replace original file** — optional checkbox in Convert Media, Manage Presets, and Edit Media → Trim to move the original to Trash / Recycle Bin once processing succeeds
+- **Video codec selection** for `.mp4` and `.mkv` (`H.264`, `H.265 / HEVC`, `AV1` via `libsvtav1`/`libaom-av1`, and hardware-detected NVIDIA NVENC)
 - **Strip metadata** (EXIF, GPS, tags) for privacy — per-run toggle or a default preference
 - **Custom output folder** — save converted files anywhere (per-run or as a preference)
 - **Before/After size comparison** in the success toast (e.g. "saved 42 MB (58%)")
@@ -30,7 +32,7 @@
 | Media Type | Supported Input Formats                                                                                                                            | Supported Output Formats                 |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | Video      | MOV, MP4, AVI, MKV, MPG, WEBM, TS, MPEG, VOB, M2TS, MTS, M4V, FLV, 3GP, ASF, WMV, RMVB, OGV, MXF, NUT, DV, GXF, RM, CDXL, WTV, M3U8, MPD, SEG, TXD | MP4, AVI, MKV, MOV, MPG, WEBM, **GIF**   |
-| Image      | JPG, JPEG, PNG, WEBP, HEIC (MacOS), TIFF, TIF, AVIF, BMP, PCX, TGA, RAS, SGI, PPM, PGM, PBM, PNM, XBM, XPM, ICO, JP2, J2K, PCD, CIN, WBMP, XFACE   | JPG, PNG, WEBP, HEIC (MacOS), TIFF, AVIF |
+| Image      | JPG, JPEG, PNG, WEBP, HEIC (macOS, or Windows/Linux with FFmpeg 7+), TIFF, TIF, AVIF, BMP, PCX, TGA, RAS, SGI, PPM, PGM, PBM, PNM, XBM, XPM, ICO, JP2, J2K, PCD, CIN, WBMP, XFACE   | JPG, PNG, WEBP, HEIC (macOS), TIFF, AVIF |
 | Audio      | MP3, AAC, WAV, M4A, FLAC, AIF, AIFF, OGG, OGA, ALAC, WMA, OPUS, AMR, CAF, AU, SND, APE, DSF, DFF, MPC, WV, SPX, XA, RA                             | MP3, AAC, WAV, FLAC, M4A                 |
 
 ## Usage
@@ -72,6 +74,7 @@ Raycast extensions cannot run as permanent background daemons. If Raycast or the
 
 Open **Edit Media**, choose one file, and select an operation:
 
+- Trim a video or audio file losslessly (`-c copy`), optionally replacing the original file in place
 - Resize and/or crop an image or video
 - Change audio or video playback speed from 0.25× to 40×. For video, optionally choose 24, 30, or 60 fps and remove audio in the same edit
 - Change video frame rate to 24, 30, or 60 fps, keeping audio unless removal is selected
@@ -107,11 +110,13 @@ You can also set defaults in extension preferences:
 - **Default Audio Output Format**: default output format for audio conversions.
 - **Default Audio Quality Preset**: preset used in simple mode (`lowest`, `low`, `medium`, `high`, `highest`).
 - **Default Video Output Format**: default output format for video conversions.
+- **Default Video Codec (MP4 / MKV)**: default video codec for `.mp4` and `.mkv` outputs (`Format Default`, `H.264`, `H.265 / HEVC`, `AV1 (CPU)`, and NVIDIA NVENC variants).
 - **Default Video Quality Preset**: preset used in simple mode (`lowest`, `low`, `medium`, `high`, `highest`).
 - **Default GIF FPS**: default frame rate for video → GIF conversions (`10`, `15`, `24`, `30`).
 - **Default GIF Width**: default output width for GIFs (`original`, `480`, `720`, `1080`).
 - **Default Output Location**: `Same folder as input` or `Custom folder` (see next).
 - **Custom Output Folder**: absolute path used when `Default Output Location` is set to `Custom folder`.
+- **Preserve original files' date when modified**: when on (default), keeps the original file's Date Modified timestamp on converted outputs (skipped when Strip Metadata is enabled).
 - **Strip Metadata By Default**: when on, converted files get `-map_metadata -1` applied so EXIF/GPS/tags are removed.
 
 You can still override all values in the Convert Media form every time you run a conversion.

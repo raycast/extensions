@@ -27,4 +27,13 @@ describe("resolveQualitySettings", () => {
       ".jpg": 90,
     });
   });
+
+  it("preserves simple quality preset when overriding only videoCodec", () => {
+    const resolved = resolveQualitySettings("video", ".mp4", "highest", { videoCodec: "av1" }) as {
+      ".mp4": { codec?: string; crf: number; preset: string };
+    };
+    assert.equal(resolved[".mp4"].codec, "av1");
+    assert.equal(resolved[".mp4"].crf, 95);
+    assert.equal(resolved[".mp4"].preset, "slower");
+  });
 });

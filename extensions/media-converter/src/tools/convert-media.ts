@@ -95,6 +95,7 @@ type Input = {
   flacCompressionLevel?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 
   // --- Optional advanced video controls (apply when relevant) ---
+  videoCodec?: "h264" | "h264-nvenc" | "hevc" | "hevc-nvenc" | "av1" | "av1-nvenc";
   videoEncodingMode?: "crf" | "vbr" | "vbr-2-pass";
   videoCrf?: number; // 0-100 (mapped internally)
   videoBitrate?:
@@ -197,6 +198,7 @@ export default async function ConvertMedia(input: Input) {
     audioBitDepth,
     flacCompressionLevel,
     // video
+    videoCodec,
     videoEncodingMode,
     videoCrf,
     videoBitrate,
@@ -304,6 +306,7 @@ export default async function ConvertMedia(input: Input) {
         audioSampleRate,
         audioBitDepth,
         flacCompressionLevel,
+        videoCodec,
         videoEncodingMode,
         videoCrf,
         videoBitrate,
@@ -507,23 +510,25 @@ function summarizeSettings(
       }
       case ".mp4": {
         const v = vid[".mp4"] as VideoQuality[".mp4"];
+        const codecPrefix = v.codec ? `${v.codec}, ` : "";
         const enc = getEncodingMode(v);
         if (enc === "crf") {
           const vr = v as Extract<VideoQuality[".mp4"], { encodingMode: "crf" }>;
-          return `CRF ${vr.crf}, preset ${vr.preset}`;
+          return `${codecPrefix}CRF ${vr.crf}, preset ${vr.preset}`;
         }
         const vr = v as Extract<VideoQuality[".mp4"], { encodingMode: "vbr" | "vbr-2-pass" }>;
-        return `${(enc ?? "").toUpperCase()} ${vr.bitrate} kbps${vr.maxBitrate ? ` max ${vr.maxBitrate}` : ""}, preset ${vr.preset}`;
+        return `${codecPrefix}${(enc ?? "").toUpperCase()} ${vr.bitrate} kbps${vr.maxBitrate ? ` max ${vr.maxBitrate}` : ""}, preset ${vr.preset}`;
       }
       case ".mkv": {
         const v = vid[".mkv"] as VideoQuality[".mkv"];
+        const codecPrefix = v.codec ? `${v.codec}, ` : "";
         const enc = getEncodingMode(v);
         if (enc === "crf") {
           const vr = v as Extract<VideoQuality[".mkv"], { encodingMode: "crf" }>;
-          return `CRF ${vr.crf}, preset ${vr.preset}`;
+          return `${codecPrefix}CRF ${vr.crf}, preset ${vr.preset}`;
         }
         const vr = v as Extract<VideoQuality[".mkv"], { encodingMode: "vbr" | "vbr-2-pass" }>;
-        return `${(enc ?? "").toUpperCase()} ${vr.bitrate} kbps${vr.maxBitrate ? ` max ${vr.maxBitrate}` : ""}, preset ${vr.preset}`;
+        return `${codecPrefix}${(enc ?? "").toUpperCase()} ${vr.bitrate} kbps${vr.maxBitrate ? ` max ${vr.maxBitrate}` : ""}, preset ${vr.preset}`;
       }
       case ".avi": {
         const v = vid[".avi"] as VideoQuality[".avi"];
@@ -566,6 +571,7 @@ function summarizeParams(params: Input): string {
   if (params.audioBitDepth) parts.push(`audio bitDepth ${params.audioBitDepth}`);
   if (params.flacCompressionLevel) parts.push(`flac level ${params.flacCompressionLevel}`);
   // video
+  if (params.videoCodec) parts.push(`video codec ${params.videoCodec}`);
   if (params.videoEncodingMode) parts.push(`video mode ${params.videoEncodingMode}`);
   if (typeof params.videoCrf === "number") parts.push(`video crf ${params.videoCrf}`);
   if (params.videoBitrate) parts.push(`video bitrate ${params.videoBitrate}`);

@@ -14,6 +14,7 @@ export type BatchOptions = {
   quality: QualitySettings;
   outputDir?: string;
   stripMetadata?: boolean;
+  replaceOriginal?: boolean;
   trim?: TrimOptions;
   /** When true, individual video conversions show live progress in the toast. */
   showProgress?: boolean;
@@ -78,6 +79,7 @@ export async function runConversionBatch(files: string[], opts: BatchOptions): P
       const convertOpts: ConvertOptions = {
         outputDir: opts.outputDir,
         stripMetadata: opts.stripMetadata,
+        replaceOriginal: opts.replaceOriginal,
         trim: opts.trim,
         signal: opts.signal,
       };
@@ -110,6 +112,8 @@ export async function runConversionBatch(files: string[], opts: BatchOptions): P
           stripMetadata: opts.stripMetadata,
           outputDir: opts.outputDir,
           durationMs: Date.now() - started,
+          inputBytes,
+          outputBytes,
         });
       } catch (historyErr) {
         console.warn("Failed to write history entry:", historyErr);

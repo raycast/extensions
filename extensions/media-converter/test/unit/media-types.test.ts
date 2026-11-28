@@ -117,6 +117,21 @@ describe("getDefaultQuality", () => {
     assert.ok(q[".mp4"]);
   });
 
+  it("applies defaultVideoCodec preference to .mp4 and .mkv", () => {
+    const qMp4 = getDefaultQuality(
+      ".mp4",
+      { ...basePrefs, moreConversionSettings: true, defaultVideoCodec: "av1-nvenc" },
+    ) as { ".mp4": { codec: string } };
+    assert.equal(qMp4[".mp4"].codec, "av1-nvenc");
+
+    const qMkv = getDefaultQuality(
+      ".mkv",
+      { ...basePrefs, defaultVideoCodec: "av1" },
+      "low",
+    ) as { ".mkv": { codec: string } };
+    assert.equal(qMkv[".mkv"].codec, "av1");
+  });
+
   it("throws when simple-mode is used without a quality level", () => {
     assert.throws(() => getDefaultQuality(".mp4", { ...basePrefs }));
   });

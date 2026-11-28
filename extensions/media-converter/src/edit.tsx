@@ -3,6 +3,8 @@ import { Action, ActionPanel, Form, Icon, Toast, getSelectedFinderItems, showInF
 import { showFailureToast } from "@raycast/utils";
 import path from "node:path";
 import { EDIT_FRAME_RATES, editMedia, type EditRequest } from "./utils/editMedia";
+import { resolveTrim } from "./utils/conversionOptions";
+import { formatTimeString } from "./utils/time";
 import { getMediaType } from "./types/media";
 
 type Operation = EditRequest["operation"];
@@ -10,6 +12,9 @@ type Operation = EditRequest["operation"];
 export default function Command() {
   const [files, setFiles] = useState<string[]>([]);
   const [operation, setOperation] = useState<Operation>("resize-crop");
+  const [trimStart, setTrimStart] = useState("");
+  const [trimEnd, setTrimEnd] = useState("");
+  const [replaceOriginal, setReplaceOriginal] = useState(false);
   const [width, setWidth] = useState("");
   const [height, setHeight] = useState("");
   const [cropWidth, setCropWidth] = useState("");
@@ -35,7 +40,27 @@ export default function Command() {
     return () => abortController.current?.abort();
   }, []);
 
+  const trimValidationHint = useMemo<string>(() => {
+    if (!trimStart && !trimEnd) return "";
+    const resolved = resolveTrim(trimStart, trimEnd);
+    if (resolved.error) return resolved.error;
+    const s = resolved.startSec;
+    const e = resolved.endSec;
+    if (s !== undefined && e !== undefined) return `Will keep ${formatTimeString(e - s)} of media`;
+    if (s !== undefined) return `Will skip the first ${formatTimeString(s)}`;
+    if (e !== undefined) return `Will keep only the first ${formatTimeString(e)}`;
+    return "";
+  }, [trimStart, trimEnd]);
+
   const request = useMemo<EditRequest>(() => {
+    if (operation === "trim") {
+      return {
+        operation,
+        start: trimStart,
+        end: trimEnd,
+        replaceOriginal,
+      };
+    }
     if (operation === "resize-crop") {
       return {
         operation,
@@ -62,6 +87,9 @@ export default function Command() {
     return { operation, mode: subtitleMode, subtitlePath: subtitleFiles[0] };
   }, [
     operation,
+    trimStart,
+    trimEnd,
+    replaceOriginal,
     width,
     height,
     cropWidth,
@@ -144,6 +172,7 @@ export default function Command() {
         onChange={(value) => setOperation(value as Operation)}
       >
         <Form.Dropdown.Item value="resize-crop" title="Resize / Crop" />
+        <Form.Dropdown.Item value="trim" title="Trim" />
         <Form.Dropdown.Item value="speed" title="Change Speed" />
         <Form.Dropdown.Item value="frame-rate" title="Change Frame Rate" />
         <Form.Dropdown.Item value="remove-audio" title="Remove Audio" />
@@ -151,6 +180,34 @@ export default function Command() {
         <Form.Dropdown.Item value="normalize" title="Normalize Audio" />
         <Form.Dropdown.Item value="subtitles" title="Subtitles" />
       </Form.Dropdown>
+      {operation === "trim" && (
+        <>
+          <Form.Description text="Trims video or audio losslessly (-c copy) without re-encoding for instant speed and zero quality loss. Start cuts snap to the nearest keyframe." />
+          <Form.Checkbox
+            id="replaceOriginal"
+            title="Output"
+            label="Replace original file"
+            value={replaceOriginal}
+            onChange={setReplaceOriginal}
+            info="When enabled, moves the original file to the Trash / Recycle Bin and saves the trimmed clip in its place once trimming succeeds. Leave off to save a separate trimmed copy."
+          />
+          <Form.TextField
+            id="trimStart"
+            title="Start"
+            placeholder="e.g. 0:10 or 10.5"
+            value={trimStart}
+            onChange={setTrimStart}
+          />
+          <Form.TextField
+            id="trimEnd"
+            title="End"
+            placeholder="e.g. 1:30 or 90"
+            value={trimEnd}
+            onChange={setTrimEnd}
+          />
+          {trimValidationHint && <Form.Description text={trimValidationHint} />}
+        </>
+      )}
       {operation === "resize-crop" && (
         <>
           <Form.Description text="Resize dimensions are optional. For crop, enter both width and height." />

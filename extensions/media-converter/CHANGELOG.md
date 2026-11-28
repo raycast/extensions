@@ -1,5 +1,24 @@
 # Media Converter Changelog
 
+## [AV1 video support, lossless Trim in Edit Media, and Windows FFmpeg fixes] - {PR_MERGE_DATE}
+
+### Added
+
+- **Video Codec** selector for `.mp4` and `.mkv` outputs in Advanced Mode (`H.264`, `H.265 / HEVC`, `AV1 (CPU)`, plus hardware-detected NVIDIA NVENC options for `H.264`, `H.265 / HEVC`, and `AV1`), and a **Default Video Codec** preference.
+- **Trim** operation in **Edit Media** for lossless stream-copy (`-c copy`) trimming of video and audio, with an optional **Replace original file** checkbox (off by default; moves the original to Trash / Recycle Bin).
+- Optional **Replace original file** checkbox in **Convert Media** and **Manage Presets** (off by default; moves the original to Trash / Recycle Bin after conversion succeeds and reuses the original filename when format and folder match).
+- `.heic` image input support on Windows and Linux when FFmpeg 7.0+ is installed (converting to JPG, PNG, WebP, TIFF, or AVIF, and resizing/cropping in **Edit Media**).
+- Show the resolved FFmpeg CRF/CQ value next to each percentage in the Advanced Mode **Quality** dropdown (e.g. `45 (CRF 28)` or `30 (CQ 36)`).
+
+### Changed
+
+- `.mp4` outputs now include `-movflags +faststart` for faster streaming playback, and H.265 `.mp4` outputs include `-tag:v hvc1` for broader player compatibility.
+- Clarified the **Encoding Preset** tooltip to explain how slower vs. faster presets affect encoding time, file size, and quality.
+
+### Fixed
+
+- Windows FFmpeg detection now checks `PATH`, scans WinGet's `Packages` directory without wildcard paths, resolves the real `AppData\Local` path via `os.homedir()` under MSIX, and recognizes FFmpeg git-master version strings (`N-…`).
+
 ## [Fix WebP and AVIF with FFmpeg builds missing encoders] - 2026-11-11
 
 - AVIF images now use libsvtav1 when FFmpeg has no libaom-av1, as in Homebrew's `ffmpeg` formula, instead of failing

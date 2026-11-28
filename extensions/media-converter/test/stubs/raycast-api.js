@@ -31,6 +31,7 @@ export async function getPreferenceValues() {
 }
 export function openCommandPreferences() {}
 export async function launchCommand() {}
+export async function trash() {}
 export const Clipboard = { copy: async () => {} };
 
 export function getSelectedFinderItems() {

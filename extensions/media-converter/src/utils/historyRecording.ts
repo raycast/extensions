@@ -27,6 +27,8 @@ export async function recordConversionHistory(params: {
   stripMetadata?: boolean;
   outputDir?: string;
   durationMs: number;
+  inputBytes?: number;
+  outputBytes?: number;
 }): Promise<void> {
   await appendHistory({
     operation: "convert",
@@ -39,8 +41,8 @@ export async function recordConversionHistory(params: {
     stripMetadata: params.stripMetadata,
     outputDir: params.outputDir,
     durationMs: params.durationMs,
-    inputBytes: sizeOf(params.input),
-    outputBytes: sizeOf(params.output),
+    inputBytes: params.inputBytes ?? sizeOf(params.input),
+    outputBytes: params.outputBytes ?? sizeOf(params.output),
   });
 }
 
@@ -73,6 +75,8 @@ export async function recordEditHistory(params: {
   output: string;
   outputFormat: AllOutputExtension;
   durationMs: number;
+  inputBytes?: number;
+  outputBytes?: number;
 }): Promise<void> {
   const mediaType = getMediaType(path.extname(params.output)) ?? getMediaType(path.extname(params.input)) ?? "video";
   await appendHistory({
@@ -82,7 +86,7 @@ export async function recordEditHistory(params: {
     outputFormat: params.outputFormat,
     mediaType,
     durationMs: params.durationMs,
-    inputBytes: sizeOf(params.input),
-    outputBytes: sizeOf(params.output),
+    inputBytes: params.inputBytes ?? sizeOf(params.input),
+    outputBytes: params.outputBytes ?? sizeOf(params.output),
   });
 }

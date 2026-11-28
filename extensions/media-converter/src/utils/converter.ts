@@ -1,8 +1,20 @@
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { findFFmpegPath } from "./ffmpeg";
-import { buildAvifArgs, getAvailableEncoders, missingEncoderError, pickAvifEncoder } from "./encoders";
+import { getPreferenceValues, trash } from "@raycast/api";
+import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "./ffmpeg";
+import {
+  buildAvifArgs,
+  getAvailableEncoders,
+  mapPresetToAomCpuUsed,
+  mapPresetToNvenc,
+  mapPresetToSvtAv1,
+  missingEncoderError,
+  pickAv1VideoEncoder,
+  pickAvifEncoder,
+  qualityPercentToCrf,
+  type Av1VideoEncoder,
+} from "./encoders";
 import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
 import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
 import { parseTimeString, toFfmpegTime } from "./time";
@@ -15,6 +27,8 @@ import {
   ImageQuality,
   AudioQuality,
   VideoQuality,
+  VideoCodec,
+  VideoPreset,
   GifQuality,
   getMediaType,
   getOutputCategory,
@@ -23,9 +37,72 @@ import {
 } from "../types/media";
 
 function convertQualityToCrf(qualityPercentage: Percentage): number {
-  // Map 100% quality to CRF 0, and 0% quality to CRF 51
-  // Using a linear mapping for simplicity
-  return Math.round(51 - (qualityPercentage / 100) * 51);
+  return qualityPercentToCrf(qualityPercentage, 51);
+}
+
+export function shouldPreserveFileDates(stripMetadata?: boolean): boolean {
+  if (stripMetadata) return false;
+  try {
+    const prefs = getPreferenceValues<Preferences>();
+    return prefs.preserveFileDates !== false;
+  } catch {
+    return true;
+  }
+}
+
+/** Copy original file's Date Modified (mtime) & Date Accessed (atime) to the converted output. */
+export function preserveFileTimestamps(sourcePath: string, targetPath: string): void {
+  try {
+    const stat = fs.statSync(sourcePath);
+    fs.utimesSync(targetPath, stat.atime, stat.mtime);
+  } catch (error) {
+    console.warn("Failed to preserve file timestamps:", error);
+  }
+}
+
+/**
+ * Replace `targetPath` with `tempPath` by moving the original to the OS Trash / Recycle Bin first.
+ * Never permanently deletes the user's original file if Trash is unavailable.
+ */
+export async function replaceFileSafely(tempPath: string, targetPath: string): Promise<void> {
+  try {
+    await trash(targetPath);
+  } catch (error) {
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin (${String(error)}). The original file was kept.`,
+    );
+  }
+  if (fs.existsSync(targetPath)) {
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin. The original file was kept.`,
+    );
+  }
+  fs.renameSync(tempPath, targetPath);
+}
+
+/**
+ * Move `targetPath` to the OS Trash / Recycle Bin.
+ * Never permanently deletes the user's original file if Trash is unavailable.
+ */
+export async function trashFileSafely(targetPath: string): Promise<void> {
+  try {
+    await trash(targetPath);
+  } catch (error) {
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin (${String(error)}). The original file was kept.`,
+    );
+  }
+  if (fs.existsSync(targetPath)) {
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin. The original file was kept.`,
+    );
+  }
+}
+
+function isSameFilePath(a: string, b: string): boolean {
+  const ra = path.resolve(a);
+  const rb = path.resolve(b);
+  return process.platform === "win32" ? ra.toLowerCase() === rb.toLowerCase() : ra === rb;
 }
 
 function getUniqueOutputPath(filePath: string, extension: string, outputDir?: string): string {
@@ -47,6 +124,7 @@ export type ConvertOptions = {
   returnCommandString?: boolean;
   outputDir?: string;
   stripMetadata?: boolean;
+  replaceOriginal?: boolean;
   trim?: TrimOptions;
   onProgress?: (p: ProgressInfo) => void;
   signal?: AbortSignal;
@@ -84,9 +162,47 @@ export async function convertMedia<T extends AllOutputExtension>(
     throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
   }
 
-  const { returnCommandString = false, outputDir, stripMetadata, trim, onProgress, signal } = opts;
+  const { returnCommandString = false, outputDir, stripMetadata, replaceOriginal, trim, onProgress, signal } = opts;
   const trimArgs = buildTrimArgs(trim);
-  const metadataArgs = stripMetadata ? ["-map_metadata", "-1"] : [];
+  const metadataArgs = stripMetadata ? ["-map_metadata", "-1"] : ["-map_metadata", "0"];
+  const keepDates = shouldPreserveFileDates(stripMetadata);
+
+  const resolveWriteTarget = (ext: string): { writePath: string; replaceInPlace: boolean } => {
+    const dir = outputDir && outputDir.length > 0 ? outputDir : path.dirname(filePath);
+    const baseName = path.basename(filePath, path.extname(filePath));
+    const directPath = path.join(dir, `${baseName}${ext}`);
+    const replaceInPlace = Boolean(replaceOriginal) && !returnCommandString && isSameFilePath(directPath, filePath);
+    if (replaceInPlace) {
+      const tmp = path.join(
+        dir,
+        `${baseName}.convert-tmp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}${ext}`,
+      );
+      return { writePath: tmp, replaceInPlace: true };
+    }
+    return { writePath: getUniqueOutputPath(filePath, ext, outputDir), replaceInPlace: false };
+  };
+
+  const finalizeOutput = async (writePath: string, replaceInPlace: boolean): Promise<string> => {
+    if (keepDates) preserveFileTimestamps(filePath, writePath);
+    if (replaceInPlace) {
+      await replaceFileSafely(writePath, filePath);
+      return filePath;
+    }
+    if (replaceOriginal && !returnCommandString) {
+      await trashFileSafely(filePath);
+    }
+    return writePath;
+  };
+
+  const cleanupTempOutput = (writePath: string, replaceInPlace: boolean): void => {
+    if (replaceInPlace && fs.existsSync(writePath)) {
+      try {
+        fs.unlinkSync(writePath);
+      } catch {
+        /* ignore temp cleanup error */
+      }
+    }
+  };
 
   let ffmpegArgs = [...trimArgs, "-i"];
   const outputCategory = getOutputCategory(outputFormat);
@@ -106,7 +222,7 @@ export async function convertMedia<T extends AllOutputExtension>(
   if (outputCategory === "gif") {
     const gifQuality = quality as GifQuality;
     const gifSettings = gifQuality[".gif"];
-    const finalOutputPath = getUniqueOutputPath(filePath, ".gif", outputDir);
+    const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(".gif");
 
     const fps = gifSettings.fps;
     const scale = gifSettings.width === "original" ? "iw" : gifSettings.width;
@@ -145,7 +261,10 @@ export async function convertMedia<T extends AllOutputExtension>(
       await runProcess(paletteSpec, signal);
       console.log(`Executing FFmpeg GIF command: ${formatProcessForDisplay(finalSpec)}`);
       await execWithOptionalProgress(finalSpec);
-      return finalOutputPath;
+      return await finalizeOutput(finalOutputPath, replaceInPlace);
+    } catch (error) {
+      cleanupTempOutput(finalOutputPath, replaceInPlace);
+      throw error;
     } finally {
       if (fs.existsSync(tempPaletteFile)) {
         try {
@@ -161,7 +280,7 @@ export async function convertMedia<T extends AllOutputExtension>(
     case "image": {
       const currentOutputFormat = outputFormat as OutputImageExtension;
       const imageQuality = quality as ImageQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
+      const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(currentOutputFormat);
 
       let tempHeicFile: string | null = null;
       let tempPaletteFile: string | null = null;
@@ -221,14 +340,26 @@ export async function convertMedia<T extends AllOutputExtension>(
             }
           }
         } else {
-          // If the input file is HEIC and the output format is not HEIC, convert to PNG first
+          let decodedHeicDirectly = false;
+          // If the input file is HEIC and the output format is not HEIC:
+          // - macOS uses `sips` to pre-convert HEIC to PNG.
+          // - Windows/Linux with FFmpeg 7.0+ decodes HEIC natively (pre-decoding to PNG only for
+          //   PNG-8 palettegen, because FFmpeg cannot chain `-vf` onto tiled HEIC's internal graph).
           if (extension === ".heic") {
+            if (!supportsHeicInput(ffmpegPath.version)) {
+              throw new Error(
+                `HEIC input requires macOS or FFmpeg ${MIN_FFMPEG_HEIC_INPUT_VERSION}+ (found FFmpeg v${ffmpegPath.version}).`,
+              );
+            }
             if (returnCommandString) {
               // For command string, use original file (assuming user handles preprocessing)
               processedInputPath = filePath;
-            } else {
+              if (process.platform !== "darwin") {
+                decodedHeicDirectly = true;
+              }
+            } else if (process.platform === "darwin") {
               try {
-                const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
+                const tempFileName = `${path.basename(filePath, path.extname(filePath))}_temp_${Date.now()}.png`;
                 tempHeicFile = path.join(os.tmpdir(), tempFileName);
 
                 await runProcess(
@@ -247,6 +378,30 @@ export async function convertMedia<T extends AllOutputExtension>(
                 }
                 throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
               }
+            } else if (currentOutputFormat === ".png" && imageQuality[".png"] === "png-8") {
+              try {
+                const tempFileName = `${path.basename(filePath, path.extname(filePath))}_temp_${Date.now()}.png`;
+                tempHeicFile = path.join(os.tmpdir(), tempFileName);
+
+                await runProcess(
+                  {
+                    command: ffmpegPath.path,
+                    args: ["-i", filePath, "-frames:v", "1", "-compression_level", "1", "-y", tempHeicFile],
+                  },
+                  signal,
+                );
+
+                processedInputPath = tempHeicFile;
+              } catch (error) {
+                console.error(`Error pre-processing HEIC file with FFmpeg: ${filePath}`, error);
+                if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+                  fs.unlinkSync(tempHeicFile);
+                }
+                throw new Error(`Failed to decode HEIC file with FFmpeg: ${String(error)}`);
+              }
+            } else {
+              processedInputPath = filePath;
+              decodedHeicDirectly = true;
             }
           }
 
@@ -336,6 +491,9 @@ export async function convertMedia<T extends AllOutputExtension>(
               break;
             }
           }
+          if (decodedHeicDirectly) {
+            ffmpegArgs.push("-frames:v", "1");
+          }
           ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
           const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };
           if (returnCommandString) {
@@ -344,8 +502,9 @@ export async function convertMedia<T extends AllOutputExtension>(
           console.log(`Executing FFmpeg image command: ${formatProcessForDisplay(ffmpegSpec)}`);
           await runProcess(ffmpegSpec, signal);
         }
-        return finalOutputPath;
+        return await finalizeOutput(finalOutputPath, replaceInPlace);
       } catch (error) {
+        cleanupTempOutput(finalOutputPath, replaceInPlace);
         console.error(`Error converting ${processedInputPath} to ${currentOutputFormat}:`, error);
         throw error;
       } finally {
@@ -362,7 +521,7 @@ export async function convertMedia<T extends AllOutputExtension>(
     case "audio": {
       const currentOutputFormat = outputFormat as OutputAudioExtension;
       const audioQuality = quality as AudioQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
+      const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(currentOutputFormat);
 
       ffmpegArgs.push(filePath);
 
@@ -423,8 +582,13 @@ export async function convertMedia<T extends AllOutputExtension>(
         return formatProcessForDisplay(ffmpegSpec);
       }
       console.log(`Executing FFmpeg audio command: ${formatProcessForDisplay(ffmpegSpec)}`);
-      await execWithOptionalProgress(ffmpegSpec);
-      return finalOutputPath;
+      try {
+        await execWithOptionalProgress(ffmpegSpec);
+        return await finalizeOutput(finalOutputPath, replaceInPlace);
+      } catch (error) {
+        cleanupTempOutput(finalOutputPath, replaceInPlace);
+        throw error;
+      }
     }
 
     case "video": {
@@ -433,11 +597,66 @@ export async function convertMedia<T extends AllOutputExtension>(
 
       ffmpegArgs.push(filePath);
 
+      let resolvedAv1Encoder: Av1VideoEncoder | null = null;
+      let isNvencEncoder = false;
+
       // Add format-specific codec and settings
       switch (currentOutputFormat) {
-        case ".mp4": {
-          const mp4Quality = videoQuality[".mp4"];
-          ffmpegArgs.push("-vcodec", "h264", "-acodec", "aac", "-preset", mp4Quality.preset);
+        case ".mp4":
+        case ".mkv": {
+          const containerQuality = videoQuality[currentOutputFormat];
+          const codec: VideoCodec = containerQuality.codec ?? (currentOutputFormat === ".mkv" ? "hevc" : "h264");
+          const preset: VideoPreset = containerQuality.preset;
+
+          if (codec === "h264") {
+            ffmpegArgs.push("-vcodec", "h264", "-acodec", "aac", "-preset", preset);
+          } else if (codec === "h264-nvenc") {
+            const encoders = await getAvailableEncoders(ffmpegPath.path);
+            if (encoders && !encoders.has("h264_nvenc")) {
+              throw missingEncoderError(`${currentOutputFormat.toUpperCase()} (H.264 NVENC)`, "h264_nvenc");
+            }
+            isNvencEncoder = true;
+            ffmpegArgs.push("-c:v", "h264_nvenc", "-preset", mapPresetToNvenc(preset), "-c:a", "aac");
+          } else if (codec === "hevc") {
+            ffmpegArgs.push("-vcodec", "libx265", "-acodec", "aac", "-preset", preset);
+            if (currentOutputFormat === ".mp4") {
+              ffmpegArgs.push("-tag:v", "hvc1");
+            }
+          } else if (codec === "hevc-nvenc") {
+            const encoders = await getAvailableEncoders(ffmpegPath.path);
+            if (encoders && !encoders.has("hevc_nvenc")) {
+              throw missingEncoderError(`${currentOutputFormat.toUpperCase()} (H.265 NVENC)`, "hevc_nvenc");
+            }
+            isNvencEncoder = true;
+            ffmpegArgs.push("-c:v", "hevc_nvenc", "-preset", mapPresetToNvenc(preset), "-c:a", "aac");
+            if (currentOutputFormat === ".mp4") {
+              ffmpegArgs.push("-tag:v", "hvc1");
+            }
+          } else {
+            const encoders = await getAvailableEncoders(ffmpegPath.path);
+            resolvedAv1Encoder = pickAv1VideoEncoder(codec, encoders);
+            if (!resolvedAv1Encoder) {
+              const requested = codec === "av1-nvenc" ? "av1_nvenc" : "libsvtav1 or libaom-av1";
+              throw missingEncoderError(`${currentOutputFormat.toUpperCase()} (AV1)`, requested);
+            }
+            if (resolvedAv1Encoder === "av1_nvenc") {
+              isNvencEncoder = true;
+              ffmpegArgs.push("-c:v", "av1_nvenc", "-preset", mapPresetToNvenc(preset), "-c:a", "aac");
+            } else if (resolvedAv1Encoder === "libsvtav1") {
+              ffmpegArgs.push("-c:v", "libsvtav1", "-preset", mapPresetToSvtAv1(preset), "-c:a", "aac");
+            } else {
+              ffmpegArgs.push(
+                "-c:v",
+                "libaom-av1",
+                "-cpu-used",
+                mapPresetToAomCpuUsed(preset),
+                "-row-mt",
+                "1",
+                "-c:a",
+                "aac",
+              );
+            }
+          }
           break;
         }
         case ".avi": {
@@ -464,11 +683,6 @@ export async function convertMedia<T extends AllOutputExtension>(
           );
           break;
         }
-        case ".mkv": {
-          const mkvQuality = videoQuality[".mkv"];
-          ffmpegArgs.push("-vcodec", "libx265", "-acodec", "aac", "-preset", mkvQuality.preset);
-          break;
-        }
         case ".mpg": {
           ffmpegArgs.push("-vcodec", "mpeg2video", "-acodec", "mp3");
           break;
@@ -488,7 +702,8 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       // Handle encoding mode (unified for all formats except .mov)
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
+      const { writePath: finalOutputPath, replaceInPlace } = resolveWriteTarget(currentOutputFormat);
+      const mp4FaststartArgs = currentOutputFormat === ".mp4" ? ["-movflags", "+faststart"] : [];
       let logFilePrefix: string | null = null;
 
       if (currentOutputFormat !== ".mov") {
@@ -496,9 +711,28 @@ export async function convertMedia<T extends AllOutputExtension>(
 
         if ("encodingMode" in qualitySettings) {
           if (qualitySettings.encodingMode === "crf") {
-            ffmpegArgs.push("-crf", String(convertQualityToCrf(qualitySettings.crf)));
+            if (isNvencEncoder) {
+              if (qualitySettings.crf >= 100) {
+                ffmpegArgs.push("-rc", "constqp", "-qp", "0");
+              } else {
+                const cq = Math.max(1, qualityPercentToCrf(qualitySettings.crf, 51));
+                ffmpegArgs.push("-rc", "vbr", "-cq", String(cq), "-b:v", "0");
+              }
+            } else if (resolvedAv1Encoder === "libsvtav1") {
+              ffmpegArgs.push("-crf", String(qualityPercentToCrf(qualitySettings.crf, 63)));
+            } else if (resolvedAv1Encoder === "libaom-av1") {
+              ffmpegArgs.push("-crf", String(qualityPercentToCrf(qualitySettings.crf, 63)), "-b:v", "0");
+            } else {
+              ffmpegArgs.push("-crf", String(convertQualityToCrf(qualitySettings.crf)));
+            }
           } else {
             // VBR or VBR 2-pass
+            if (isNvencEncoder) {
+              ffmpegArgs.push("-rc", "vbr");
+              if (qualitySettings.encodingMode === "vbr-2-pass") {
+                ffmpegArgs.push("-multipass", "fullres");
+              }
+            }
             ffmpegArgs.push("-b:v", `${qualitySettings.bitrate}k`);
 
             if ("maxBitrate" in qualitySettings && qualitySettings.maxBitrate) {
@@ -510,7 +744,7 @@ export async function convertMedia<T extends AllOutputExtension>(
               );
             }
 
-            if (qualitySettings.encodingMode === "vbr-2-pass") {
+            if (qualitySettings.encodingMode === "vbr-2-pass" && !isNvencEncoder) {
               if (returnCommandString) {
                 // For command string, include both passes
                 logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
@@ -523,6 +757,7 @@ export async function convertMedia<T extends AllOutputExtension>(
                   command: ffmpegPath.path,
                   args: [
                     ...ffmpegArgs,
+                    ...mp4FaststartArgs,
                     ...metadataArgs,
                     "-pass",
                     "2",
@@ -555,14 +790,17 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       try {
-        ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
+        ffmpegArgs.push(...mp4FaststartArgs, ...metadataArgs, "-y", finalOutputPath);
         const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };
         if (returnCommandString) {
           return formatProcessForDisplay(ffmpegSpec);
         }
         console.log(`Executing FFmpeg video command: ${formatProcessForDisplay(ffmpegSpec)}`);
         await execWithOptionalProgress(ffmpegSpec);
-        return finalOutputPath;
+        return await finalizeOutput(finalOutputPath, replaceInPlace);
+      } catch (error) {
+        cleanupTempOutput(finalOutputPath, replaceInPlace);
+        throw error;
       } finally {
         // Clean up 2-pass log files if they exist
         if (logFilePrefix) {
