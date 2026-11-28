@@ -1,4 +1,4 @@
-import { getApplications, showHUD } from "@raycast/api";
+import { getApplications, showToast, Toast } from "@raycast/api";
 
 export async function checkOmniFocusInstalled() {
   const applications = await getApplications();
@@ -7,5 +7,6 @@ export async function checkOmniFocusInstalled() {
 }
 
 export async function showNotInstalledErrorFeedback() {
-  await showHUD("OmniFocus is not installed");
+  // A toast rather than a HUD: a HUD closes Raycast, and the user would lose what they typed.
+  await showToast({ style: Toast.Style.Failure, title: "OmniFocus is not installed" });
 }

@@ -17,6 +17,16 @@ const isValidGroupBy = (value: string | undefined): value is GroupBy => {
 };
 
 export default function PerspectivesCommand() {
+  // Everything below talks to OmniFocus, so only render it once the requirements check (installed + Pro)
+  // has passed. Otherwise users without Pro get a generic load error instead of the explanation.
+  return (
+    <ValidateRequirements>
+      <PerspectivesView />
+    </ValidateRequirements>
+  );
+}
+
+function PerspectivesView() {
   const preferences = getPreferenceValues();
 
   // Initialize view mode with preferences but maintain state during session
@@ -78,37 +88,35 @@ export default function PerspectivesCommand() {
   };
 
   return (
-    <ValidateRequirements>
-      <TaskList
-        isLoading={perspectiveLoading || isLoading}
-        tasks={data}
-        title={viewMode.groupBy === "none" ? viewMode.perspective : `${viewMode.perspective} (${viewMode.groupBy})`}
-        onTaskUpdated={async () => {
-          await revalidate();
-        }}
-        isShowingDetail={preferences.showDetailsByDefault}
-        groupBy={viewMode.groupBy}
-        searchBarAccessory={
-          <List.Dropdown tooltip="View Options" onChange={handleViewChange} defaultValue={getDropdownValue()}>
-            <List.Dropdown.Section title="Built-in Perspectives">
-              {builtInNames?.map((n) => <List.Dropdown.Item key={n} title={n} value={n} />)}
-            </List.Dropdown.Section>
+    <TaskList
+      isLoading={perspectiveLoading || isLoading}
+      tasks={data}
+      title={viewMode.groupBy === "none" ? viewMode.perspective : `${viewMode.perspective} (${viewMode.groupBy})`}
+      onTaskUpdated={async () => {
+        await revalidate();
+      }}
+      isShowingDetail={preferences.showDetailsByDefault}
+      groupBy={viewMode.groupBy}
+      searchBarAccessory={
+        <List.Dropdown tooltip="View Options" onChange={handleViewChange} defaultValue={getDropdownValue()}>
+          <List.Dropdown.Section title="Built-in Perspectives">
+            {builtInNames?.map((n) => <List.Dropdown.Item key={n} title={n} value={n} />)}
+          </List.Dropdown.Section>
 
-            <List.Dropdown.Section title="Custom Perspectives">
-              {perspectives?.customPerspectives.map((p) => (
-                <List.Dropdown.Item key={p.id} title={p.name} value={p.name} />
-              ))}
-            </List.Dropdown.Section>
+          <List.Dropdown.Section title="Custom Perspectives">
+            {perspectives?.customPerspectives.map((p) => (
+              <List.Dropdown.Item key={p.id} title={p.name} value={p.name} />
+            ))}
+          </List.Dropdown.Section>
 
-            <List.Dropdown.Section title="Group Current View">
-              <List.Dropdown.Item title="No Grouping" value="group:none" />
-              <List.Dropdown.Item title="By Project" value="group:project" />
-              <List.Dropdown.Item title="By Tags" value="group:tags" />
-              <List.Dropdown.Item title="By Priority" value="group:priority" />
-            </List.Dropdown.Section>
-          </List.Dropdown>
-        }
-      />
-    </ValidateRequirements>
+          <List.Dropdown.Section title="Group Current View">
+            <List.Dropdown.Item title="No Grouping" value="group:none" />
+            <List.Dropdown.Item title="By Project" value="group:project" />
+            <List.Dropdown.Item title="By Tags" value="group:tags" />
+            <List.Dropdown.Item title="By Priority" value="group:priority" />
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    />
   );
 }

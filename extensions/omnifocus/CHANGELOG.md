@@ -1,5 +1,19 @@
 # OmniFocus Changelog
 
+## [Fix special characters, nested tags and error handling] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Task names, notes, tags, project names and perspective names containing backticks, `${...}` or backslashes no longer break commands
+- Choosing a nested tag in Add a Task now assigns that tag instead of creating a duplicate at the top level (#21696)
+- Add a Task no longer creates a duplicate task when a tag or project can't be assigned; the form closes and says what's missing
+- Tags typed in "Tags to create" are no longer added twice on retry, and empty entries (such as a trailing comma) are ignored
+- Projects with the same name in different folders are now assigned correctly
+- Add a Task no longer shows a blank screen when tags or projects fail to load
+- Add a Task and List Tasks now explain when OmniFocus isn't installed or Pro isn't active, instead of showing a generic error
+- The "Automation in OmniFocus Pro" button now opens the OmniFocus page
+- Quick Add to Inbox now reports errors (including OmniFocus not being installed) in a toast that keeps Raycast open, and confirms success with a HUD
+
 ## [Planned Date support] - 2026-09-14
 
 ### Added

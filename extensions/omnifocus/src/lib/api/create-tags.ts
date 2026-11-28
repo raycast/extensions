@@ -6,16 +6,17 @@ export async function createTag(tagName: string) {
         const omnifocus = Application('OmniFocus');
         const doc = omnifocus.defaultDocument();
 
-        const tags = doc.tags.whose({name:  \`${tagName}\`});
-
-        if (!tags.length) {
-            const tag = omnifocus.Tag({name: \`${tagName}\`}); 
-            doc.tags.push(tag);
-            return { id: tag.id() };
+        // Search every tag, including nested ones. doc.tags only lists top-level tags,
+        // so an existing child tag would otherwise be duplicated at the top level.
+        const existing = doc.flattenedTags.whose({ name: args.tagName });
+        if (existing.length) {
+            return { id: existing[0].id() };
         }
 
-        const tag = tags[0];
+        const tag = omnifocus.Tag({ name: args.tagName });
+        doc.tags.push(tag);
         return { id: tag.id() };
     `,
+    { tagName },
   );
 }
