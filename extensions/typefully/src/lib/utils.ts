@@ -27,20 +27,20 @@ export function groupSocialSetsByTeam(items: SocialSetListItem[]): GroupedSocial
   return { noTeam, teamOrder, teamMap };
 }
 
-export function buildPostsFromContent(content: string, splitThread: boolean): Post[] {
+export function buildPostsFromContent(content: string, splitThread: boolean, mediaIds: string[] = []): Post[] {
   const normalized = content.replace(/\r\n/g, "\n").trim();
   if (!normalized) {
-    return [];
+    return mediaIds.length ? [{ text: "", media_ids: mediaIds }] : [];
   }
   if (!splitThread) {
     const merged = normalized.replace(/\n+---\n+/g, "\n\n");
-    return [{ text: merged }];
+    return [{ text: merged, ...(mediaIds.length ? { media_ids: mediaIds } : {}) }];
   }
   return normalized
     .split(/\n+---\n+/)
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((text) => ({ text }));
+    .map((text, index) => ({ text, ...(index === 0 && mediaIds.length ? { media_ids: mediaIds } : {}) }));
 }
 
 export function getDraftDisplayTitle(draft: DraftListItem) {

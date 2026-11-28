@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
-import { FormValidation, useCachedState, useForm, usePromise } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedState, useForm, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createDraft, getSocialSetDetail, listSocialSets, listTags } from "../lib/api";
 import {
@@ -13,8 +13,11 @@ import {
 } from "../lib/constants";
 import { ApiKeyRequiredView } from "../components/api-key-required";
 import { getPreferences } from "../lib/preferences";
+import { removeClipboardImages, validateImageFiles } from "../lib/clipboard-images";
+import { useClipboardImages } from "../lib/use-clipboard-images";
+import { uploadMedia } from "../lib/media";
 import type { DraftCreatePlatforms, Tag } from "../lib/types";
-import { buildPostsFromContent, getErrorMessage, groupSocialSetsByTeam } from "../lib/utils";
+import { buildPostsFromContent, groupSocialSetsByTeam } from "../lib/utils";
 
 type PublishOption = "draft" | "now" | "next-free-slot" | "schedule";
 type ShareOption = "yes" | "no";
@@ -29,6 +32,7 @@ type FormValues = {
   socialSetId: string;
   platforms: string[];
   content: string;
+  images: string[];
   draftTitle?: string;
   scratchpadText?: string;
   tags: string[];
@@ -61,7 +65,7 @@ function buildScheduledDate(date: Date, time: string) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0, 0);
 }
 
-export function CreateDraftForm(props: { socialSetId?: string; draftValues?: Form.Values }) {
+export function CreateDraftForm(props: { socialSetId?: string; draftValues?: Form.Values; preserveDrafts?: boolean }) {
   const [defaultSocialSetId] = useCachedState<string>(DEFAULT_SOCIAL_SET_STORAGE_KEY);
   const [lastSocialSetId, setLastSocialSetId] = useCachedState<string>(LAST_SOCIAL_SET_STORAGE_KEY);
   const [platformSelectionsBySocialSet, setPlatformSelectionsBySocialSet] = useCachedState<Record<string, string[]>>(
@@ -73,6 +77,8 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
   );
   const previousSocialSetId = useRef<string | undefined>(undefined);
   const hasInitializedPlatforms = useRef(false);
+  const busy = useRef(false);
+  const [isBusy, setIsBusy] = useState(false);
 
   const { data: socialSets, isLoading: isLoadingSocialSets } = usePromise(listSocialSets, []);
 
@@ -83,6 +89,7 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
       socialSetId: props.socialSetId ?? (props.draftValues?.socialSetId as string) ?? "",
       platforms: (props.draftValues?.platforms as string[]) ?? [],
       content: (props.draftValues?.content as string) ?? "",
+      images: (props.draftValues?.images as string[]) ?? [],
       draftTitle: (props.draftValues?.draftTitle as string) ?? "",
       scratchpadText: (props.draftValues?.scratchpadText as string) ?? "",
       tags: (props.draftValues?.tags as string[]) ?? [],
@@ -92,29 +99,21 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
     },
     validation: {
       socialSetId: FormValidation.Required,
-      content: FormValidation.Required,
+      content: (value): string | undefined =>
+        value?.trim() || values.images.length ? undefined : "Add text or an image",
+      images: (value) => (value && value.length > 4 ? "Attach up to 4 images" : undefined),
       platforms: (value) => (value && value.length > 0 ? undefined : "Select at least one platform"),
       scheduleDate: publishOption === "schedule" ? FormValidation.Required : undefined,
       scheduleTime: publishOption === "schedule" ? FormValidation.Required : undefined,
     },
     onSubmit: async (formValues) => {
-      const threadPosts = buildPostsFromContent(formValues.content, true);
-      if (threadPosts.length === 0) {
+      if (busy.current) return;
+      if (!formValues.content.trim() && formValues.images.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Add content to create a draft",
+          title: "Add text or an image to create a draft",
         });
         return;
-      }
-
-      const singlePost = buildPostsFromContent(formValues.content, false);
-
-      const platforms: DraftCreatePlatforms = {};
-      for (const platform of formValues.platforms as PlatformKey[]) {
-        platforms[platform] = {
-          enabled: true,
-          posts: THREAD_PLATFORMS.has(platform) ? threadPosts : singlePost,
-        };
       }
 
       let publishAt: string | undefined;
@@ -147,9 +146,30 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
         publishAt = publishOption;
       }
 
-      await showToast({ style: Toast.Style.Animated, title: "Creating draft" });
-
+      busy.current = true;
+      setIsBusy(true);
       try {
+        await validateImageFiles(formValues.images);
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Creating draft" });
+        const mediaIds: string[] = [];
+        for (const [index, image] of formValues.images.entries()) {
+          toast.title = `Uploading image ${index + 1} of ${formValues.images.length}`;
+          const media = await uploadMedia(Number(formValues.socialSetId), image);
+          if (media.status !== "ready") {
+            throw new Error(
+              "Image processing timed out. Your images are still attached; try creating the draft again.",
+            );
+          }
+          mediaIds.push(media.media_id);
+        }
+        toast.title = "Creating draft";
+        const platforms: DraftCreatePlatforms = {};
+        for (const platform of formValues.platforms as PlatformKey[]) {
+          platforms[platform] = {
+            enabled: true,
+            posts: buildPostsFromContent(formValues.content, THREAD_PLATFORMS.has(platform), mediaIds),
+          };
+        }
         const draft = await createDraft(Number(formValues.socialSetId), {
           platforms,
           draft_title: formValues.draftTitle || undefined,
@@ -161,7 +181,9 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
 
         reset({
           content: "",
+          images: [],
         });
+        await removeClipboardImages(formValues.images);
         focus("content");
 
         await showToast({
@@ -181,14 +203,37 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
           },
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to create draft",
-          message: getErrorMessage(error),
-        });
+        await showFailureToast(error, { title: "Failed to create draft" });
+      } finally {
+        busy.current = false;
+        setIsBusy(false);
       }
     },
   });
+
+  const attachClipboardImage = useClipboardImages(values.images, Boolean(props.preserveDrafts));
+
+  const handleAttachImage = async () => {
+    if (busy.current) return;
+    if (values.images.length >= 4) {
+      await showToast({ style: Toast.Style.Failure, title: "Attach up to 4 images" });
+      return;
+    }
+    busy.current = true;
+    setIsBusy(true);
+    try {
+      const image = await attachClipboardImage();
+      if (!image) return;
+      setValue("images", (current) => [...current, image]);
+      setValidationError("content", undefined);
+      await showToast({ style: Toast.Style.Success, title: "Image attached" });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not attach image" });
+    } finally {
+      busy.current = false;
+      setIsBusy(false);
+    }
+  };
 
   const handlePasteFromClipboard = async () => {
     const text = await Clipboard.readText();
@@ -313,11 +358,11 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
     }));
   }, [setPlatformSelectionsBySocialSet, values.platforms, values.socialSetId]);
 
-  const isLoading = isLoadingSocialSets || isLoadingSocialSetDetail || isLoadingTags;
+  const isLoading = isLoadingSocialSets || isLoadingSocialSetDetail || isLoadingTags || isBusy;
 
   return (
     <Form
-      enableDrafts
+      enableDrafts={props.preserveDrafts}
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -325,6 +370,15 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
             <Action.SubmitForm title="Create Draft" onSubmit={handleSubmit} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <Action
+              title="Attach Image from Clipboard"
+              icon={Icon.Image}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+              }}
+              onAction={handleAttachImage}
+            />
             <Action title="Paste from Clipboard" icon={Icon.Document} onAction={handlePasteFromClipboard} />
             <Action title="Clear Content" icon={Icon.Trash} onAction={handleClearContent} />
           </ActionPanel.Section>
@@ -373,6 +427,20 @@ export function CreateDraftForm(props: { socialSetId?: string; draftValues?: For
         {...itemProps.content}
       />
       <Form.Description text="Separate posts with --- to create a thread. On single-post platforms like LinkedIn, the separator is removed and content is merged." />
+
+      <Form.FilePicker
+        title="Images"
+        allowMultipleSelection
+        canChooseDirectories={false}
+        info="Use Attach Image from Clipboard, or choose up to 4 PNG, JPEG, WebP, or GIF files. Images attach to the first post on every selected platform."
+        {...itemProps.images}
+        onChange={(images) => {
+          if (busy.current) return;
+          void removeClipboardImages(values.images.filter((image) => !images.includes(image)));
+          itemProps.images.onChange?.(images);
+          if (images.length) setValidationError("content", undefined);
+        }}
+      />
 
       <Form.Separator />
 
@@ -423,5 +491,5 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
   if (!apiKey) {
     return <ApiKeyRequiredView />;
   }
-  return <CreateDraftForm draftValues={props.draftValues} />;
+  return <CreateDraftForm draftValues={props.draftValues} preserveDrafts />;
 }
