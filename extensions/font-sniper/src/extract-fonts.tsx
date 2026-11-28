@@ -386,14 +386,6 @@ export default function ExtractFonts() {
                     onAction={() => toggleSelection(index)}
                   />
                 )}
-                <ActionPanel.Section>
-                  <Action.Push
-                    title="Preview Font"
-                    icon={Icon.Eye}
-                    target={<FontPreview font={font} pageUrl={sourceUrl} />}
-                  />
-                  <FontActions font={font} />
-                </ActionPanel.Section>
                 <Action
                   title="Download Selected Fonts"
                   icon={Icon.Download}
@@ -430,6 +422,14 @@ export default function ExtractFonts() {
                   shortcut={Keyboard.Shortcut.Common.New}
                   onAction={goBack}
                 />
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Preview Font"
+                    icon={Icon.Eye}
+                    target={<FontPreview font={font} pageUrl={sourceUrl} />}
+                  />
+                  <FontActions font={font} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

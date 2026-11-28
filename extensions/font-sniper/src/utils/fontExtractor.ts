@@ -50,6 +50,13 @@ function extractInlineStyles(html: string): string[] {
   return styles;
 }
 
+function stripCssComments(css: string): string {
+  // Preserve escapes, quoted strings, and unquoted url() contents.
+  const tokens =
+    /\/\*[\s\S]*?(?:\*\/|$)|\\[\s\S]|"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|\burl\(\s*(?:\\[\s\S]|[^\\)"'])*\)/gi;
+  return css.replace(tokens, (token) => (token.startsWith("/*") ? " " : token));
+}
+
 function extractImportUrls(css: string, baseUrl: string): string[] {
   const urls: string[] = [];
   // Match @import url("...") or @import "..."
@@ -452,7 +459,7 @@ async function fetchCSSWithImports(
   visited.add(url);
 
   try {
-    const css = await fetchWithHeaders(url);
+    const css = stripCssComments(await fetchWithHeaders(url));
     const results: ExtractedCSS[] = [{ content: css, baseUrl: url }];
 
     // Recursively fetch @import stylesheets
@@ -484,7 +491,7 @@ export async function extractFonts(pageUrl: string): Promise<FontInfo[]> {
   // Extract inline styles
   const inlineStyles = extractInlineStyles(html);
   for (const style of inlineStyles) {
-    cssContents.push({ content: style, baseUrl: pageUrl });
+    cssContents.push({ content: stripCssComments(style), baseUrl: pageUrl });
   }
 
   // Extract and fetch external stylesheets
