@@ -179,14 +179,28 @@ export function CreateWorkItemForm({
   });
   // One Parent field: a picker of the sprint's backlog items once a sprint is set, else a work item ID.
   const pickParentFromSprint = sprintsAvailable && !!effectiveIteration;
-  const firstIteration = useRef(true);
+  // The sprint's backlog items, plus the selected parent when it isn't one of them (for example while they load,
+  // or when the form was opened under an item of another sprint). Same key for the same item, so the selection
+  // survives the list loading.
+  const selectedParent = parentId.trim();
+  const parentOptions = [
+    ...(selectedParent && !(stories ?? []).some((st) => String(st.id) === selectedParent)
+      ? [
+          {
+            id: selectedParent,
+            title: loadingStories ? `#${selectedParent}` : `#${selectedParent} (not in this sprint)`,
+          },
+        ]
+      : []),
+    ...(stories ?? []).map((st) => ({ id: String(st.id), title: `#${st.id} ${st.title}` })),
+  ];
+  // Only when the sprint really changes (not on mount, even if effects run twice): a parent chosen for another
+  // sprint, or typed as an ID, would be hidden by the picker, so start over. The parent the form was opened
+  // with is kept.
+  const lastIteration = useRef(effectiveIteration);
   useEffect(() => {
-    // Keep the parent the form was opened with; afterwards, a parent chosen for another sprint (or typed as
-    // an ID) would be hidden by the picker, so start over.
-    if (firstIteration.current) {
-      firstIteration.current = false;
-      return;
-    }
+    if (lastIteration.current === effectiveIteration) return;
+    lastIteration.current = effectiveIteration;
     setParentId("");
   }, [effectiveIteration]);
   const { data: estimateFields } = useCachedPromise(getEstimateFields, [project, safeType], {
@@ -386,15 +400,15 @@ export function CreateWorkItemForm({
           title="Parent"
           info="Backlog items of the selected sprint"
           value={parentId.trim()}
-          onChange={setParentId}
+          onChange={(v) => {
+            // While the list loads, the dropdown can report "" because its items are changing: keep the parent.
+            if (v === "" && loadingStories) return;
+            setParentId(v);
+          }}
         >
-          <Form.Dropdown.Item value="" title={loadingStories ? "Loading…" : "— (no parent)"} />
-          {/* A parent the form was opened with that isn't in this sprint stays visible and selected. */}
-          {parentId.trim() && !(stories ?? []).some((st) => String(st.id) === parentId.trim()) && (
-            <Form.Dropdown.Item value={parentId.trim()} title={`#${parentId.trim()} (not in this sprint)`} />
-          )}
-          {(stories ?? []).map((st) => (
-            <Form.Dropdown.Item key={st.id} value={String(st.id)} title={`#${st.id} ${st.title}`} />
+          <Form.Dropdown.Item key="none" value="" title="— (no parent)" />
+          {parentOptions.map((o) => (
+            <Form.Dropdown.Item key={`parent-${o.id}`} value={o.id} title={o.title} />
           ))}
         </Form.Dropdown>
       ) : (
