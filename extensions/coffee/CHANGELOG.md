@@ -1,5 +1,10 @@
 # Coffee Changelog
 
+## [Let the display sleep in sessions with a time limit] - {PR_MERGE_DATE}
+
+- On macOS, sessions with a time limit kept the display awake until they ended, even with **Prevent display sleep** off: Caffeinate For, Caffeinate Until, the menu bar's durations, schedules, and AI requests with a duration or end time. With that option off, Coffee now lets the display turn off after the delay set in System Settings > Lock Screen, and no longer turns on a display that's off when one of these sessions starts.
+- With **Prevent system sleep** also off, your Mac can now sleep during these sessions, except on AC power when **Prevent system sleep on AC power** is on. With every option off, they keep only the system awake, which is what `caffeinate` does by default.
+
 ## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).

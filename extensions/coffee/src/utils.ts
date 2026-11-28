@@ -109,12 +109,14 @@ export async function startCaffeinate(
   additionalArgs?: string,
   reason?: CaffeinationReason,
 ) {
-  parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
+  const timeout = parseCaffeinateTimeout(additionalArgs?.split(/\s+/).filter(Boolean) ?? []);
   if (process.platform === "win32") {
     const sessionId = await windowsStartCaffeinate(additionalArgs);
     await setWindowsCaffeinationReason(sessionId, reason);
   } else {
-    const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
+    // With -t, caffeinate holds -u for the whole session, and -u keeps the display awake.
+    const userActive = timeout !== null && !getPreferenceValues<Preferences>().preventDisplay ? [] : ["-u"];
+    const args = [...userActive, ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
     await startMacCaffeinate(args, reason);
   }
 
