@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   LaunchProps,
   List,
   Toast,
@@ -11,52 +12,32 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api"
-import { getCatalog, postCapture, captureIdentity, type CatalogResult, type TuckResult } from "./client"
-import {
-  MAX_CAPTURE_LENGTH,
-  insertToken,
-  pickerRows,
-  type Catalog,
-  type ListenerStatus,
-  type OpenToken,
-  type PickerRow,
-} from "./line"
+import { usePromise } from "@raycast/utils"
+import { getCatalog, postCapture, captureIdentity, type TuckResult } from "./client"
+import { MAX_CAPTURE_LENGTH, insertToken, pickerRows, type OpenToken, type PickerRow } from "./line"
 import { failureLabel, receiptLabel } from "./messages"
 import { parsePairLink, type Pair } from "./pair"
 
-type TuckArguments = {
-  text?: string
-}
-
-type Preferences = {
-  pairLink: string
-}
-
-export default function Command(props: LaunchProps<{ arguments: TuckArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Tuck }>) {
   const pair = parsePairLink(getPreferenceValues<Preferences>().pairLink)
   const port = pair?.port
   const bearer = pair?.token
   const [line, setLine] = useState(props.arguments.text ?? "")
-  const [catalog, setCatalog] = useState<Catalog | null>(null)
-  const [status, setStatus] = useState<ListenerStatus>("ready")
-  const [loading, setLoading] = useState(Boolean(pair))
   const [busy, setBusy] = useState(false)
   const identity = useRef<{ key: string; id: string } | null>(null)
   const token = useRef<OpenToken | null>(null)
-
-  useEffect(() => {
-    if (port == null || !bearer) return
-    const active: Pair = { port, token: bearer }
-    let cancelled = false
-    void getCatalog(active).then((result) => {
-      if (cancelled) return
-      applyCatalog(result, setCatalog, setStatus)
-      setLoading(false)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [port, bearer])
+  // Reload Names runs this again, so names come back after Tuck is opened or unlocked.
+  const {
+    data: names,
+    isLoading: loading,
+    revalidate,
+  } = usePromise(
+    async (listenerPort?: number, listenerToken?: string) =>
+      listenerPort != null && listenerToken ? getCatalog({ port: listenerPort, token: listenerToken }) : null,
+    [port, bearer],
+  )
+  const catalog = names?.ok ? names.catalog : null
+  const status = names && !names.ok ? names.reason : "ready"
 
   if (!pair) {
     return (
@@ -77,6 +58,9 @@ export default function Command(props: LaunchProps<{ arguments: TuckArguments }>
 
   const view = pickerRows(line, { catalog, status })
   token.current = view.token
+  // Until the first answer, a picker would list Create alone and Raycast would keep it selected
+  // once the real names arrive above it. Show the loading bar instead.
+  const rows = view.token && loading && !names ? [] : view.rows
 
   return (
     <List
@@ -88,7 +72,7 @@ export default function Command(props: LaunchProps<{ arguments: TuckArguments }>
       onSearchTextChange={setLine}
     >
       <List.Section title={sectionTitle(view.token)}>
-        {view.rows.map((row) => (
+        {rows.map((row) => (
           <List.Item
             key={row.id}
             icon={rowIcon(row, view.token)}
@@ -103,6 +87,7 @@ export default function Command(props: LaunchProps<{ arguments: TuckArguments }>
                   setLine(insertToken(line, open, slug))
                 }}
                 onTuck={() => void tuck(pair, line, identity, setBusy)}
+                onReload={revalidate}
               />
             }
           />
@@ -116,11 +101,21 @@ function RowActions({
   row,
   onInsert,
   onTuck,
+  onReload,
 }: {
   row: PickerRow
   onInsert: (slug: string) => void
   onTuck: () => void
+  onReload: () => void
 }) {
+  const reload = (
+    <Action
+      title="Reload Names"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={onReload}
+    />
+  )
   if (row.role === "insert" && row.slug) {
     const title = row.title.startsWith("Create ") ? row.title : `Insert ${row.subtitle}`
     return (
@@ -128,19 +123,14 @@ function RowActions({
         <Action title={title} icon={Icon.Plus} onAction={() => onInsert(row.slug!)} />
         {/* Second action, so Raycast gives it ⌘↩. */}
         <Action title="Tuck This" icon={Icon.Check} onAction={onTuck} />
-      </ActionPanel>
-    )
-  }
-  if (row.role === "hint") {
-    return (
-      <ActionPanel>
-        <Action title="Tuck This" icon={Icon.Check} onAction={onTuck} />
+        {reload}
       </ActionPanel>
     )
   }
   return (
     <ActionPanel>
       <Action title="Tuck This" icon={Icon.Check} onAction={onTuck} />
+      {reload}
     </ActionPanel>
   )
 }
@@ -161,20 +151,6 @@ function rowIcon(row: PickerRow, token: OpenToken | null) {
   return Icon.Tag
 }
 
-function applyCatalog(
-  result: CatalogResult,
-  setCatalog: (catalog: Catalog | null) => void,
-  setStatus: (status: ListenerStatus) => void,
-) {
-  if (result.ok) {
-    setCatalog(result.catalog)
-    setStatus("ready")
-    return
-  }
-  setCatalog(null)
-  setStatus(result.reason)
-}
-
 async function tuck(
   pair: Pair,
   line: string,
@@ -190,12 +166,14 @@ async function tuck(
     await showToast({ style: Toast.Style.Failure, title: "That thought is too long" })
     return
   }
-  identity.current = captureIdentity(text, identity.current, () => `raycast:${crypto.randomUUID()}`)
+  // Held locally: a second submit during the awaits below replaces identity.current.
+  const capture = captureIdentity(text, identity.current, () => `raycast:${crypto.randomUUID()}`)
+  identity.current = capture
   setBusy(true)
   const toast = await showToast({ style: Toast.Style.Animated, title: "Tucking…" })
   let result: TuckResult
   try {
-    result = await postCapture(pair, { id: identity.current.id, text })
+    result = await postCapture(pair, { id: capture.id, text })
   } finally {
     setBusy(false)
   }

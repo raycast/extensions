@@ -4,9 +4,11 @@ Tuck a thought from Raycast into [Tuck](https://tuckthis.app), the end-to-end en
 
 ## Set up
 
-1. Install and sign in to the Tuck Mac app.
-2. In the Tuck menu bar, choose **Copy pair link**.
-3. Open the **Tuck** command and paste the `tuck://pair?port=47221&token=…` link into its **Pair link** preference.
+1. Download the Tuck Mac app from [tuckthis.app/site/apps](https://tuckthis.app/site/apps), open it, and sign in. A Tuck account is needed.
+2. Click Tuck in the menu bar and choose **Copy pair link**.
+3. Open the **Tuck** command in Raycast. It asks for the **Pair Link** the first time. Paste the `tuck://pair?port=47221&token=…` link there.
+
+To change the link later, open Raycast Settings, then Extensions, then Tuck.
 
 The pair link is stored as a password preference. It is not your vault passphrase, and it only works on this Mac.
 
@@ -23,7 +25,3 @@ After you tuck, the command says what happened:
 - **Sent to your inbox**: Tuck posted the line to your inbox.
 
 While the vault is locked, names are not listed. You can still tuck a line, and names come back after you unlock.
-
-## Develop
-
-In this folder: `npm install`, then `npm run dev`. `npm run lint` runs the store checks.

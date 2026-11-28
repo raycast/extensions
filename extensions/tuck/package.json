@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tuck",
   "title": "Tuck",
-  "description": "Tuck a thought into the Mac menu bar app",
+  "description": "Tuck a thought into your end-to-end encrypted second brain through the Tuck Mac app, with tags, people, and brains picked as you type.",
   "icon": "icon.png",
   "author": "coderhoades",
   "platforms": [
@@ -10,6 +10,12 @@
   ],
   "categories": [
     "Productivity"
+  ],
+  "keywords": [
+    "notes",
+    "capture",
+    "second brain",
+    "todo"
   ],
   "license": "MIT",
   "engines": {
@@ -34,7 +40,7 @@
   "preferences": [
     {
       "name": "pairLink",
-      "title": "Pair link",
+      "title": "Pair Link",
       "description": "Paste the tuck://pair link from the Tuck menu bar (Copy pair link)",
       "type": "password",
       "required": true,
@@ -42,14 +48,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.13.1"
+    "@raycast/api": "^2.14.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@types/react": "^19.0.10",
-    "typescript": "^5.8.2",
     "@raycast/eslint-config": "^2.0.4",
+    "@types/react": "^19.0.10",
     "eslint": "^10.15.0",
-    "prettier": "^3.10.1"
+    "prettier": "^3.10.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "dev": "ray develop",

@@ -162,7 +162,8 @@ export function pickerRows(
   }))
 
   const createSlug = token.kind === "@" ? slugify(token.query) : slugPathFromQuery(token.query)
-  if (token.query.trim() && createSlug && rows.length === 0) {
+  // Offered below the matches whenever the typed name itself is not there yet.
+  if (token.query.trim() && createSlug && !matches.some((match) => match.slug === createSlug)) {
     rows.push({
       id: `create${token.kind}${createSlug}`,
       role: "insert",
