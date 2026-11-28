@@ -1,9 +1,9 @@
 import { Color, Icon, MenuBarExtra, open, openExtensionPreferences } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { allTabs, link } from "./nextterm";
 
 export default function Command() {
-  const { data, isLoading, error } = usePromise(async () =>
+  const { data, isLoading, error } = useCachedPromise(async () =>
     (await allTabs()).filter((tab) => tab.state === "attention"),
   );
   const waiting = data ?? [];

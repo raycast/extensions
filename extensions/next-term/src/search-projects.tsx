@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, LaunchProps, List, popToRoot, showHUD } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { agents, call, FailedView, link, name, projects, Projects, shown } from "./nextterm";
 
@@ -43,9 +43,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                   <Action
                     key={agent.command}
                     title={agent.title}
-                    onAction={() =>
-                      call("new_tab", { directory: project.path, command: agent.command, title: agent.title })
-                    }
+                    onAction={async () => {
+                      try {
+                        const tab = await call<{ id: string }>("new_tab", {
+                          directory: project.path,
+                          command: agent.command,
+                          title: agent.title,
+                        });
+                        await link("tab", { id: tab.id });
+                        await showHUD(`${agent.title} started in ${name(project.path)}`);
+                        await popToRoot();
+                      } catch (error) {
+                        await showFailureToast(error, { title: "Could not start the agent" });
+                      }
+                    }}
                   />
                 ))}
               </ActionPanel.Submenu>

@@ -1,6 +1,6 @@
 import { getPreferenceValues, open, showHUD } from "@raycast/api";
 export { FailedView } from "./failed-view";
-import { execFile } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 
@@ -29,13 +29,44 @@ export interface Projects {
 
 const appPaths = ["/Applications/Next Term.app", `${homedir()}/Applications/Next Term.app`];
 
+/** The oldest Next Term with `nxtrm call` and the `nextterm://` links. */
+export const minimumVersion = "0.11.80";
+
+/** The version of the Next Term.app that holds this nxtrm, or undefined for a tool outside an app. */
+function appVersion(tool: string): string | undefined {
+  const app = tool.match(/^(.*\.app)\/Contents\/Resources\/bin\/nxtrm$/)?.[1];
+  if (!app) return undefined;
+  try {
+    const plist = `${app}/Contents/Info.plist`;
+    const args = ["-extract", "CFBundleShortVersionString", "raw", plist];
+    return execFileSync("/usr/bin/plutil", args, { encoding: "utf8", timeout: 5_000 }).trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Refuses a Next Term older than minimumVersion, with a message that says to update it. */
+function checkVersion(tool: string): void {
+  const version = appVersion(tool);
+  if (version && version.localeCompare(minimumVersion, undefined, { numeric: true }) < 0) {
+    throw new Error(`Next Term ${minimumVersion} or later is required (this is ${version}). Please update Next Term.`);
+  }
+}
+
 /** Next Term's command line tool: the preference, else the one inside Next Term.app. */
 export function nxtrmPath(): string {
   const chosen = getPreferenceValues<Preferences>().nxtrm?.trim();
-  if (chosen) return chosen.replace(/^~(?=\/)/, homedir());
+  if (chosen) {
+    const tool = chosen.replace(/^~(?=\/)/, homedir());
+    checkVersion(tool);
+    return tool;
+  }
   for (const app of appPaths) {
     const tool = `${app}/Contents/Resources/bin/nxtrm`;
-    if (existsSync(tool)) return tool;
+    if (existsSync(tool)) {
+      checkVersion(tool);
+      return tool;
+    }
   }
   throw new Error("Next Term isn't in Applications. Set its nxtrm path in this extension's preferences.");
 }
