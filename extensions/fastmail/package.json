@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastmail",
+  "title": "Fastmail",
+  "description": "Search Fastmail email, manage messages, and copy login codes from a hotkey or the menu bar with your Fastmail account.",
+  "icon": "command-icon.png",
+  "author": "marckohlbrugge",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Email",
+      "subtitle": "Fastmail",
+      "description": "Show your latest inbox emails, or search across all mail.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-latest-code",
+      "title": "Copy Latest Login Code",
+      "subtitle": "Fastmail",
+      "description": "Copy the code from the newest login email of the last 15 minutes. Prefers the site open in your browser. Assign it a hotkey.",
+      "mode": "no-view"
+    },
+    {
+      "name": "login-codes",
+      "title": "Login Codes",
+      "subtitle": "Fastmail",
+      "description": "Show fresh login codes in the menu bar. Click one to copy it.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useAI",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Raycast AI",
+      "label": "Use Raycast AI to find login codes",
+      "description": "Off by default. When on, the subject, sender and text of recent emails that look like login or verification emails are sent to Raycast AI to find the code or link. These emails contain live login codes. When off, codes are found on your Mac with pattern matching only. Requires Raycast Pro."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^2.3.3",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
