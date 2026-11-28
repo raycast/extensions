@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tuck",
+  "title": "Tuck",
+  "description": "Tuck a thought into your encrypted second brain with tags, people, and brains picked as you type, using the Tuck Mac app and a Tuck account.",
+  "icon": "icon.png",
+  "author": "coderhoades",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "notes",
+    "capture",
+    "second brain",
+    "todo"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "commands": [
+    {
+      "name": "tuck",
+      "title": "Tuck",
+      "description": "Tuck a thought with #tags, @people, and /brains",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Thought",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "pairLink",
+      "title": "Pair Link",
+      "description": "Paste the tuck://pair link from the Tuck menu bar (Copy pair link)",
+      "type": "password",
+      "required": true,
+      "placeholder": "tuck://pair?port=47221&token=…"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.14.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
