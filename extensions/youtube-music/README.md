@@ -22,7 +22,11 @@ raycast://extensions/danieldbird/youtube-music/play-song?launchContext=%7B%22sou
 
 ## Required Setup
 
-The extension controls your browser via AppleScript by running JavaScript in the YouTube Music tab. You must enable **Allow JavaScript from Apple Events** in the browser you select in the extension preferences; otherwise commands will fail (often with "Unknown Error").
+Except for Ardia, the extension controls your browser via AppleScript by running JavaScript in the YouTube Music tab. You must enable **Allow JavaScript from Apple Events** in the browser you select in the extension preferences; otherwise commands will fail (often with "Unknown Error").
+
+### Ardia
+
+Install **Ardia → Settings → Plugins → Command Line**, select Ardia in the extension preferences, and open `https://music.youtube.com/`. Commands use `~/.local/bin/ardia` to control an existing tab; **Allow JavaScript from Apple Events** is not needed. Player shortcuts respect the **URL Preference**; Now Playing and library/queue actions require a YouTube Music tab. The CLI grants local programs browser-wide control; it is not limited to YouTube Music.
 
 ### Safari
 

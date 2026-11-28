@@ -15,7 +15,7 @@ import {
 import { getProgressIcon } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchQueueArtwork } from "./search";
-import { openInSelectedBrowser, runJSInYouTubeMusicTab, type TabError } from "./utils";
+import { ardiaErrors, openInSelectedBrowser, runJSInYouTubeMusicTab, type TabError } from "./utils";
 
 function runMusic(code: string, options?: { silent?: boolean; onError?: (reason: TabError) => void }) {
   return runJSInYouTubeMusicTab(code, { ...options, musicOnly: true });
@@ -518,6 +518,9 @@ function unavailableCopy(
   browserName: string
 ): { title: string; description: string } {
   switch (reason) {
+    case "ardia-install":
+    case "ardia-cli":
+      return ardiaErrors[reason];
     case "js-events-disabled":
       return {
         title: "Enable JavaScript from Apple Events",

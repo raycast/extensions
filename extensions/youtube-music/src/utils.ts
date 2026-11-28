@@ -1,6 +1,8 @@
 import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
+import { runInArdia } from "./ardia";
+
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
 type UrlPreference = "music" | "youtube" | "both";
 
@@ -15,7 +17,17 @@ export type TabError =
   | "js-error"
   | "automation"
   | "browser-unavailable"
-  | "applescript-error";
+  | "applescript-error"
+  | "ardia-cli"
+  | "ardia-install";
+
+export const ardiaErrors = {
+  "ardia-install": { title: "Ardia CLI Not Found", description: "Install Command Line in Ardia → Settings → Plugins." },
+  "ardia-cli": {
+    title: "Ardia CLI Request Failed",
+    description: "Make sure Ardia is running and Command Line can control it.",
+  },
+};
 
 /**
  * YouTube Music pauses after a long idle period and asks whether you are still
@@ -175,6 +187,11 @@ function handleAppleScriptError(error: unknown, browserName: string): void {
   }
 }
 
+function withKeepPlaying(code: string, enabled: boolean): string {
+  // Update the flag even when off: a previously installed watcher outlives its command.
+  return `window.__ytmKeepPlayingWanted = ${enabled};\n${enabled ? keepPlaying : ""}\n${code}`;
+}
+
 /**
  * Executes JavaScript inside a matching YouTube or YouTube Music tab in the selected browser.
  */
@@ -200,11 +217,29 @@ export async function runJSInYouTubeMusicTab(
   // Commands that read the music player must not fall through to a regular
   // YouTube tab when the user prefers "Both" or "YouTube".
   const condition = musicOnly ? 'URL contains "music.youtube.com"' : getUrlCondition(urlPreference);
-  // The flag is sent on every command, so switching the preference off stops a
-  // watcher that is already running in the page. The watcher itself is only
-  // installed when the user has opted in.
-  const watcherFlag = `window.__ytmKeepPlayingWanted = ${keepPlayingWatcher ? "true" : "false"};`;
-  const script = keepPlayingWatcher ? `${watcherFlag}\n${keepPlaying}\n${code}` : `${watcherFlag}\n${code}`;
+  const script = withKeepPlaying(code, !!keepPlayingWatcher);
+
+  if (browser.bundleId === "com.ardia.browser") {
+    try {
+      const value = await runInArdia(script, musicOnly ? "music" : urlPreference);
+      if (value === undefined) {
+        onError?.("no-tab");
+        if (!silent)
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "No matching tab in Ardia",
+            message: "Open a tab matching the extension’s URL preference.",
+          });
+      }
+      return value;
+    } catch (error) {
+      const reason = (error as NodeJS.ErrnoException).code === "ENOENT" ? "ardia-install" : "ardia-cli";
+      onError?.(reason);
+      const { title, description } = ardiaErrors[reason];
+      if (!silent) await showToast({ style: Toast.Style.Failure, title, message: description });
+      return undefined;
+    }
+  }
 
   let result: string;
   try {
@@ -306,6 +341,16 @@ export async function openInSelectedBrowser(url: string): Promise<boolean> {
       style: Toast.Style.Failure,
     });
     return false;
+  }
+
+  if (browser.bundleId === "com.ardia.browser") {
+    try {
+      await open(url, browser);
+      return true;
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Could Not Open URL in Ardia" });
+      return false;
+    }
   }
 
   try {
