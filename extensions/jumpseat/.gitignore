@@ -1,0 +1,25 @@
+node_modules/
+dist/
+coverage/
+.cache/
+.eslintcache
+*.tsbuildinfo
+
+.DS_Store
+*.log
+
+.env
+.env.*
+!.env.example
+.npmrc
+
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Agent guidance stays in this repository: `ray publish` stages the extension
+# with this file, and the Raycast Store forbids agent tooling in extensions.
+AGENTS.md

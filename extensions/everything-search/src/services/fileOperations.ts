@@ -4,7 +4,7 @@ import { dirname, join } from "path";
 import { isExecutableFile } from "../utils/file";
 import { FileInfo, Preferences } from "../types";
 import { promisify } from "util";
-import { exec, execFile } from "child_process";
+import { exec, execFile, spawn } from "child_process";
 import { searchFilesWithCLI } from "./everything-cli";
 import { searchFilesWithSDK } from "./everything-sdk";
 
@@ -82,7 +82,17 @@ export async function showInExplorer(path: string, preferences: Preferences) {
       });
     }
   } else {
-    await open(targetPath);
+    // Explorer stops reading the path at the first comma unless it is quoted, and it parses
+    // its own command line, so the quotes have to reach it unescaped.
+    const explorer = spawn("explorer.exe", [`/select,"${path}"`], { windowsVerbatimArguments: true });
+    explorer.on("error", async (error) => {
+      console.log(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error Opening in Explorer",
+        message: error.message,
+      });
+    });
   }
 }
 

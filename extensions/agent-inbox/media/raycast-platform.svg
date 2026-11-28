@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="166" height="28" viewBox="0 0 166 28" role="img" aria-label="Platform: Raycast">
+  <title>Platform: Raycast</title>
+  <rect x="0.5" y="0.5" width="165" height="27" rx="5.5" fill="#24292f" stroke="#444c56"/>
+  <path d="M74 1v26" stroke="#444c56"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">
+    <text x="11" y="18" font-size="10" font-weight="600" letter-spacing=".5" fill="#c9d1d9">PLATFORM</text>
+    <text x="108" y="18.5" font-size="12" font-weight="600" fill="#ffffff">Raycast</text>
+  </g>
+  <g transform="translate(85 7) scale(.583333)" fill="#ff6363">
+    <path d="M6.004 15.492v2.504L0 11.992l1.258-1.249Zm2.504 2.504H6.004L12.008 24l1.253-1.253zm14.24-4.747L24 11.997 12.003 0 10.75 1.251 15.491 6h-2.865L9.317 2.692 8.065 3.944l2.06 2.06H8.691v9.31H18v-1.432l2.06 2.06 1.252-1.252-3.312-3.32V8.506ZM6.63 5.372 5.38 6.625l1.342 1.343 1.251-1.253Zm10.655 10.655-1.247 1.251 1.342 1.343 1.253-1.251zM3.944 8.059 2.692 9.31l3.312 3.314v-2.506zm9.936 9.937h-2.504l3.314 3.312 1.25-1.252z"/>
+  </g>
+</svg>

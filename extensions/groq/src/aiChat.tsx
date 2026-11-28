@@ -12,12 +12,12 @@ import {
   LocalStorage,
   Alert,
 } from "@raycast/api";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
 import { ChatData, Chats } from "./hook/AIChat.types";
 import { currentDate } from "./hook/utils";
 import { ChatCompletionMessageParam } from "openai/resources";
-import { Stream } from "openai/streaming";
+import { consumeCompletion } from "./hook/stream-completion";
 
 const model_override = getPreferenceValues<{ model_chat: string }>().model_chat;
 const APIprovider = "Groq";
@@ -28,13 +28,45 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(true);
   const model = useMemo(() => (model_override === "global" ? global_model : model_override), [model_override]);
 
+  const activeRequest = useRef<AbortController | undefined>(undefined);
+
   const updateChatData = useCallback((callback: (data: ChatData) => void) => {
     setChatData((oldData) => {
       if (!oldData) return oldData;
-      callback(oldData);
-      return { ...oldData };
+      const newData = structuredClone(oldData);
+      callback(newData);
+      return newData;
     });
   }, []);
+
+  const loadAnswer = async (
+    chatName: string,
+    messageId: string,
+    messages: ChatCompletionMessageParam[],
+    signal: AbortSignal,
+  ) => {
+    const response = await openai.chat.completions.create({ model, messages, stream: enable_streaming }, { signal });
+    await consumeCompletion(response, {
+      signal,
+      onUpdate: (answer) => {
+        updateChatData((data) => {
+          const message = data.chats
+            .find((chat) => chat.name === chatName)
+            ?.messages.find((m) => m.creationDate === messageId);
+          if (message) message.answer = answer;
+        });
+      },
+    });
+  };
+
+  const finishMessage = (chatName: string, messageId: string) => {
+    updateChatData((data) => {
+      const message = data.chats
+        .find((chat) => chat.name === chatName)
+        ?.messages.find((m) => m.creationDate === messageId);
+      if (message) message.finished = true;
+    });
+  };
 
   const CreateChat = () => {
     const { pop } = useNavigation();
@@ -84,14 +116,19 @@ export default function Chat() {
 
     if (
       !chatData ||
+      activeRequest.current ||
       (getChat(chatData.currentChat).messages.length !== 0 && !getChat(chatData.currentChat).messages[0].finished)
     ) {
       showToast({ style: Toast.Style.Failure, title: "Please Wait", message: "Only one message at a time." });
       return;
     }
 
+    const controller = new AbortController();
+    activeRequest.current = controller;
+    const chatName = chatData.currentChat;
+    const messageId = new Date().toISOString();
     setSearchText("");
-    showToast({ style: Toast.Style.Animated, title: "Response Loading" });
+    let toast: Toast | undefined;
 
     updateChatData((data) => {
       const currentChat = getChat(chatData.currentChat, data.chats);
@@ -99,7 +136,7 @@ export default function Chat() {
       currentChat.messages.unshift({
         prompt: query,
         answer: "",
-        creationDate: new Date().toISOString(),
+        creationDate: messageId,
         finished: false,
         modelName: model,
       });
@@ -108,6 +145,8 @@ export default function Chat() {
 
     try {
       setIsLoading(true);
+      toast = await showToast({ style: Toast.Style.Animated, title: "Response Loading" });
+      if (controller.signal.aborted) return;
       const currentChat = getChat(chatData.currentChat);
       const messages = currentChat.messages.slice(0, 12).flatMap((x) => [
         // slice() to send the last 12 messages
@@ -120,48 +159,24 @@ export default function Chat() {
       });
       messages.reverse();
 
-      const response = await openai.chat.completions.create({
-        model: model,
-        messages: [...messages, { role: "user", content: query }],
-        stream: enable_streaming,
-      });
-
-      let answer = "";
-      if (response instanceof Stream) {
-        for await (const message of response) {
-          answer += message.choices[0].delta.content || "";
-          updateChatData((data) => {
-            getChat(chatData.currentChat, data.chats).messages[0].answer = answer;
-            return data;
-          });
-        }
-      } else {
-        answer = response.choices[0]?.message?.content ?? "";
-        updateChatData((data) => {
-          getChat(chatData.currentChat, data.chats).messages[0].answer = answer;
-          return data;
-        });
-      }
-
-      updateChatData((data) => {
-        getChat(chatData.currentChat, data.chats).messages[0].finished = true;
-        return data;
-      });
-
+      await loadAnswer(chatName, messageId, [...messages, { role: "user", content: query }], controller.signal);
+      if (controller.signal.aborted) return;
+      finishMessage(chatName, messageId);
       showToast({ style: Toast.Style.Success, title: "Response Loaded" });
-      setIsLoading(false);
     } catch (error) {
-      console.error(`Error processing message with ${APIprovider}:`, error);
-      updateChatData((data) => {
-        getChat(chatData.currentChat, data.chats).messages.shift();
-        return data;
-      });
+      if (controller.signal.aborted) return;
+      finishMessage(chatName, messageId);
       showToast({
         style: Toast.Style.Failure,
         title: `${APIprovider} cannot process this message`,
-        message: error as string,
+        message: error instanceof Error ? error.message : String(error),
       });
-      setIsLoading(false);
+    } finally {
+      if (activeRequest.current === controller) {
+        activeRequest.current = undefined;
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+      if (controller.signal.aborted) await toast?.hide();
     }
   };
 
@@ -282,69 +297,56 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    (async () => {
-      const storedChatData = await LocalStorage.getItem("chatData");
-      if (storedChatData) {
-        const newData: ChatData = JSON.parse(storedChatData as string);
-
-        if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
-          setIsLoading(true);
+    const controller = new AbortController();
+    activeRequest.current = controller;
+    let pendingMessage: { chatName: string; messageId: string } | undefined;
+    void (async () => {
+      try {
+        const storedChatData = await LocalStorage.getItem("chatData");
+        if (controller.signal.aborted) return;
+        if (storedChatData) {
+          const newData: ChatData = JSON.parse(storedChatData as string);
+          setChatData(newData);
           const currentChat = getChat(newData.currentChat, newData.chats);
-          const messages = currentChat.messages.map((x) => ({
-            role: "user",
-            content: x.prompt,
-          })) as ChatCompletionMessageParam[];
-
-          const response = await openai.chat.completions.create({
-            model: model,
-            messages: [...messages, { role: "user", content: currentChat.messages[0].prompt }],
-            stream: enable_streaming,
-          });
-
-          let answer = "";
-          if (response instanceof Stream) {
-            for await (const message of response) {
-              answer += message.choices[0].delta.content || "";
-              updateChatData((newChatData) => {
-                getChat(newData.currentChat, newChatData.chats).messages[0].answer = answer;
-                return newChatData;
-              });
-            }
-          } else {
-            answer = response.choices[0]?.message?.content ?? "";
-            updateChatData((newChatData) => {
-              getChat(newData.currentChat, newChatData.chats).messages[0].answer = answer;
-              return newChatData;
-            });
+          const pending = currentChat.messages[0];
+          if (pending?.finished === false) {
+            pendingMessage = { chatName: newData.currentChat, messageId: pending.creationDate };
+            const messages = currentChat.messages.map((x) => ({
+              role: "user",
+              content: x.prompt,
+            })) as ChatCompletionMessageParam[];
+            await loadAnswer(
+              newData.currentChat,
+              pending.creationDate,
+              [...messages, { role: "user", content: pending.prompt }],
+              controller.signal,
+            );
+            if (controller.signal.aborted) return;
+            finishMessage(newData.currentChat, pending.creationDate);
+            showToast({ style: Toast.Style.Success, title: "Response Loaded" });
           }
-
-          updateChatData((newChatData) => {
-            getChat(newData.currentChat, newChatData.chats).messages[0].finished = true;
-            return newChatData;
+        } else {
+          setChatData({
+            currentChat: "New Chat",
+            chats: [{ name: "New Chat", creationDate: new Date(), modelName: model, messages: [] }],
           });
-
-          showToast({ style: Toast.Style.Success, title: "Response Loaded" });
-          setIsLoading(false);
         }
-
-        setChatData(newData);
-      } else {
-        const newChatData: ChatData = {
-          currentChat: "New Chat",
-          chats: [
-            {
-              name: "New Chat",
-              creationDate: new Date(),
-              modelName: model,
-              messages: [],
-            },
-          ],
-        };
-        await LocalStorage.setItem("chatData", JSON.stringify(newChatData));
-        setChatData(newChatData);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        if (pendingMessage) finishMessage(pendingMessage.chatName, pendingMessage.messageId);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Unable to load chat",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        if (activeRequest.current === controller) {
+          activeRequest.current = undefined;
+          if (!controller.signal.aborted) setIsLoading(false);
+        }
       }
     })();
-    setIsLoading(false);
+    return () => activeRequest.current?.abort();
   }, []);
 
   useEffect(() => {
@@ -379,10 +381,9 @@ export default function Chat() {
         <List.Dropdown
           tooltip="Your Chats"
           onChange={(newValue) => {
-            setChatData((oldData) => ({
-              ...oldData!,
-              currentChat: newValue,
-            }));
+            setChatData((oldData) =>
+              !oldData || oldData.currentChat === newValue ? oldData : { ...oldData, currentChat: newValue },
+            );
           }}
           value={chatData.currentChat}
         >

@@ -1,5 +1,11 @@
 export type Platform = "macos" | "windows";
 
 export function getPlatform(): Platform {
-  return process.platform === "darwin" ? "macos" : "windows";
+  if (process.platform === "darwin") {
+    return "macos";
+  }
+  if (process.platform === "win32") {
+    return "windows";
+  }
+  throw new Error(`Unsupported platform: ${process.platform}`);
 }

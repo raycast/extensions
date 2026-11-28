@@ -1,5 +1,14 @@
 # Capacities Changelog
 
+## [Fix README links] - 2026-11-27
+
+- Fix the task-management and FAQ links and the tip block, and link the Capacities docs guide.
+
+## [Return to root search after capturing] - 2026-09-03
+
+- Fixed the Create Task, Save Weblink and Save to Daily Note commands leaving the form on the navigation stack after a successful save, so reopening Raycast returned to the filled-in form instead of the root search.
+- Replaced the redundant `showHUD` + `closeMainWindow` pair with a single `showHUD(..., { clearRootSearch: true, popToRootType: PopToRootType.Immediate })` call.
+
 ## [Add Deadline to Create Task] - 2026-07-21
 
 - Add "Deadline" date picker to the Create Task command, mirroring Capacities' native two-date task creation (Date + Deadline).

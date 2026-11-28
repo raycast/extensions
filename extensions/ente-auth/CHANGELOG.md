@@ -1,5 +1,20 @@
 # Ente Auth Changelog
 
+## [Restore support for Ente CLI before 0.4] - 2026-11-25
+
+- Detect the installed Ente CLI version and use the original `account list` / `export` flow for CLI versions below 0.4, and the newer `auth export` flow for 0.4 and above
+- Fixed "Ente binary not found" on CLI versions below 0.4, which have no `--version` flag
+
+## [Support Ente CLI 0.4+] - 2026-11-17
+
+- Fixed the "Ente binary not found" error by checking the CLI with `--version` instead of the removed `version` command
+- Fixed import and export by reading the auth account from `ente account list --json` and exporting with `ente auth export --plaintext`
+  
+## [Respect TOTP account settings] - 2026-11-04
+
+- Generate codes using each imported account's algorithm, digit count, and period
+- Use the configured period for next-code generation and countdown progress
+
 ## [Fix import with null OTP parameters] - 2026-07-09
 
 - Fixed imports skipping Ente Auth export entries with `algorithm=null`, `digits=null`, or `period=null` by using standard TOTP defaults

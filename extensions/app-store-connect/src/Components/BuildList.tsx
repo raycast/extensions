@@ -1,5 +1,6 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { platformWithVersion, VersionWithPlatform } from "../Utils/statusHelpers";
 import { useAppStoreConnectApi } from "../Hooks/useAppStoreConnect";
 import {
   App,
@@ -8,15 +9,10 @@ import {
   preReleaseVersionSchemas,
 } from "../Model/schemas";
 import BuildItem from "./BuildItem";
+import { testFlightUrl } from "../Utils/appStoreConnect";
 
 interface BuildListProps {
   app: App;
-}
-
-interface VersionWithPlatform {
-  id: string;
-  platform: string;
-  version: string;
 }
 
 export default function BuildList({ app }: BuildListProps) {
@@ -65,32 +61,6 @@ export default function BuildList({ app }: BuildListProps) {
     }
   }, [selectedVersion]);
 
-  useEffect(() => {
-    if (pagination) {
-      if (pagination.hasMore) {
-        pagination.onLoadMore();
-      }
-    }
-  }, [pagination]);
-
-  const platformWithVersion = (appStoreVersion: VersionWithPlatform | undefined) => {
-    if (!appStoreVersion) {
-      return "";
-    }
-    switch (appStoreVersion.platform) {
-      case "IOS":
-        return "iOS " + appStoreVersion.version;
-      case "MAC_OS":
-        return "macOS " + appStoreVersion.version;
-      case "TV_OS":
-        return "tvOS " + appStoreVersion.version;
-      case "VISION_OS":
-        return "visionOS " + appStoreVersion.version;
-      default:
-        return appStoreVersion.platform + " " + appStoreVersion.version;
-    }
-  };
-
   return (
     <List
       pagination={pagination}
@@ -109,14 +79,33 @@ export default function BuildList({ app }: BuildListProps) {
           }}
         >
           {(versions ?? [])?.map((version: VersionWithPlatform) => (
-            <List.Dropdown.Item title={platformWithVersion(version)} value={version.id} />
+            <List.Dropdown.Item key={version.id} title={platformWithVersion(version)} value={version.id} />
           ))}
         </List.Dropdown>
       }
     >
-      <List.Section title={app.attributes.name}>
-        {builds?.map((item: BuildWithBetaDetailAndBetaGroups) => <BuildItem build={item} app={app} />)}
-      </List.Section>
+      {isLoadingApp || isLoadingPreReleaseVersions || (builds && builds.length > 0) ? (
+        <List.Section title={app.attributes.name}>
+          {builds?.map((item: BuildWithBetaDetailAndBetaGroups) => (
+            <BuildItem key={item.build.id} build={item} app={app} />
+          ))}
+        </List.Section>
+      ) : (
+        <List.EmptyView
+          icon={{ source: Icon.Hammer, tintColor: Color.SecondaryText }}
+          title={versions && versions.length > 0 ? "No Builds for This Version" : "No Builds Yet"}
+          description={
+            versions && versions.length > 0
+              ? `${app.attributes.name} has no builds for ${platformWithVersion(selectedVersion)}. Pick another version above, or upload a build from Xcode.`
+              : `${app.attributes.name} has no builds yet. Upload one from Xcode or Transporter and it will appear here once it finishes processing.`
+          }
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open in App Store Connect" icon={Icon.Globe} url={testFlightUrl(app.id)} />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }

@@ -1,5 +1,28 @@
 # Changelog
 
+## [Windows Support] - 2026-11-25
+
+- Declare Windows as a supported platform.
+- Open Webchat: start the local dashboard with `spawn` instead of a `nohup` shell command, which Windows can't run. On Windows it starts `%LOCALAPPDATA%\hermes\bin\hermes.exe`. If Hermes can't be started, the error says to run `hermes dashboard`.
+- Upgrade `@raycast/api` to 2.13.1. With 1.104, a development build on Windows fails with "Missing executable".
+- Give every action shortcut a Windows equivalent. Shortcuts that match `Keyboard.Shortcut.Common` use it, and the rest keep the same key on macOS with `ctrl` on Windows. macOS shortcuts are unchanged.
+- Trim surrounding whitespace from the API Token before sending it, so a pasted token with a trailing newline or space no longer returns HTTP 401.
+- API Server Status: add an Open Extension Preferences action, and say whether an HTTP 401 means no token is set or the token was rejected.
+- Process Selected Text: when Raycast can't read the selection, the No Text Selected screen shows Raycast's reason.
+
+## [AI Tools] - 2026-09-07
+
+- Add AI Tools for Raycast AI integration:
+  - `ask-hermes`: Send questions to Hermes and get answers
+  - `process-text`: Transform text (summarize, explain, fix grammar, etc.)
+  - `check-status`: Diagnose connection issues with the Hermes API server
+
+## [0.1.1] - 2026-08-21
+
+- Status uses `GET /v1/models` as the primary liveness check (OpenAI-compatible). `/health` is optional metadata.
+- Empty Model Name uses a model advertised by `/v1/models` instead of always sending `hermes-agent`.
+- API Token is no longer a required preference field so commands can load; the bearer is still sent when set.
+
 ## [Initial Release] - 2026-05-05
 
 - Initial release

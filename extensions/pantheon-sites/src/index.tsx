@@ -1,10 +1,21 @@
-import { ActionPanel, List, Action, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  Color,
+  getPreferenceValues,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState } from "react";
-import { terminusCmd } from "./utils";
+import { getTerminusCommand } from "./utils";
 import { Sites } from "./types";
 import { TerminusSetup } from "./components/TerminusSetup";
 import { SiteDetail } from "./components/SiteDetail";
+import { dashboardUrl } from "./dashboard";
 
 function getMemberships(site: Sites[string]): string[] {
   if (!site.memberships) return [];
@@ -14,26 +25,63 @@ function getMemberships(site: Sites[string]): string[] {
     .filter(Boolean);
 }
 
+// Lenient ("30s" → 30). Falls back to 120s on blank/invalid/non-positive input
+// (useExec treats 0 as "use its 10s default").
+function parseTimeout(value: string | undefined): number {
+  const seconds = parseFloat(value?.trim() || "120");
+  return Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 120_000;
+}
+
+// framework can be null (uninitialized site), a variant like "drupal10" / "wordpress_network",
+// or a framework without a bundled icon (e.g. "nodejs", "backdrop").
+function frameworkIcon(framework: string | null) {
+  if (framework === null) return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
+  if (framework.startsWith("wordpress")) return { source: "wordpress.svg", tintColor: Color.PrimaryText };
+  if (framework.startsWith("drupal")) return { source: "drupal.svg", tintColor: Color.PrimaryText };
+  return { source: Icon.Code, tintColor: Color.PrimaryText };
+}
+
+function siteListArgs(organization: string | undefined): string[] {
+  const org = organization?.trim();
+  return org ? ["site:list", `--org=${org}`, "--format=json"] : ["site:list", "--format=json"];
+}
+
 function getOrgLabel(orgName: string): string {
   return orgName.toLowerCase() === "team" ? "Personal" : orgName;
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const { file, env } = getTerminusCommand(preferences.terminusPath);
   const [selectedOrg, setSelectedOrg] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [refreshStamps, setRefreshStamps] = useState<Record<string, number>>({});
 
-  const { isLoading: checkLoading, error: checkError } = useExec(terminusCmd(preferences.terminusPath, "--version"), {
-    shell: true,
-  });
+  const { isLoading: checkLoading, error: checkError } = useExec(file, ["--version"], { env });
 
-  const { isLoading: sitesLoading, data } = useExec(terminusCmd(preferences.terminusPath, "site:list --format=json"), {
-    shell: true,
+  const {
+    isLoading: sitesLoading,
+    data,
+    error: sitesError,
+    revalidate,
+  } = useExec(file, siteListArgs(preferences.organization), {
+    env,
     execute: !checkLoading && !checkError,
+    timeout: parseTimeout(preferences.siteListTimeout),
+    keepPreviousData: true,
+    onWillExecute: () => {
+      showToast({ style: Toast.Style.Animated, title: "Fetching sites from Pantheon…" });
+    },
+    onData: () => {
+      showToast({ style: Toast.Style.Success, title: "Site list updated" });
+    },
+    // Keeps the built-in Retry action and error message; timeout guidance is in the empty view.
+    failureToastOptions: { title: "Failed to load sites" },
   });
 
   const isLoading = checkLoading || sitesLoading;
+  const loadFailed = !isLoading && !!sitesError;
+  const timedOut = loadFailed && /timed out|ETIMEDOUT|SIGTERM/i.test(sitesError.message);
 
   if (!checkLoading && checkError) {
     return <TerminusSetup />;
@@ -67,8 +115,6 @@ export default function Command() {
     })
     .sort((a, b) => sites[a].name.localeCompare(sites[b].name));
 
-  const dashboardUrl = "https://dashboard.pantheon.io";
-
   return (
     <List
       isShowingDetail
@@ -99,6 +145,33 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      <List.EmptyView
+        icon={loadFailed ? Icon.Warning : Icon.Globe}
+        title={
+          isLoading
+            ? "Loading sites… (large accounts can take a minute)"
+            : timedOut
+              ? "Terminus timed out"
+              : loadFailed
+                ? "Failed to load sites"
+                : "No sites found"
+        }
+        description={
+          timedOut
+            ? "Increase 'Site List Timeout' in the extension preferences, then refresh."
+            : loadFailed
+              ? sitesError.message
+              : undefined
+        }
+        actions={
+          <ActionPanel>
+            <Action icon={Icon.ArrowClockwise} title="Refresh Site List" onAction={revalidate} />
+            {timedOut && (
+              <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            )}
+          </ActionPanel>
+        }
+      />
       {sites && (
         <List.Section title="Sites" subtitle={`${filteredSiteKeys.length}`}>
           {filteredSiteKeys.map((key) => {
@@ -111,7 +184,7 @@ export default function Command() {
 
             return (
               <List.Item
-                icon={{ source: `${sites[key].framework.replace(/\d+$/, "")}.svg`, tintColor: Color.PrimaryText }}
+                icon={frameworkIcon(sites[key].framework)}
                 title={sites[key].name}
                 key={sites[key].id}
                 accessories={[
@@ -143,11 +216,8 @@ export default function Command() {
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Framework"
-                          icon={{
-                            source: `${sites[key].framework.replace(/\d+$/, "")}.svg`,
-                            tintColor: Color.PrimaryText,
-                          }}
-                          text={`${sites[key].framework}`}
+                          icon={frameworkIcon(sites[key].framework)}
+                          text={sites[key].framework ?? "Not initialized"}
                         />
                       </List.Item.Detail.Metadata>
                     }
@@ -162,13 +232,19 @@ export default function Command() {
                     <Action.OpenInBrowser
                       icon={Icon.AppWindowList}
                       title="Open Pantheon Dashboard"
-                      url={`${dashboardUrl}/sites/${sites[key].id}`}
+                      url={dashboardUrl(sites[key])}
                     />
                     <Action
                       icon={Icon.ArrowClockwise}
                       title="Refresh Screenshot"
                       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                       onAction={() => setRefreshStamps((prev) => ({ ...prev, [key]: Date.now() }))}
+                    />
+                    <Action
+                      icon={Icon.ArrowClockwise}
+                      title="Refresh Site List"
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={revalidate}
                     />
                   </ActionPanel>
                 }

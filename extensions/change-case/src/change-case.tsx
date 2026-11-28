@@ -54,6 +54,7 @@ export default function Command(props: LaunchProps) {
   const immediatelyConvertToCase = props.launchContext?.case;
 
   const [content, setContent] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [frontmostApp, setFrontmostApp] = useState<Application>();
   const [pinned, setPinned] = useState<CaseType[]>([]);
   const [recent, setRecent] = useState<CaseType[]>([]);
@@ -63,11 +64,12 @@ export default function Command(props: LaunchProps) {
         try {
           const content = await readContent(preferredSource);
           const modified = convert(content, immediatelyConvertToCase);
+          if (!modified) throw new NoTextError();
 
           if (preferredAction === "paste") {
-            Clipboard.paste(modified);
+            await Clipboard.paste(modified);
           } else {
-            Clipboard.copy(modified);
+            await Clipboard.copy(modified);
           }
 
           if (!hideHUD) {
@@ -94,7 +96,9 @@ export default function Command(props: LaunchProps) {
 
     setPinned(getPinnedCases());
     setRecent(getRecentCases());
-    getFrontmostApplication().then(setFrontmostApp);
+    getFrontmostApplication()
+      .then(setFrontmostApp)
+      .catch(() => setFrontmostApp(undefined));
   }, []);
 
   useEffect(() => {
@@ -110,16 +114,20 @@ export default function Command(props: LaunchProps) {
   }, []);
 
   const refreshContent = async () => {
+    setIsLoading(true);
     try {
       setContent(props.fallbackText || (await readContent(preferredSource)));
     } catch (error) {
       if (error instanceof NoTextError) {
+        setContent("");
+      } else {
         showToast({
           style: Toast.Style.Failure,
-          title: "Nothing to convert",
-          message: "Please ensure that text is either selected or copied",
+          title: "Failed to read text",
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -131,6 +139,10 @@ export default function Command(props: LaunchProps) {
 
   const handleAction = useCallback(
     (caseType: CaseType, modified: string, hudMessage: string, action: "copy" | "paste") => {
+      if (!modified) {
+        showToast({ style: Toast.Style.Failure, title: "Nothing to Convert" });
+        return;
+      }
       setRecent([caseType, ...recent.filter((c) => c !== caseType)].slice(0, MAX_RECENT_CASES + pinned.length));
       if (!hideHUD) showHUD(hudMessage);
       if (action === "paste") {
@@ -167,14 +179,20 @@ export default function Command(props: LaunchProps) {
     />
   );
 
-  const PasteToActiveApp = (props: { case: CaseType; modified: string }): JSX.Element | null =>
-    frontmostApp ? (
-      <Action
-        title={`Paste in ${frontmostApp.name}`}
-        icon={{ fileIcon: frontmostApp.path }}
-        onAction={() => handleAction(props.case, props.modified, `Pasted in ${frontmostApp.name}`, "paste")}
-      />
-    ) : null;
+  const PasteToActiveApp = (props: { case: CaseType; modified: string }): JSX.Element => (
+    <Action
+      title={frontmostApp ? `Paste in ${frontmostApp.name}` : "Paste to Active App"}
+      icon={frontmostApp ? { fileIcon: frontmostApp.path } : Icon.Clipboard}
+      onAction={() =>
+        handleAction(
+          props.case,
+          props.modified,
+          frontmostApp ? `Pasted in ${frontmostApp.name}` : "Pasted to Active App",
+          "paste",
+        )
+      }
+    />
+  );
 
   const CaseItem = (props: {
     case: CaseType;
@@ -277,8 +295,25 @@ export default function Command(props: LaunchProps) {
     );
   };
 
+  if (!isLoading && !content) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Text}
+          title="Nothing to Convert"
+          description="Copy the text you want to convert, then run this command again."
+          actions={
+            <ActionPanel>
+              <Action title="Refresh Content" icon={Icon.RotateAntiClockwise} onAction={refreshContent} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   return (
-    <List isShowingDetail={true} isLoading={!pinned || !recent} selectedItemId={recent[0]}>
+    <List isShowingDetail={true} isLoading={isLoading} selectedItemId={recent[0]}>
       <List.Section title="Pinned">
         {pinned
           ?.filter((key) => conversions[key])

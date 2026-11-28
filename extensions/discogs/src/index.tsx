@@ -33,14 +33,14 @@ const MissingPATScreen = () => {
 };
 
 const getApiUrl = (searchText: string, token: string) =>
-  `${DISCOGS_API_URL}/database/search?q=${searchText}&format=Vinyl&token=${token}`;
+  `${DISCOGS_API_URL}/database/search?${new URLSearchParams({ q: searchText, format: "Vinyl", token })}`;
 
 export default function Command() {
   const { token } = getPreferenceValues<RaycastExtPreferences>();
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useFetch<ApiResponse>(
     getApiUrl(searchText, token),
-    { keepPreviousData: true },
+    { keepPreviousData: true, execute: Boolean(token) },
   );
 
   if (!token) {

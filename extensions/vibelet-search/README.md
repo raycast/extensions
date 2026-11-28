@@ -47,8 +47,24 @@ The extension reads session files directly from disk:
 - Claude Desktop: `~/Library/Application Support/Claude/claude-code-sessions/<user>/<workspace>/local_*.json`
 - Codex CLI and Codex Desktop: `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`
 
-Startup indexing reads only the beginning of each session file to extract titles quickly. Full messages are loaded when a conversation is opened.
+### Caching & incremental indexing
 
-Full-content search uses ripgrep. The first content search downloads the ripgrep binary into Raycast's support directory if it is not already cached there.
+Session metadata and full-text content are cached under Raycast's support directory
+(`.../vibelet-search/cache/`) so opening the extension and searching stay fast even with
+thousands of sessions:
 
-Session content stays on your machine and is never uploaded.
+- **Metadata** is cached per source with `mtime + size` fingerprints. On open, only files
+  that are new or changed are re-read (just their head, streamed, stopping as soon as the
+  title is found) — everything else is served from cache. Cache corruption degrades
+  silently to a full rescan.
+- **Content search** runs ripgrep over a single merged index file (`messages.txt`), built
+  incrementally from per-session segments. A content hit resolves straight to the exact
+  message, so opening a matched session jumps to that message highlighted, instead of
+  scanning the whole file again.
+
+Title extraction reads only the beginning of each session file. Full messages are loaded
+streaming, when a conversation is opened. The first content search downloads the ripgrep
+binary into Raycast's support directory if it is not already cached there.
+
+All caches are local, rebuildable from scratch (delete the `cache/` folder), and never
+touch the original agent data. Session content stays on your machine and is never uploaded.

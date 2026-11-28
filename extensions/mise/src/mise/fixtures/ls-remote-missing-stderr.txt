@@ -1,0 +1,3 @@
+mise ERROR HTTP status client error (404 Not Found) for url (https://pypi.org/pypi/this-does-not-exist-zz/json)
+mise ERROR Version: 2026.9.5 macos-arm64 (2026-09-10)
+mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information

@@ -1,16 +1,35 @@
-import { Action, ActionPanel, Icon, LaunchType, List, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { AuthGate } from "./views/auth-required";
+import { Action, ActionPanel, Detail, Icon, Keyboard, LaunchType, List, useNavigation } from "@raycast/api";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { DestructiveAction } from "./actions";
-import { Command, CommandHook } from "./type";
+import { Command } from "./type";
 import packageJson from "../package.json";
 import { DEFAULT_COMMANDS, useCommand } from "./hooks/useCommand";
 import { CommandForm, iconsByContentSource } from "./views/command/from";
-import CommandView, { CommandLaunchProps } from "./views/command/command-view";
+import type { CommandLaunchProps } from "./views/command/command-view";
+
+const CommandView = lazy(() => import("./views/command/command-view"));
+
+function OpenCommand(props: CommandLaunchProps) {
+  return (
+    <Suspense fallback={<Detail isLoading markdown="" />}>
+      <CommandView {...props} />
+    </Suspense>
+  );
+}
 
 export default function EntryPoint(props: CommandLaunchProps) {
+  return (
+    <AuthGate>
+      <AuthenticatedEntryPoint {...props} />
+    </AuthGate>
+  );
+}
+
+function AuthenticatedEntryPoint(props: CommandLaunchProps) {
   const requestModelId = props.launchContext?.commandId;
   if (requestModelId) {
-    return <CommandView {...props} />;
+    return <OpenCommand {...props} />;
   }
   return <SearchAiCommand />;
 }
@@ -21,13 +40,14 @@ function SearchAiCommand() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null);
 
-  const sortedCommands = Object.values(commands.data).sort((a, b) => a.name.localeCompare(b.name));
-  const filteredCommands = sortedCommands
-    .filter((value, index, self) => index === self.findIndex((cmd) => cmd.id === value.id))
-    .filter((cmd) => {
-      if (searchText === "") return true;
-      return cmd.name.toLowerCase().includes(searchText.toLowerCase());
-    });
+  const sortedCommands = useMemo(
+    () => Object.values(commands.data).sort((a, b) => a.name.localeCompare(b.name)),
+    [commands.data],
+  );
+  const query = searchText.toLowerCase();
+  const filteredCommands = query
+    ? sortedCommands.filter((cmd) => cmd.name.toLowerCase().includes(query))
+    : sortedCommands;
 
   const getActionPanel = (cmd: Command) => (
     <ActionPanel>
@@ -36,7 +56,7 @@ function SearchAiCommand() {
         icon={Icon.AppWindowSidebarRight}
         onAction={() =>
           navigation.push(
-            <CommandView
+            <OpenCommand
               arguments={{}}
               draftValues={{}}
               launchType={LaunchType.UserInitiated}
@@ -49,19 +69,19 @@ function SearchAiCommand() {
       <ActionPanel.Section>
         <Action
           title={"Edit AI Command"}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          shortcut={Keyboard.Shortcut.Common.Edit}
           icon={Icon.Pencil}
           onAction={() => navigation.push(<CommandForm cmd={cmd} use={{ commands }} />)}
         />
         <Action
           title={"Create AI Command"}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           icon={Icon.NewDocument}
           onAction={() => navigation.push(<CommandForm use={{ commands }} />)}
         />
         <Action
           title={"Duplicate AI Command"}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={Keyboard.Shortcut.Common.Duplicate}
           icon={Icon.Duplicate}
           onAction={() => navigation.push(<CommandForm cmd={cmd} isNew={true} use={{ commands }} />)}
         />
@@ -83,7 +103,7 @@ function SearchAiCommand() {
               title: "Are you sure you want to remove this AI command from your collection?",
             }}
             icon={Icon.Trash}
-            onAction={() => commands.remove(cmd)}
+            onAction={() => commands.remove(cmd).catch(() => {})}
           />
         )}
         {commands.isDefault(cmd.id) && (
@@ -93,7 +113,7 @@ function SearchAiCommand() {
               title: "Are you sure you want to reset this action to its default settings?",
             }}
             icon={Icon.Repeat}
-            onAction={() => resetToDefaults(cmd, DEFAULT_COMMANDS, commands)}
+            onAction={() => commands.update(DEFAULT_COMMANDS[cmd.id]).catch(() => {})}
             shortcut={null}
           />
         )}
@@ -104,7 +124,7 @@ function SearchAiCommand() {
               "Are you sure? All your custom AI commands will be deleted, and default AI commands will be recreated with their default values.",
           }}
           icon={Icon.Trash}
-          onAction={commands.clear}
+          onAction={() => commands.clear().catch(() => {})}
           shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
         />
       </ActionPanel.Section>
@@ -135,7 +155,10 @@ function SearchAiCommand() {
               id={cmd.id}
               key={cmd.id}
               title={cmd.name}
-              accessories={[{ icon: iconsByContentSource[cmd.contentSource] }, { text: cmd.model }]}
+              accessories={[
+                { icon: iconsByContentSource[cmd.contentSource] },
+                { text: commands.resolveModel(cmd).option },
+              ]}
               actions={selectedCommandId === cmd.id ? getActionPanel(cmd) : undefined}
             />
           ))}
@@ -148,7 +171,10 @@ function SearchAiCommand() {
               id={cmd.id}
               key={cmd.id}
               title={cmd.name}
-              accessories={[{ icon: iconsByContentSource[cmd.contentSource] }, { text: cmd.model }]}
+              accessories={[
+                { icon: iconsByContentSource[cmd.contentSource] },
+                { text: commands.resolveModel(cmd).option },
+              ]}
               actions={selectedCommandId === cmd.id ? getActionPanel(cmd) : undefined}
             />
           ))}
@@ -173,11 +199,4 @@ function SearchAiCommand() {
       )}
     </List>
   );
-}
-
-function resetToDefaults(cmd: Command, defaultCommands: Record<string, Command>, commands: CommandHook) {
-  const defaultCommand = defaultCommands[cmd.id];
-  if (defaultCommand) {
-    commands.update(defaultCommand);
-  }
 }

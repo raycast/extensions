@@ -1,3 +1,5 @@
+import { granolaFetch } from "./granolaFetch";
+import { normalizeFolder } from "./normalizeFolder";
 import { showFailureToast } from "@raycast/utils";
 import { logGranolaError, toError } from "./errorUtils";
 import getAccessToken from "./getAccessToken";
@@ -18,9 +20,10 @@ interface UserInfo {
 const API_CONFIG = {
   API_URL: "https://api.granola.ai/v1",
   STREAM_API_URL: "https://stream.api.granola.ai/v1",
-  CLIENT_VERSION: "7.162.1",
+  CLIENT_VERSION: "7.543.0",
   getUserAgent(): string {
-    return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Granola/${this.CLIENT_VERSION} Chrome/146.0.7680.188 Electron/41.2.1 Safari/537.36`;
+    const platform = process.platform === "win32" ? "Windows NT 10.0; Win64; x64" : "Macintosh; Intel Mac OS X 10_15_7";
+    return `Granola/${this.CLIENT_VERSION} (${platform})`;
   },
   // Unique delimiter that's extremely unlikely to appear in content
   CHUNK_DELIMITER: "\x1F\x1E\x1D__GRANOLA_CHUNK__\x1D\x1E\x1F",
@@ -176,6 +179,7 @@ export interface CalendarEvent {
 }
 
 export interface CreateNoteProgress {
+  documentId?: string;
   step: "setup" | "processing" | "generating-title" | "streaming-summary" | "finalizing" | "complete";
   streamingContent?: string;
   title?: string;
@@ -276,7 +280,7 @@ async function postToGranolaApi<T>(
   signal?: AbortSignal,
 ): Promise<T> {
   const headers = await createHeaders();
-  const response = await fetch(`${API_CONFIG.API_URL}/${endpoint}`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/${endpoint}`, {
     method: "POST",
     headers,
     body: body === undefined ? null : JSON.stringify(body),
@@ -416,7 +420,7 @@ function cleanupContent(content: string, outputFormat: "display" | "html" = "dis
 async function createDocument(documentId: string, userInfo: UserInfo): Promise<void> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/create-document`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/create-document`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -438,7 +442,7 @@ async function createDocument(documentId: string, userInfo: UserInfo): Promise<v
 async function updateDocumentForTranscription(documentId: string): Promise<void> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/update-document`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/update-document`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -477,7 +481,7 @@ async function insertTranscriptChunks(transcript: string, documentId: string): P
   const headers = await createHeaders();
   const transcriptChunks = createTranscriptChunks(transcript, documentId);
 
-  const response = await fetch(`${API_CONFIG.API_URL}/insert-transcriptions`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/insert-transcriptions`, {
     method: "POST",
     headers,
     body: JSON.stringify({ chunks: transcriptChunks }),
@@ -494,7 +498,7 @@ async function insertTranscriptChunks(transcript: string, documentId: string): P
 async function generateTitle(transcript: string, documentId: string, userInfo: UserInfo): Promise<string> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/llm-proxy`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/llm-proxy`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -542,7 +546,7 @@ async function generateTitle(transcript: string, documentId: string, userInfo: U
 async function finalizeDocumentWithTitle(documentId: string, title: string): Promise<void> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/update-document`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/update-document`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -571,7 +575,7 @@ async function generateAISummaryWithStreaming(
 ): Promise<string> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.STREAM_API_URL}/llm-proxy-stream`, {
+  const response = await granolaFetch(`${API_CONFIG.STREAM_API_URL}/llm-proxy-stream`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -651,7 +655,7 @@ async function createSummaryPanel(documentId: string, panelId: string): Promise<
   const headers = await createHeaders();
   const createdAt = getISOTimestamp();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/create-document-panel`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/create-document-panel`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -677,7 +681,7 @@ async function updateSummaryPanel(documentId: string, panelId: string, summaryCo
   const linkHtml = `\n<hr>\n<p>Chat with meeting transcript: <a href="https://notes.granola.ai/d/${documentId}">https://notes.granola.ai/d/${documentId}</a></p>\n`;
   const fullContent = summaryContent + linkHtml;
 
-  const response = await fetch(`${API_CONFIG.API_URL}/update-document-panel`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/update-document-panel`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -711,7 +715,7 @@ async function updateLastViewedTimestamp(panelId: string): Promise<void> {
   const headers = await createHeaders();
   const lastViewedAt = getISOTimestamp();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/update-document-panel`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/update-document-panel`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -739,8 +743,8 @@ export async function createNoteFromTranscript(
   try {
     // Step 1: Create a new document
     if (signal?.aborted) throw new Error("Operation cancelled");
-    onProgress?.({ step: "setup" });
     const documentId = crypto.randomUUID();
+    onProgress?.({ step: "setup", documentId });
     await createDocument(documentId, userInfo);
 
     // Step 1b: Update document for transcription
@@ -918,7 +922,7 @@ export interface DocumentMetadataResponse {
 export async function saveToNotion(documentId: string, signal?: AbortSignal): Promise<NotionSaveResult> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/save-to-notion`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/save-to-notion`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -1032,7 +1036,7 @@ export async function getDocumentMetadata(documentId: string): Promise<DocumentM
     Pragma: "no-cache",
   });
 
-  const response = await fetch(`${API_CONFIG.API_URL}/get-document-metadata`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/get-document-metadata`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -1091,7 +1095,7 @@ export async function getDocumentNotesMarkdown(documentId: string): Promise<stri
 
   // Try get-documents-batch first (more efficient for single document)
   try {
-    const batchResponse = await fetch(`${API_CONFIG.API_URL}/get-documents-batch`, {
+    const batchResponse = await granolaFetch(`${API_CONFIG.API_URL}/get-documents-batch`, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -1164,7 +1168,7 @@ export async function getDocumentNotesMarkdownBatch(
     const batch = documentIds.slice(i, i + batchSize);
 
     try {
-      const batchResponse = await fetch(`${API_CONFIG.API_URL}/get-documents-batch`, {
+      const batchResponse = await granolaFetch(`${API_CONFIG.API_URL}/get-documents-batch`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -1213,7 +1217,7 @@ export async function getDocumentNotesMarkdownBatch(
 export async function getDocumentSet(): Promise<DocumentSetResponse> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/get-document-set`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/get-document-set`, {
     method: "POST",
     headers,
     body: JSON.stringify({}),
@@ -1234,7 +1238,7 @@ export async function getDocumentSet(): Promise<DocumentSetResponse> {
 export async function getDocumentPanels(documentId: string, signal?: AbortSignal): Promise<PanelsByDocId | null> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/get-document-panels`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/get-document-panels`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -1314,7 +1318,7 @@ export async function getDocumentPanelsBatch(
         return { documentId, panels };
       } catch (error) {
         // If a panel fetch fails, log but continue with other documents
-        console.warn(`Failed to fetch panels for document ${documentId}:`, error);
+        logGranolaError("getDocumentPanelsBatch", error);
         return { documentId, panels: null };
       }
     });
@@ -1348,7 +1352,7 @@ export async function getDocumentPanelsBatch(
 export async function getDocumentListsMetadata(includeDocumentIds = true): Promise<DocumentListsMetadataResponse> {
   const headers = await createHeaders();
 
-  const response = await fetch(`${API_CONFIG.API_URL}/get-document-lists-metadata`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/get-document-lists-metadata`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -1365,7 +1369,9 @@ export async function getDocumentListsMetadata(includeDocumentIds = true): Promi
 }
 
 export async function getDocumentList(listId: string, signal?: AbortSignal): Promise<DocumentList> {
-  return postToGranolaApi<DocumentList>("get-document-list", { list_id: listId }, "Get document list", signal);
+  return normalizeFolder(
+    await postToGranolaApi<DocumentList>("get-document-list", { list_id: listId }, "Get document list", signal),
+  );
 }
 
 export async function createDocumentList(title: string, signal?: AbortSignal): Promise<DocumentListMutationResult> {
@@ -1441,7 +1447,7 @@ export async function chatWithDocuments(
     ...request,
   };
 
-  const response = await fetch(`${API_CONFIG.STREAM_API_URL}/chat-with-documents`, {
+  const response = await granolaFetch(`${API_CONFIG.STREAM_API_URL}/chat-with-documents`, {
     method: "POST",
     headers,
     body: JSON.stringify(requestBody),
@@ -1624,7 +1630,7 @@ export async function updateDocumentNotes(documentId: string, markdownContent: s
     updated_at: new Date().toISOString().replace("Z", "") + "Z",
   };
 
-  const response = await fetch(`${API_CONFIG.API_URL}/update-document`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/update-document`, {
     method: "POST",
     headers,
     body: JSON.stringify(payload),
@@ -1644,7 +1650,7 @@ export async function fetchUpcomingEvents(): Promise<CalendarEvent[]> {
   });
 
   // First refresh events from Google
-  const refreshResponse = await fetch(`${API_CONFIG.API_URL}/refresh-google-events`, {
+  const refreshResponse = await granolaFetch(`${API_CONFIG.API_URL}/refresh-google-events`, {
     method: "POST",
     headers,
     body: JSON.stringify({ selected_calendars_only: true }),
@@ -1654,7 +1660,7 @@ export async function fetchUpcomingEvents(): Promise<CalendarEvent[]> {
     await handleApiError(refreshResponse, "Refresh Google events");
   }
 
-  const data = await refreshResponse.json();
+  const data = (await refreshResponse.json()) as { results?: Array<{ events?: CalendarEvent[] }> };
 
   // Extract events from the response
   const allEvents: CalendarEvent[] = [];
@@ -1739,7 +1745,7 @@ export async function createDocumentFromEvent(event: CalendarEvent): Promise<{ i
     creation_source: "macOS",
   };
 
-  const response = await fetch(`${API_CONFIG.API_URL}/create-document`, {
+  const response = await granolaFetch(`${API_CONFIG.API_URL}/create-document`, {
     method: "POST",
     headers,
     body: JSON.stringify(payload),

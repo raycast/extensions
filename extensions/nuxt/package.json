@@ -3,7 +3,7 @@
   "name": "nuxt",
   "title": "Nuxt",
   "type": "module",
-  "description": "Supercharge your Nuxt workflow",
+  "description": "Search Nuxt docs, Nuxt UI components and modules, create Nuxt files from templates and monitor dev servers from the menu bar, with AI tools.",
   "icon": "icon.png",
   "author": "HugoRCD",
   "categories": [
@@ -144,5 +144,10 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "js-yaml@4": "4.3.2"
+  }
 }

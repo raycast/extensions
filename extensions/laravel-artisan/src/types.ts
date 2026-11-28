@@ -1,7 +1,8 @@
 type Argument = {
   name: string;
   description: string;
-  default: string | null;
+  // Array arguments, like queue:retry's ids, default to a list
+  default: string | string[] | null;
   required: boolean;
 };
 type Option = {
@@ -15,6 +16,7 @@ export type ConsoleCommand = {
   name: string;
   description: string;
   synopsis: string;
+  aliases: string[];
   arguments: Argument[];
   options: Option[];
 };

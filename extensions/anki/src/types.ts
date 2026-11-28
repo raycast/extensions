@@ -1,4 +1,4 @@
-import { Form, Keyboard } from '@raycast/api';
+import { Keyboard } from '@raycast/api';
 
 export interface AnkiCollectionData {
   crt: number;
@@ -130,7 +130,18 @@ export type AddNoteParams = {
   picture: PictureItem[];
 };
 
-export type UpdateNoteParams = AddNoteParams;
+export type UpdateNoteParams = {
+  id: number;
+  fields: Record<string, string>;
+  audio?: AudioItem[];
+  video?: VideoItem[];
+  picture?: PictureItem[];
+};
+
+export type EditNoteParams = { id: number } & (
+  | { fields: Record<string, string>; tags?: string[] }
+  | { fields?: Record<string, string>; tags: string[] }
+);
 
 type MediaSource =
   | { url: string; path?: never; data?: never }
@@ -171,5 +182,3 @@ export type FieldMediaMap = {
 export type ShortcutDictionary = {
   [shortcut: string]: Keyboard.Shortcut;
 };
-
-export type FieldRef = React.RefObject<Form.TextArea | Form.FilePicker>;

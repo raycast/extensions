@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation, Clipboard } from "@raycast/api";
 import { NetworkService, VPC } from "./NetworkService";
+import { CacheManager } from "../../utils/CacheManager";
 import SubnetsView from "./SubnetsView";
 import FirewallRulesView from "./FirewallRulesView";
 
@@ -227,6 +228,14 @@ export default function VPCView({ projectId, gcloudPath }: VPCViewProps) {
                   title="View Subnets"
                   icon={Icon.List}
                   onAction={() => {
+                    CacheManager.saveRecentResource({
+                      id: vpc.id || vpc.name,
+                      type: "network",
+                      name: vpc.name,
+                      projectId,
+                      accessedAt: Date.now(),
+                      consoleUrl: `https://console.cloud.google.com/networking/networks/details/${vpc.name}?project=${projectId}`,
+                    });
                     push(<SubnetsView projectId={projectId} gcloudPath={gcloudPath} vpc={vpc} />);
                   }}
                 />

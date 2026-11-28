@@ -1,7 +1,10 @@
 import { environment, getPreferenceValues } from "@raycast/api";
+import { calendar_v3 } from "@googleapis/calendar";
 import { addRaycastSignature } from "./event-values";
 
 const preferences = getPreferenceValues();
+
+export const isMacOS = process.platform === "darwin";
 
 export function roundUpTime(date = new Date(), roundMins = 15) {
   const ms = 1000 * 60 * roundMins;
@@ -13,7 +16,6 @@ export function addSignature(description: string | undefined) {
 }
 
 function parseRRule(rrule: string): string {
-  // Remove RRULE: prefix if present
   const rule = rrule.replace("RRULE:", "");
   const parts = rule.split(";");
   const ruleObj: Record<string, string> = {};
@@ -32,21 +34,18 @@ function parseRRule(rrule: string): string {
 
   let humanReadable = "";
 
-  // Handle frequency and interval
   if (interval === 1) {
     humanReadable = `Every ${freq.slice(0, -2)}`;
   } else {
     humanReadable = `Every ${interval} ${freq.slice(0, -2)}s`;
   }
 
-  // Handle end condition
   if (count) {
     humanReadable += `, ${count} times`;
   } else if (until) {
     humanReadable += ` until ${until.toLocaleDateString()}`;
   }
 
-  // Handle specific days for weekly recurrence
   if (freq === "weekly" && ruleObj.BYDAY) {
     const days = ruleObj.BYDAY.split(",").map((day) => {
       const dayMap: Record<string, string> = {
@@ -67,6 +66,25 @@ function parseRRule(rrule: string): string {
   }
 
   return humanReadable;
+}
+
+/**
+ * Whether the user can change their RSVP response on this event via an
+ * attendee patch. Only regular invitations qualify: the user must be an
+ * attendee (not the organizer), the event must not be cancelled, and the
+ * event must be a regular (default) event. Special event types such as
+ * birthdays, focus time, out-of-office, or working locations reject attendee
+ * patches with e.g. "Attempt made to modify 'birthday' event in a way that is
+ * not valid for this event type."
+ */
+export function canChangeResponseStatus(event: calendar_v3.Schema$Event): boolean {
+  if (!event.id || event.status === "cancelled") {
+    return false;
+  }
+  if (!event.attendees?.some((attendee) => attendee.self)) {
+    return false;
+  }
+  return !event.eventType || event.eventType === "default";
 }
 
 export function formatRecurrence(recurrence: string[]): string {
@@ -103,15 +121,9 @@ function isInternal() {
 }
 
 export function getClientId() {
-  if (environment.raycastVersion.split(".").length === 4) {
-    return isInternal()
-      ? "690234628480-ic526rvseca4983uujs693rnqh49kgjh.apps.googleusercontent.com"
-      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
-  } else {
-    return isInternal()
-      ? "690234628480-4h8a6h78482ks82g3s1ghrqa0ce8qgo3.apps.googleusercontent.com"
-      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
-  }
+  return isInternal()
+    ? "690234628480-4h8a6h78482ks82g3s1ghrqa0ce8qgo3.apps.googleusercontent.com"
+    : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
 }
 
 export function toISO8601WithTimezoneOffset(date = new Date()) {
@@ -190,11 +202,7 @@ export function parseAttendeeEmails(attendees?: string | string[] | null): {
   return { emails, invalidEntries };
 }
 
-/**
- * Google Calendar's named event colors mapped to their API `colorId` values (1–11).
- * These are the colors exposed in the event color picker in Google Calendar.
- * @see https://developers.google.com/calendar/api/v3/reference/colors
- */
+/** Google Calendar's named event colors mapped to their API `colorId` values. */
 export const EVENT_COLORS = {
   lavender: "1",
   sage: "2",
@@ -215,11 +223,6 @@ const COLOR_ID_TO_NAME: Record<string, EventColorName> = Object.fromEntries(
   Object.entries(EVENT_COLORS).map(([name, id]) => [id, name as EventColorName]),
 );
 
-/**
- * Returns a human-readable, capitalized color name for a Google Calendar `colorId`
- * (e.g. "2" → "Sage"). Falls back to "default" when no color is set, or to the raw
- * id if it isn't part of the known palette.
- */
 export function colorIdToName(colorId?: string | number | null): string {
   if (colorId === undefined || colorId === null || String(colorId).trim().length === 0) {
     return "default";
@@ -234,25 +237,19 @@ export function colorIdToName(colorId?: string | number | null): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-/**
- * The official background hex value for each event `colorId`, as returned by the
- * Google Calendar `colors.get` endpoint. Used to snap an arbitrary hex code to
- * the nearest supported event color (the API only allows colorId 1–11, not
- * arbitrary per-event colors).
- * @see https://developers.google.com/calendar/api/v3/reference/colors
- */
+/** Background hex values for event color IDs, as returned by Google's colors endpoint. */
 export const EVENT_COLOR_HEX: Record<string, string> = {
-  "1": "#a4bdfc", // lavender
-  "2": "#7ae7bf", // sage
-  "3": "#dbadff", // grape
-  "4": "#ff887c", // flamingo
-  "5": "#fbd75b", // banana
-  "6": "#ffb878", // tangerine
-  "7": "#46d6db", // peacock
-  "8": "#e1e1e1", // graphite
-  "9": "#5484ed", // blueberry
-  "10": "#51b749", // basil
-  "11": "#dc2127", // tomato
+  "1": "#a4bdfc",
+  "2": "#7ae7bf",
+  "3": "#dbadff",
+  "4": "#ff887c",
+  "5": "#fbd75b",
+  "6": "#ffb878",
+  "7": "#46d6db",
+  "8": "#e1e1e1",
+  "9": "#5484ed",
+  "10": "#51b749",
+  "11": "#dc2127",
 };
 
 function hexToRgb(hex: string): [number, number, number] | undefined {
@@ -273,10 +270,6 @@ function hexToRgb(hex: string): [number, number, number] | undefined {
   return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
 }
 
-/**
- * Finds the supported event `colorId` whose palette color is closest to the
- * given hex code, using squared Euclidean distance in RGB space.
- */
 function nearestColorId(hex: string): string | undefined {
   const rgb = hexToRgb(hex);
   if (!rgb) {
@@ -304,16 +297,8 @@ function nearestColorId(hex: string): string | undefined {
 }
 
 /**
- * Resolves a user-provided color into a Google Calendar `colorId` (1–11).
- *
- * Accepts:
- * - a named color (e.g. "green", "sage", "purple", "grape");
- * - a raw numeric `colorId` as a string or number (e.g. "2", 3);
- * - a hex code (e.g. "#FF6363" or "#f63"), which is snapped to the nearest
- *   supported event color since Google Calendar does not allow arbitrary
- *   per-event hex colors.
- *
- * @throws Error if the value cannot be resolved to a valid colorId.
+ * Accepts a named color, color ID, or hex value; hex values map to the nearest
+ * supported palette color because the API does not accept arbitrary event colors.
  */
 export function resolveColorId(color?: string | number | null): string | undefined {
   if (color === undefined || color === null) {
@@ -325,7 +310,6 @@ export function resolveColorId(color?: string | number | null): string | undefin
     return undefined;
   }
 
-  // Hex code (e.g. "#FF6363", "f63") — snap to the nearest supported color.
   if (/^#?[0-9a-f]{3}$/.test(value) || /^#?[0-9a-f]{6}$/.test(value)) {
     const nearest = nearestColorId(value);
     if (nearest) {
@@ -334,7 +318,6 @@ export function resolveColorId(color?: string | number | null): string | undefin
     throw new Error(`Invalid hex color "${color}".`);
   }
 
-  // Raw numeric colorId (1–11).
   if (/^\d+$/.test(value)) {
     const id = Number(value);
     if (id >= 1 && id <= 11) {
@@ -343,7 +326,6 @@ export function resolveColorId(color?: string | number | null): string | undefin
     throw new Error(`Invalid colorId "${color}". Expected a value between 1 and 11.`);
   }
 
-  // Named color, including a few common aliases.
   const aliases: Record<string, EventColorName> = {
     green: "sage",
     purple: "grape",

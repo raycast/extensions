@@ -6,6 +6,7 @@ import {
   Form,
   Icon,
   List,
+  closeMainWindow,
   confirmAlert,
   environment,
   getPreferenceValues,
@@ -13,12 +14,15 @@ import {
   Toast,
   useNavigation,
   getApplications,
+  getFrontmostApplication,
   Application,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import { getFavicon, runAppleScript } from "@raycast/utils";
+import { rankByQuery } from "./search";
+import { EmojiPickerActions } from "./emoji-picker";
 
 // --- Types ---
 type SavedApp = { name: string; path: string; bundleId?: string };
@@ -254,6 +258,29 @@ function openUrl(url: string, app?: SavedApp, background = false): void {
   }
 }
 
+const BROWSER_BUNDLE_IDS = [
+  "com.apple.Safari",
+  "com.google.Chrome",
+  "company.thebrowser.Browser",
+  "org.mozilla.firefox",
+  "com.microsoft.edgemac",
+  "com.brave.Browser",
+  "com.operasoftware.Opera",
+  "com.vivaldi.Vivaldi",
+];
+
+// Opens the link in the browser that was active behind Raycast, else the default browser
+async function openInActiveBrowser(url: string): Promise<void> {
+  try {
+    const front = await getFrontmostApplication();
+    const isBrowser = front.bundleId && BROWSER_BUNDLE_IDS.includes(front.bundleId);
+    openUrl(url, isBrowser ? { name: front.name, path: front.path, bundleId: front.bundleId } : undefined);
+    await closeMainWindow();
+  } catch {
+    await showToast(Toast.Style.Failure, "Failed to open link");
+  }
+}
+
 function getAllLinksData(item: FolderItem): { url: string; app?: SavedApp }[] {
   const data: { url: string; app?: SavedApp }[] = [];
   for (const child of item.items) {
@@ -349,25 +376,10 @@ async function getActiveTabFromBrowser(): Promise<{ url: string; title: string }
   return null;
 }
 
-async function openSystemEmojiPicker() {
-  try {
-    await runAppleScript(`
-      delay 0.2
-      tell application "System Events" to key code 49 using {control down, command down}
-    `);
-  } catch (error) {
-    console.error("Failed to open emoji picker:", error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Action Failed",
-      message: "Check Accessibility permissions in System Settings.",
-    });
-  }
-}
-
 // --- Forms ---
 function AddLinkForm({ folderId, onComplete }: { folderId: string | null; onComplete: () => void }) {
   const { pop } = useNavigation();
+  const [icon, setIcon] = useState("");
   const [apps, setApps] = useState<Application[]>([]);
 
   useEffect(() => {
@@ -405,12 +417,7 @@ function AddLinkForm({ folderId, onComplete }: { folderId: string | null; onComp
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Link" onSubmit={handleSubmit} />
-          <Action
-            title="Open OS Emoji Picker"
-            icon={Icon.Airplane}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-            onAction={openSystemEmojiPicker}
-          />
+          <EmojiPickerActions icon={icon} onChange={setIcon} />
         </ActionPanel>
       }
     >
@@ -422,7 +429,7 @@ function AddLinkForm({ folderId, onComplete }: { folderId: string | null; onComp
           <Form.Dropdown.Item key={a.path} value={a.bundleId || a.path} title={a.name} icon={{ fileIcon: a.path }} />
         ))}
       </Form.Dropdown>
-      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" />
+      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" value={icon} onChange={setIcon} />
     </Form>
   );
 }
@@ -437,6 +444,7 @@ function EditLinkForm({
   onComplete: () => void;
 }) {
   const { pop } = useNavigation();
+  const [icon, setIcon] = useState(link.icon ?? "");
   const [apps, setApps] = useState<Application[]>([]);
 
   useEffect(() => {
@@ -478,12 +486,7 @@ function EditLinkForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update Link" onSubmit={handleSubmit} />
-          <Action
-            title="Open OS Emoji Picker"
-            icon={Icon.Airplane}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-            onAction={openSystemEmojiPicker}
-          />
+          <EmojiPickerActions icon={icon} onChange={setIcon} />
         </ActionPanel>
       }
     >
@@ -495,13 +498,14 @@ function EditLinkForm({
           <Form.Dropdown.Item key={a.path} value={a.bundleId || a.path} title={a.name} icon={{ fileIcon: a.path }} />
         ))}
       </Form.Dropdown>
-      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" defaultValue={link.icon} />
+      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" value={icon} onChange={setIcon} />
     </Form>
   );
 }
 
 function AddFolderForm({ folderId, onComplete }: { folderId: string | null; onComplete: () => void }) {
   const { pop } = useNavigation();
+  const [icon, setIcon] = useState("");
 
   async function handleSubmit(values: { title: string; icon: string }) {
     const data = loadLinks();
@@ -526,17 +530,12 @@ function AddFolderForm({ folderId, onComplete }: { folderId: string | null; onCo
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Folder" onSubmit={handleSubmit} />
-          <Action
-            title="Open OS Emoji Picker"
-            icon={Icon.Airplane}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-            onAction={openSystemEmojiPicker}
-          />
+          <EmojiPickerActions icon={icon} onChange={setIcon} />
         </ActionPanel>
       }
     >
       <Form.TextField id="title" title="Folder Name" placeholder="My folder" />
-      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" />
+      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" value={icon} onChange={setIcon} />
     </Form>
   );
 }
@@ -551,6 +550,7 @@ function EditFolderForm({
   onComplete: () => void;
 }) {
   const { pop } = useNavigation();
+  const [icon, setIcon] = useState(folder.icon ?? "");
 
   async function handleSubmit(values: { title: string; icon: string }) {
     const data = loadLinks();
@@ -579,17 +579,12 @@ function EditFolderForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update Folder" onSubmit={handleSubmit} />
-          <Action
-            title="Open OS Emoji Picker"
-            icon={Icon.Airplane}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-            onAction={openSystemEmojiPicker}
-          />
+          <EmojiPickerActions icon={icon} onChange={setIcon} />
         </ActionPanel>
       }
     >
       <Form.TextField id="title" title="Folder Name" placeholder="My folder" defaultValue={folder.title} />
-      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" defaultValue={folder.icon} />
+      <Form.TextField id="icon" title="Icon (Emoji)" placeholder="Press ⌘⇧E to pick" value={icon} onChange={setIcon} />
     </Form>
   );
 }
@@ -646,6 +641,8 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
   const [data, setData] = useState<LinksData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refresh, setRefresh] = useState(0);
+  const [searchText, setSearchText] = useState("");
+  const [selectedId, setSelectedId] = useState<string>();
 
   useEffect(() => {
     try {
@@ -685,6 +682,20 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
     find(data.items);
   } else {
     currentItems = data.items;
+  }
+
+  const getSearchable = (item: AnyItem) => ({
+    primary: item.title,
+    secondary: item.type === "link" ? getDomainOnly(item.url) : undefined,
+  });
+  const visibleItems = rankByQuery(currentItems, searchText, getSearchable);
+  // Search reorders and hides items, so moving "one step" would swap with an item that is not on screen
+  const isSearching = searchText.trim().length > 0;
+
+  // Raycast keeps the highlighted row while it is still in the results, so select the best match explicitly
+  function handleSearchTextChange(text: string) {
+    setSearchText(text);
+    setSelectedId(rankByQuery(currentItems, text, getSearchable)[0]?.id);
   }
 
   const triggerRefresh = () => setRefresh((r) => r + 1);
@@ -752,6 +763,24 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
     await showToast(Toast.Style.Success, "Deleted successfully");
   }
 
+  // Replace the folder with its contents, in the same position
+  async function deleteFolderKeepContents(folder: FolderItem) {
+    const ok = await confirmAlert({
+      title: "Delete folder and keep its contents?",
+      message: `The folder is removed and its ${folder.items.length} item(s) move up to this level.`,
+      primaryAction: { title: "Delete Folder", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+
+    const d = loadLinks();
+    updateFolder(d, folderId, (items) =>
+      items.flatMap((i) => (i.id === folder.id && i.type === "folder" ? i.items : [i])),
+    );
+    saveLinks(d);
+    triggerRefresh();
+    await showToast(Toast.Style.Success, "Folder deleted, contents kept");
+  }
+
   const ListAddActions = () => (
     <ActionPanel.Section title="Add & Create">
       <Action.Push
@@ -776,8 +805,15 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
   );
 
   return (
-    <List navigationTitle={breadcrumbs.join(" → ")} searchBarPlaceholder="Search items...">
-      {currentItems.map((item) => (
+    <List
+      navigationTitle={breadcrumbs.join(" → ")}
+      searchBarPlaceholder="Search items..."
+      filtering={false}
+      onSearchTextChange={handleSearchTextChange}
+      selectedItemId={selectedId}
+      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
+    >
+      {visibleItems.map((item) => (
         <List.Item
           key={item.id}
           id={item.id}
@@ -804,6 +840,12 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                     ) : (
                       <Action.OpenInBrowser title="Open Link" url={item.url} />
                     )}
+                    <Action
+                      title="Open in Active Browser"
+                      icon={Icon.Window}
+                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      onAction={() => openInActiveBrowser(item.url)}
+                    />
                     <Action.OpenWith path={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                     <Action
                       title="Open Link (Keep Window Open)"
@@ -816,6 +858,16 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                           await showToast(Toast.Style.Failure, "Failed to open link");
                         }
                       }}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open in Browser"
+                      url={item.url}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy URL"
+                      content={item.url}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                   </>
                 ) : (
@@ -862,18 +914,22 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() => duplicateItem(item.id)}
                 />
-                <Action
-                  title="Move up"
-                  icon={Icon.ArrowUp}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-                  onAction={() => moveItem(item.id, -1)}
-                />
-                <Action
-                  title="Move Down"
-                  icon={Icon.ArrowDown}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                  onAction={() => moveItem(item.id, 1)}
-                />
+                {!isSearching && (
+                  <>
+                    <Action
+                      title="Move up"
+                      icon={Icon.ArrowUp}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                      onAction={() => moveItem(item.id, -1)}
+                    />
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                      onAction={() => moveItem(item.id, 1)}
+                    />
+                  </>
+                )}
                 <Action
                   title={item.type === "link" ? "Delete Link" : "Delete Folder"}
                   icon={Icon.Trash}
@@ -881,6 +937,15 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   onAction={() => deleteItem(item.id)}
                 />
+                {item.type === "folder" && (
+                  <Action
+                    title="Delete Folder, Keep Contents"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "d" }}
+                    onAction={() => deleteFolderKeepContents(item)}
+                  />
+                )}
               </ActionPanel.Section>
 
               <ListAddActions />
@@ -889,11 +954,15 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
         />
       ))}
 
-      {currentItems.length === 0 && (
+      {visibleItems.length === 0 && (
         <List.EmptyView
-          icon={Icon.Folder}
-          title="Folder is empty"
-          description="Use ⌘⇧L to add a link, or ⌘F to add a subfolder."
+          icon={currentItems.length === 0 ? Icon.Folder : Icon.MagnifyingGlass}
+          title={currentItems.length === 0 ? "Folder is empty" : "No results"}
+          description={
+            currentItems.length === 0
+              ? "Use ⌘⇧L to add a link, or ⌘F to add a subfolder."
+              : `Nothing in this folder matches "${searchText.trim()}".`
+          }
           actions={
             <ActionPanel>
               <ListAddActions />

@@ -1,5 +1,24 @@
 # NetBird Changelog
 
+## [Exit Node management] - 2026-11-25
+
+- Added `Show Exit Nodes` command to select or deselect the active exit node without affecting other network route selections.
+- Fixed `networks select` replacing the entire route selection instead of appending, which could silently clear unrelated selected routes when toggling just one.
+- `Show Networks` no longer lists exit node routes; manage them from the new `Show Exit Nodes` command instead.
+- Added a Retry action to the failed-fetch view in `Show Networks` and `Show Exit Nodes`.
+
+## [Fix update when a new version is available] - 2026-10-29
+
+- Fixed the update failing with "Command failed: brew outdated netbird" whenever a newer NetBird was available. `brew outdated` exits with code 1 when the formula is outdated, which was treated as an error.
+
+## [Fix double SSO login page] - 2026-09-23
+
+- Fixed SSO login page opening twice when connecting to NetBird.
+
+## [Toggle Connection] - 2026-09-16
+
+- Added `Toggle Connection` command which connects to NetBird when disconnected and disconnects when connected.
+
 ## [Custom Admin URL] - 2026-04-03
 
 - Added option to overwrite Admin Panel URL in preferences.

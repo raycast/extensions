@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, closeMainWindow } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-import { CONTRIBUTE_URL } from "./helpers";
+import { CONTRIBUTE_URL, platformShortcut } from "./helpers";
 
 const baseUrl = "https://ray.so/themes";
 
@@ -31,7 +31,7 @@ type Theme = {
 };
 
 export default function ExploreThemes() {
-  const { data: themes, isLoading } = useFetch<Theme[]>(`https:/ray.so/api/themes`);
+  const { data: themes, isLoading } = useFetch<Theme[]>(`https://ray.so/api/themes`);
 
   const [appearanceFilter, setAppearanceFilter] = useState("all");
 
@@ -161,10 +161,7 @@ export default function ExploreThemes() {
                   title="Copy URL to Share"
                   icon={Icon.Link}
                   content={getThemeURL(theme)}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                  }}
+                  shortcut={platformShortcut(["cmd", "shift"], "s")}
                 />
 
                 <Action.Open
@@ -172,20 +169,14 @@ export default function ExploreThemes() {
                   icon={Icon.Stars}
                   target={getThemeURL(filteredThemes[Math.floor(Math.random() * filteredThemes.length)])}
                   onOpen={() => closeMainWindow()}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "r" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "r" },
-                  }}
+                  shortcut={platformShortcut(["cmd", "shift"], "r")}
                 />
 
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     title="Contribute"
                     icon={Icon.PlusSquare}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                    }}
+                    shortcut={platformShortcut(["cmd", "shift"], "c")}
                     url={CONTRIBUTE_URL}
                   />
                 </ActionPanel.Section>
@@ -194,10 +185,7 @@ export default function ExploreThemes() {
                   <Action.CopyToClipboard
                     title="Copy JSON Configuration"
                     content={JSON.stringify(theme, null, 2)}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "." },
-                      Windows: { modifiers: ["ctrl"], key: "." },
-                    }}
+                    shortcut={platformShortcut(["cmd"], ".")}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

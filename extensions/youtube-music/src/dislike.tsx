@@ -22,6 +22,10 @@ const dislike = `(function() {
 export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(dislike);
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "dislike-already-clicked":
         await showHUD("👀 Already disliked");
@@ -37,6 +41,6 @@ export default async () => {
     }
     await closeMainWindow();
   } catch (error) {
-    // do nothing if error is thrown because it will be handled by the toast
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

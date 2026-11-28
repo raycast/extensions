@@ -4,17 +4,18 @@ import {
   Alert,
   Color,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
   openExtensionPreferences,
   showToast,
-  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { BinaryNotFoundError, getSources, PIXTUOID_INSTALL_HINT, SourceStatus, toggleSource } from "./pixtuoid";
+import { BinaryNotFoundError, getSources, SourceStatus, toggleSource } from "./pixtuoid";
 
-const REPO_URL = "https://github.com/IvanWng97/pixtuoid";
+const REPO_URL = "https://github.com/pixtuoid/pixtuoid";
+const INSTALL_URL = "https://pixtuoid.dev/#install";
 
 export default function ManageSources() {
   const { data, isLoading, revalidate, error } = usePromise(getSources);
@@ -27,7 +28,7 @@ export default function ManageSources() {
     if (item.connected) {
       const confirmed = await confirmAlert({
         title: `Disconnect ${item.display_name}?`,
-        message: "Removes its hooks from that CLI's config. You can reconnect anytime.",
+        message: "Removes any hooks or plugin pixtuoid installed for that CLI. You can reconnect anytime.",
         primaryAction: { title: "Disconnect", style: Alert.ActionStyle.Destructive },
       });
       if (!confirmed) return;
@@ -39,13 +40,13 @@ export default function ManageSources() {
     });
     try {
       const row = await toggleSource(item.id, item.connected);
-      if (row?.outcome?.startsWith("failed")) {
+      if (row.outcome === "failed") {
         toast.style = Toast.Style.Failure;
         toast.title = `${item.display_name}: failed`;
-        toast.message = row.outcome.replace(/^failed:\s*/, "");
+        toast.message = row.message ?? undefined;
       } else {
         toast.style = Toast.Style.Success;
-        toast.title = `${item.display_name} — ${row?.outcome ?? "updated"}`;
+        toast.title = `${item.display_name} — ${row.outcome}`;
       }
     } catch (e) {
       toast.style = Toast.Style.Failure;
@@ -58,11 +59,9 @@ export default function ManageSources() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter agent CLIs…">
-      <List.EmptyView
-        icon={Icon.Plug}
-        title={isLoading ? "Loading sources…" : "No sources reported"}
-        description={isLoading ? undefined : "No agent CLIs were reported. Install pixtuoid and try again."}
-      />
+      {/* Raycast shows an EmptyView while loading once the search bar has text, where its own would read as no
+          match (developers.raycast.com/api-reference/user-interface/list). */}
+      {data === undefined && <List.EmptyView icon={Icon.Plug} title="Loading sources…" />}
       {(data ?? []).map((s) => (
         <List.Item
           key={s.id}
@@ -84,7 +83,12 @@ export default function ManageSources() {
                 onAction={() => revalidate()}
               />
               <Action.OpenInBrowser icon={Icon.Globe} title="Open Pixtuoid on GitHub" url={REPO_URL} />
-              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />
@@ -100,11 +104,7 @@ function ErrorView({ error, onRetry }: { error: Error; onRetry: () => void }) {
       <List.EmptyView
         icon={notFound ? Icon.MagnifyingGlass : Icon.Warning}
         title={notFound ? "Pixtuoid not found" : "Couldn't read sources"}
-        description={
-          notFound
-            ? `Set the binary path in preferences, or install pixtuoid (${PIXTUOID_INSTALL_HINT}).`
-            : error.message
-        }
+        description={notFound ? "Set the binary path in preferences, or install pixtuoid." : error.message}
         actions={
           <ActionPanel>
             {notFound ? (
@@ -112,7 +112,7 @@ function ErrorView({ error, onRetry }: { error: Error; onRetry: () => void }) {
             ) : (
               <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
             )}
-            <Action.OpenInBrowser icon={Icon.Globe} title="Installation Docs" url={`${REPO_URL}#install`} />
+            <Action.OpenInBrowser icon={Icon.Globe} title="Installation Docs" url={INSTALL_URL} />
           </ActionPanel>
         }
       />

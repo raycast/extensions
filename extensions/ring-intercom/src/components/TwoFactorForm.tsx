@@ -5,7 +5,7 @@ import React from "react";
 interface TwoFactorFormProps {
   authState: AuthState;
   setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
-  twoFactorRef: React.RefObject<Form.TextField>;
+  twoFactorRef: React.RefObject<Form.TextField | null>;
 }
 
 export function sanitizeTwoFactorCode(

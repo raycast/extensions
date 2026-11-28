@@ -40,55 +40,6 @@ type PayloadResponse = {
   uuid: string;
 };
 
-type AppleSearchResponse = {
-  results?: AppleSearchResult[];
-};
-
-type AppleSearchResult =
-  | {
-      documentation: {
-        metadata: AppleDocumentationMetadata;
-      };
-    }
-  | {
-      devsite: {
-        metadata: AppleDevsiteMetadata;
-      };
-    }
-  | {
-      developer: {
-        metadata: AppleDeveloperMetadata;
-      };
-    };
-
-type AppleDocumentationMetadata = {
-  title?: string;
-  description?: string;
-  permalink?: string;
-  hierarchy?: string;
-  availability?: string;
-  kind?: string;
-};
-
-type AppleDevsiteMetadata = {
-  title?: string;
-  description?: string;
-  sourceURL?: string;
-};
-
-type AppleDeveloperMetadata = {
-  titles?: string[];
-  descriptions?: string[];
-  permalinks?: string[];
-  thumbnailLinks?: string[];
-  projectNames?: string[];
-  ids?: string[];
-  itemTypes?: string[];
-  availabilityDates?: string[];
-  deliveryLanguageCodes?: string[];
-  mediaDurations?: number[];
-};
-
 interface Visitable {
   onVisit: (result: ResultLike) => void;
 }

@@ -1,0 +1,241 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "skyfrom",
+  "title": "SkyFrom",
+  "description": "Explore the sky over any supported city, copy gradients, and sync your desktop wallpaper.",
+  "icon": "skyfrom-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "explore-sky",
+      "title": "Explore Sky",
+      "description": "Search cities and preview their sky gradients.",
+      "mode": "view",
+      "keywords": [
+        "city",
+        "gradient",
+        "skyfrom",
+        "color"
+      ],
+      "subtitle": "SkyFrom"
+    },
+    {
+      "name": "current-sky",
+      "title": "Current Sky",
+      "description": "Preview the sky for your default location.",
+      "mode": "view",
+      "subtitle": "SkyFrom"
+    },
+    {
+      "name": "copy-gradient",
+      "title": "Copy Sky Gradient",
+      "description": "Copy a gradient in your preferred format.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "city",
+          "placeholder": "City (optional)",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "subtitle": "SkyFrom"
+    },
+    {
+      "name": "set-wallpaper",
+      "title": "Set Sky Wallpaper",
+      "description": "Apply a sky gradient as your desktop wallpaper.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "city",
+          "placeholder": "City (optional)",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "subtitle": "SkyFrom"
+    },
+    {
+      "name": "auto-update-wallpaper",
+      "title": "Auto Update Wallpaper",
+      "description": "Refresh your sky wallpaper now and periodically when enabled.",
+      "mode": "no-view",
+      "interval": "15m",
+      "subtitle": "SkyFrom"
+    },
+    {
+      "name": "favorite-skies",
+      "title": "Favorite Skies",
+      "description": "Browse and reuse saved locations and times.",
+      "mode": "view",
+      "subtitle": "SkyFrom"
+    },
+    {
+      "name": "sky-menu-bar",
+      "title": "Sky Menu Bar",
+      "description": "See your last refreshed sky and access wallpaper controls.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "subtitle": "SkyFrom"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.0",
+    "@raycast/utils": "^2.3.3",
+    "proper-lockfile": "^4.1.2",
+    "suncalc": "^2.1.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "defaultCity",
+      "placeholder": "Lisbon",
+      "title": "Default City",
+      "description": "Enter a city name or SkyFrom city slug. You can also set a default in Explore Sky.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "exportFormat",
+      "title": "Export Format",
+      "description": "Format used by Copy Sky Gradient and the copy shortcut.",
+      "type": "dropdown",
+      "required": false,
+      "default": "css",
+      "data": [
+        {
+          "title": "CSS",
+          "value": "css"
+        },
+        {
+          "title": "Tailwind",
+          "value": "tailwind"
+        },
+        {
+          "title": "SVG",
+          "value": "svg"
+        },
+        {
+          "title": "JSON",
+          "value": "json"
+        },
+        {
+          "title": "Figma Design Tokens",
+          "value": "figma"
+        },
+        {
+          "title": "CSS Variables",
+          "value": "tokens"
+        }
+      ]
+    },
+    {
+      "name": "autoWallpaper",
+      "title": "Automatic Wallpaper",
+      "label": "Update wallpaper in the background",
+      "description": "Allow wallpaper updates while Raycast is running.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "updateFrequency",
+      "title": "Update Frequency",
+      "description": "Minimum time between automatic wallpaper updates.",
+      "type": "dropdown",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "value": "15",
+          "title": "15 minutes"
+        },
+        {
+          "value": "30",
+          "title": "30 minutes"
+        },
+        {
+          "value": "60",
+          "title": "60 minutes"
+        }
+      ]
+    },
+    {
+      "name": "autoCity",
+      "placeholder": "Tokyo",
+      "title": "Automatic Wallpaper City",
+      "description": "Leave empty to use your default city.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "saveImages",
+      "title": "Save Downloaded Images",
+      "label": "Keep a copy of each manually applied wallpaper",
+      "description": "Save a copy in the wallpaper directory or Downloads.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "wallpaperDirectory",
+      "title": "Wallpaper Directory",
+      "description": "Destination for saved copies and PNG exports. Defaults to Downloads. Active wallpapers are managed by SkyFrom.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-cities",
+      "title": "Search SkyFrom Cities",
+      "description": "Find cities supported by SkyFrom."
+    },
+    {
+      "name": "get-sky-gradient",
+      "title": "Get Sky Gradient",
+      "description": "Get sky colors or export a gradient for a city and time."
+    },
+    {
+      "name": "list-favorite-skies",
+      "title": "List Favorite Skies",
+      "description": "Find saved skies by name, city, or time preset."
+    },
+    {
+      "name": "download-sky-png",
+      "title": "Download Sky PNG",
+      "description": "Save a sky gradient PNG to your wallpaper directory after confirmation."
+    },
+    {
+      "name": "set-sky-wallpaper",
+      "title": "Set Sky Wallpaper",
+      "description": "Set a sky gradient as the desktop wallpaper after confirmation."
+    }
+  ]
+}

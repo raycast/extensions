@@ -269,6 +269,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
           title="Notion Page"
           isLoading={isLoading}
           onSearchTextChange={setSearchText}
+          filtering={false}
           storeValue
         >
           {searchPages?.map((page) => {

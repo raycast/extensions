@@ -1,5 +1,27 @@
 # Audio Device Changelog
 
+## [Adjust Volume in Output Device List] - 2026-11-21
+
+- You can use Turn up Volume and Turn Down Volume in the output device list to adjust the selected device by 5 percentage points with Cmd+= and Cmd+- on macOS or Ctrl+= and Ctrl+- on Windows.
+- Existing pinned volume targets follow these adjustments.
+- Windows output devices expose their volume levels so these controls are available for supported devices.
+
+## [Add Ask AI Raycast Command] - 2026-10-05
+
+- Add Ask AI tools to list audio devices, switch the active input or output device, and get or set volume.
+
+## [Fix] - 2026-09-30
+
+- Find devices whose names contain an apostrophe in Use Combo, Favourite and Toggle Favourites, whether the name uses a straight (') or typographic (’) apostrophe.
+
+## [Update] - 2026-09-23
+
+- Added an optional `volume` argument to the Set Output Volume and Set Input Volume commands, so a volume can be set silently from a hotkey or deeplink (e.g. `raycast://extensions/benvp/audio-device/set-volume?arguments=%7B%22volume%22%3A%2220%22%7D`)
+
+## [Fix] - 2026-08-21
+
+- Reduce background device enforcement refreshes from every 10 seconds to every minute.
+
 ## [Bugfix] - 2026-05-27
 
 - Show a confirmation when manually running the enforce device commands.

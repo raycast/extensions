@@ -1,6 +1,8 @@
 import type { ListItem } from "../types";
 
-export const EXAMPLE_SNIPPETS: ListItem[] = [
+type ExampleItem = Omit<ListItem, "id" | "snippetId" | "contentId"> & { id: number; value: string };
+
+const EXAMPLE_ITEMS: ExampleItem[] = [
   {
     id: 1,
     name: "React Component",
@@ -101,3 +103,10 @@ print(result)`,
     language: "python",
   },
 ];
+
+export const EXAMPLE_SNIPPETS: ListItem[] = EXAMPLE_ITEMS.map((item) => ({
+  ...item,
+  id: String(item.id),
+  snippetId: item.id,
+  contentId: 1,
+}));

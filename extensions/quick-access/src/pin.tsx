@@ -26,8 +26,10 @@ interface PinFormValues {
 export default function Pin() {
   const { handleSubmit, itemProps, setValue } = useForm<PinFormValues>({
     async onSubmit(values) {
-      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+      // Persist the pins before closing the window: closing it can tear down the command
+      // before the pending LocalStorage write completes, so the pins would never be saved.
       await pinFiles(values.paths);
+      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     },
     validation: {
       paths: FormValidation.Required,
@@ -79,7 +81,7 @@ export const pinFiles = async (folderPaths: string[] = [], closeMainWindow = tru
       const parsedPath = parse(value);
       if (!checkDuplicatePath(value, localDirectory)) {
         newDirectory.push({
-          id: isDirectory(value) ? DirectoryType.FOLDER : DirectoryType.FILE + (timeStamp + index),
+          id: (isDirectory(value) ? DirectoryType.FOLDER : DirectoryType.FILE) + (timeStamp + index),
           name: parsedPath.base,
           path: value,
           type: isDirectory(value) ? DirectoryType.FOLDER : DirectoryType.FILE,

@@ -9,7 +9,9 @@ import { fetchProviderJson } from "../lib/fetchProviderJson";
 const API_BASE_URL = "https://gif-search.raycast.com/api/giphy";
 type GiphyResults = { data: GiphyGif[] };
 
-function getGiphyUrl(type: "gifs" | "videos" | undefined, opt?: APIOpt) {
+type GiphyType = "gifs" | "videos" | "stickers";
+
+function getGiphyUrl(type: GiphyType | undefined, opt?: APIOpt) {
   const reqUrl = new URL(API_BASE_URL);
   reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
   reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
@@ -22,13 +24,18 @@ function getGiphyUrl(type: "gifs" | "videos" | undefined, opt?: APIOpt) {
   return reqUrl;
 }
 
-export default async function giphy(type?: "gifs" | "videos") {
-  const provider = type === "videos" ? "GIPHY Clips" : "GIPHY";
+const PROVIDER_NAMES: Record<GiphyType, string> = { gifs: "GIPHY", videos: "GIPHY Clips", stickers: "GIPHY Stickers" };
+
+export default async function giphy(type?: GiphyType) {
+  const provider = PROVIDER_NAMES[type ?? "gifs"];
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
       const reqUrl = getGiphyUrl(type, opt);
       reqUrl.searchParams.set("q", term);
+      // Lets a description ("when the build finally passes") find GIFs, not only literal matches; the
+      // proxy searches 1–2 word queries as typed and falls back to them if its rewrite fails.
+      reqUrl.searchParams.set("smart", "1");
 
       const results = await fetchProviderJson<GiphyResults>(reqUrl, { provider, request: "search" });
       return { results: results.data.map(mapGiphyResponse) };

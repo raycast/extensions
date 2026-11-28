@@ -25,6 +25,18 @@ export interface TOTPAccount {
 
 export type ImportMode = "json" | "sqlite";
 
+export interface MissingKey {
+  keyId: string;
+  entryCount: number;
+}
+
+export interface LoadResult {
+  accounts: TOTPAccount[];
+  missingKeys: MissingKey[];
+  // entries that decrypted but couldn't be decoded
+  undecodableCount: number;
+}
+
 export interface DecryptedAuthenticatorEntry {
   metadata: {
     name: string;

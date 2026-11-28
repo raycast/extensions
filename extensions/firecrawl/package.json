@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "firecrawl",
   "title": "Firecrawl",
-  "description": "Scrape, search, and conduct in-depth research with Firecrawl",
+  "description": "Scrape web pages to Markdown, search the web and run deep research with Firecrawl AI tools, and generate LLMs.txt for any site.",
   "icon": "firecrawl-extension-icon.png",
   "author": "nickscamara",
   "owner": "firecrawl",
@@ -15,6 +15,9 @@
     "pernielsentikaer",
     "xilopaint",
     "ftonato"
+  ],
+  "pastContributors": [
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [
@@ -46,11 +49,6 @@
       "name": "scrape",
       "title": "Scrape",
       "description": "Get contents for a particular webpage by scraping and returning markdown."
-    },
-    {
-      "name": "extract",
-      "title": "Extract",
-      "description": "Extract specific content from any set of URLs - useful for grabbing the exact data you need."
     }
   ],
   "preferences": [
@@ -62,31 +60,24 @@
       "description": "Your custom Firecrawl API key."
     },
     {
-      "name": "maxDepth",
-      "title": "Max Depth - Deep Research",
+      "name": "maxCredits",
+      "title": "Max Credits",
       "type": "textfield",
-      "description": "The maximum depth of the research.",
-      "default": "3",
-      "required": false
-    },
-    {
-      "name": "timeLimit",
-      "title": "Time Limit - Deep Research",
-      "type": "textfield",
-      "description": "The time limit of the research in seconds.",
-      "default": "500",
+      "description": "Maximum Firecrawl agent credits per Deep Research run. The run stops with an error if it reaches this cap.",
+      "default": "100",
+      "placeholder": "100",
       "required": false
     }
   ],
   "dependencies": {
-    "@mendable/firecrawl-js": "^4.3.4",
-    "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^1.17.0"
+    "@mendable/firecrawl-js": "^4.54.0",
+    "@raycast/api": "^2.10.0",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
@@ -101,5 +92,8 @@
   },
   "engines": {
     "node": ">=22.0.0"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

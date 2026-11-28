@@ -1,17 +1,40 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { CreateGitHubIntegrationForm } from "./components/create-git-hub-integration-form";
+import { WorkspaceDropdown } from "./components/workspace-switcher";
 import { useIntegrations } from "./hooks/use-integrations";
-import { notraUrl } from "./utils";
+import { useWorkspace } from "./hooks/use-workspace";
+import { notraOrganizationUrl } from "./utils";
 
 export default function Command() {
-  const { data: integrations, isLoading, revalidate } = useIntegrations();
+  const {
+    hasMultipleWorkspaces,
+    isLoading: isLoadingWorkspace,
+    switchWorkspace,
+    workspace,
+    workspaces,
+  } = useWorkspace();
+  const {
+    data: integrations,
+    isLoading: isLoadingIntegrations,
+    revalidate,
+  } = useIntegrations({ execute: !isLoadingWorkspace, organizationId: workspace?.id });
+  const isLoading = isLoadingWorkspace || isLoadingIntegrations;
+  const integrationsUrl = notraOrganizationUrl("/integrations", workspace?.slug);
 
   const githubIntegrations = integrations?.github ?? [];
   const linearIntegrations = integrations?.linear ?? [];
   const hasAny = githubIntegrations.length > 0 || linearIntegrations.length > 0;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search integrations...">
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        hasMultipleWorkspaces ? (
+          <WorkspaceDropdown onChange={switchWorkspace} workspace={workspace} workspaces={workspaces} />
+        ) : undefined
+      }
+      searchBarPlaceholder="Search integrations..."
+    >
       {!(isLoading || hasAny) && (
         <List.EmptyView
           actions={
@@ -21,7 +44,7 @@ export default function Command() {
                 target={<CreateGitHubIntegrationForm onCreated={revalidate} />}
                 title="Create GitHub Integration"
               />
-              <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl("/settings/integrations")} />
+              <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={integrationsUrl} />
             </ActionPanel>
           }
           description="Add a GitHub repository to get started."
@@ -41,14 +64,14 @@ export default function Command() {
                   )}
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.OpenWith}
                     title="View on Notra"
-                    url={notraUrl("/settings/integrations")}
+                    url={integrationsUrl}
                   />
                   <Action.CopyToClipboard content={gh.displayName} title="Copy Display Name" />
                   <Action.Push
                     icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     target={<CreateGitHubIntegrationForm onCreated={revalidate} />}
                     title="Create GitHub Integration"
                   />
@@ -72,9 +95,9 @@ export default function Command() {
                 <ActionPanel>
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.OpenWith}
                     title="Manage on Notra"
-                    url={notraUrl("/settings/integrations")}
+                    url={integrationsUrl}
                   />
                   <Action.CopyToClipboard content={ln.displayName} title="Copy Display Name" />
                 </ActionPanel>

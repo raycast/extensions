@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "faaaaahhh",
+  "title": "Faaaaahhh",
+  "description": "Play the Faaaaahhh meme sound with a global Raycast hotkey.",
+  "icon": "icon.png",
+  "author": "rafaosquito98",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "keywords": [
+    "fah",
+    "faah",
+    "meme",
+    "sound",
+    "soundboard"
+  ],
+  "license": "MIT",
+  "private": true,
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play Faaaaahhh",
+      "description": "Play the bundled meme sound immediately, without opening a view.",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist --exit-on-error",
+    "lint": "ray lint --exit-on-error",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "2.12.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.6.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}

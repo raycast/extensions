@@ -11,19 +11,22 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/utils";
-import { ConferenceProviderActions, useConferenceProviders } from "./conferencing";
+import { FormValidation, getFavicon, showFailureToast, useCachedState, useForm } from "@raycast/utils";
+import { AddConferenceProviderAction, EditConferenceProvidersAction, useConferenceProviders } from "./conferencing";
 import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./lib/google";
 import useCalendars from "./hooks/useCalendars";
-import { addSignature, parseAttendeeEmails, parseDurationMs, roundUpTime } from "./lib/utils";
+import { addSignature, isMacOS, parseAttendeeEmails, parseDurationMs, roundUpTime } from "./lib/utils";
+import { buildAllDayDateRange } from "./lib/events";
 import { calendar_v3 } from "@googleapis/calendar";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { randomUUID } from "node:crypto";
 
 type FormValues = {
   calendar: string;
   title: string;
   startDate: Date | null;
+  endDate: Date | null;
+  allDay: boolean;
   duration: string;
   attendees: string | undefined;
   conferencingProvider: string | undefined;
@@ -46,9 +49,26 @@ function parseDurationAsMinutesForPlainNumbers(value: string | undefined): numbe
   return parseDurationMs(trimmedValue) ?? null;
 }
 
+function normalizeConferencingValue(value: unknown): string | undefined {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (value && typeof value === "object" && "link" in value && typeof value.link === "string") {
+    return value.link;
+  }
+
+  return undefined;
+}
+
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
+  // Cached hook results can populate native Form controls before the Form finishes mounting.
+  const [isMounted, setIsMounted] = useState(false);
   const { calendar } = useGoogleAPIs();
-  const [calendarId, setCalendarId] = useState("primary");
+  const [lastConferencingProvider, setLastConferencingProvider] = useCachedState<string>(
+    "create-event-conferencing",
+    "none",
+  );
 
   const { data: calendarsData, isLoading: isLoadingCalendars } = useCalendars();
   const availableCalendars = useMemo(() => {
@@ -66,22 +86,25 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
   }, [calendarsData]);
 
   const [conferencingProviders] = useConferenceProviders();
-  const { data: calendarData, isLoading } = useCalendar(calendarId);
-  const { focus, handleSubmit, itemProps, reset } = useForm<FormValues>({
+  const { focus, handleSubmit, itemProps, reset, setValue, values } = useForm<FormValues>({
     initialValues: {
       calendar: props.launchContext?.calendar ?? "primary",
       title: props.launchContext?.title ?? "",
       startDate: props.launchContext?.startDate ?? roundUpTime(),
+      endDate: undefined,
+      allDay: false,
       duration: props.launchContext?.duration ?? `${preferences.defaultEventDuration}min`,
       attendees: props.launchContext?.attendees,
-      conferencingProvider: props.launchContext?.conferencingProvider,
+      conferencingProvider:
+        normalizeConferencingValue(props.launchContext?.conferencingProvider ?? lastConferencingProvider) ?? "none",
       description: props.launchContext?.description,
       sendInvitations: props.launchContext?.sendInvitations ?? preferences.sendInvitations,
     },
     validation: {
       title: FormValidation.Required,
+      startDate: FormValidation.Required,
       duration: (value) => {
-        if (!value) return undefined; // allow empty, revert to default onSubmit
+        if (!value) return undefined;
         const milliseconds = parseDurationAsMinutesForPlainNumbers(value);
         if (milliseconds === undefined || milliseconds === null) {
           return "Invalid format. Examples: 30, 45m, 1h, 1h30m";
@@ -95,11 +118,17 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       await showToast({ style: Toast.Style.Animated, title: "Creating event" });
 
       const calendarId = values.calendar ?? "primary";
-      const startDate = values.startDate ?? new Date();
+      const startDate = values.startDate;
+      if (!startDate) {
+        return;
+      }
       const parsedMilliseconds = values.duration
         ? parseDurationAsMinutesForPlainNumbers(values.duration)
         : Number(preferences.defaultEventDuration) * 60 * 1000;
-      if (parsedMilliseconds === undefined || parsedMilliseconds === null || parsedMilliseconds <= 0) {
+      if (
+        !values.allDay &&
+        (parsedMilliseconds === undefined || parsedMilliseconds === null || parsedMilliseconds <= 0)
+      ) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid Duration",
@@ -118,40 +147,41 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
-      const requestBody: calendar_v3.Schema$Event = {
-        summary: values.title,
-        description: addSignature(values.description),
-        start: {
-          dateTime: startDate.toISOString(),
-        },
-        end: {
-          dateTime: new Date(startDate.getTime() + parsedMilliseconds).toISOString(),
-        },
-        attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
-        location:
-          values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
-            ? undefined
-            : values.conferencingProvider,
-        conferenceData:
-          values.conferencingProvider === "hangoutsMeet"
-            ? {
-                createRequest: {
-                  conferenceSolutionKey: {
-                    type: "hangoutsMeet",
-                  },
-                  requestId: randomUUID(),
-                },
-              }
-            : undefined,
-      };
-
       const resetForm = () => {
-        setCalendarId("primary");
         focus("title");
         reset();
       };
 
+      setLastConferencingProvider(values.conferencingProvider ?? "none");
+
       try {
+        const schedule = values.allDay
+          ? buildAllDayDateRange(startDate, values.endDate ?? undefined)
+          : {
+              start: { dateTime: startDate.toISOString() },
+              end: { dateTime: new Date(startDate.getTime() + parsedMilliseconds!).toISOString() },
+            };
+        const requestBody: calendar_v3.Schema$Event = {
+          summary: values.title,
+          description: addSignature(values.description),
+          ...schedule,
+          attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
+          location:
+            values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
+              ? undefined
+              : values.conferencingProvider,
+          conferenceData:
+            values.conferencingProvider === "hangoutsMeet"
+              ? {
+                  createRequest: {
+                    conferenceSolutionKey: {
+                      type: "hangoutsMeet",
+                    },
+                    requestId: randomUUID(),
+                  },
+                }
+              : undefined,
+        };
         const event = await calendar.events.insert({
           calendarId,
           requestBody,
@@ -197,88 +227,137 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
     },
   });
 
-  const calendarItemProps = {
-    ...itemProps.calendar,
+  const calendarId = values.calendar ?? "primary";
+  const { data: calendarData, isLoading } = useCalendar(calendarId);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoadingCalendars || availableCalendars.length === 0) {
+      return;
+    }
+
+    const currentCalendar = values.calendar ?? "primary";
+    if (availableCalendars.some((calendar) => calendar.id === currentCalendar)) {
+      return;
+    }
+
+    const fallback = availableCalendars.find((calendar) => calendar.id === "primary")?.id ?? availableCalendars[0]?.id;
+    if (fallback) {
+      setValue("calendar", fallback);
+    }
+  }, [availableCalendars, isLoadingCalendars, setValue, values.calendar]);
+
+  const conferencingItemProps = {
+    ...itemProps.conferencingProvider,
     onChange: (value: string) => {
-      setCalendarId(value);
-      itemProps?.calendar?.onChange?.(value);
+      setLastConferencingProvider(value);
+      itemProps.conferencingProvider?.onChange?.(value);
     },
   };
 
   return (
     <Form
-      isLoading={isLoading || isLoadingCalendars}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Calendar} title="Create Event" onSubmit={handleSubmit} />
-          <ConferenceProviderActions />
+          <ActionPanel.Section title="Conferencing">
+            <AddConferenceProviderAction />
+            <EditConferenceProvidersAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Calendar" value={calendarId} {...calendarItemProps}>
-        {availableCalendars.map((calendar) => (
-          <Form.Dropdown.Item key={calendar.id} value={calendar.id} title={calendar.title} />
-        ))}
-      </Form.Dropdown>
-      <Form.TextField title="Title" placeholder="Event title..." {...itemProps.title} />
-      <Form.DatePicker
-        title="Start Date"
-        min={new Date()}
-        type={Form.DatePicker.Type.DateTime}
-        {...itemProps.startDate}
-      />
-      <Form.TextField
-        title="Duration"
-        placeholder="30min, 1h, 1h30m, ..."
-        info="Defaults to minutes without specified unit. Valid examples: 30, 45m, 1h, 1h30m."
-        storeValue
-        {...itemProps.duration}
-      ></Form.TextField>
-      <Form.TextField
-        title="Guests"
-        placeholder="Event guests..."
-        info="Comma seperated list of email addresses"
-        {...itemProps.attendees}
-      />
-      <Form.Dropdown
-        title="Conferencing"
-        storeValue
-        info={conferencingProviders.length === 0 ? 'Press "⌘ + N" to create a conference provider' : undefined}
-        {...itemProps.conferencingProvider}
-      >
-        <Form.Dropdown.Section>
-          <Form.Dropdown.Item icon={Icon.CircleDisabled} title="None" value="none" />
-          {calendarData?.data.conferenceProperties?.allowedConferenceSolutionTypes?.map((type) => (
-            <Form.Dropdown.Item
-              key={type}
-              icon={getConferenceSolutionIcon(type)}
-              title={getConferenceSolutionTitle(type)}
-              value={type}
+      {isMounted ? (
+        <>
+          {!isLoadingCalendars && (
+            <Form.Dropdown title="Calendar" {...itemProps.calendar}>
+              {availableCalendars.map((calendar) => (
+                <Form.Dropdown.Item key={calendar.id} value={calendar.id} title={calendar.title} />
+              ))}
+            </Form.Dropdown>
+          )}
+          <Form.TextField title="Title" placeholder="Event title..." {...itemProps.title} />
+          <Form.Checkbox
+            label="All-day"
+            info="Create a date-only event. The end date is inclusive."
+            {...itemProps.allDay}
+          />
+          <Form.DatePicker
+            title={values.allDay ? "Start Date" : "Start Date and Time"}
+            min={new Date()}
+            type={values.allDay ? Form.DatePicker.Type.Date : Form.DatePicker.Type.DateTime}
+            {...itemProps.startDate}
+          />
+          {values.allDay ? (
+            <Form.DatePicker
+              title="End Date"
+              info="Optional. Leave empty for a single-day event."
+              min={values.startDate ?? new Date()}
+              type={Form.DatePicker.Type.Date}
+              {...itemProps.endDate}
             />
-          ))}
-        </Form.Dropdown.Section>
-        <Form.Dropdown.Section title="Custom">
-          {conferencingProviders.map((provider) => (
-            <Form.Dropdown.Item
-              key={`${provider.name}-${provider.link}`}
-              icon={getFavicon(provider.link)}
-              title={provider.name}
-              value={provider.link}
+          ) : (
+            <Form.TextField
+              title="Duration"
+              placeholder="30min, 1h, 1h30m, ..."
+              info="Defaults to minutes without specified unit. Valid examples: 30, 45m, 1h, 1h30m."
+              storeValue
+              {...itemProps.duration}
             />
-          ))}
-        </Form.Dropdown.Section>
-      </Form.Dropdown>
-      <Form.Dropdown
-        title="Send Invitations"
-        info="Send email invitations (including meeting links) to guests"
-        storeValue
-        {...itemProps.sendInvitations}
-      >
-        <Form.Dropdown.Item title="All Guests" value="all" />
-        <Form.Dropdown.Item title="External Guests Only" value="externalOnly" />
-        <Form.Dropdown.Item title="None" value="none" />
-      </Form.Dropdown>
-      <Form.TextArea title="Description" placeholder="Event description..." {...itemProps.description} />
+          )}
+          <Form.TextField
+            title="Guests"
+            placeholder="Event guests..."
+            info="Comma seperated list of email addresses"
+            {...itemProps.attendees}
+          />
+          <Form.Dropdown
+            title="Conferencing"
+            info={
+              conferencingProviders.length === 0
+                ? `Press "${isMacOS ? "⌘ + N" : "Ctrl + N"}" to create a conference provider`
+                : undefined
+            }
+            {...conferencingItemProps}
+          >
+            <Form.Dropdown.Section>
+              <Form.Dropdown.Item icon={Icon.CircleDisabled} title="None" value="none" />
+              {calendarData?.data.conferenceProperties?.allowedConferenceSolutionTypes?.map((type) => (
+                <Form.Dropdown.Item
+                  key={type}
+                  icon={getConferenceSolutionIcon(type)}
+                  title={getConferenceSolutionTitle(type)}
+                  value={type}
+                />
+              ))}
+            </Form.Dropdown.Section>
+            <Form.Dropdown.Section title="Custom">
+              {conferencingProviders.map((provider) => (
+                <Form.Dropdown.Item
+                  key={`${provider.name}-${provider.link}`}
+                  icon={getFavicon(provider.link)}
+                  title={provider.name}
+                  value={provider.link}
+                />
+              ))}
+            </Form.Dropdown.Section>
+          </Form.Dropdown>
+          <Form.Dropdown
+            title="Send Invitations"
+            info="Send email invitations (including meeting links) to guests"
+            {...itemProps.sendInvitations}
+          >
+            <Form.Dropdown.Item title="All Guests" value="all" />
+            <Form.Dropdown.Item title="External Guests Only" value="externalOnly" />
+            <Form.Dropdown.Item title="None" value="none" />
+          </Form.Dropdown>
+          <Form.TextArea title="Description" placeholder="Event description..." {...itemProps.description} />
+        </>
+      ) : null}
     </Form>
   );
 }

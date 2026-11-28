@@ -26,6 +26,13 @@ Raycast closes immediately and is ready for your next command.
 
 <img width="600" alt="Quickstart New Timer Command" src="./assets/new-entry.png">
 
+### Quickstop Timer
+
+Stops the running time entry immediately, without opening a window. Assign it a
+global hotkey to end a timer from anywhere with one keystroke — a HUD confirms
+what was stopped and how long it ran. If nothing is running, it says so and does
+nothing.
+
 ### Manage Tags
 
 This command list all the tags you have access to. You can create, rename, and delete them, assuming you have the appropriate permissions.

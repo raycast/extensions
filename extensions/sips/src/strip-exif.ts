@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as https from "https";
@@ -10,7 +9,7 @@ import * as tar from "tar";
 import runOperation from "./operations/runOperation";
 import stripEXIF from "./operations/stripEXIFOperation";
 import { ExifToolLocation } from "./utilities/enums";
-import { getSelectedImages } from "./utilities/utils";
+import { findSystemExifTool, getSelectedImages } from "./utilities/utils";
 
 /**
  * Prompts the user to install ExifTool. If the user accepts, ExifTool is installed to the support directory.
@@ -44,14 +43,39 @@ export async function installExifTool() {
     });
 
     const supportPath = environment.supportPath;
-    const tarURL = "https://exiftool.org/Image-ExifTool-13.21.tar.gz";
-    const checksum = "c009024d0405ddc12fb448f0d3b2acc63ed5d87d55bf1f242522f22f0a03985c";
+    // CPAN keeps past releases available, unlike exiftool.org which only hosts the latest version
+    const tarURL = "https://cpan.metacpan.org/authors/id/E/EX/EXIFTOOL/Image-ExifTool-13.55.tar.gz";
+    const checksum = "5f4c81d34ad406538c2871ad72dbfceb5d9b412b2f16cbbeb4d712d270846667";
 
     let waiting = true;
-    https.get(tarURL, async (response) => {
-      const tarName = "Image-ExifTool-13.21.tar.gz";
+    const failDownload = (message: string) => {
+      if (!waiting) return;
+      toast.title = "Failed to download ExifTool";
+      toast.message = message;
+      toast.style = Toast.Style.Failure;
+      waiting = false;
+    };
+
+    const request = https.get(tarURL, async (response) => {
+      if (response.statusCode !== 200) {
+        response.resume();
+        failDownload(`HTTP ${response.statusCode}`);
+        return;
+      }
+
+      const tarName = "Image-ExifTool-13.55.tar.gz";
       const tarPath = path.join(supportPath, tarName);
       const file = fs.createWriteStream(tarPath);
+
+      // Handle failures during the transfer (e.g. the connection drops after the headers) or while writing the file
+      const abortDownload = (error: Error) => {
+        response.destroy();
+        file.destroy();
+        fs.promises.rm(tarPath, { force: true }).catch(() => undefined);
+        failDownload(error.message);
+      };
+      response.on("error", abortDownload);
+      file.on("error", abortDownload);
       response.pipe(file);
 
       // Checksum verification
@@ -74,10 +98,10 @@ export async function installExifTool() {
         if (valid) {
           // Extract the tarball
           await tar.x({
-            file: `${supportPath}/Image-ExifTool-13.21.tar.gz`,
+            file: tarPath,
             cwd: supportPath,
           });
-          await fs.promises.rename(`${supportPath}/Image-ExifTool-13.21`, `${supportPath}/exiftool`);
+          await fs.promises.rename(`${supportPath}/Image-ExifTool-13.55`, `${supportPath}/exiftool`);
           await LocalStorage.setItem("exifToolLocation", ExifToolLocation.SUPPORT_DIR);
           waiting = false;
           toast.title = "Done!";
@@ -86,6 +110,7 @@ export async function installExifTool() {
         await fs.promises.unlink(tarPath);
       });
     });
+    request.on("error", (error) => failDownload(error.message));
 
     while (waiting) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -96,15 +121,13 @@ export async function installExifTool() {
 }
 
 /**
- * Determines whether ExifTool is on the path. If not, prompts the user to install it.
+ * Determines whether ExifTool is installed on the system (on the path or in a common location such as Homebrew's).
+ * If not, prompts the user to install it.
  */
 export async function setExifToolLocation() {
-  // See if ExifTool is on the path
-  try {
-    execSync("exiftool -ver");
+  if (findSystemExifTool()) {
     await LocalStorage.setItem("exifToolLocation", ExifToolLocation.ON_PATH);
-  } catch {
-    // If not, prompt the user to install it
+  } else {
     await installExifTool();
   }
 }
@@ -127,12 +150,10 @@ export async function getExifToolLocation() {
   }
 
   if (initialLocation === ExifToolLocation.ON_PATH) {
-    try {
-      execSync("exiftool -ver");
+    if (findSystemExifTool()) {
       return ExifToolLocation.ON_PATH;
-    } catch {
-      await setExifToolLocation();
     }
+    await setExifToolLocation();
   }
 
   return await LocalStorage.getItem("exifToolLocation");

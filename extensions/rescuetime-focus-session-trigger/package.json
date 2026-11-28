@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rescuetime-focus-session-trigger",
   "title": "RescueTime",
-  "description": "Commands to get the most out of RescueTime. Start and stop Focus Sessions, get your daily highlights, goals, alerts, log offline time, and more.",
+  "description": "Start and end RescueTime Focus Sessions, see today's productivity, read daily highlights and alerts, and log highlights or offline time.",
   "icon": "rescueTime-logo.png",
   "author": "TuorTheBlessed",
   "contributors": [

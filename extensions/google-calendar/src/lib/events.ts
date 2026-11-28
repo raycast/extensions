@@ -36,15 +36,11 @@ export interface EventWriteInput {
   eventType?: EventType;
   birthdayType?: "birthday";
   focusTimeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   focusTimeChatStatus?: "available" | "doNotDisturb";
   focusTimeDeclineMessage?: string;
   outOfOfficeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   outOfOfficeDeclineMessage?: string;
   workingLocationType?: "homeOffice" | "officeLocation" | "customLocation";
   workingLocationLabel?: string;
@@ -135,11 +131,16 @@ function buildAttendees(
     add(parseEmails(value, label), properties);
   };
 
-  applyField(input.attendees, "attendee email", {}, (attendee) => !attendee.optional && !attendee.resource);
+  applyField(
+    input.attendees,
+    "attendee email",
+    { optional: false, resource: false },
+    (attendee) => !attendee.optional && !attendee.resource,
+  );
   applyField(
     input.requiredAttendees,
     "required attendee email",
-    {},
+    { optional: false, resource: false },
     (attendee) => !attendee.optional && !attendee.resource,
   );
   applyField(input.optionalAttendees, "optional attendee email", { optional: true, resource: false }, (attendee) =>
@@ -155,6 +156,26 @@ function addUtcDays(date: string, days: number) {
   const result = new Date(`${date}T00:00:00Z`);
   result.setUTCDate(result.getUTCDate() + days);
   return result.toISOString().slice(0, 10);
+}
+
+function calendarDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Converts date-picker values into Google Calendar's all-day date range.
+ * The UI end date is inclusive; Google's end.date is exclusive.
+ */
+export function buildAllDayDateRange(start: Date, end?: Date) {
+  const startDate = calendarDate(start);
+  const endDate = calendarDate(end ?? start);
+  if (endDate < startDate) {
+    throw new Error("All-day end date cannot be before the start date.");
+  }
+  return { start: { date: startDate }, end: { date: addUtcDays(endDate, 1) } };
 }
 
 function dateDurationDays(start: string, end: string) {

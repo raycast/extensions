@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "braid",
   "title": "Braid Design System",
-  "description": "Search and use Braid Components and Iconography from Raycast",
+  "description": "Search the Braid Design System docs, components and icons, and open them.",
   "icon": "braid-raycast-icon.png",
   "author": "felixhabib",
   "categories": [
@@ -50,5 +50,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "format": "ray lint --fix"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

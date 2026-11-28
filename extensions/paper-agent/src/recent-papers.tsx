@@ -1,80 +1,31 @@
-import { Action, ActionPanel, List, getPreferenceValues, open } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import * as path from "node:path";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { useEffect, useMemo, useState } from "react";
-import { checkCoreAvailable, CORE_INSTALL_URL, getBootstrapCopyText } from "./core-check";
-import { withEffectiveConfigPathAsync } from "./config-utils";
-import { type Paper, parseCliPapers } from "./paper-utils";
+import { checkCoreAvailable } from "./core-check";
+import { PaperEmptyView } from "./paper-empty-view";
+import { resolveDeliveryDirs } from "./config-utils";
+import { type Paper } from "./paper-utils";
 import { PaperListView } from "./paper-list";
+import { loadRecentPapers } from "./paper-loaders";
 
-const execFileAsync = promisify(execFile);
 const DEFAULT_LIMIT = 30;
-
-async function loadRecentPapers(options: {
-  configPath: string;
-  prefPaperDir: string;
-  paperDir: string;
-  libraryDir: string;
-  pythonBin: string;
-  agentRoot: string;
-  limit: number;
-}): Promise<Paper[]> {
-  const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot, limit } = options;
-
-  if (!configPath || !prefPaperDir) {
-    return [];
-  }
-
-  try {
-    const rawJson = await withEffectiveConfigPathAsync(configPath, prefPaperDir, async (effectiveConfigPath) => {
-      const result = await execFileAsync(
-        pythonBin,
-        ["-m", "paper_agent", "list", "--json", "--limit", String(limit), "--config", effectiveConfigPath],
-        { cwd: agentRoot, encoding: "utf-8" },
-      );
-      return result.stdout;
-    });
-
-    return parseCliPapers(rawJson, {
-      paperDir,
-      libraryDir,
-      fallbackDate: "unknown",
-    });
-  } catch {
-    return [];
-  }
-}
-
-function CoreNotFoundEmptyView() {
-  return (
-    <List.EmptyView
-      title="Core not found"
-      description={`Install: ${CORE_INSTALL_URL} — or run the bootstrap command (Copy action).`}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Bootstrap Command" content={getBootstrapCopyText()} />
-          <Action title="Open GitHub" onAction={() => open(CORE_INSTALL_URL)} />
-        </ActionPanel>
-      }
-    />
-  );
-}
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.RecentPapers>();
+  const [retry, setRetry] = useState(0);
   const normalized = useMemo(() => {
     const configPath = prefs.configPath?.trim() ?? "";
     const hasConfig = configPath.length > 0;
     const prefPaperDir = prefs.paperDir?.trim() ?? "";
-    const paperDir = prefPaperDir;
-    const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
-    const hasPaperDir = prefPaperDir.length > 0;
+    const { paperDir, libraryDir } = resolveDeliveryDirs(configPath, prefPaperDir);
+    const hasPaperDir = paperDir.length > 0;
     const agentRoot = hasConfig ? path.dirname(configPath) : "";
-    const pythonPathTrim = prefs.pythonPath?.trim() ?? "";
-    const pythonBin = pythonPathTrim.length > 0 ? pythonPathTrim : path.join(agentRoot, ".venv", "bin", "python3");
+    const pythonBin =
+      prefs.pythonPath && prefs.pythonPath.trim().length > 0
+        ? prefs.pythonPath.trim()
+        : path.join(agentRoot, ".venv", "bin", "python3");
     const rawLimit = prefs.recentLimit;
-    const parsedLimit = parseInt(String(rawLimit ?? "").trim(), 10);
+    const parsedLimit = parseInt(rawLimit?.trim() ?? "", 10);
     const recentLimit = Number.isNaN(parsedLimit) || parsedLimit < 1 ? DEFAULT_LIMIT : Math.min(parsedLimit, 500);
     return {
       configPath,
@@ -87,36 +38,47 @@ export default function Command() {
       pythonBin,
       recentLimit,
     };
-  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath, prefs.recentLimit]);
+  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath, prefs.recentLimit, retry]);
   const { configPath, hasConfig, prefPaperDir, paperDir, libraryDir, hasPaperDir, agentRoot, pythonBin, recentLimit } =
     normalized;
 
   const [coreOk, setCoreOk] = useState<boolean | null>(null);
   const [papers, setPapers] = useState<Paper[]>([]);
   const [isLoadingPapers, setIsLoadingPapers] = useState(false);
+  const [coreError, setCoreError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const retryLoad = () => setRetry((value) => value + 1);
 
   useEffect(() => {
     if (!hasConfig || !hasPaperDir) return;
 
     let cancelled = false;
-    void checkCoreAvailable({
-      configPath: prefs.configPath,
-      paperDir: prefs.paperDir,
-      pythonPath: prefs.pythonPath,
-    })
+    const controller = new AbortController();
+    setCoreOk(null);
+    void checkCoreAvailable(
+      {
+        configPath: prefs.configPath,
+        paperDir: prefs.paperDir,
+        pythonPath: prefs.pythonPath,
+      },
+      controller.signal,
+    )
       .then((r) => {
         if (cancelled) return;
         setCoreOk(r.ok);
+        setCoreError(r.error ?? "");
       })
       .catch(() => {
         if (cancelled) return;
         setCoreOk(false);
+        setCoreError("Unable to check Paper Agent. Check extension preferences and retry.");
       });
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [normalized]);
+  }, [normalized, retry]);
 
   useEffect(() => {
     if (!hasConfig || !hasPaperDir || !coreOk) {
@@ -126,16 +88,28 @@ export default function Command() {
     }
 
     let cancelled = false;
+    const controller = new AbortController();
     setIsLoadingPapers(true);
+    setLoadError("");
 
-    void loadRecentPapers({ configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot, limit: recentLimit })
+    void loadRecentPapers({
+      configPath,
+      prefPaperDir,
+      paperDir,
+      libraryDir,
+      pythonBin,
+      agentRoot,
+      limit: recentLimit,
+      signal: controller.signal,
+    })
       .then((results) => {
         if (cancelled) return;
         setPapers(results);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         setPapers([]);
+        setLoadError(error instanceof Error ? error.message : "Unable to load papers. Please retry.");
       })
       .finally(() => {
         if (cancelled) return;
@@ -144,15 +118,16 @@ export default function Command() {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [normalized, coreOk]);
 
   if (!hasConfig || !hasPaperDir) {
     return (
       <List>
-        <List.EmptyView
+        <PaperEmptyView
           title="Set preferences first"
-          description="Set both 'Config File Path' and 'Paper Directory' in extension preferences."
+          description="Set Config File Path, then set delivery.paper_dir in YAML or Paper Directory in Preferences."
         />
       </List>
     );
@@ -160,7 +135,7 @@ export default function Command() {
 
   if (coreOk === null) {
     return (
-      <List>
+      <List isLoading>
         <List.EmptyView title="Checking core…" description="Verifying Paper Agent is installed." />
       </List>
     );
@@ -169,7 +144,15 @@ export default function Command() {
   if (!coreOk) {
     return (
       <List>
-        <CoreNotFoundEmptyView />
+        <PaperEmptyView title="Core unavailable" description={coreError} onRetry={retryLoad} showInstall />
+      </List>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <List>
+        <PaperEmptyView title="Could not load papers" description={loadError} onRetry={retryLoad} />
       </List>
     );
   }
@@ -178,8 +161,8 @@ export default function Command() {
     <PaperListView
       papers={papers}
       isLoading={isLoadingPapers}
-      emptyTitle="No papers shown"
-      emptyDescription="Config and Paper directory are set but no data came back. Run the pipeline at least once."
+      emptyTitle="No papers yet"
+      emptyDescription="Run the pipeline to add papers to your library."
       subtitleMode="date-and-authors"
     />
   );

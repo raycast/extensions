@@ -1,11 +1,15 @@
 import {
   Action,
   ActionPanel,
+  BrowserExtension,
   Clipboard,
   Form,
+  getFrontmostApplication,
   getSelectedFinderItems,
+  getSelectedText,
   getPreferenceValues,
   Icon,
+  Keyboard,
   LaunchProps,
   open,
   openExtensionPreferences,
@@ -14,8 +18,10 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { runAppleScript, showFailureToast, useCachedPromise } from "@raycast/utils";
+import { readdirSync, readFileSync } from "fs";
+import { join } from "path";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addObjectToSpaces,
   createObject,
@@ -34,17 +40,39 @@ import {
   classifyFilePaths,
   classifyTextInput,
   getUnsupportedUploadFiles,
+  isProbablyUrl,
   SaveInput,
 } from "./save-input";
+import {
+  getSaveKind,
+  getSaveSourceTitle,
+  isFinderBundleId,
+  joinNoteParts,
+  SAVE_SOURCE_PRIORITY,
+  SaveSource,
+  SaveSourceId,
+  shouldReadSelectedText,
+  sortSaveSources,
+  toDetectedInput,
+} from "./save-sources";
 import { isUserTag } from "./tag-utils";
+import {
+  buildActiveTabAppleScript,
+  detectFlavorFromScriptingDefinition,
+  extractBundleIdFromInfoPlist,
+  getBrowserScriptFlavor,
+  getScriptingBundleId,
+  isKnownBrowserBundleId,
+  isSafeBundleId,
+  parseActiveTabUrl,
+  ScriptableBrowserFlavor,
+  supportsAppleScript,
+} from "./browser-tabs";
 
+/** Only the fields still read from the submitted form; the text fields are controlled state. */
 type SaveValues = {
-  kind: "url" | "note" | "file";
   existingTags: string[];
   files: string[];
-  title?: string;
-  url: string;
-  content: string;
   spaceId: string;
 };
 
@@ -55,112 +83,373 @@ type SaveLaunchContext = {
   url?: string;
 };
 
+/** What the form opens with. The kind of save is never stored; it follows from what's filled in. */
 type InitialState = {
-  kind: SaveValues["kind"];
-  content: string;
+  input: string;
   files: string[];
-  title: string;
-  url: string;
 };
 
-const EMPTY_INITIAL_STATE: InitialState = {
-  kind: "note",
-  content: "",
-  files: [],
-  title: "",
-  url: "",
-};
+const EMPTY_INITIAL_STATE: InitialState = { input: "", files: [] };
 
 function getInitialStateFromInput(input: SaveInput): InitialState | undefined {
   if (input.kind === "files") {
-    return { ...EMPTY_INITIAL_STATE, kind: "file", files: input.value };
+    return { input: "", files: input.value };
   }
 
-  if (input.kind === "url") {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: input.value };
-  }
-
-  if (input.kind === "note") {
-    return { ...EMPTY_INITIAL_STATE, kind: "note", content: input.value };
+  if (input.kind === "url" || input.kind === "note") {
+    return { input: input.value, files: [] };
   }
 
   return undefined;
 }
 
-async function getClipboardInitialState(): Promise<InitialState | undefined> {
-  for (let offset = 0; offset <= 5; offset++) {
-    try {
-      const initialState = getInitialStateFromInput(classifyClipboardContent(await Clipboard.read({ offset })));
-
-      if (initialState) {
-        return initialState;
-      }
-    } catch {
-      // Continue through the available clipboard history when an item can't be read.
-    }
-  }
-
-  return undefined;
-}
-
-async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
+/**
+ * Input handed over on purpose — from another command, a deeplink, or text typed after the
+ * command name in root search. It always wins and never involves detection.
+ */
+function getExplicitInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): InitialState | undefined {
   const launchContextFiles = classifyFilePaths([
     ...(Array.isArray(launchContext?.files) ? launchContext.files : []),
     ...(launchContext?.file ? [launchContext.file] : []),
   ]);
 
   if (launchContextFiles.kind === "files") {
-    return { ...EMPTY_INITIAL_STATE, kind: "file", files: launchContextFiles.value };
+    return { input: "", files: launchContextFiles.value };
   }
 
   if (launchContext?.url) {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: launchContext.url };
+    return { input: launchContext.url, files: [] };
   }
 
   if (launchContext?.content) {
-    return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
+    return { input: launchContext.content, files: [] };
   }
 
-  const clipboardInitialState = await getClipboardInitialState();
+  return getInitialStateFromInput(classifyTextInput(fallbackText));
+}
 
-  if (clipboardInitialState) {
-    return clipboardInitialState;
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const BROWSER_TABS_RETRY_DELAYS_MS = [0, 150];
+const APPLESCRIPT_TIMEOUT_MS = 3000;
+
+type ScriptingDefinition = {
+  content: string;
+  /** The bundle that actually owns the terminology, which may be a nested app. */
+  bundleId?: string;
+};
+
+/**
+ * Locates an app's scripting definition. Some browsers (e.g. ChatGPT Atlas) nest the real
+ * app — and its `.sdef` — inside `Contents/Support`, in which case the terminology belongs
+ * to the nested bundle id rather than the one macOS reports for the frontmost app.
+ */
+function findScriptingDefinition(appPath: string): ScriptingDefinition | undefined {
+  const candidates: Array<{ appDir: string; nested: boolean }> = [{ appDir: appPath, nested: false }];
+  const supportDir = join(appPath, "Contents", "Support");
+
+  try {
+    for (const entry of readdirSync(supportDir)) {
+      if (entry.endsWith(".app")) {
+        candidates.push({ appDir: join(supportDir, entry), nested: true });
+      }
+    }
+  } catch {
+    // No nested Support bundle.
+  }
+
+  for (const { appDir, nested } of candidates) {
+    try {
+      const resourcesDir = join(appDir, "Contents", "Resources");
+      const sdefName = readdirSync(resourcesDir).find((entry) => entry.endsWith(".sdef"));
+
+      if (!sdefName) {
+        continue;
+      }
+
+      const content = readFileSync(join(resourcesDir, sdefName), "utf8");
+
+      if (!nested) {
+        return { content };
+      }
+
+      const infoPlist = readFileSync(join(appDir, "Contents", "Info.plist"), "utf8");
+      return { content, bundleId: extractBundleIdFromInfoPlist(infoPlist) };
+    } catch {
+      // Directory missing or unreadable; try the next candidate.
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolves how to script the frontmost browser: allowlist first, then the app's own
+ * scripting definition so unlisted browsers keep working without a code change.
+ */
+function resolveBrowserTarget(
+  bundleId: string,
+  appPath?: string,
+): { bundleId: string; flavor: ScriptableBrowserFlavor } | undefined {
+  const knownFlavor = getBrowserScriptFlavor(bundleId);
+
+  if (knownFlavor === "safari" || knownFlavor === "chromium") {
+    return { bundleId: getScriptingBundleId(bundleId), flavor: knownFlavor };
+  }
+
+  // A recognized-but-unscriptable browser (Firefox); don't probe its bundle.
+  if (knownFlavor === "none" || !appPath) {
+    return undefined;
+  }
+
+  const scriptingDefinition = findScriptingDefinition(appPath);
+
+  if (!scriptingDefinition) {
+    return undefined;
+  }
+
+  const flavor = detectFlavorFromScriptingDefinition(scriptingDefinition.content);
+
+  if (!flavor) {
+    return undefined;
+  }
+
+  const scriptingBundleId = scriptingDefinition.bundleId ?? bundleId;
+  return isSafeBundleId(scriptingBundleId) ? { bundleId: scriptingBundleId, flavor } : undefined;
+}
+
+type FrontmostBrowser = {
+  /** The bundle to address in AppleScript; undefined for browsers we can't script. */
+  scriptingBundleId?: string;
+  /** Undefined for browsers we can't script (Firefox), which use the Browser Extension. */
+  flavor?: ScriptableBrowserFlavor;
+};
+
+/**
+ * Identifies the frontmost app as a browser. Known bundle ids resolve immediately;
+ * anything else is accepted only if its scripting definition looks like a browser's,
+ * which is what lets newer browsers work without being added to the allowlist.
+ */
+function resolveFrontmostBrowser(frontmostApplication: {
+  bundleId?: string;
+  path?: string;
+}): FrontmostBrowser | undefined {
+  const bundleId = frontmostApplication.bundleId;
+
+  if (!bundleId || !isSafeBundleId(bundleId)) {
+    return undefined;
+  }
+
+  const target = supportsAppleScript() ? resolveBrowserTarget(bundleId, frontmostApplication.path) : undefined;
+
+  if (target) {
+    return { scriptingBundleId: target.bundleId, flavor: target.flavor };
+  }
+
+  return isKnownBrowserBundleId(bundleId) ? {} : undefined;
+}
+
+async function getActiveTabUrlViaAppleScript(browser: FrontmostBrowser): Promise<string | undefined> {
+  const { scriptingBundleId, flavor } = browser;
+
+  if (!scriptingBundleId || !flavor) {
+    return undefined;
   }
 
   try {
-    const finderSelection = await getSelectedFinderItems();
-    const selectedFiles = classifyFilePaths(finderSelection.map((item) => item.path));
+    const output = await runAppleScript(buildActiveTabAppleScript(scriptingBundleId, flavor), {
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
 
-    if (selectedFiles.kind === "files") {
-      return { ...EMPTY_INITIAL_STATE, kind: "file", files: selectedFiles.value };
-    }
+    return parseActiveTabUrl(output);
   } catch {
-    // Ignore missing Finder context and fall back to text detection.
+    // Automation permission denied, browser not scriptable, or no open window.
+    return undefined;
   }
-
-  const fallbackInput = classifyTextInput(fallbackText);
-
-  if (fallbackInput.kind === "url") {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: fallbackInput.value };
-  }
-
-  if (fallbackInput.kind === "note") {
-    return { ...EMPTY_INITIAL_STATE, kind: "note", content: fallbackInput.value };
-  }
-
-  return EMPTY_INITIAL_STATE;
 }
+
+async function getActiveTabUrlViaBrowserExtension(): Promise<string | undefined> {
+  for (const retryDelayMs of BROWSER_TABS_RETRY_DELAYS_MS) {
+    if (retryDelayMs > 0) {
+      await delay(retryDelayMs);
+    }
+
+    try {
+      const tabs = await BrowserExtension.getTabs();
+      const activeTab = tabs.find((tab) => tab.active);
+
+      if (activeTab?.url && isProbablyUrl(activeTab.url)) {
+        return activeTab.url;
+      }
+
+      // If no tab is reported as active (a known Safari/Browser-Extension gap),
+      // we deliberately don't guess — reading page content across tabs to work
+      // around it would require broader per-site permissions than this feature
+      // is worth. Fall through to other detection layers instead.
+      return undefined;
+    } catch {
+      // The native-messaging bridge to the Browser Extension can be transiently
+      // unavailable (e.g. right after install, or on a tab opened before it connected);
+      // retry a couple of times before giving up.
+    }
+  }
+
+  return undefined;
+}
+
+type FrontmostApplication = Awaited<ReturnType<typeof getFrontmostApplication>>;
+
+async function readClipboardSource(): Promise<SaveSource | undefined> {
+  try {
+    // Latest item only: walking back through history is how stale prefills used to sneak in.
+    const input = toDetectedInput(classifyClipboardContent(await Clipboard.read()));
+    return input ? { id: "clipboard", input } : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function readSelectionSource(): Promise<SaveSource | undefined> {
+  try {
+    const input = toDetectedInput(classifyTextInput(await getSelectedText()));
+    return input ? { id: "selection", input } : undefined;
+  } catch {
+    // No selection, or the frontmost app doesn't expose one.
+    return undefined;
+  }
+}
+
+async function readTabSource(application: FrontmostApplication): Promise<SaveSource | undefined> {
+  const browser = resolveFrontmostBrowser(application);
+
+  if (!browser) {
+    return undefined;
+  }
+
+  // The Browser Extension reports whichever browser it's installed in, which isn't
+  // necessarily the frontmost one — trusting it for a scriptable browser surfaces a URL
+  // from a different app. Only use it when the browser can't be scripted (Firefox, Zen).
+  const url = browser.flavor
+    ? await getActiveTabUrlViaAppleScript(browser)
+    : await getActiveTabUrlViaBrowserExtension();
+
+  if (!url || !isProbablyUrl(url)) {
+    return undefined;
+  }
+
+  return { id: "tab", input: { kind: "url", value: url }, appName: application.name };
+}
+
+async function readFinderSource(): Promise<SaveSource | undefined> {
+  try {
+    const selection = await getSelectedFinderItems();
+    const input = toDetectedInput(classifyFilePaths(selection.map((item) => item.path)));
+    return input ? { id: "finder", input } : undefined;
+  } catch {
+    // Nothing selected in Finder.
+    return undefined;
+  }
+}
+
+type Detection = {
+  /** Resolves once every higher-priority source has settled, so a slow read only blocks when it would win. */
+  defaultSource: Promise<SaveSource | undefined>;
+  /** Every source that found something, in priority order. */
+  allSources: Promise<SaveSource[]>;
+};
+
+function startDetection(): Detection {
+  const frontmostApplication = getFrontmostApplication().catch(() => undefined);
+  // Read the clipboard first: `getSelectedText()` can go through the system clipboard, and
+  // reading both at once risks picking up the selection as clipboard content.
+  const clipboard = readClipboardSource();
+
+  const selection = (async () => {
+    const application = await frontmostApplication;
+    await clipboard;
+    return shouldReadSelectedText(application?.bundleId) ? readSelectionSource() : undefined;
+  })();
+
+  const tab = (async () => {
+    const application = await frontmostApplication;
+    return application ? readTabSource(application) : undefined;
+  })();
+
+  const finder = (async () => {
+    const application = await frontmostApplication;
+    return isFinderBundleId(application?.bundleId) ? readFinderSource() : undefined;
+  })();
+
+  const reads: Record<SaveSourceId, Promise<SaveSource | undefined>> = { selection, tab, finder, clipboard };
+  const orderedReads = SAVE_SOURCE_PRIORITY.map((id) => reads[id]);
+
+  return {
+    defaultSource: (async () => {
+      for (const read of orderedReads) {
+        const source = await read;
+
+        if (source) {
+          return source;
+        }
+      }
+
+      return undefined;
+    })(),
+    allSources: Promise.all(orderedReads).then(sortSaveSources),
+  };
+}
+
+/**
+ * Detection runs at most once per command launch.
+ *
+ * `getSelectedText()` is a global, stateful operation, so two concurrent calls interfere.
+ * React's development double-mount triggers exactly that, so callers share one detection.
+ * Each command launch is a fresh process, so this lives exactly as long as it should.
+ */
+let detection: Detection | undefined;
+
+function startDetectionOnce(): Detection {
+  detection ??= startDetection();
+  return detection;
+}
+
+function getSourceShortcut(index: number): Keyboard.Shortcut | undefined {
+  if (index > 8) {
+    return undefined;
+  }
+
+  const key = String(index + 1) as Keyboard.KeyEquivalent;
+  return { macOS: { modifiers: ["cmd"], key }, Windows: { modifiers: ["ctrl"], key } };
+}
+
+const MANUAL_SOURCE_VALUE = "manual";
 
 export default function SaveToMymindCommand(props: LaunchProps) {
   const { push } = useNavigation();
-  const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
+  const { accessKeyId, accessKeySecret, accessLevel, detectContext } = getPreferenceValues<Preferences>();
   const accessKeyScope = getAccessKeyScope(accessKeyId, accessKeySecret);
   const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
-  const [kind, setKind] = useState<SaveValues["kind"]>("note");
-  const [initialState, setInitialState] = useState<InitialState>(EMPTY_INITIAL_STATE);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [isInitializing, setIsInitializing] = useState(true);
+  // Explicit input wins outright. Otherwise the form opens empty straight away, and only
+  // detects context when the preference asks for it.
+  const [initialPlan] = useState(() => {
+    const explicitState = getExplicitInitialState(props.fallbackText, launchContext);
+    return explicitState
+      ? { state: explicitState, detect: false }
+      : { state: EMPTY_INITIAL_STATE, detect: Boolean(detectContext) };
+  });
+  const [input, setInput] = useState(initialPlan.state.input);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>(initialPlan.state.files);
+  const [title, setTitle] = useState("");
+  /** The optional note attached to a link. */
+  const [content, setContent] = useState("");
+  const kind = getSaveKind(input, selectedFiles);
+  const [sources, setSources] = useState<SaveSource[]>([]);
+  const [sourceId, setSourceId] = useState<SaveSourceId | typeof MANUAL_SOURCE_VALUE>(MANUAL_SOURCE_VALUE);
+  const [isInitializing, setIsInitializing] = useState(initialPlan.detect);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasTypedRef = useRef(false);
   const effectiveAccessLevel = useEffectiveAccessLevel(accessLevel, accessKeyScope);
   const canWrite = useWriteAccess(accessLevel, accessKeyScope);
   const { data: spaces = [], error: spacesError } = useCachedPromise(() => listSpaces(), [], {
@@ -181,46 +470,92 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         .filter(Boolean),
     [tags],
   );
-  const formKey = useMemo(
-    () =>
-      JSON.stringify({
-        content: initialState.content,
-        files: initialState.files,
-        kind: initialState.kind,
-        title: initialState.title,
-        url: initialState.url,
-      }),
-    [initialState.content, initialState.files, initialState.kind, initialState.title, initialState.url],
-  );
   const unsupportedSelectedFiles = useMemo(() => getUnsupportedUploadFiles(selectedFiles), [selectedFiles]);
 
+  function applySource(source: SaveSource) {
+    const state = getInitialStateFromInput(source.input);
+
+    if (!state) {
+      return;
+    }
+
+    setSourceId(source.id);
+    setSelectedFiles(state.files);
+    setInput(state.input);
+    setTitle("");
+    setContent("");
+  }
+
+  function typed<T>(setter: (value: T) => void) {
+    return (value: T) => {
+      hasTypedRef.current = true;
+      setSourceId(MANUAL_SOURCE_VALUE);
+      setter(value);
+    };
+  }
+
+  /** Editing or clearing a link folds its note into the main field instead of hiding it. */
+  function handleInputChange(value: string) {
+    if (kind === "url" && getSaveKind(value, selectedFiles) !== "url" && content.trim()) {
+      setInput(joinNoteParts(value, content));
+      setContent("");
+      return;
+    }
+
+    setInput(value);
+  }
+
+  /** Adding files folds a link's note into the main field, which becomes the note attached to each file. */
+  function handleFilesChange(files: string[]) {
+    if (files.length > 0 && selectedFiles.length === 0 && content.trim()) {
+      setInput(joinNoteParts(input, content));
+      setContent("");
+    }
+
+    setSelectedFiles(files);
+  }
+
   useEffect(() => {
+    if (!initialPlan.detect) {
+      return;
+    }
+
     let cancelled = false;
+    const { defaultSource, allSources } = startDetectionOnce();
 
-    async function loadInitialState() {
-      try {
-        const nextState = await resolveInitialState(props.fallbackText, launchContext);
-
-        if (cancelled) {
+    void defaultSource
+      .then((source) => {
+        if (cancelled || !source) {
           return;
         }
 
-        setInitialState(nextState);
-        setKind(nextState.kind);
-        setSelectedFiles(nextState.files);
-      } finally {
+        setSources((currentSources) =>
+          currentSources.some((candidate) => candidate.id === source.id)
+            ? currentSources
+            : sortSaveSources([...currentSources, source]),
+        );
+
+        // Don't clobber anything typed while detection was still running.
+        if (!hasTypedRef.current) {
+          applySource(source);
+        }
+      })
+      .finally(() => {
         if (!cancelled) {
           setIsInitializing(false);
         }
-      }
-    }
+      });
 
-    void loadInitialState();
+    void allSources.then((detectedSources) => {
+      if (!cancelled) {
+        setSources(detectedSources);
+      }
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [launchContext, props.fallbackText]);
+  }, [initialPlan]);
 
   if (!canWrite) {
     return (
@@ -248,22 +583,18 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
   async function handleSubmit(values: SaveValues) {
     const existingTags = values.existingTags ?? [];
-    const title = values.title ?? "";
-    const url = values.url ?? "";
-    const content = values.content ?? "";
     const files = values.files ?? selectedFiles;
     const tagNames = Array.from(new Set(existingTags));
     const trimmedTitle = title.trim();
-    const trimmedContent = content.trim();
+    const trimmedInput = input.trim();
+    const trimmedUrl = kind === "url" ? trimmedInput : "";
+    // A note's body, or the note attached to a link or to each uploaded file. A leftover link note is
+    // normally folded into the main field already; joining it here means it can never be dropped.
+    const trimmedContent = kind === "url" ? content.trim() : joinNoteParts(input, content);
     const spaceId = values.spaceId || undefined;
 
-    if (kind === "url" && !url.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "URL is required" });
-      return;
-    }
-
-    if (kind === "note" && !content.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "Note content is required" });
+    if (!kind) {
+      await showToast({ style: Toast.Style.Failure, title: "Add a link, a note, or files" });
       return;
     }
 
@@ -287,6 +618,10 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           throw new Error("Choose at least one supported file.");
         }
 
+        // One file takes the title; with several, a shared title would be wrong, so it leads the note instead.
+        const isSingleFile = supportedFiles.value.length === 1;
+        const fileTitle = isSingleFile ? trimmedTitle || undefined : undefined;
+        const fileNote = isSingleFile ? trimmedContent : joinNoteParts(trimmedTitle, trimmedContent);
         let createdCount = 0;
         let duplicateCount = 0;
         let failureCount = 0;
@@ -299,6 +634,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           try {
             const result = await uploadObjectFile({
               filePath,
+              title: fileTitle,
               tags: tagNames.length > 0 ? tagNames : undefined,
               spaceId,
             });
@@ -307,8 +643,8 @@ export default function SaveToMymindCommand(props: LaunchProps) {
               await addObjectToSpaces(result.object.id, [spaceId]);
             }
 
-            if (trimmedContent) {
-              await createObjectNote(result.object.id, trimmedContent);
+            if (fileNote) {
+              await createObjectNote(result.object.id, fileNote);
             }
 
             if (result.created) {
@@ -343,7 +679,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
             : `${createdCount} file${createdCount === 1 ? "" : "s"} uploaded`;
 
         if (supportedFiles.value.length === 1 && firstCreatedObjectId) {
-          push(<ObjectDetail objectId={firstCreatedObjectId} />, () => {
+          push(<ObjectDetail objectId={firstCreatedObjectId} pollForTags={true} />, () => {
             void popToRoot();
           });
         }
@@ -353,7 +689,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
       const result = await createObject({
         title: kind === "note" ? trimmedTitle || undefined : undefined,
-        url: kind === "url" ? url.trim() : undefined,
+        url: kind === "url" ? trimmedUrl : undefined,
         content: kind === "note" ? trimmedContent || undefined : undefined,
         tags: tagNames.length > 0 ? tagNames : undefined,
         spaceId,
@@ -385,7 +721,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       toast.message = result.object.title?.trim() || "Untitled";
 
       if (result.created) {
-        push(<ObjectDetail objectId={result.object.id} fallbackObject={result.object} />, () => {
+        push(<ObjectDetail objectId={result.object.id} fallbackObject={result.object} pollForTags={true} />, () => {
           void popToRoot();
         });
       }
@@ -400,59 +736,93 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
   return (
     <Form
-      key={formKey}
       isLoading={isInitializing || isSubmitting}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save to mymind" onSubmit={handleSubmit} />
+          {sources.length > 1 ? (
+            <ActionPanel.Submenu title="Switch Source" icon={Icon.ArrowRightCircle}>
+              {sources.map((source, index) => (
+                <Action
+                  key={source.id}
+                  title={getSaveSourceTitle(source)}
+                  shortcut={getSourceShortcut(index)}
+                  onAction={() => applySource(source)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveValues["kind"])}>
-        <Form.Dropdown.Item value="url" title="Link" />
-        <Form.Dropdown.Item value="note" title="Note" />
-        <Form.Dropdown.Item value="file" title="File" />
-      </Form.Dropdown>
-      {kind === "note" ? (
-        <Form.TextField id="title" title="Title" placeholder="Optional title" defaultValue={initialState.title} />
-      ) : null}
-      {kind === "file" ? (
-        <>
-          <Form.FilePicker
-            id="files"
-            title="Files"
-            value={selectedFiles}
-            onChange={setSelectedFiles}
-            allowMultipleSelection={true}
-          />
-          <Form.Description text="Choose one or more supported files. You can remove any file before uploading." />
-          {unsupportedSelectedFiles.length > 0 ? (
-            <Form.Description
-              text={`Unsupported files will be skipped: ${unsupportedSelectedFiles
-                .slice(0, 3)
-                .map((filePath) => filePath.split(/[\\/]/).pop() ?? filePath)
-                .join(", ")}${unsupportedSelectedFiles.length > 3 ? ", …" : ""}`}
-            />
+      {sources.length > 0 ? (
+        <Form.Dropdown
+          id="source"
+          title="From"
+          value={sourceId}
+          onChange={(value) => {
+            const source = sources.find((candidate) => candidate.id === value);
+
+            if (source && value !== sourceId) {
+              applySource(source);
+            }
+          }}
+        >
+          {sourceId === MANUAL_SOURCE_VALUE ? (
+            <Form.Dropdown.Item value={MANUAL_SOURCE_VALUE} title="Typed Manually" />
           ) : null}
-          <Form.TextArea
-            id="content"
-            title="Note"
-            placeholder="Optional note to attach to each uploaded file"
-            defaultValue={initialState.content}
-          />
-        </>
+          {sources.map((source) => (
+            <Form.Dropdown.Item key={source.id} value={source.id} title={getSaveSourceTitle(source)} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+      <Form.TextArea
+        id="input"
+        title={
+          kind === "url"
+            ? "Link"
+            : kind === "file" && selectedFiles.length > 1
+              ? "Note for Each File"
+              : kind
+                ? "Note"
+                : "Link or Note"
+        }
+        placeholder={kind === "file" ? "Optional note to attach" : "Paste a link or write a note"}
+        value={input}
+        onChange={typed(handleInputChange)}
+      />
+      {kind === "file" && isProbablyUrl(input.trim().split("\n")[0] ?? "") ? (
+        <Form.Description text="With files added, the link is saved as text in each file's note." />
+      ) : null}
+      {kind === "note" || (kind === "file" && (selectedFiles.length === 1 || title.trim())) ? (
+        <Form.TextField id="title" title="Title" placeholder="Optional" value={title} onChange={typed(setTitle)} />
       ) : null}
       {kind === "url" ? (
-        <>
-          <Form.TextField id="url" title="URL" placeholder="https://example.com" defaultValue={initialState.url} />
-          <Form.TextArea id="content" title="Body" placeholder="Optional note" defaultValue={initialState.content} />
-        </>
-      ) : kind === "note" ? (
         <Form.TextArea
           id="content"
-          title="Body"
-          placeholder="Write your note here…"
-          defaultValue={initialState.content}
+          title="Note"
+          placeholder="Optional note to attach"
+          value={content}
+          onChange={typed(setContent)}
+        />
+      ) : null}
+      <Form.FilePicker
+        id="files"
+        title="Files"
+        value={selectedFiles}
+        onChange={typed(handleFilesChange)}
+        allowMultipleSelection={true}
+      />
+      {unsupportedSelectedFiles.length > 0 ? (
+        <Form.Description
+          text={
+            "Unsupported files will be skipped: " +
+            unsupportedSelectedFiles
+              .slice(0, 3)
+              .map((filePath) => filePath.split(/[\\/]/).pop() ?? filePath)
+              .join(", ") +
+            (unsupportedSelectedFiles.length > 3 ? ", …" : "")
+          }
         />
       ) : null}
       <Form.Dropdown id="spaceId" title="Space" storeValue={true}>

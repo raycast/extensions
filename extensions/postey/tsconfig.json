@@ -4,6 +4,7 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["es2020"],
+    "types": ["node", "react"],
     "module": "commonjs",
     "target": "es2020",
     "strict": true,

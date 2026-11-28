@@ -3,7 +3,7 @@
   "name": "raycast-port",
   "title": "Raycast Port",
   "type": "module",
-  "description": "This allows you to use Raycast features out of Raycast.",
+  "description": "Use Raycast features such as AI.ask, Browser Extension and Window Management from outside Raycast through deeplinks.",
   "icon": "raycast-port-icon.png",
   "author": "litomore",
   "categories": [

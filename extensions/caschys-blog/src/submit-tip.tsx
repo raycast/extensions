@@ -1,7 +1,8 @@
 import React from "react";
 
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, open } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import { buildTipMailto } from "./mailto";
 
 /**
  * URL to the privacy policy of Caschys Blog
@@ -48,27 +49,16 @@ export default function SubmitTip() {
       }
 
       try {
-        // Create email content
-        const subject = `Tip for Caschys Blog: ${values.tipTitle}`;
-        const body = `Title: ${values.tipTitle}\n\nDescription: ${values.tipContent}\n\nSubmitted by: ${values.name || "Anonymous"}`;
-
-        // Open default email client
-        await open(
-          `mailto:tipp@stadt-bremerhaven.de?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-        );
+        await open(buildTipMailto({ title: values.tipTitle, description: values.tipContent, name: values.name }));
 
         await showToast({
           style: Toast.Style.Success,
-          title: "Email client opened",
+          title: "Email draft opened",
         });
         pop();
       } catch (error) {
         console.error("Error opening email client:", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error opening email client",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        await showFailureToast(error, { title: "Error opening email client" });
       }
     },
     validation: {
@@ -86,7 +76,7 @@ export default function SubmitTip() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Tip" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Open Email Draft" onSubmit={handleSubmit} />
           <Action.OpenInBrowser
             title="Open Privacy Policy"
             url={PRIVACY_POLICY_URL}

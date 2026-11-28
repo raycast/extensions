@@ -17,6 +17,9 @@ Your organization's project will be queried using the [Resource Manager API](htt
 which is free and has no quota limits.
 `;
 
+// Raycast terminates the command worker when it renders thousands of rows.
+const MAX_RESULTS = 100;
+
 export default function Command() {
   return <ProjectList />;
 }
@@ -45,6 +48,7 @@ export function ProjectList() {
   });
 
   const sortedProjects = sortProjectsByUsage(filteredProjects);
+  const visibleProjects = sortedProjects.slice(0, MAX_RESULTS);
 
   return (
     <List
@@ -52,9 +56,17 @@ export function ProjectList() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search projects by name or id..."
     >
-      {sortedProjects.map((project) => (
-        <ProjectListItem key={project.projectId} project={project} />
-      ))}
+      <List.Section
+        title={
+          sortedProjects.length > MAX_RESULTS
+            ? `Showing ${MAX_RESULTS} of ${sortedProjects.length} projects—type to narrow down`
+            : undefined
+        }
+      >
+        {visibleProjects.map((project) => (
+          <ProjectListItem key={project.projectId} project={project} />
+        ))}
+      </List.Section>
     </List>
   );
 }

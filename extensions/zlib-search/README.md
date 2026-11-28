@@ -1,0 +1,98 @@
+# Z-Library Raycast Extension
+
+Search Z-Library and download books directly from Raycast.
+
+## Features
+
+- **Search Books** - Type a title, author, or keyword to search Z-Library in real-time
+- **Quick Download** - Press Enter to download any book to your preferred folder
+- **Bulk Download** - Select multiple books in the search results and download them all at once
+- **Download Queue** - Save books for later with Add to Queue, then review and bulk-download them whenever you're ready, even across Raycast restarts
+- **Book Details** - View authors, year, format, size, and rating for each result
+- **Browse Online** - Open books in your browser to read previews or get more info
+- **Copy Book ID** - Quickly copy book IDs for command-line use
+
+## Requirements
+
+- **zlib CLI** version 0.0.16 or newer, installed:
+  - macOS:
+    ```bash
+    brew install heartleo/tap/zlib-cli
+    ```
+  - Windows:
+    ```powershell
+    winget install heartleo.zlib
+    ```
+- An active Z-Library login (run `zlib login` in your terminal)
+
+The Homebrew formula was renamed from `zlib` to `zlib-cli` (the command is still `zlib`). If you installed the old formula, `brew upgrade` will not replace it. Replace it once:
+
+```bash
+brew list zlib | grep -q bin/zlib && brew uninstall zlib
+brew install heartleo/tap/zlib-cli
+```
+
+## Setup
+
+1. Install the extension from Raycast Store (macOS and Windows)
+2. Configure preferences (optional):
+   - **zlib Binary Path** - Path to zlib executable (default: auto-detected — `/opt/homebrew/bin/zlib` on macOS, `zlib.exe` on PATH on Windows)
+   - **Download Directory** - Where to save books (default: `~/Downloads`)
+   - **Z-Library Domain Override** - Set this only if your session uses a blocked domain (see `zlib doctor --eapi`)
+
+## Usage
+
+1. Open Raycast (Alt+Space on Windows; ⌘+Space on macOS)
+2. Type "Search Books"
+3. Enter a search query (title, author, ISBN, etc.)
+4. Press ⏎ to download, or use other actions:
+   - **Open in Browser** - Visit the book's Z-Library page
+   - **Copy Book ID** - Copy the book's identifier
+
+### Can't find a book?
+
+The search runs through the `zlib` CLI, and its results can differ from the Z-Library website (the website sometimes has books the CLI does not return). The last row of the results, **Search "..." on the Z-Library website**, opens the website's own search for your query in your browser. It uses your **Z-Library Domain Override** if set, otherwise the domain of the results.
+
+> **Note:** These shortcuts use `⌘` on macOS and `Ctrl` on Windows.
+
+### Bulk Download (select and download now)
+
+1. In Search Books, select a book with **Select** (⌘S) - its row shows a checkmark
+2. Repeat for as many books as you want, including across different searches
+3. Run **Download Selected** (⌘⇧D) to download all of them, one at a time
+
+### Download Queue (save for later)
+
+1. In Search Books, use **Add to Queue** (⌘B) on any book to save it without downloading
+2. Open the **Download Queue** command any time - even after restarting Raycast - to see everything you've saved
+3. Download individual books, or run **Download All Queued** (⌘⇧D) to download everything at once
+4. Downloaded books stay in the queue marked **Downloaded** until you remove them or clear them with **Clear All Downloaded**
+
+## "Access denied" when searching?
+
+If a search fails with `EAPI search failed: Access denied`, your `zlib` CLI is out of date. Z-Library changed its search API in November 2026, and CLI versions before 0.0.16 can no longer search (login, profile and downloads keep working, which makes it look like a login problem). Check your version and upgrade:
+
+```bash
+zlib version
+brew upgrade zlib-cli      # macOS (see Requirements if you installed the old `zlib` formula)
+winget upgrade heartleo.zlib   # Windows
+```
+
+## Domain Issues?
+
+If you see "failed to fetch book" errors, your saved Z-Library session may be using a blocked domain. Run this in Terminal:
+
+```bash
+zlib doctor --eapi
+```
+
+Look for domains marked "healthy", then set one in the extension's **Z-Library Domain Override** preference (⌘+K, Ctrl+K on Windows).
+
+## License
+
+MIT
+
+## Links
+
+- [zlib GitHub](https://github.com/heartleo/zlib)
+- [Z-Library](https://z-library.ec/)

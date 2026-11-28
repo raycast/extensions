@@ -1,0 +1,7 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.DS_Store
+# raw OpenSkiData downloads are never committed
+*.csv
+*.geojson

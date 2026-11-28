@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Add Aube support] - 2026-08-27
+
+- Add Aube as a package manager option for copying install commands
+
 ## [Add search results provider] - 2026-08-06
 
 - Add an npmx.dev option for external package search results

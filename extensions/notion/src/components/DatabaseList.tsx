@@ -49,6 +49,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
       searchBarPlaceholder="Filter pages"
       navigationTitle={navigationTitle}
       onSearchTextChange={setSearchText}
+      filtering={false}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Sort by"

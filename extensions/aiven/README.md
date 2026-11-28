@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/aiven.png" width="200" height="200" />
+    <img src="./media//extension_icon@dark.png" width="200" height="200" />
 </p>
 
 # Aiven
@@ -28,6 +28,18 @@ As of `Initial Version`, you can only "View" some basic information. More featur
 
 ## ➕ More
 
-Looking for a more hands-on approach to manage services? Install [Coolify](https://coolify.io/) on a VPS and pair with the below extension:
+### Interested in self-hosting? Try these:
 
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+### Looking for a DB solution? Try this:
+
+<a title="Install neon Raycast Extension" href="https://www.raycast.com/xmok/neon"><img src="https://www.raycast.com/xmok/neon/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+### Want a full platform? Try these:
+
+<a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install koyeb Raycast Extension" href="https://www.raycast.com/xmok/koyeb"><img src="https://www.raycast.com/xmok/koyeb/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install pocketbase Raycast Extension" href="https://www.raycast.com/xmok/pocketbase"><img src="https://www.raycast.com/xmok/pocketbase/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install oci Raycast Extension" href="https://www.raycast.com/xmok/oci"><img src="https://www.raycast.com/xmok/oci/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

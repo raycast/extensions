@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, AI, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useCopilotUsage } from "./hooks/useCopilotUsage";
 import { provider, reauthorize } from "./lib/oauth";
+import { clearInferenceCache } from "./services/inference";
 
 function Command() {
   const { isLoading, usage, error, revalidate } = useCopilotUsage();
@@ -37,11 +38,26 @@ function Command() {
     });
   };
 
+  const handleRefreshAiModels = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing GitHub Copilot AI Models" });
+    try {
+      await clearInferenceCache();
+      await AI.refreshModels();
+      toast.style = Toast.Style.Success;
+      toast.title = "Refreshed GitHub Copilot AI Models";
+    } catch (refreshError) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to Refresh AI Models";
+      toast.message = refreshError instanceof Error ? refreshError.message : String(refreshError);
+    }
+  };
+
   const UsageActions = (
     <ActionPanel>
       {/* eslint-disable-next-line @raycast/prefer-title-case */}
       <Action.OpenInBrowser title="Manage paid AI credits" url="https://github.com/settings/billing/budgets" />
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+      <Action title="Refresh AI Models" icon={Icon.Stars} onAction={handleRefreshAiModels} />
       {/* eslint-disable-next-line @raycast/prefer-title-case */}
       <Action title="Log Out" icon={Icon.Logout} onAction={reauthorize} />
     </ActionPanel>

@@ -1,4 +1,39 @@
-# Paper Agent
+# Paper Agent Changelog
+
+## [Setup and dependency maintenance] - 2026-11-23
+
+- Add Check Setup to inspect the core, paper directories, and configuration sources without starting a run.
+- Show existing papers in Today, Recent, and Search when Paper Directory is left empty.
+- Add a search prompt to Check Setup.
+- Use YAML paper and custom library directories when Paper Directory is left empty in Raycast, including relative paths.
+- Explain which settings Raycast overrides, and provide a repair command for a missing Python executable.
+- Update Raycast API to 2.13.1 and refresh the dependency tree to address the minimatch security advisory.
+
+## [Installation status and updates] - 2026-10-27
+
+- Show installed core, Python, extension build, Raycast version, and installation source in Run Status.
+- Check for stable core updates on demand and open update instructions from the action menu.
+- Wait for Python inspection when checking updates immediately after opening or refreshing Run Status, and cancel the pending check when leaving or refreshing the command.
+- Update Raycast API to 2.9.0.
+
+## [SDK maintenance] - 2026-10-17
+
+- Update to Raycast API 2.8.2, which shares bundled dependencies across commands.
+- Refresh compatible development dependencies and verify the extension's offline regression tests and distribution build.
+
+## [Maintenance] - 2026-10-07
+
+- Update to Raycast API 2.6.3 and Node.js 22.22.2 for development and CI.
+- Show core and library errors separately from empty results, with actions to open preferences and retry.
+- Trim Python paths consistently, cancel superseded searches, and add timeouts for core checks and library queries.
+- Allow library responses up to 8 MiB and report invalid CLI output.
+- Preserve the clipboard when schedule installation cannot find the core.
+- Add offline regression checks and a distribution build to CI.
+- Keep favorites, reading queues, and read state synchronized across nested views; preserve saved data when storage fails.
+- Respect manual unread changes, validate saved paper fields, and handle absolute note paths.
+- Keep legacy saved papers with null optional metadata readable and preserve manual read choices across nested-view reloads.
+- Pass Gmail app passwords to manual and scheduled runs and validate numeric preferences before starting.
+- Keep startup errors visible with retry actions, allow refreshing run status, and verify schedule removal.
 
 ## [Initial Release] - 2026-04-02
 

@@ -1,24 +1,26 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
 import { useActionsAreReady, useActionsState } from "./store/actions";
 import { useHistoryState } from "./store/history";
+import { ItemLaunchContext } from "./types";
 import { truncateText } from "./utils";
 
 export default function MenuBar() {
   const ready = useActionsAreReady();
-  const actions = useActionsState((state) => state.actions.sort((a, b) => a.name.localeCompare(b.name)));
-  const history = useHistoryState((state) => state.history.sort((a, b) => b.timestamp - a.timestamp));
+  const actions = useActionsState((state) => state.actions)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const history = useHistoryState((state) => state.history)
+    .slice()
+    .sort((a, b) => b.timestamp - a.timestamp);
 
   const regular = actions.filter((action) => !action.favorite);
   const favorites = actions.filter((action) => action.favorite);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openCommand = (name: string, args?: Record<string, any>) => {
+  const openCommand = (name: "commands" | "history" | "create", context?: ItemLaunchContext) => {
     launchCommand({
-      ownerOrAuthorName: "quiknull",
-      extensionName: "alice-ai",
       type: LaunchType.UserInitiated,
       name,
-      arguments: args,
+      context,
     });
   };
 

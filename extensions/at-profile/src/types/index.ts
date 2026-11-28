@@ -1,24 +1,28 @@
-import { Image } from "@raycast/api";
-
-// === Core App Types ===
+import type { PlatformId } from "../catalog/platforms";
 
 /**
- * Represents a social app/platform that can be used to open profiles
+ * A social app/platform that can be used to open profiles
  */
 export interface App {
   name: string;
+  /** Stable ID. Generated from the URL template when a custom app is created, and never changed after. */
   value: string;
   urlTemplate: string;
   placeholder: string;
-  visible?: boolean;
+  /** The software the site runs, for a custom app on a Mastodon server, Discourse forum and so on */
+  platform?: PlatformId;
+  /** Hidden from Find Profile unless NSFW sites are included */
+  nsfw?: boolean;
+  /** On an ATProto app, the server a bare name belongs to: `example` means `example.bsky.social` */
+  handleDomain?: string;
 }
 
 /**
- * Extended app interface for custom apps with additional metadata
+ * An app with its Manage Apps state
  */
-export interface CustomApp extends App {
-  id: string;
-  createdAt: string;
+export interface AppEntry extends App {
+  visible: boolean;
+  isDefault: boolean;
 }
 
 /**
@@ -29,61 +33,12 @@ export interface AppSetting {
   visible: boolean;
 }
 
-/**
- * App item used in UI components with computed properties
- */
-export interface AppItem {
-  urlTemplate: string;
-  value: string;
-  id: string;
-  name: string;
-  url: string;
-  visible: boolean;
-  isDefault: boolean;
-  icon?: Image.ImageLike;
-}
-
-// === Custom App Management ===
-
-/**
- * Input data for creating a new custom app
- */
 export interface CustomAppInput {
   name: string;
   urlTemplate: string;
-  visible?: boolean;
-}
-
-/**
- * Update data for modifying an existing custom app
- */
-export interface CustomAppUpdate {
-  name?: string;
-  urlTemplate?: string;
-  visible?: boolean;
-}
-
-/**
- * Props for the custom app form component
- */
-export interface CustomAppFormProps {
-  app?: {
-    id: string;
-    name: string;
-    urlTemplate: string;
-    visible: boolean;
-  };
-  onSave?: () => void;
-}
-
-// === Command Arguments ===
-
-/**
- * Arguments for the open-profile command
- */
-export interface OpenProfileArguments {
-  app?: string;
-  profile?: string;
+  platform?: PlatformId;
+  nsfw?: boolean;
+  handleDomain?: string;
 }
 
 /**
@@ -95,66 +50,23 @@ export interface QuickOpenArguments {
 }
 
 /**
- * Arguments for the manage-apps command
- */
-export interface ManageAppsArguments {
-  action?: "import" | "export";
-}
-
-// === Form Props ===
-
-/**
- * Props for the open profile form component
- */
-export interface OpenProfileFormProps {
-  initialProfile?: string;
-  initialApp?: string;
-  onSubmit?: (values: { profile: string; app: string }) => Promise<void>;
-}
-
-/**
- * Input type for AI tools - contains profile and app identifiers
+ * Input type for the AI tools
  */
 export type Input = {
   profile: string;
   app: string;
 };
 
-// === History Types ===
-
 /**
- * Represents a single usage history entry tracking profile + app combinations
+ * One profile + app pair in History
  */
 export interface UsageHistoryItem {
   profile: string;
   app: string;
   appName: string;
   timestamp: number;
+  count: number;
 }
-
-/**
- * Extended history item with URL and favicon information
- */
-export interface HistoryItem {
-  url: string | URL;
-  profile: string;
-  app: string;
-  appName: string;
-  favicon?: string;
-  isStarred?: boolean;
-  timestamp: number;
-}
-
-/**
- * Usage history item enhanced with favicon and URL for UI display
- */
-export interface HistoryItemWithFavicon extends UsageHistoryItem {
-  favicon?: Image.ImageLike;
-  url?: string;
-  isStarred?: boolean;
-}
-
-// === Import/Export Types ===
 
 /**
  * Structure for importing/exporting extension settings as YAML
@@ -164,10 +76,12 @@ export interface YAMLSettings {
   usageHistory: UsageHistoryItem[];
   visible: Record<string, boolean>;
   customApps: Array<{
-    id?: string;
     name: string;
     value: string;
     urlTemplate: string;
     visible: boolean;
+    platform?: PlatformId;
+    nsfw?: boolean;
+    handleDomain?: string;
   }>;
 }

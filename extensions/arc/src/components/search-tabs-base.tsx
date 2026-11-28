@@ -76,6 +76,7 @@ export function SearchTabsBase(props: SearchTabsBaseProps) {
       { name: "title", weight: 0.2 },
       { name: "titlePinyin", weight: 0.3 },
       { name: "url", weight: 0.5 },
+      { name: "spaceName", weight: 0.15 },
     ],
     threshold: 0.3, // Adjust this value to control fuzzy matching sensitivity (0.0 = exact match, 1.0 = match anything)
     includeScore: true,

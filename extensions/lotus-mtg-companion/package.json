@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lotus-mtg-companion",
   "title": "Lotus - MTG Companion",
-  "description": "A non-official tool to easily search for Magic The Gathering cards, sets, and rules - powered by Scryfall search.",
+  "description": "Search Magic: The Gathering cards with Scryfall syntax, browse MTG sets and their cards, and view random cards with rulings.",
   "icon": "lotus-mtg-companion-extension-icon.png",
   "author": "madmaxmckinney",
   "categories": [

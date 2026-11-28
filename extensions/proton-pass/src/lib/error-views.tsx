@@ -1,7 +1,9 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { JSX } from "react";
-import { PassCliErrorType, PROTON_PASS_CLI_DOCS } from "./types";
-import { clearCliCache } from "./cli";
+import { CliPathErrorType, PassCliError, PassCliErrorType, PROTON_PASS_CLI_DOCS } from "./types";
+import { clearCliCache, outdatedCliVersion } from "./cli";
+import { MIN_PASS_CLI_VERSION } from "./core/cli-version";
+import { NotLoggedInView } from "./login-view";
 
 function ClearCliCacheAction({ onComplete }: { onComplete?: () => void }): JSX.Element {
   const handle = async () => {
@@ -27,6 +29,8 @@ interface ErrorViewProps {
   errorType: PassCliErrorType;
   onRetry?: () => void;
   contextTitle?: string;
+  /** Shown for errors without a dedicated description, so pass-cli's reason isn't lost. */
+  message?: string;
 }
 
 interface ErrorConfig {
@@ -37,15 +41,14 @@ interface ErrorConfig {
   showRetry: boolean;
 }
 
-function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string): ErrorConfig {
+function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string, message?: string): ErrorConfig {
   switch (errorType) {
-    case "not_installed":
+    case "unsupported_platform":
       return {
         icon: Icon.XMarkCircle,
-        title: "Proton Pass CLI Not Installed",
-        description:
-          "You need to install the Proton Pass CLI to use this extension. Click below to learn how to install it.",
-        showDocsLink: true,
+        title: "Unsupported Platform",
+        description: `Proton Pass supports macOS arm64/x64 and Windows x64. Current platform: ${process.platform}-${process.arch}.`,
+        showDocsLink: false,
         showRetry: false,
       };
     case "not_authenticated":
@@ -85,15 +88,59 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string): Err
       return {
         icon: Icon.ExclamationMark,
         title: contextTitle ? `Failed to ${contextTitle}` : "An Error Occurred",
-        description: "An error occurred. Please try again.",
+        description: message || "An error occurred. Please try again.",
         showDocsLink: true,
         showRetry: true,
       };
   }
 }
 
-export function ErrorListView({ errorType, onRetry, contextTitle }: ErrorViewProps) {
-  const config = getErrorConfig(errorType, contextTitle);
+function cliPathScreen(errorType: CliPathErrorType): { title: string; description: string } {
+  switch (errorType) {
+    case "outdated_cli":
+      return {
+        title: "Proton Pass CLI Out of Date",
+        description: `pass-cli ${outdatedCliVersion()} is too old: Proton Pass needs ${MIN_PASS_CLI_VERSION} or later. Update it, or set CLI Path back to pass-cli.`,
+      };
+    case "unrunnable_cli":
+      return {
+        title: "Proton Pass CLI Can't Run",
+        description: "The file at CLI Path can't run. Fix the path, or set it back to pass-cli.",
+      };
+    case "not_installed":
+      return {
+        title: "Proton Pass CLI Not Found",
+        description: "Nothing at CLI Path. Fix the path, or set it back to pass-cli.",
+      };
+  }
+}
+
+/**
+ * pass-cli missing, too old or unable to run at CLI Path. The extension installs its own pass-cli, so this happens only
+ * when CLI Path points elsewhere: the preferences are where it's fixed.
+ */
+export function CliPathErrorView({ errorType }: { errorType: CliPathErrorType }) {
+  const { title, description } = cliPathScreen(errorType);
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.XMarkCircle}
+        title={title}
+        description={description}
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            <Action.OpenInBrowser title="Open Installation Guide" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
+export function ErrorListView({ errorType, onRetry, contextTitle, message }: ErrorViewProps) {
+  if (PassCliError.isCliPath(errorType)) return <CliPathErrorView errorType={errorType} />;
+  const config = getErrorConfig(errorType, contextTitle, message);
 
   return (
     <List>
@@ -119,7 +166,10 @@ export function renderErrorView(
   errorType: PassCliErrorType | null,
   onRetry?: () => void,
   contextTitle?: string,
+  message?: string,
 ): JSX.Element | null {
   if (!errorType) return null;
-  return <ErrorListView errorType={errorType} onRetry={onRetry} contextTitle={contextTitle} />;
+  // The login screen, rather than a message: it can log in, and follow a login started before.
+  if (errorType === "not_authenticated" && onRetry) return <NotLoggedInView reload={onRetry} />;
+  return <ErrorListView errorType={errorType} onRetry={onRetry} contextTitle={contextTitle} message={message} />;
 }

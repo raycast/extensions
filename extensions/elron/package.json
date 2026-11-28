@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "elron",
   "title": "Elron Train Times",
-  "description": "Fetch train times for Elron train times",
+  "description": "Show Elron train times between Tallinn and Tartu in Estonia.",
   "icon": "elron-icon.png",
   "author": "raimond",
   "contributors": [
@@ -22,7 +22,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "date-fns": "^2.29.3"
   },
   "devDependencies": {
@@ -41,5 +41,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.8"
   }
 }

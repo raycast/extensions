@@ -1,4 +1,6 @@
-import { Detail } from "@raycast/api";
+import { Detail, useNavigation } from "@raycast/api";
+import { useEffect } from "react";
+import { registerDetail } from "../lib/detail-stack";
 
 export const GenericDetail = <T,>({
   actions,
@@ -15,6 +17,9 @@ export const GenericDetail = <T,>({
   metadata: (item: T) => Detail.Props["metadata"];
   navigationTitle: (item: T) => string;
 }) => {
+  const { pop } = useNavigation();
+  useEffect(() => registerDetail(pop), [pop]);
+
   const markdownContent = markdown(item);
   const metadataContent = metadata(item);
   const titleContent = navigationTitle(item);

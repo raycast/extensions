@@ -2,6 +2,8 @@
 
 Search GitHub Users
 
+The extension icon matches GitHub Gist in light and dark appearances.
+
 ## How it works
 
 [![Watch the video](assets/thumbnail.png)](https://share.cleanshot.com/qlvwHXSJ)

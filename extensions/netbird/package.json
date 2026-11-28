@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netbird",
   "title": "NetBird",
-  "description": "Control your NetBird mesh network right from Raycast.",
+  "description": "Connect and disconnect your NetBird mesh VPN network, view peers, status, network routes and exit nodes, update NetBird and open the admin panel.",
   "icon": "netbird-icon.png",
   "author": "mi7chal",
+  "contributors": [
+    "dnwjn"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -21,6 +24,13 @@
       "title": "Connect",
       "subtitle": "NetBird",
       "description": "Connects to NetBird and starts the background daemon.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "NetBird",
+      "description": "Connects to NetBird if disconnected, disconnects otherwise.",
       "mode": "no-view"
     },
     {
@@ -42,6 +52,13 @@
       "title": "Show Networks",
       "subtitle": "NetBird",
       "description": "View and manage network routes selection.",
+      "mode": "view"
+    },
+    {
+      "name": "exit-nodes",
+      "title": "Show Exit Nodes",
+      "subtitle": "NetBird",
+      "description": "View and manage exit node selection (only one can be active at a time).",
       "mode": "view"
     },
     {

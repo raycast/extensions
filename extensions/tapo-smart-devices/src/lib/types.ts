@@ -10,6 +10,7 @@ export enum DeviceStatusEnum {
   Loading = "loading",
   Available = "available",
   NotAvailable = "not_available",
+  SignInFailed = "sign_in_failed",
 }
 
 export type Device = TapoDevice & {

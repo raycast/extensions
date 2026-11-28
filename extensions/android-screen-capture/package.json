@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "android-screen-capture",
   "title": "Android Screen Capture",
-  "description": "Screenshot & screenrecords of Android via ADB",
+  "description": "Take screenshots and screen recordings of an Android device over ADB and copy them to your Mac clipboard.",
   "icon": "command-icon.png",
   "author": "chenhuazhao",
   "categories": [
@@ -30,7 +30,7 @@
       "type": "textfield",
       "required": false,
       "title": "adb command directory",
-      "description": "Set directory path where adb command included. Default is `$HOME/Library/Android/sdk/platform-tools`.",
+      "description": "Set directory path where adb command included. When empty, `$HOME/Library/Android/sdk/platform-tools` is used, or Homebrew's adb (`/opt/homebrew/bin`, `/usr/local/bin`) if the SDK is not installed.",
       "placeholder": "/dir/sdk/platform-tools"
     }
   ],
@@ -52,5 +52,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
-import { Cache, OAuth } from "@raycast/api";
+import { AI, Cache, LocalStorage, OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
+import { CACHE_PREFIX } from "../services/inference-core";
 
 const CLIENT_ID = "Ov23ctJbHO0idEBx76J5";
 const SCOPES = "repo,workflow,read:org";
@@ -35,8 +36,34 @@ export const provider = new OAuthService({
 
 export const reauthorize = async (): Promise<string> => {
   cache.remove("previousRepositories");
+  const storedItems = await LocalStorage.allItems();
+  await Promise.all(
+    Object.keys(storedItems)
+      .filter((key) => key.startsWith(CACHE_PREFIX))
+      .map((key) => LocalStorage.removeItem(key)),
+  );
   await client.removeTokens();
-  return provider.authorize();
+  const token = await provider.authorize();
+  try {
+    await AI.refreshModels();
+  } catch {
+    // Ignore when AI models aren't enabled or the user isn't on Raycast Pro
+  }
+  return token;
+};
+
+// Model provider entry points run in the background outside of `withAccessToken`, where
+// Raycast refuses to show the sign-in UI. Surface that as an actionable message instead.
+export const authorizeModelProvider = async (): Promise<string> => {
+  try {
+    return await provider.authorize();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("not available when command is launched in background")) {
+      throw new Error("Sign in to GitHub first by opening any GitHub Copilot command.");
+    }
+    throw error;
+  }
 };
 
 export const getOctokit = (): Octokit => {

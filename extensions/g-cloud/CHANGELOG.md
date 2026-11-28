@@ -1,5 +1,50 @@
 # Google Cloud CLI Changelog
 
+## [Add Artifact Registry] - 2026-11-27
+
+- Added **Artifact Registry** to the service hub — browse repositories across all regions with format, mode, and total size
+- Added a **Docker Images** browser grouped by image name with All / Tagged / Untagged filtering, image details, copy actions for tagged pull URIs, digest URIs, and `docker pull` commands, and confirmed image deletion
+- Added a **Packages & Versions** browser for non-Docker repositories (npm, Python, Maven, Go, APT, YUM, Generic) with version copy and confirmed deletion
+- Added copy actions for repository registry URIs and `gcloud auth configure-docker` commands
+
+## [Add Quick Access Recent Resources & Pinned Projects] - 2026-11-27
+
+- Populated the Hub's **Quick Access** section automatically as you open VMs, Storage buckets, Cloud Run services, Cloud Functions, Cloud SQL instances, secrets, and VPC networks
+- Added direct deep-linking from Quick Access into Storage buckets and Secret details, plus actions to remove individual items or clear Quick Access
+- Added **Pinned Projects** so favorite projects stay pinned at the top of project dropdowns (with `Cmd+.` to pin/unpin the current project and a searchable **Manage Pinned Projects** view)
+
+## [Fix Navigation, Project Switching & Config Cache Invalidation] - 2026-11-27
+
+- Fixed Hub navigation to push service views onto the navigation stack so pressing Escape returns to the Hub instead of closing Raycast
+- Fixed in-service project switching across all services to stay in the current service and sync the selected project with the Hub
+- Cleared cached OAuth tokens, command results, auth state, and project caches (including `~/.raycast-gcloud-prefs.json`) when activating a named gcloud configuration or switching accounts, and synced the activated configuration's project
+
+## [Delete Compute Engine Instances] - 2026-11-17
+
+- Added a destructive action to permanently delete Compute Engine VM instances from the instance list or detail view
+- Added confirmation and operation-status feedback, including a warning that auto-delete disks are also removed
+
+## [Compute Engine Lifecycle Fixes] - 2026-09-23
+
+- Fixed Compute Engine lifecycle actions to use state-aware verbs, including resuming suspended instances instead of trying to start them
+- Added Compute Engine suspend and restart actions, improved transitional state handling, and refreshed instance detail state after power actions
+
+## [Fix Silent Empty Lists When gcloud Credentials Expire] - 2026-09-09
+
+- Fixed an expired gcloud session being treated as authenticated. `gcloud auth list` keeps reporting an account as `ACTIVE` after its refresh token has expired, so the extension stayed on the hub and every list — including the project dropdown — silently came back empty with no explanation. It now confirms the credentials still work and shows a **Session Expired** screen wired to the existing sign-in action. Failures that are not credential-related (a timeout, a network blip) are left alone so they still surface as real errors.
+
+## [Add Cloud SQL] - 2026-09-09
+
+### New Features
+- Added **Cloud SQL** to the service hub — browse instances with engine, machine type, region, high-availability and running state
+- Added an instance detail view covering connectivity (connection name, IP addresses, authorized networks, SSL mode), backup configuration, and the maintenance window
+- Added per-instance **databases** and **users** listings, and a **backups** view that lists backup runs and can trigger an on-demand backup with a custom description
+- Added copy actions for the instance name, connection name, public IP, and a ready-to-run `gcloud sql connect` command
+
+## [Fix Empty Project Dropdown on Accounts with Many Projects] - 2026-09-02
+
+- Fixed the project dropdown showing "No projects found" when `gcloud projects list` output exceeds 1 MB (roughly 3,500+ projects). `getProjects` relied on Node's default `execFile` `maxBuffer`, so the process was killed with `ERR_CHILD_PROCESS_STDIO_MAXBUFFER` and the rejection was swallowed into an empty list. It now passes an explicit 64 MiB `maxBuffer`.
+
 ## [1.1.0] - 2026-04-16
 
 ### New Features

@@ -6,7 +6,7 @@ Wiki: [https://qalculate.github.io/manual/qalc.html](https://qalculate.github.io
 
 Aliasing this command to `q` or making a shortcut is encouraged.
 
-This command requires `qalc` to work.
+This command requires `qalc` to work on macOS. On Windows, `qalc` can be downloaded automatically.
 
 You can get `qalc` on [https://qalculate.github.io/downloads.html](https://qalculate.github.io/downloads.html) or by getting `libqalculate` from your package manager.
 

@@ -228,13 +228,21 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
     // Check if input looks like a hash or URL
     const isHash = /^[a-fA-F0-9]{32,64}$/.test(input);
 
-    // Basic URL validation to avoid malformed URLs
+    // Basic URL validation to avoid malformed URLs. Bare domains (e.g. "google.com") have no
+    // scheme and fail the URL constructor, so we also accept them by checking with an
+    // "https://" prefix - but we submit the original, unmodified input to VirusTotal, since
+    // VirusTotal scores a bare domain and its "https://" URL as distinct resources.
     const isValidUrl = (urlString: string): boolean => {
       try {
         new URL(urlString);
         return true;
       } catch {
-        return false;
+        try {
+          new URL(`https://${urlString}`);
+          return true;
+        } catch {
+          return false;
+        }
       }
     };
 

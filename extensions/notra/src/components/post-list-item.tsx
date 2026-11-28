@@ -1,10 +1,19 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { CONTENT_TYPE_ICONS, CONTENT_TYPE_LABELS } from "../schemas";
-import { notraUrl } from "../utils";
+import type { ReactNode } from "react";
+import { notraOrganizationUrl } from "../utils";
 import type { Post } from "../types";
 import { PostDetail } from "./post-detail";
 
-export function PostListItem({ post, onPostMutated }: { post: Post; onPostMutated?: () => Promise<void> | void }) {
+interface PostListItemProps {
+  extraActions?: ReactNode;
+  onPostMutated?: () => Promise<void> | void;
+  organizationSlug?: string;
+  post: Post;
+}
+
+export function PostListItem({ extraActions, onPostMutated, organizationSlug, post }: PostListItemProps) {
+  const postUrl = notraOrganizationUrl(`/content/${post.id}`, organizationSlug);
   const contentTypeIcon = CONTENT_TYPE_ICONS[post.contentType] ?? Icon.Document;
   const contentTypeLabel = CONTENT_TYPE_LABELS[post.contentType] ?? post.contentType;
 
@@ -30,12 +39,13 @@ export function PostListItem({ post, onPostMutated }: { post: Post; onPostMutate
             target={<PostDetail onPostMutated={onPostMutated} postId={post.id} />}
             title="View Post"
           />
-          <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl(`/content/${post.id}`)} />
+          <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={postUrl} />
           <Action.CopyToClipboard
-            content={notraUrl(`/content/${post.id}`)}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            content={postUrl}
+            shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
             title="Copy Link"
           />
+          {extraActions}
         </ActionPanel>
       }
       icon={contentTypeIcon}

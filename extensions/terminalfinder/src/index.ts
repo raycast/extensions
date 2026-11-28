@@ -3,6 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import clipboardToCmux from "./clipboardToCmux";
 import cmuxToFinder from "./cmuxToFinder";
 import finderToCmux from "./finderToCmux";
+import ternToFinder from "./ternToFinder";
 import { applicationToFinder, clipboardToApplication, finderToApplication, isTerminal } from "./utils";
 
 export default async function (props: LaunchProps<{ arguments: Arguments.Index }>) {
@@ -14,6 +15,8 @@ export default async function (props: LaunchProps<{ arguments: Arguments.Index }
       await finderToCmux();
     } else if (from === "cmux" && to === "Finder") {
       await cmuxToFinder();
+    } else if (from === "Tern" && to === "Finder") {
+      await ternToFinder();
     } else if (from === "Clipboard" && isTerminal(to)) {
       await clipboardToApplication(to);
     } else if (from === "Finder" && isTerminal(to)) {

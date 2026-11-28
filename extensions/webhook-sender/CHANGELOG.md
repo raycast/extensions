@@ -1,5 +1,19 @@
 # Webhook Sender Changelog
 
+## [Quick Send & Shortcuts] - 2026-10-08
+
+### Added
+
+- Send a saved webhook directly with Enter, then view the response
+
+### Changed
+
+- Open in Form and Edit in Form now use the common Edit shortcut (⌘E / Ctrl+E)
+- Delete for saved webhooks, history entries and form fields now uses the common Remove shortcut (⌃X / Ctrl+D)
+- Clear all history now uses the common Remove All shortcut (⌃⇧X / Ctrl+Alt+D)
+- Form and response shortcuts now work on both macOS and Windows: Save, Add Field, Copy Response (⌘⇧C / Ctrl+Shift+C), Copy Request Body (⌘⌥C / Ctrl+Alt+C)
+- Saving a webhook now checks that raw JSON is valid
+
 ## [Initial Version] - 2026-05-06
 
 ### Added

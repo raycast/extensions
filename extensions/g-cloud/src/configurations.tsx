@@ -2,6 +2,8 @@ import { List, Icon, Color, showToast, Toast, useNavigation, getPreferenceValues
 import { useState, useEffect } from "react";
 import { detectGcloudPath, getInstallInstructions, getPlatform } from "./utils/gcloudDetect";
 import { CacheManager } from "./utils/CacheManager";
+import { clearCommandCache } from "./gcloud";
+import { clearTokenCache } from "./utils/gcpApi";
 import DoctorView from "./components/DoctorView";
 import { ConfigurationsView } from "./services/configurations";
 import { revokeAllAuth } from "./services/configurations/ConfigurationsService";
@@ -67,8 +69,9 @@ export default function ConfigurationsCommand() {
         const toast = await showToast({ style: Toast.Style.Animated, title: "Logging out..." });
         try {
           await revokeAllAuth(gcloudPath);
-          CacheManager.clearAuthCache();
-          CacheManager.clearProjectCache();
+          clearTokenCache();
+          clearCommandCache();
+          CacheManager.clearAllCaches();
           toast.style = Toast.Style.Success;
           toast.title = "Logged out. Re-authenticate from the main Google Cloud command.";
         } catch {
@@ -77,6 +80,8 @@ export default function ConfigurationsCommand() {
         }
       }}
       onClearCache={() => {
+        clearTokenCache();
+        clearCommandCache();
         CacheManager.clearAllCaches();
         CacheManager.clearRecentResources();
         showToast({ style: Toast.Style.Success, title: "Cache cleared" });

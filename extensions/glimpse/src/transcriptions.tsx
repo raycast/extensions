@@ -1,18 +1,20 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
+import { ErrorEmptyView } from "./error-view";
 import { glimpse, HistoryRecord } from "./glimpse";
 
 export default function Command() {
   const [query, setQuery] = useState("");
 
-  const { data, isLoading } = usePromise(
+  const { data, error, isLoading, revalidate } = usePromise(
     async (q: string) => {
       const args = q.trim() ? ["history", "search", q, "--limit", "50"] : ["history", "list", "--limit", "50"];
       const res = await glimpse<{ records: HistoryRecord[] }>(args);
       return res.records;
     },
     [query],
+    { onError: () => undefined },
   );
 
   return (
@@ -23,7 +25,7 @@ export default function Command() {
       throttle
       isShowingDetail
     >
-      {(data ?? []).map((record) => (
+      {(error ? [] : (data ?? [])).map((record) => (
         <List.Item
           key={record.id}
           icon={record.status === "error" ? Icon.ExclamationMark : Icon.Text}
@@ -51,14 +53,18 @@ export default function Command() {
               <Action
                 title="Open in Glimpse"
                 icon={Icon.AppWindow}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
                 onAction={() => openHistory()}
               />
             </ActionPanel>
           }
         />
       ))}
-      <List.EmptyView title="No dictations" description="Your dictations appear here." />
+      {error ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView title="No dictations" description="Your dictations appear here." />
+      )}
     </List>
   );
 }

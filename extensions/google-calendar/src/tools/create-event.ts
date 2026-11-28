@@ -24,7 +24,10 @@ type Input = {
    * Always include Z or a numeric UTC offset for timed events.
    */
   startDate: string;
-  /** Explicit exclusive end datetime/date. Prefer this when the user gave an end time. */
+  /**
+   * Explicit end datetime/date. For all-day events this is exclusive, so use the day after the user's final date.
+   * Prefer durationDays when converting an inclusive natural-language date range.
+   */
   endDate?: string;
   /** Timed-event length in minutes, used only when endDate is omitted. */
   duration?: number;
@@ -82,18 +85,14 @@ type Input = {
   eventType?: "default" | "birthday" | "focusTime" | "outOfOffice" | "workingLocation";
   /** Focus-time invitation handling. */
   focusTimeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   /** Chat status during focus time. */
   focusTimeChatStatus?: "available" | "doNotDisturb";
   /** Auto-decline message for focus time. */
   focusTimeDeclineMessage?: string;
   /** Out-of-office invitation handling. */
   outOfOfficeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   /** Auto-decline message for out-of-office. */
   outOfOfficeDeclineMessage?: string;
   /** Working-location kind. */

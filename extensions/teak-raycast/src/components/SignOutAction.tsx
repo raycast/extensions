@@ -1,15 +1,22 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
-import { teakOAuth } from "../lib/oauth";
-import { getPreferences } from "../lib/preferences";
+import { type SignOutResult, signOutTeak } from "../lib/oauth";
+import { grandfatheredApiKey } from "../lib/preferences";
+
+// Raycast runs each command fresh, so this lasts until the command closes.
+let signedOutThisRun = false;
+
+export const hasSignedOutThisRun = () => signedOutThisRun;
 
 interface SignOutActionProps {
+  beforeSignOut?: () => Promise<unknown>;
   onSignedOut?: () => void;
 }
 
-export function SignOutAction({ onSignedOut }: SignOutActionProps) {
-  // Sign-out only applies to browser (OAuth) sessions. API-key users manage
-  // their credential in extension preferences, so hide the action for them.
-  if (getPreferences().apiKey?.trim()) {
+export function SignOutAction({
+  beforeSignOut,
+  onSignedOut,
+}: SignOutActionProps) {
+  if (grandfatheredApiKey()) {
     return null;
   }
 
@@ -17,10 +24,28 @@ export function SignOutAction({ onSignedOut }: SignOutActionProps) {
     <Action
       icon={Icon.Logout}
       onAction={async () => {
-        await teakOAuth.client.removeTokens();
+        let result: SignOutResult;
+        try {
+          await beforeSignOut?.();
+          result = await signOutTeak();
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could not sign out of Teak",
+            message: error instanceof Error ? error.message : "Try again.",
+          });
+          return;
+        }
+        signedOutThisRun = true;
         await showToast({
           style: Toast.Style.Success,
-          title: "Signed out of Teak",
+          title:
+            result === "local-only"
+              ? "Signed out on this Mac"
+              : "Signed out of Teak",
+          ...(result === "local-only"
+            ? { message: "Other installations may still be connected." }
+            : {}),
         });
         onSignedOut?.();
       }}

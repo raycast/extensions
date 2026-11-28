@@ -245,6 +245,37 @@ export async function closeHeliumTab(tabUrl: string): Promise<boolean> {
 }
 
 /**
+ * Open a new tab on Helium's default new tab page.
+ *
+ * Deliberately creates the tab without a URL: Chromium refuses
+ * AppleScript-driven navigation to `chrome://` addresses, so setting the tab's
+ * URL to `chrome://new-tab-page/` lands on an `ERR_INVALID_URL` error page
+ * instead of the new tab page. A tab made with no properties opens whatever
+ * Helium is configured to show.
+ */
+export async function createNewTab(): Promise<void> {
+  const script = `
+    tell application "Helium"
+      if not running then
+        activate
+        delay 1
+      end if
+
+      if (count of windows) is 0 then
+        make new window
+      else
+        tell window 1 to make new tab
+      end if
+
+      activate
+    end tell
+    return true
+  `;
+
+  await runAppleScript(script);
+}
+
+/**
  * Create a new window in Helium browser
  */
 export async function createNewWindow(): Promise<void> {

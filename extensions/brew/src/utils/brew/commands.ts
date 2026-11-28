@@ -3,11 +3,10 @@
  *
  * Provides functions for executing brew commands with proper error handling.
  *
- * Homebrew 5.0 Compatibility Notes:
- * - Download concurrency is now enabled by default (HOMEBREW_DOWNLOAD_CONCURRENCY=auto)
- * - The extension supports controlling this via preferences
- * - --no-quarantine and --quarantine flags are deprecated
- * - HOMEBREW_USE_INTERNAL_API can be enabled for the new smaller JSON API
+ * Targets Homebrew 6.0 and later.
+ *
+ * Download concurrency is enabled by default (HOMEBREW_DOWNLOAD_CONCURRENCY=auto);
+ * the extension exposes a preference to turn it off.
  */
 
 import { exec } from "child_process";
@@ -17,7 +16,7 @@ import * as fs from "fs/promises";
 import { join as path_join } from "path";
 import { environment } from "@raycast/api";
 import { ExecError, ExecResult } from "../types";
-import { brewExecutable } from "./paths";
+import { brewExecutable, brewPath } from "./paths";
 import { preferences } from "../preferences";
 import { brewLogger } from "../logger";
 import { BrewLockError, isBrewLockMessage } from "../errors";
@@ -25,18 +24,33 @@ import { bundleIdentifier } from "../cache";
 
 const execp = promisify(exec);
 
-// Track if we've logged the Homebrew 5.0 environment configuration
+// Track if we've logged the Homebrew environment configuration
 let homebrewEnvLogged = false;
 
 /**
  * Execute a brew command.
+ *
+ * With `raw`, `cmd` is already a complete shell command line (Doctor's
+ * `sudo chown …` remediations) and runs verbatim instead of being prefixed with
+ * the resolved brew executable.
  */
-export async function execBrew(cmd: string, options?: { signal?: AbortSignal }): Promise<ExecResult> {
+export async function execBrew(
+  cmd: string,
+  options?: { signal?: AbortSignal; env?: NodeJS.ProcessEnv; raw?: boolean },
+): Promise<ExecResult> {
   try {
-    const env = await execBrewEnv();
-    return await execp(`${brewExecutable()} ${cmd}`, {
+    // Caller overrides win: a read-only command can set HOMEBREW_NO_AUTO_UPDATE
+    // without changing what every other command in the extension runs with.
+    const env = { ...(await execBrewEnv()), ...options?.env };
+    if (options?.raw) {
+      // execBrewEnv doesn't set PATH; without this, a bare "brew …" inside a
+      // remediation resolves off whatever's inherited instead of the configured
+      // install (customBrewPath), the way brewExecutable() does below.
+      env.PATH = `${brewPath("bin")}:${env.PATH ?? ""}`;
+    }
+    return await execp(options?.raw ? cmd : `${brewExecutable()} ${cmd}`, {
       signal: options?.signal,
-      env: env,
+      env,
       maxBuffer: 10 * 1024 * 1024,
     });
   } catch (err) {
@@ -55,8 +69,10 @@ export async function execBrew(cmd: string, options?: { signal?: AbortSignal }):
       });
     }
 
-    // Check for brew not found
-    if (preferences.customBrewPath && execErr && execErr.code === 127) {
+    // Check for brew not found. Only for commands the extension actually ran
+    // the brew executable for: a raw remediation's 127 is its OWN missing
+    // binary (a missing `sudo`), and claiming brew is missing would be a lie.
+    if (!options?.raw && preferences.customBrewPath && execErr?.code === 127) {
       execErr.stderr = `Brew executable not found at: ${preferences.customBrewPath}`;
       throw execErr;
     }
@@ -66,9 +82,30 @@ export async function execBrew(cmd: string, options?: { signal?: AbortSignal }):
 }
 
 /**
+ * Run a `--json` brew command that signals "I found something" by exiting 1
+ * with the report already on stdout. Returns that run's output, carrying
+ * brew's own `ExecError` so a caller can prefer brew's message to a parse
+ * error. Any other failure rethrows.
+ */
+export async function execBrewJson(
+  cmd: string,
+  options?: { signal?: AbortSignal },
+): Promise<ExecResult & { exitError?: ExecError }> {
+  try {
+    return await execBrew(cmd, options);
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code === 1 && execErr.stdout?.trim()) {
+      return { stdout: execErr.stdout, stderr: execErr.stderr, exitError: execErr };
+    }
+    throw err;
+  }
+}
+
+/**
  * Get the environment variables for brew execution.
  *
- * Homebrew 5.0 environment variables:
+ * Homebrew environment variables:
  * - HOMEBREW_DOWNLOAD_CONCURRENCY: Controls parallel downloads (default: "auto")
  *   Set to "1" to disable concurrent downloads
  */
@@ -82,31 +119,23 @@ export async function execBrewEnv(): Promise<NodeJS.ProcessEnv> {
   const env = { ...process.env };
   env["SUDO_ASKPASS"] = askpassPath;
   // Use HOMEBREW_BROWSER to pass through the app's bundle identifier.
-  // Brew will ignore custom environment variables.
+  // Only commands that open a URL read this (brew execs it directly), and the
+  // extension never invokes one — which is the reason this is safe.
   env["HOMEBREW_BROWSER"] = bundleIdentifier;
 
-  // Homebrew 5.0: Control download concurrency
-  // By default, Homebrew 5.0 enables concurrent downloads (auto)
-  // Users can disable this via preferences if they experience issues
+  // Control download concurrency. Homebrew enables concurrent downloads by
+  // default (auto); users can disable this via preferences if it causes trouble.
   const downloadConcurrencyDisabled = preferences.disableDownloadConcurrency;
   if (downloadConcurrencyDisabled) {
     env["HOMEBREW_DOWNLOAD_CONCURRENCY"] = "1";
   }
 
-  // Homebrew 5.0: Opt-in to the new internal API (smaller JSON)
-  // This will become default in a future version
-  const useInternalApi = preferences.useInternalApi;
-  if (useInternalApi) {
-    env["HOMEBREW_USE_INTERNAL_API"] = "1";
-  }
-
-  // Log Homebrew 5.0 configuration once per session
+  // Log the Homebrew configuration once per session
   if (!homebrewEnvLogged) {
     homebrewEnvLogged = true;
-    brewLogger.log("Homebrew 5.0 Configuration", {
+    brewLogger.log("Homebrew Configuration", {
       downloadConcurrencyEnabled: !downloadConcurrencyDisabled,
       downloadConcurrencyMode: downloadConcurrencyDisabled ? "sequential (1)" : "parallel (auto)",
-      internalApiEnabled: useInternalApi,
       verboseLogging: preferences.verboseLogging,
     });
   }

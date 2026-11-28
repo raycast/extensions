@@ -7,9 +7,16 @@ export function templateWebUrl(id: number): string {
   return `${awxUrl.trim().replace(/\/+$/, "")}/#/templates/job_template/${id}`;
 }
 
+export type TemplateKind = "job_templates" | "workflow_job_templates";
+
 /** API URL for a template's survey specification. */
-export function surveySpecUrl(kind: "job_templates" | "workflow_job_templates", id: number): string {
+export function surveySpecUrl(kind: TemplateKind, id: number): string {
   return `${apiBase()}/${kind}/${id}/survey_spec/`;
+}
+
+/** API URL for a template's launch config (what it prompts for on launch, and the defaults). */
+export function launchConfigUrl(kind: TemplateKind, id: number): string {
+  return `${apiBase()}/${kind}/${id}/launch/`;
 }
 
 /** Web URL for a workflow template's detail page in the AWX UI. */

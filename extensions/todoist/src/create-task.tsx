@@ -825,7 +825,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.Plus} />
-          <RefreshAction />
+          <RefreshAction setData={setData} />
         </ActionPanel>
       }
       enableDrafts={!fromProjectId && !fromTodayEmptyView && !fromLabel}

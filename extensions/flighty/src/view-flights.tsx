@@ -1,9 +1,11 @@
-import {List, ActionPanel, Action, Icon, Color} from '@raycast/api'
+import {List, ActionPanel, Action, Icon, Color, Keyboard} from '@raycast/api'
 import {useState} from 'react'
 import dayjs, {type Dayjs} from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import {getAllYears, useFlights} from './use-flights'
+import {matchesFlightListSearch} from './flight-list-search'
+import {formatAirport} from './flights'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -12,11 +14,13 @@ dayjs.extend(timezone)
 const timeFormat = 'h:mma'
 
 export default function () {
-    const {isLoading, error, data: allFlights} = useFlights()
+    const {isLoading, error, data: allFlights, permissionView, warning} = useFlights()
     const allYears = getAllYears(allFlights)
+    const [searchText, setSearchText] = useState('')
     const [filter, setFilter] = useState<{type: 'future'} | {type: 'all'} | {type: 'year'; year: string}>({type: 'future'})
 
     const filteredFlights = allFlights?.filter((flight) => {
+        if (!matchesFlightListSearch(flight, searchText)) return false
         if (filter.type === 'future') return dayjs.unix(flight.depTimeOriginal).isAfter(dayjs())
         if (filter.type === 'all') return true
         const depTime = dayjs.unix(flight.depTimeOriginal)
@@ -26,9 +30,14 @@ export default function () {
 
     if (filter.type === 'future') filteredFlights?.reverse()
 
+    if (permissionView) return permissionView
+
     return (
         <List
             isLoading={isLoading}
+            filtering={false}
+            searchText={searchText}
+            onSearchTextChange={setSearchText}
             navigationTitle="Flights"
             isShowingDetail={error === undefined}
             searchBarAccessory={
@@ -46,11 +55,28 @@ export default function () {
                     </List.Dropdown.Section>
 
                     <List.Dropdown.Section title="Past Flights">
-                        {allYears?.map((year) => <List.Dropdown.Item key={year} title={year.toString()} value={year.toString()} />)}
+                        {allYears?.map((year) => (
+                            <List.Dropdown.Item key={year} title={year.toString()} value={year.toString()} />
+                        ))}
                     </List.Dropdown.Section>
                 </List.Dropdown>
             }
         >
+            {warning && (
+                <List.Section>
+                    <List.Item
+                        id="parse-warning"
+                        icon={Icon.Warning}
+                        title="Some Flights Could Not Be Loaded"
+                        detail={<List.Item.Detail markdown={warning} />}
+                        actions={
+                            <ActionPanel>
+                                <Action.CopyToClipboard title="Copy Error Details" content={warning} />
+                            </ActionPanel>
+                        }
+                    />
+                </List.Section>
+            )}
             <List.Section title={filteredFlights ? `${filteredFlights.length} Flights` : undefined}>
                 {filteredFlights?.map((flight) => {
                     const link = `https://live.flighty.app/${flight.id}`
@@ -79,31 +105,13 @@ export default function () {
                             key={flight.id}
                             icon={{
                                 source: {
-                                    light: `https://live.flighty.app/content/airlines:light_${flight.airlineIcao.toLowerCase()}.svg`,
-                                    dark: `https://live.flighty.app/content/airlines:dark_${flight.airlineIcao.toLowerCase()}.svg`,
+                                    light: `https://live.flighty.app/airline/${flight.airlineId}/logo/LIGHT`,
+                                    dark: `https://live.flighty.app/airline/${flight.airlineId}/logo/DARK`,
                                 },
                                 fallback: Icon.Airplane,
                             }}
                             title={`${flight.airlineIata} ${flight.number}`}
                             accessories={[{text: depDate}]}
-                            keywords={[
-                                flight.number,
-                                flight.airlineIata,
-                                flight.airlineIcao,
-                                flight.airlineName,
-
-                                flight.depAirportIata,
-                                flight.depCity,
-                                flight.arrAirportIata,
-                                flight.arrCity,
-
-                                flight.aircraftIata,
-                                flight.aircraftIcao,
-                                flight.aircraftName,
-                                flight.aircraftTailNumber,
-
-                                flight.pnr,
-                            ].filter((s) => s !== null)}
                             actions={
                                 <ActionPanel title="Flight">
                                     <Action.OpenInBrowser title="Open in Flighty" url={link} />
@@ -111,7 +119,7 @@ export default function () {
                                     <Action.CopyToClipboard
                                         title="Copy Flight Number"
                                         content={`${flight.airlineIata} ${flight.number}`}
-                                        shortcut={{modifiers: ['cmd'], key: '.'}}
+                                        shortcut={Keyboard.Shortcut.Common.CopyName}
                                     />
                                     {flight.pnr && <Action.CopyToClipboard title="Copy Booking Code" content={flight.pnr} />}
                                 </ActionPanel>
@@ -125,8 +133,8 @@ export default function () {
 
                                             <List.Item.Detail.Metadata.Label title="Date" text={depDate} />
 
-                                            <List.Item.Detail.Metadata.Label title="From" text={`${flight.depCity} (${flight.depAirportIata})`} />
-                                            <List.Item.Detail.Metadata.Label title="To" text={`${flight.arrCity} (${flight.arrAirportIata})`} />
+                                            <List.Item.Detail.Metadata.Label title="From" text={formatAirport(flight.depCity, flight.depAirportIata)} />
+                                            <List.Item.Detail.Metadata.Label title="To" text={formatAirport(flight.arrCity, flight.arrAirportIata)} />
 
                                             <List.Item.Detail.Metadata.Separator />
 

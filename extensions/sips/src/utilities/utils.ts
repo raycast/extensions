@@ -873,13 +873,35 @@ export const hexToRGBA = (hex: string) => {
   };
 };
 
+/**
+ * Common install locations for ExifTool that may not be on Raycast's PATH (e.g. Homebrew).
+ */
+const EXIFTOOL_FALLBACK_PATHS = ["/opt/homebrew/bin/exiftool", "/usr/local/bin/exiftool"];
+
+/**
+ * Finds a working ExifTool installed on the system, checking the PATH first and then common install locations.
+ *
+ * @returns The command to run ExifTool, or undefined if no working installation was found.
+ */
+export const findSystemExifTool = (): string | undefined => {
+  for (const command of ["exiftool", ...EXIFTOOL_FALLBACK_PATHS]) {
+    try {
+      execSync(`"${command}" -ver`, { stdio: "ignore" });
+      return command;
+    } catch {
+      // Try the next location
+    }
+  }
+  return undefined;
+};
+
 export const expandTilde = (filePath: string) => {
   const homedir = os.homedir();
   if (filePath.startsWith("~")) {
     return filePath.replace(/^~(?=$|\/|\\)/, homedir);
   }
 
-  const regex = /(\/Users\/.*?)\/.*/;
+  const regex = /^(\/Users\/[^/]+)\/.*/;
   const match = filePath.match(regex);
   if (match) {
     return filePath.replace(match[1], homedir);

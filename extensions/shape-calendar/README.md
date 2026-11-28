@@ -4,16 +4,20 @@ Search, create, and manage your training activities from [Shape Calendar](https:
 
 ## Setup
 
-1. Get your API token from [Shape Calendar Settings](https://shapecalendar.com/settings)
-2. Open the extension preferences in Raycast and paste your token
+Run any command and sign in with your Shape Calendar account when prompted. You can revoke access at any time from [Shape Calendar Settings](https://shapecalendar.com/settings/api-access).
 
 ## Commands
 
 - **Search Activities** — Browse your planned and completed activities with a detail view
 - **This Week** — See your training plan for the current week at a glance
+- **Training Status** — Readiness, training load, and health metrics, with a preview right in the command row
 - **Today's Workout** — Pin to root search to always see today's workout
 
-## AI Extension
+## Shape MCP
+
+The extension bundles [Shape's MCP server](https://shapecalendar.com/mcp) for Raycast AI. Raycast connects to the server and discovers its tools, so training features stay in sync with Shape without separate tool implementations in the extension.
+
+Open **Ask Shape Calendar** or mention `@shape-calendar` in AI Chat. Sign in with your Shape account when Raycast prompts you. You can also manage the connection in **Manage MCP Servers**. MCP sign-in is separate from the sign-in used by the regular commands; existing command sign-ins continue to work.
 
 Ask Shape Calendar questions like:
 
@@ -21,4 +25,7 @@ Ask Shape Calendar questions like:
 - "How was my last workout?"
 - "Schedule a 10k run for tomorrow"
 - "Create a training plan for next week"
+- "Should I train hard today?"
+- "How did I sleep this week?"
+- "How was my heart rate during my last run?"
 - "Mark all my planned workouts as completed"

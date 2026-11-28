@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "modrinth-search",
   "title": "Modrinth Search",
-  "description": "Searches Modrinth.com for anything listed.",
+  "description": "Search Minecraft mods, modpacks, resource packs and shaders on Modrinth and open their page, source code, issues, wiki or Discord.",
   "icon": "command-icon.png",
   "author": "legenden",
   "license": "MIT",

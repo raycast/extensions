@@ -2,14 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mymind",
   "title": "mymind",
-  "description": "Search, save, upload, and organize your mymind library with the official API",
+  "description": "Search, save and organize your mymind library: links, notes and files with tags and spaces, plus menu bar quick save and AI tools.",
   "icon": "extension-icon.png",
   "author": "arian",
   "access": "public",
   "owner": "mymind",
   "contributors": [
     "yannglt",
-    "peduarte"
+    "peduarte",
+    "sebastiangonzales"
   ],
   "categories": [
     "Applications",
@@ -203,7 +204,9 @@
               "type": "link",
               "url": "https://example.com/typography",
               "mymindUrl": "https://access.mymind.com/everything/#obj_1",
-              "tags": ["design"],
+              "tags": [
+                "design"
+              ],
               "spaceIds": [],
               "created": "2024-01-01T00:00:00Z",
               "modified": "2024-01-01T00:00:00Z"
@@ -297,18 +300,18 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^1.19.1",
-    "zod": "^3.24.2"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "tsx": "^4.20.6",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -352,6 +355,15 @@
       ]
     },
     {
+      "name": "detectContext",
+      "type": "checkbox",
+      "required": false,
+      "title": "Context Detection",
+      "label": "Prefill Save to mymind from what you're doing",
+      "description": "Off by default, which opens Save to mymind empty. When on, it prefills from, in order: selected text, the active browser tab, files selected in Finder, then the latest clipboard item. Switch between detected sources from the From dropdown. Reading the browser tab asks macOS for permission the first time. macOS only.",
+      "default": false
+    },
+    {
       "name": "mediaGridColumns",
       "type": "dropdown",
       "required": false,
@@ -380,6 +392,7 @@
   ],
   "overrides": {
     "minimatch": "^10.0.1",
-    "picomatch": "^4.0.4"
+    "picomatch": "^4.0.4",
+    "js-yaml@4": "4.3.2"
   }
 }

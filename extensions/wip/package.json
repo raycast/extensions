@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wip",
   "title": "WIP",
-  "description": "Manage your WIP todos and projects from Raycast.",
+  "description": "Search your WIP todos and projects, add completed todos, and check your WIP shipping streak.",
   "icon": "icon.png",
   "author": "marckohlbrugge",
   "categories": [
@@ -24,7 +24,7 @@
       "subtitle": "WIP",
       "description": "Show WIP Streak",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "done",
@@ -84,5 +84,12 @@
         }
       ]
     }
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
+  },
+  "platforms": [
+    "macOS"
   ]
 }

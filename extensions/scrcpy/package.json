@@ -2,11 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scrcpy",
   "title": "Scrcpy",
-  "description": "Mirror android device screen with scrcpy",
+  "description": "Mirror your Android phone screen on your Mac with scrcpy and adb, choosing a connected device.",
   "icon": "icon.png",
   "author": "zcfan",
-  "contributors": [
-  ],
+  "contributors": [],
   "pastContributors": [
     "Lemon"
   ],
@@ -60,5 +59,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

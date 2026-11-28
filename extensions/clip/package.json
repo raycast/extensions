@@ -25,7 +25,7 @@
     "@raycast/api": "^1.101.0",
     "@raycast/utils": "^2.2.0"
   },
-  "description": "Shorten URLs using multiple services (bit.ly, cutt.ly, tinyurl, is.gd, v.gd)",
+  "description": "Shorten URLs from your clipboard with Bitly, Cuttly, TinyURL, is.gd or v.gd, copy the short link, and view your shortened URL history.",
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^20.0.0",
@@ -67,5 +67,11 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "title": "Clip - URL Shortener"
+  "title": "Clip - URL Shortener",
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12",
+    "js-yaml@4": "4.3.2"
+  }
 }

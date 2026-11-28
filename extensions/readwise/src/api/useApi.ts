@@ -5,7 +5,9 @@ import { fetchReadwise } from "./fetcher";
 import { useHandleError } from "./useHandleError";
 
 export const useDetailApi = <T>(endpoint: string) => {
-  const { data, error, isValidating } = useSWR<T, HTTPError>(endpoint, fetchReadwise);
+  const { data, error, isValidating } = useSWR<T, HTTPError>(endpoint, (url: string) =>
+    fetchReadwise<T, Record<string, never>>(url, {})
+  );
   useHandleError(error);
 
   return {
@@ -24,7 +26,10 @@ export const useListApi = <T, Params extends DefaultParams>(endpoint: string, de
   const defaultQueryParams = defaultParams || DEFAULT_LIST_PARAMS;
   const [params, setParams] = useState(defaultQueryParams);
 
-  const { data, error, isValidating } = useSWR<T, HTTPError>([endpoint, params], fetchReadwise);
+  const { data, error, isValidating } = useSWR<T, HTTPError>(
+    [endpoint, params],
+    ([url, queryParams]: [string, Params]) => fetchReadwise<T, Params>(url, queryParams)
+  );
   useHandleError(error);
 
   return {

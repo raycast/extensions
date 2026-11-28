@@ -1,15 +1,216 @@
 # Brew Changelog
 
+## [One action at a time per package] - 2026-11-26
+
+- Fixed: pressing Install, Upgrade or Uninstall again while it runs no longer starts a second Homebrew and fails with "Brew is Busy". The package's icon spins, Install and Upgrade read "Installing…" or "Upgrading…", and Uninstall is hidden until the list shows the result
+- Improved: the "Installing…" toast appears as soon as you press Install, instead of after the trust check for a package from a third-party tap
+- Improved: uninstalling a package that was already removed, from the Terminal or another command, says it was already uninstalled instead of reporting an error
+- Changed: when Uninstall refuses a pinned package, its toast offers Force Uninstall and Unpin as two separate actions, as its message says, instead of one action that did both
+
+## [Show Installed filters, and the version in use] - 2026-11-24
+
+- Changed: Show Installed's filter now offers Installed by You and Dependencies beside All, Formulae and Casks. It replaces Hide Dependencies (⌘D), which could leave dependencies hidden with nothing on screen saying so
+- Fixed: with an older version still installed beside a newer one, such as `rust`, rows in Show Installed and Search show the version Homebrew links rather than the leftover one, Show Installed dates the row by it, and Show in Finder opens that version's folder
+- Improved: rows show the version alone, without letters such as `(DO)`. The Outdated tag and the pin icon already say the same, and whether a package is a dependency shows in Show Installed's Dependencies section and in the sidebar's Version row
+- New: the sidebar shows when a package was installed, in Show Installed and in Search
+
+## [Unused tag and build dependencies] - 2026-11-24
+
+- Fixed: Show Installed no longer tags a dependency "Unused" while a package built from source needs it to build again, such as `rust` for a formula built with it. From Homebrew 7.0.16, Uninstall refuses to remove one
+
+## [Homebrew 7.0.15 previews and pins] - 2026-11-21
+
+- Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package
+- Fixed: Preview Upgrades with two or more packages shows clean versions, and its total download size includes every package Homebrew gives a size for
+- Fixed: a formula pinned under another name, such as an alias or a former name, now reads as pinned, so Uninstall asks to unpin it first and Upgrade All leaves it alone
+- Fixed: Search launched from Raycast's root with a trailing space, such as `vgmstream `, finds results again
+
+## [Tap checks before adding, and readable warnings] - 2026-11-20
+
+- New: pasting a tap or repository into Manage Taps shows what it holds before you add it. A repository that isn't a Homebrew tap says so, and offers the install its README names or a tap from the same owner
+- New: when a paste names a package, or the tap has only one, the first row installs it after one confirmation
+- Improved: once the check finishes, a misspelled `user/repo/name` lists the tap's real packages, in Search and Manage Taps
+- Improved: typing `user/name` for a package rather than a tap, such as `thousandflowers/rcc`, offers to install it from the owner's own tap when it is there
+- Improved: Add Tap trusts a tap only once brew lists packages in it. Adding an empty tap doesn't trust it, and Manage Taps shows "No packages found" with Remove Tap
+- Improved: a shorter confirmation when installing from a tap, and progress that names each step
+- Improved: after an install from Manage Taps, the list moves to that tap's section
+- Changed: Remove Tap also clears the tap's trust, so adding it again asks first
+- Improved: a suggested package that is already installed opens its details instead of offering Install again
+- Improved: trusting a tap with no packages asks first, since trust covers whatever it adds later
+- Improved: the sidebar action says Show Sidebar or Hide Sidebar, and each list remembers the choice
+- Improved: shorter preference descriptions, code on error screens is marked as text, and Debug is now Show Debug Info
+- Fixed: a Disabled or Deprecated row shows a label, such as "Fails Gatekeeper Check", instead of Homebrew's internal code, such as `fails_gatekeeper_check`
+- Improved: the Disabled or Deprecated row shows a short reason, such as "Requires a signed download URL". Show Details gives the full reason, the date and any replacement
+- Improved: a Disabled or Deprecated package that names a replacement shows it in its own Use Instead row
+- Improved: Refresh in Manage Taps checks a pasted tap again from scratch, so a private repository can be read once git is signed in
+- Fixed: installing a package from a tap Homebrew doesn't trust yet failed with "Refusing to load" on Homebrew 7.0.14 and later. It now trusts that one package first
+- Fixed: one untrusted tap no longer stops Manage Taps from loading. Packages from it that aren't trusted on their own are listed by name, marked Not Trusted, with Install and Trust Tap
+- Improved: Stop Trusting Tap lists the tap's installed formulae first. They stay installed, but won't appear in Show Installed or Show Upgrades
+- Fixed: Show Installed refreshes after a tap is trusted or untrusted, in Raycast or in the terminal
+- Changed: Run Install in Terminal and Run Upgrade in Terminal use ⌘⇧T in the install and upgrade previews, as in Show Upgrades
+
+## [Handle missing package descriptions] - 2026-11-14
+
+- Omit missing formula and cask descriptions from list subtitles instead of passing `null` to the UI.
+
+## [CLI search keywords] - 2026-11-09
+
+- Fixed: Show Upgrades answers to "outdated" again. The keyword was removed by accident and is restored
+- New: root search finds Show Installed with "list", Manage Taps with "untap" or "trust", and Clean up with "cleanup"
+- New: "homebrew" is on every command, so search finds the whole extension
+- Improved: the Adopt Apps subtitle changed from Homebrew to Brew
+
+## [Show unscanned formulae in Show Vulnerabilities] - 2026-11-06
+
+- Fixed: Show Vulnerabilities lists the formulae `brew vulns` didn't scan, such as ones from untrusted taps, and why
+- Fixed: Show Vulnerabilities lists the formulae brew checked against a newer version than the one installed, instead of saying "No known vulnerabilities"
+
+## [Adopt Apps reads brew.env] - 2026-11-06
+
+- Fixed: Adopt Apps now looks in the install folder set in `brew.env`, `/Applications` and `~/Applications`
+- Improved: the README says Raycast doesn't get `XDG_CONFIG_HOME`, and which `brew.env` file to use
+
+## [Homebrew options] - 2026-11-05
+
+- Improved: the README explains how to set Homebrew options, such as where casks install, so installs from the extension use them too
+
+## [Run in Terminal after a finished command] - 2026-11-03
+
+- Fixed: with Terminal as the terminal application, a Run in Terminal action did nothing once an earlier command had finished and its window still showed "[Process completed]". Run in Terminal now opens a new window, so it also no longer ends the shell in your front tab
+
+## [Install in your terminal by default] - 2026-11-03
+
+- New: an "Install and uninstall in the terminal application" preference, off by default. ↩ on a package that is not installed runs `brew install` in your terminal application, and ⌘I still installs inside Raycast. ⌃X runs `brew uninstall` there too, except on a pinned package, where Uninstall stays in Raycast and asks to unpin
+
+## [Finished toasts lose Cancel] - 2026-11-03
+
+- Fixed: a finished install, upgrade or uninstall could stay on its progress toast, such as "Installing Tinycast / Operation completed successfully", with a Cancel button that did nothing. It now ends on the result, such as "Installed Tinycast", with no Cancel
+
+## [Better search ranking] - 2026-10-31
+
+- Improved: Search now lists exact name matches first, then names that start with what you typed, then names containing it, and description-only matches last. Searching `dia` finds Dia before AirMedia
+
+## [Added new screenshots] - 2026-10-13
+
+## [Remove Tap fix] - 2026-10-04
+
+- Fixed: on Homebrew 6.0.12 and earlier, Remove Tap left the tap's installed packages behind although its confirmation said they would be uninstalled. It now uninstalls them, then removes the tap, on every Homebrew version, and keeps the tap if a package can't be uninstalled
+- Fixed: after a Remove Tap that stopped partway, the list now shows what was removed, so trying again picks up where it stopped
+
+## [Third-party taps] - 2026-10-02
+
+- New **Manage Taps** command: every tap you have added is a section listing the formulae and casks it provides, with a dropdown to narrow to one tap. Add a tap by typing `user/repo` (or `user/repo <url>` for a repository not named `homebrew-…`), and remove it, or on Homebrew 7 trust and stop trusting it, from any of its rows
+- A tap that only adds `brew` commands gets one row naming them; ↵ opens its repository
+- Search recognizes a pasted `user/repo/name`, or a whole line from a project's install page, and offers it as a row: one confirmation adds the tap, trusts that one package and installs it
+- Homebrew 7 trusts a package by itself whenever a command names it, so Install, Upgrade, both previews and the Run in Terminal actions now ask first, and trust only that package, never its tap
+- A package from a third-party tap is now installed by its full name, so one that shares a name with a Homebrew package can no longer install the wrong one
+- Fixed: a package from a third-party tap no longer shows the install status of a same-named Homebrew package in the sidebar
+
+## [Adopt Apps] - 2026-10-01
+
+- New **Adopt Apps** command: finds apps already on your Mac that Homebrew has a cask for, and hands them to Homebrew so they upgrade with everything else
+- Matches are grouped by what vouches for them — **Ready to Adopt**, **Likely Adoptable**, **Unlikely Adoptions** — and anything not ready goes through **Preview Adoption** (⌘⇧I) first. An app Homebrew would refuse to adopt as it stands (missing files the cask links, or a conflicting cask already installed) is listed under **Can't Adopt**, with the reason in its tooltip
+- Adoption shows Homebrew's progress as it runs, and warns before it will ask for your administrator password
+- Ignore a wrong match with ⌘⇧H; the filter above the list shows ignored apps and puts them back
+- Never offers Mac App Store or macOS system apps, and refuses an adoption that could delete your only copy of an app
+- The Adopt, Link Cask, Unlink Cask and Update Homebrew confirmations say what will happen and name the action on their button, instead of listing the raw `brew` command; Adopt names the folder it acts on
+- Copy Adopt Command no longer appears on a package this Mac can't install
+- Fixed: packages from third-party taps no longer show three "Unavailable" install-count rows
+
+## [Fix Services menu bar background refresh] - 2026-09-24
+
+- Services Menu Bar no longer fails with "Toast API is not available when command is launched in background" when a background refresh can't fetch services; the error is shown in the menu instead (click it to retry)
+
+## [Homebrew 7 support] - 2026-09-21
+
+- Show Installed now lists formulae you asked for and their dependencies in separate sections; a dependency nothing else needs is tagged Unused. ⌘D still hides the dependencies section.
+- New **Run Doctor** command: shows the `brew doctor` report with every recommended fix, and runs them all with one confirmation (Fix All). Needs Homebrew 7.0
+- New **Show Vulnerabilities** command: lists installed formulae with known vulnerabilities from `brew vulns` (Homebrew 7), with per-advisory detail, a Show Details view that expands every advisory in full, and an Upgrade action where the formula is also outdated
+- Installed casks that own symlinks (a `binary`, man pages, shell completions) gained **Link Cask** (⌘L) and **Unlink Cask** (⌘⇧L): each runs `brew --dry-run` first and lists the exact symlinks it would create or remove before you confirm. A cask that is already linked says so instead of running anything. Needs Homebrew 7.0
+- Preview Install (⌘⇧I) on uninstalled packages shows what `brew install --dry-run` would install or upgrade, with Install one keystroke away
+- Preview Upgrades (⌘⇧I) in Show Upgrades shows what `brew upgrade` would actually do: every package with its version transition, its download size, the total to download, and any warning brew raises. It runs `brew upgrade --dry-run` only when you ask for it — the manifest lookups take a while on a long list
+- Preview Upgrade (⌘⌥I) on an outdated package — in Show Upgrades, Show Installed and Search — shows what `brew upgrade <package>` alone would do: its version transition, download size and any warning, with Upgrade one keystroke away. Only offered where there is something to upgrade
+- Cask details now show a Languages row for casks that ship language variants (firefox, thunderbird, libreoffice, and a few others) — 8 or fewer codes list inline, more collapse to a count
+- Search marks packages that can't be installed on this Mac (disabled, Linux-only, macOS version or architecture) with ⊘, says why in the sidebar, and no longer offers Install for them
+- `Upgrade` is now the primary action for the selected formula or cask (nhojb)
+- `Upgrade All` is the secondary action (if available) (nhojb)
+- Selection can be toggled via the `⌘⇧X` shortcut (nhojb)
+- Select/Deselect all can be toggled via the `⌘⇧A` shortcut (nhojb)
+
+## [Cask pinning, Homebrew 6] - 2026-09-08
+
+- **Casks can now be pinned**, just like formulae — pin a cask and it is locked out of upgrades, gets its own section in Show Installed, and shows the same pin icon everywhere. Homebrew has supported this since 5.1.12
+- Pinning a cask that updates itself now says so: the pin holds for brew, but the app can still self-update, so the toast says "Pinning may be overridden by auto-updates" instead of implying the version is frozen
+- Uninstalling a pinned package used to surface a raw brew error — brew refuses this for pinned formulae as well as casks. It now says the package is pinned and offers "Unpin and Force Uninstall" as an explicit choice
+- Fixed: a pinned cask was included in Upgrade All and reported as a **failed** upgrade. Pinned packages are now skipped, matching how pinned formulae are handled
+- Fixed: pinning or unpinning a cask did not refresh the installed list — cask pins live in a separate directory that the cache was not watching
+- Fixed: the "D" dependency badge never appeared. Homebrew removed the field it read in 5.1.9; it now reads the field brew actually reports
+- The upgrade progress toast now reports the download phase as a batch rather than naming one package: brew announces every package up front, then downloads them concurrently, so a per-package label there was not true
+- A pinned cask now shows "Pinned: Yes" in the metadata panel, as pinned formulae already did — the list's tack accessory is hidden while that panel is open, so it was the only place the state could be seen. Formula metadata also gained the Tap row casks already had
+- A package Homebrew declines to upgrade is no longer reported as upgraded. Brew warns and skips a disabled, unavailable, already-current or un-upgradable package while still exiting 0, and each reason is now shown as its own outcome rather than one generic skip
+- Upgrading a single package that Homebrew declines now shows it as skipped, with the reason, rather than a red failure — and the "N of M" progress counter no longer stalls a step behind when a package is skipped mid-run
+- A cask that belongs to no tap no longer offers a "Copy Tap Name" action that would copy nothing
+- Pin state is now read from Homebrew's own pin directory immediately before an upgrade or uninstall, so a package pinned in another command — or outside Raycast — is respected rather than trusted from a cached snapshot. One directory read per run, ~20µs
+- If Homebrew refuses an upgrade or uninstall because the package is pinned, the toast now offers to unpin, instead of showing the raw error
+- Cask details now list the formulae and casks a cask depends on, and the architectures it requires — formula details have always shown dependencies, so casks were missing information brew reports (`gcloud-cli` needs `python@3.14`, for one)
+- Removed the unused two-phase loading path (`brew list --versions`, added in 5.0 support). It had no caller and its cache read duplicated the main loader; installed packages already paint from cache
+- **This extension now requires Homebrew 6.0 or later.** The "Use internal API" preference is gone — Homebrew 6 uses that API by default and deprecates the setting, which made brew abort outright under `HOMEBREW_DEVELOPER`
+
+## [Show Upgrades: reviewed, selective upgrading] - 2026-09-01
+
+- **Show Outdated is now Show Upgrades**: the outdated list has grown into a review surface — ↩ toggles a package (formula or cask) in or out of the upgrade, **⌘↩ runs it from any row** ("Upgrade All" with the default full selection, "Upgrade N Selected" once narrowed) and ⌘⇧A selects or deselects everything upgradable. The default selection is everything not pinned — exactly what a plain `brew upgrade` would do. Every per-package action the view offered (single upgrade, pin, copy/terminal commands, uninstall) remains on each row, and the command still answers to "outdated" in search
+- A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterwards
+- A pin is a lock, matching brew's own behavior: pinned formulae cannot be selected, and upgrading one means unpinning it — ↩ on a pinned row unpins and selects it in one step. Pinning from the review (⌘.) deselects
+- Refreshing mid-review (⌘R) keeps the selections you have already made; a formula pinned outside the extension is deselected on refresh — the lock always wins
+- Casks are selectable exactly like formulae. Cask _pinning_ (the lock semantics) ships in a follow-up
+- Running the upgrade cancels the review's in-flight background `brew update` (and waits for it to release Homebrew's update lock) instead of asking the user to try again in a moment
+- Reopening either upgrade command after a run no longer flashes the pre-run list: a snapshot the run made stale is withheld until fresh data lands
+- A failed check-for-upgrades now shows a failure screen with a Retry action instead of a blank list (Show Upgrades) or a stuck checking placeholder (Upgrade); with cached packages still on screen the failure arrives as a toast instead, and with nothing outdated the empty screen offers a route to Show Installed
+- "Run Upgrade in Terminal" on outdated rows moved from ⌘↩ to ⌘⇧T, and the single-package Upgrade action moved from ↩ into the action panel — ↩ now toggles selection and ⌘↩ starts the run on every row
+- Fixed the `OutdatedCask.installed_versions` type: `brew outdated --json=v2` returns an array for casks, not a string
+- Added a test suite (vitest, dev-only) covering the selection logic
+
+## [Install statistics & popularity sort] - 2026-09-01
+
+- Search: "Sort by Popularity" (⇧⌘P) orders results by installs over the last 30 days, ranking every match before the list is truncated — so the top rows are the most installed overall, not of the first hundred. An empty query lists the most installed packages outright.
+- The detail sidebar and the Details view both show a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.
+- Deprecated and disabled packages carry a warning at the top of the sidebar, with the reason, the date, and the replacement package where Homebrew names one.
+- "Hide Description" (⇧⌘Y) drops the description pane and shows the sidebar as a pure metadata list, with a Caveats indicator; the full caveats text stays in Show Details, which renders it as prose.
+- "Show Details" is now offered even when the sidebar is open. It previously disappeared in that state, leaving "Show in Finder" as the default action on an installed package. Install and Upgrade remain the default where they apply.
+- Display toggles are grouped in a "View" section. "Toggle Details" is now "Toggle Sidebar" (⇧⌘D), and works in Search too; "Hide Dependencies" no longer appears in Search, where nothing filtered by it. Show Installed adds an install date and marks pinned formulae.
+- Search now marks an installed package as outdated when an update exists, and offers Upgrade on it. Previously only Show Outdated knew, because the installed cache never expired on `brew update` — its freshness test watched only local install state.
+- Show Outdated groups pinned formulae into their own section, as Show Installed does. They are the ones `brew upgrade` refuses and Upgrade All skips, so keeping them out of the actionable list says so without the row having to.
+- Pinning uses a tack rather than a map pin, and Show Outdated marks a pinned formula with that icon in place of the word "Pinned". Upgrade actions carry the same up-arrow as the row they act on, instead of a hammer.
+- Upgrading a pinned formula now says so instead of failing. `brew upgrade` refuses a pinned package outright, so the action surfaced its error; it now skips with an explanation, matching Upgrade All which already skipped them.
+- An available update is now marked the same way everywhere — a yellow up-arrow, replacing a red check in Search that clashed with the red used for a failed upgrade, and a grey check in Show Outdated that was the "upgraded" glyph greyed out.
+- The Details view and the search sidebar now show the same metadata, built from one definition. They had drifted: statistics, the deprecation warning and the corrected version line each landed in one and not the other.
+- The version row leads with the version you actually have, showing `installed → available` when they differ. It previously showed the available version labeled "installed", so an outdated package read as current.
+- Cached downloads are now written atomically, so an interrupted one can no longer leave a partial file that later fails to load. This covers the package index every command depends on, not just the new statistics. Clear Cache removes leftover temporary files too.
+- Updated to `@raycast/api` 2.x, and to a `brace-expansion` release without the denial-of-service advisory (GHSA-rgw5-rvv9-x895).
+
+## [Upgrade View] - 2026-08-27
+
+- The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.
+- Upgrade progress is reported via the toast/HUD, with the icon of each package reflecting its upgrade status.
+- "Upgrade All" now upgrades each package in turn, so its progress is reported per package.
+- Added a Refresh action to the outdated action panel.
+- Pinned formulae are skipped when upgrading.
+
+## [Adopt] - 2026-08-19
+
+- Added "Copy Adopt Command" (⌘⇧⌥C) and "Run Adopt in <terminal>" (⌘⇧↵) actions in Search for packages not yet managed by Homebrew. They run `brew install --adopt` to reclaim an externally-installed package (e.g. installed via a .dmg or another package manager) into Homebrew so it is covered by `brew upgrade`.
+- The Adopt action is intentionally not shown as a direct action for uninstalled packages so it doesn't sit confusingly next to Install; adopt is available via the copy/run command actions.
+
 ## [Pin visibility, outdated tags, detail pane] - 2026-08-04
 
-- Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabelled among the other formulae
+- Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabeled among the other formulae
 - Installed packages with an available update now carry an `Outdated` tag — formulae and casks both. The list component is shared, so the tag also appears for installed-and-outdated packages in Search results
 - Show Installed: ⌘⇧D toggles a metadata detail pane for the selected package
 - A list of nothing but pinned formulae no longer reports itself as empty
 
 ## [Bug fix] - 2026-08-03
 
-- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialise to `{}`, so the cached value was emptied on write and then re-served empty forever. The serialisable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
+- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialize to `{}`, so the cached value was emptied on write and then re-served empty forever. The serializable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
 - Fixed Search intermittently failing to mark packages as installed, which had the same cause.
 
 ## [Bug fix] - 2026-07-10
@@ -21,7 +222,7 @@
 - Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
 - Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
 
-## [Bug fix] -  2026-05-21
+## [Bug fix] - 2026-05-21
 
 - Improves reliability of index cache
 - Improves toast error message if fetch fails

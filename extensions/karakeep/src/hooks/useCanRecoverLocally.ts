@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import type { Preferences } from "../types";
 import { canRecoverLocally } from "../utils/submitGuard";
 
 /**

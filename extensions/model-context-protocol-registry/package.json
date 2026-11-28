@@ -2,11 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "model-context-protocol-registry",
   "title": "Model Context Protocol Registry",
-  "description": "Find and install MCP servers in Raycast and other MCP clients like Claude or Cursor.",
+  "description": "Find and install MCP servers (Model Context Protocol) in Raycast, Claude, Cursor and other MCP clients from a registry.",
   "icon": "extension.png",
   "author": "thomas",
   "contributors": [
-    "nagauta"
+    "nagauta",
+    "pernielsentikaer",
+    "porenes",
+    "seifip",
+    "vladimir_mitev"
   ],
   "owner": "raycast",
   "access": "public",
@@ -30,8 +34,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.98.0",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3",
     "@types/json-schema": "^7.0.15",
     "numeral": "^2.0.6"
   },
@@ -39,13 +43,14 @@
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/numeral": "^2.0.5",
-    "@types/react": "19.0.10",
+    "@types/react": "19.3.0",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
+    "test": "node --test tests/*.test.cjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

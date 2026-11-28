@@ -1,4 +1,8 @@
-import { Model } from "../lib/OpenAI";
+import { Model, ReasoningLevel } from "../lib/OpenAI";
+
+export interface ItemLaunchContext {
+  id?: string;
+}
 
 export interface Action {
   id: string;
@@ -7,6 +11,7 @@ export interface Action {
   description: string;
   systemPrompt: string;
   model: Model;
+  reasoningLevel?: ReasoningLevel;
   temperature: string;
   maxTokens: string;
   favorite: boolean;

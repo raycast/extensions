@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { runHerdr, runInPane } from "../lib/herdr";
 import { parseEnvironment } from "../lib/parsers";
@@ -129,7 +129,10 @@ export function SplitPaneForm({ paneId, onDone }: DoneProps & { paneId: string }
 
   async function submit() {
     const numericRatio = Number(ratio);
-    if (!Number.isFinite(numericRatio) || numericRatio <= 0.05 || numericRatio >= 0.95) return;
+    if (!Number.isFinite(numericRatio) || numericRatio <= 0.05 || numericRatio >= 0.95) {
+      await showToast({ style: Toast.Style.Failure, title: "Choose a pane size between 5% and 95%" });
+      return;
+    }
     const success = await runAction(
       "Splitting pane",
       async () => {

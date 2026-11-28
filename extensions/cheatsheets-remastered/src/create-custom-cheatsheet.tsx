@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, ActionPanel, Action, Icon, showToast, Toast, LocalStorage, useNavigation } from "@raycast/api";
+import { Form, confirmAlert, Alert, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import Service from "./service";
@@ -11,32 +11,7 @@ type CreateFormValues = {
   description?: string;
 };
 
-// Custom hook for draft persistence
-function useDraftPersistence(key: string, defaultValue: string) {
-  const [value, setValue] = useState(defaultValue);
-
-  React.useEffect(() => {
-    // Load draft from storage
-    LocalStorage.getItem<string>(key).then((stored) => {
-      if (stored && stored !== defaultValue) {
-        setValue(stored);
-      }
-    });
-  }, [key, defaultValue]);
-
-  const updateValue = (newValue: string) => {
-    setValue(newValue);
-    // Save to storage
-    LocalStorage.setItem(key, newValue);
-  };
-
-  const clearDraft = () => {
-    LocalStorage.removeItem(key);
-    setValue(defaultValue);
-  };
-
-  return { value, updateValue, clearDraft };
-}
+import { useDraftPersistence } from "./use-draft";
 
 export function CreateCustomCheatsheet({ onCreated }: { onCreated?: () => void }) {
   const { pop } = useNavigation();
@@ -45,30 +20,36 @@ export function CreateCustomCheatsheet({ onCreated }: { onCreated?: () => void }
 
   const {
     value: title,
+    isReady: titleReady,
     updateValue: updateTitle,
     clearDraft: clearTitleDraft,
-  } = useDraftPersistence("create-custom-sheet-title", "");
+  } = useDraftPersistence<string>("create-custom-sheet-title", "");
 
   const {
     value: content,
+    isReady: contentReady,
     updateValue: updateContent,
     clearDraft: clearContentDraft,
-  } = useDraftPersistence("create-custom-sheet-content", "");
+  } = useDraftPersistence<string>("create-custom-sheet-content", "");
 
   const {
     value: tags,
+    isReady: tagsReady,
     updateValue: updateTags,
     clearDraft: clearTagsDraft,
-  } = useDraftPersistence("create-custom-sheet-tags", "");
+  } = useDraftPersistence<string>("create-custom-sheet-tags", "");
 
   const {
     value: description,
+    isReady: descriptionReady,
     updateValue: updateDescription,
     clearDraft: clearDescriptionDraft,
-  } = useDraftPersistence("create-custom-sheet-description", "");
+  } = useDraftPersistence<string>("create-custom-sheet-description", "");
 
   const handleSubmit = async (values: CreateFormValues) => {
     try {
+      if (!(titleReady && contentReady && tagsReady && descriptionReady))
+        throw new Error("Wait for saved drafts to load. If loading failed, preserve your text and reopen the form.");
       setIsSubmitting(true);
       setShowErrors(true);
 
@@ -88,10 +69,9 @@ export function CreateCustomCheatsheet({ onCreated }: { onCreated?: () => void }
       await Service.createCustomCheatsheet(values.title, values.content, tagsArray, values.description);
 
       // Clear drafts after successful submission
-      clearTitleDraft();
-      clearContentDraft();
-      clearTagsDraft();
-      clearDescriptionDraft();
+      const draftsCleared = (
+        await Promise.all([clearTitleDraft(), clearContentDraft(), clearTagsDraft(), clearDescriptionDraft()])
+      ).every(Boolean);
 
       if (onCreated) {
         onCreated();
@@ -101,7 +81,9 @@ export function CreateCustomCheatsheet({ onCreated }: { onCreated?: () => void }
       showToast({
         style: Toast.Style.Success,
         title: "Created",
-        message: `"${values.title}" has been added to your custom cheatsheets`,
+        message: draftsCleared
+          ? `"${values.title}" has been added to your custom cheatsheets`
+          : "Sheet saved. Some drafts could not be cleared; copy any newer draft before resetting it.",
       });
     } catch (error) {
       showFailureToast(error, { title: "Failed to create cheatsheet" });
@@ -112,7 +94,7 @@ export function CreateCustomCheatsheet({ onCreated }: { onCreated?: () => void }
 
   return (
     <Form
-      isLoading={isSubmitting}
+      isLoading={isSubmitting || !(titleReady && contentReady && tagsReady && descriptionReady)}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Custom Cheatsheet" onSubmit={handleSubmit} icon={Icon.Document} />
@@ -120,12 +102,19 @@ export function CreateCustomCheatsheet({ onCreated }: { onCreated?: () => void }
             title="Reset Draft"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            onAction={() => {
-              clearTitleDraft();
-              clearContentDraft();
-              clearTagsDraft();
-              clearDescriptionDraft();
-              showToast({ style: Toast.Style.Success, title: "Draft Cleared" });
+            onAction={async () => {
+              if (
+                !(await confirmAlert({
+                  title: "Discard Saved Draft?",
+                  message: "This removes the saved draft for this form.",
+                  primaryAction: { title: "Discard", style: Alert.ActionStyle.Destructive },
+                }))
+              )
+                return;
+              const draftsCleared = (
+                await Promise.all([clearTitleDraft(), clearContentDraft(), clearTagsDraft(), clearDescriptionDraft()])
+              ).every(Boolean);
+              if (draftsCleared) showToast({ style: Toast.Style.Success, title: "Draft Cleared" });
             }}
           />
         </ActionPanel>

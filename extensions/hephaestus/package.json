@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hephaestus",
   "title": "Hephaestus - JSON Tools",
-  "description": "A collection of useful developer tools and utilities, including JSON to Swift, Objective-C, TypeScript, and more.",
+  "description": "Convert JSON to Swift, Objective-C or TypeScript models, and format and beautify JSON.",
   "icon": "icon.png",
   "author": "sharker_alice_sharker",
   "categories": [
@@ -44,7 +44,7 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/js-beautify": "^1.14.3",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "quicktype-core": "^23.0.170",

@@ -1,5 +1,12 @@
 # discogs Changelog
 
+## [Fix Search Query Encoding] - 2026-11-27
+- Encode the search text in Search Discogs, so queries with `&`, `#` or `+` ("Simon & Garfunkel") search for the whole text and keep the token
+
+## [Search Current Music Track] - 2026-10-22
+- Add a macOS-only command to search the currently playing Apple Music track in the browser without a Discogs token
+- Make the Discogs token optional for the extension while retaining token checks for API searches
+
 ## [Bug Fixes and quality of life improvements] - 2026-06-16
 - Display release date as string without timezone conversion
 - Remove catalog number from labels field, show name only

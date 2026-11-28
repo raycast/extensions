@@ -1,9 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
+import { runCoreCommand } from "./core-process";
 
 /** GitHub URL for Paper Agent core (install instructions). */
 export const CORE_INSTALL_URL = "https://github.com/galleonli/paper-agent";
@@ -21,10 +18,21 @@ export function getBootstrapCopyText(): string {
   return `git clone ${CORE_INSTALL_URL}.git && cd paper-agent && ./scripts/bootstrap.sh`;
 }
 
+export function getRepairCopyText(configPath: string): string | undefined {
+  if (!configPath.trim()) return undefined;
+  const root = path.dirname(configPath.trim());
+  if (!fs.existsSync(path.join(root, "scripts", "bootstrap.sh"))) return undefined;
+  const quotedRoot = `'${root.replace(/'/g, "'\\''")}'`;
+  return `cd ${quotedRoot} && ./scripts/bootstrap.sh`;
+}
+
 /**
  * Check if Paper Agent core is available: config exists and `python -m paper_agent` runs.
  */
-export async function checkCoreAvailable(prefs: CoreCheckPrefs): Promise<{
+export async function checkCoreAvailable(
+  prefs: CoreCheckPrefs,
+  signal?: AbortSignal,
+): Promise<{
   ok: boolean;
   error?: string;
 }> {
@@ -39,19 +47,23 @@ export async function checkCoreAvailable(prefs: CoreCheckPrefs): Promise<{
   const agentRoot = path.dirname(configPath);
   const pythonBin = (prefs.pythonPath ?? "").trim() || path.join(agentRoot, ".venv", "bin", "python3");
   if (!fs.existsSync(pythonBin)) {
-    return { ok: false, error: `Python executable not found: ${pythonBin}` };
+    return {
+      ok: false,
+      error: `Python executable not found: ${pythonBin}. Run the core bootstrap script to repair the environment.`,
+    };
   }
 
   try {
-    await execFileAsync(pythonBin, ["-m", "paper_agent", "run", "--help"], {
+    await runCoreCommand(pythonBin, ["-m", "paper_agent", "run", "--help"], {
       cwd: agentRoot,
-      encoding: "utf-8",
+      timeout: 10_000,
+      signal,
     });
     return { ok: true };
-  } catch {
+  } catch (error) {
     return {
       ok: false,
-      error: "paper_agent module not found or failed. Install core from GitHub and set Preferences.",
+      error: error instanceof Error ? error.message : "Paper Agent core could not be started.",
     };
   }
 }

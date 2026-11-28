@@ -14,7 +14,9 @@ import fs from 'fs';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 const execp = promisify(exec);
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import parseGitConfig = require('parse-git-config');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import parseGithubURL = require('parse-github-url');
 
 import { Directory, Remote } from './interfaces';
@@ -29,13 +31,13 @@ export async function getDefaultTextEditor(): Promise<Application | null> {
   const exampleFile = path.join(environment.supportPath, 'blank.js');
   try {
     fs.accessSync(exampleFile, fs.constants.R_OK);
-  } catch (err) {
+  } catch {
     fs.writeFileSync(exampleFile, '// used to determine default text editor');
   }
   try {
     const defaultTextEditor = await getDefaultApplication(exampleFile);
     return defaultTextEditor;
-  } catch (err) {
+  } catch {
     return null;
   }
 }
@@ -43,7 +45,7 @@ export async function getDefaultTextEditor(): Promise<Application | null> {
 function readJSONSync(filepath: string) {
   try {
     fs.accessSync(filepath, fs.constants.R_OK);
-  } catch (err) {
+  } catch {
     return {};
   }
   const jsonData = fs.readFileSync(filepath).toString();
@@ -136,7 +138,7 @@ function parsePath(path: string): [string[], string[]] {
     try {
       fs.accessSync(pathToVerify, fs.constants.R_OK);
       resolvedPaths.push(pathToVerify);
-    } catch (err) {
+    } catch {
       unresolvedPaths.push(path);
     }
   });

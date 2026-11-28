@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "owndrop",
+  "title": "OwnDrop",
+  "description": "Send and receive text, links, screenshots, and files across macOS and Windows using your self-hosted or Cloudflare-hosted OwnDrop instance.",
+  "icon": "extension-icon.png",
+  "author": "Logan-8f",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL (Manual Setup)",
+      "description": "Your OwnDrop instance URL (e.g., https://drop.example.com)",
+      "type": "textfield",
+      "placeholder": "https://drop.example.com",
+      "required": false
+    },
+    {
+      "name": "apiToken",
+      "title": "Connection Details or Device API Token",
+      "description": "Paste Copy Connection Details from OwnDrop Devices, or enter a token with the manual Server URL",
+      "type": "password",
+      "placeholder": "owd_...",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "drop-clipboard",
+      "title": "Drop",
+      "subtitle": "OwnDrop",
+      "description": "Automatically send clipboard text, links, or files, then browse your drops",
+      "mode": "view"
+    },
+    {
+      "name": "browse-drops",
+      "title": "Browse",
+      "subtitle": "OwnDrop",
+      "description": "See your newest drops, copy, download, and manage them",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.0",
+    "@raycast/utils": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.2",
+    "eslint": "^9.26.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "dev:windows": "ray develop --target release",
+    "build:windows": "ray build --target release -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

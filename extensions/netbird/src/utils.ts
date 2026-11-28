@@ -1,8 +1,9 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 import { open, getPreferenceValues } from "@raycast/api";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Type for NetBird status json output. Interface is used in order to avoid errors with
@@ -164,8 +165,10 @@ export async function netbirdUp(): Promise<void> {
   const bin = await getNetbirdBin();
 
   // we need to return explicit Promise in order to read live output from child process
+  // `--no-browser` stops the CLI from opening the SSO page itself; we open it below from stdout,
+  // otherwise the login page is opened twice
   return new Promise((resolve, reject) => {
-    const child = exec(`${bin} up`, (error, stdout, stderr) => {
+    const child = exec(`${bin} up --no-browser`, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(formatNetbirdError(error)));
         return;
@@ -180,10 +183,8 @@ export async function netbirdUp(): Promise<void> {
     let urlOpened = false;
     child.stdout?.on("data", (data) => {
       const output = data.toString();
-      if (
-        !urlOpened &&
-        (output.includes("Please do the SSO login in your browser") || output.includes("use this URL to log in"))
-      ) {
+      // with `--no-browser` the CLI prints "Use this URL to log in:", without it "...use this URL to log in:"
+      if (!urlOpened && /use this URL to log in/i.test(output)) {
         const match = output.match(/(https:\/\/[^\s]+)/);
         if (match) {
           urlOpened = true;
@@ -217,10 +218,10 @@ export interface NetbirdNetworkRoute {
   selected: boolean;
 }
 
-function shellEscapeSingleQuotes(value: string): string {
-  // Shell-safe quoting for `child_process.exec` commands.
-  // Example: "Default Subnet" -> 'Default Subnet'
-  return `'${value.replace(/'/g, "'\\''")}'`;
+const EXIT_NODE_ROUTE = "0.0.0.0/0";
+
+export function isExitNodeRoute(route: NetbirdNetworkRoute): boolean {
+  return route.route === EXIT_NODE_ROUTE;
 }
 
 function parseNetbirdNetworksList(output: string): NetbirdNetworkRoute[] {
@@ -290,7 +291,7 @@ export async function getNetbirdNetworks(): Promise<NetbirdNetworkRoute[]> {
 export async function netbirdNetworksSelect(id: string): Promise<void> {
   const bin = await getNetbirdBin();
   try {
-    await execAsync(`${bin} networks select ${shellEscapeSingleQuotes(id)}`);
+    await execFileAsync(bin, ["networks", "select", "-a", id]);
   } catch (error: unknown) {
     throw new Error(formatNetbirdError(error));
   }
@@ -299,10 +300,45 @@ export async function netbirdNetworksSelect(id: string): Promise<void> {
 export async function netbirdNetworksDeselect(id: string): Promise<void> {
   const bin = await getNetbirdBin();
   try {
-    await execAsync(`${bin} networks deselect ${shellEscapeSingleQuotes(id)}`);
+    await execFileAsync(bin, ["networks", "deselect", id]);
   } catch (error: unknown) {
     throw new Error(formatNetbirdError(error));
   }
+}
+
+/**
+ * Selects `id` as the active exit node. Enforces single-exit-node semantics
+ * by fetching the current selection state fresh (not trusting a possibly
+ * stale caller-held list) and deselecting every other currently-selected
+ * exit node first (self-heals if more than one was left selected
+ * previously), then appends the new one so unrelated network route
+ * selections are left untouched.
+ */
+export async function netbirdSelectExitNode(id: string): Promise<void> {
+  const routes = await getNetbirdNetworks();
+  const othersToDeselect = routes.filter((n) => isExitNodeRoute(n) && n.selected && n.id !== id);
+
+  try {
+    for (const node of othersToDeselect) {
+      await netbirdNetworksDeselect(node.id);
+    }
+
+    await netbirdNetworksSelect(id);
+  } catch (error) {
+    for (const node of othersToDeselect) {
+      try {
+        await netbirdNetworksSelect(node.id);
+      } catch {
+        // ignore restore errors; the original error is rethrown below
+      }
+    }
+
+    throw error;
+  }
+}
+
+export async function netbirdDeselectExitNode(id: string): Promise<void> {
+  await netbirdNetworksDeselect(id);
 }
 
 /**
@@ -370,7 +406,17 @@ export async function netbirdUpdate(
     throw new Error("NetBird is not installed via Homebrew. We can't update it automatically.");
   }
 
-  const outdated = (await execAsync("brew outdated netbird", { env })).stdout.trim();
+  // `brew outdated <formula>` exits with code 1 when the formula is outdated, so a
+  // rejection with output is the "update available" case, not a failure.
+  const outdated = await execAsync("brew outdated netbird", { env }).then(
+    ({ stdout }) => stdout.trim(),
+    (error: { code?: number; stdout?: string }) => {
+      if (error.code === 1 && error.stdout?.trim()) {
+        return error.stdout.trim();
+      }
+      throw error;
+    },
+  );
   if (!outdated) {
     return { version: brewVersionBefore, updated: false, serviceRestarted: false };
   }

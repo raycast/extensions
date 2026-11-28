@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "splix",
   "title": "Splix",
-  "description": "Raycast interface for Splix (https://splix.app) to supercharge your productivity.",
+  "description": "Search your Splix notes and open new notes in Splix.",
   "icon": "splix.png",
   "author": "splix.app",
   "categories": [
@@ -45,5 +45,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

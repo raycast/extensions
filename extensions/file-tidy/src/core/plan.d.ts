@@ -35,5 +35,6 @@ export function buildPlan(input: {
   similar?: Map<string, SimilarInfo>;
   perceptual?: Map<string, PerceptualInfo>;
 }): Promise<PlanEntry[]>;
+export function firstFreeName(target: string, isFree: (candidate: string) => boolean): string;
 export function bucketLabel(entry: PlanEntry, destDir: string): string;
 export function formatSize(bytes: number): string;

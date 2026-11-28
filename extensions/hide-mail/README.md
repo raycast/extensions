@@ -4,15 +4,19 @@ Hide Mail lets you create unique, random email addresses to use with apps, web-s
 
 ## Usage
 
-You will need an API key from us to use this extension.
-When logged in, [visit this page](https://hidemail.app/user/api-tokens) to create a fresh API key.
+You will need an API key to use this extension:
 
-Make sure to copy the token, next you can enter that token inside Raycast to make it work.
+1. Sign in and open the [API Tokens page](https://hidemail.app/user/api-tokens)
+2. Create a token (for example named *Raycast*) and copy it
+3. Paste it into **HideMail API Key** when Raycast asks for it on first launch
+
+Using a different HideMail server? Set **HideMail Host** in the extension preferences.
 
 ## Features from HideMail API
 
-- Create new random email addresses associated with your primary email address
-- View/search all previously created e-mail addresses
+- Create new random email addresses associated with your primary email address, with an optional note (type it right after the Quick Create command)
+- View/search all previously created e-mail addresses, filter by active/inactive and see details
+- Edit alias notes
 - Activate and deactivate email addresses
 
 ## Logo Credits

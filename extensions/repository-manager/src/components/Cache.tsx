@@ -1,3 +1,4 @@
+import { projectShortcut } from '../platform'
 import { Action, Icon } from '@raycast/api'
 import { showSuccessToast, showErrorToast } from '../ui/toast'
 import { clearCache, preferences } from '../helpers'
@@ -21,7 +22,7 @@ export default function Cache() {
             title="Clear Cache"
             key="clear-cache"
             icon={Icon.Trash}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'delete' }}
+            shortcut={projectShortcut('delete', ['shift'])}
             onAction={handleClearCache}
         />
     )

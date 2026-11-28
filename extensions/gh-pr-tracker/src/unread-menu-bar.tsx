@@ -5,6 +5,7 @@ import { fetchPRsWithActivity, getFetchLimits } from "./api";
 import { loadCachedPRs, saveCachedPRs } from "./cache";
 import { loadSeen, saveSeen } from "./seen";
 import { loadEventFilters } from "./event-filters";
+import { resolveActivePrFilter } from "./pr-filters";
 import { computePrsWithUnseen, toMenuBarPrs, type PRWithUnseen, type MenuBarPr } from "./utils";
 import { menuLog as log, getErrorMessage } from "./logger";
 import {
@@ -30,9 +31,14 @@ function truncateTitle(title: string, max = 40): string {
 
 /** Compute the unread-PR list from the shared cache without hitting the network. */
 async function loadFromCache(): Promise<PRWithUnseen[]> {
-  const [prs, seen, filters] = await Promise.all([loadCachedPRs(), loadSeen(), loadEventFilters()]);
+  const [prs, seen, filters, prFilter] = await Promise.all([
+    loadCachedPRs(),
+    loadSeen(),
+    loadEventFilters(),
+    resolveActivePrFilter(),
+  ]);
   if (!prs) return [];
-  return computePrsWithUnseen(prs, seen, filters).slice(0, getFetchLimits().maxUnread);
+  return computePrsWithUnseen(prs, seen, filters, prFilter).slice(0, getFetchLimits().maxUnread);
 }
 
 /** Fetch fresh data, update the shared cache/seen, and compute the unread-PR list. */
@@ -42,9 +48,11 @@ async function fetchAndCompute(): Promise<PRWithUnseen[]> {
   const request = (async () => {
     const seenBeforeFetch = await loadSeen();
     const filters = await loadEventFilters();
+    const prFilter = await resolveActivePrFilter();
     const { prs, activeKeys, activeKeysComplete } = await fetchPRsWithActivity({
       seen: seenBeforeFetch,
       filters,
+      prFilter,
       source: "menu-bar",
     });
     // RELOAD after the fetch. The fetch can take many seconds, and writing back the snapshot
@@ -53,10 +61,11 @@ async function fetchAndCompute(): Promise<PRWithUnseen[]> {
     // view command has always reloaded here; this path did not, and silently lost those actions.
     const seen = await loadSeen();
     const freshFilters = await loadEventFilters();
+    const freshPrFilter = await resolveActivePrFilter();
     // Prune closed-PR seen state only when the key set is the complete open set — see api.ts.
     await saveSeen(seen, activeKeysComplete ? new Set(activeKeys) : undefined);
     await saveCachedPRs(prs); // shared cache — benefits the main command
-    const list = computePrsWithUnseen(prs, seen, freshFilters).slice(0, getFetchLimits().maxUnread);
+    const list = computePrsWithUnseen(prs, seen, freshFilters, freshPrFilter).slice(0, getFetchLimits().maxUnread);
     // Publish for the next synchronous seed (this command's own next launch, and the view's).
     writeMenuBarCache(toMenuBarPrs(list));
     return list;

@@ -101,7 +101,7 @@ export default function Forms() {
                 />
                 <Action.OpenInBrowser
                   shortcut={Keyboard.Shortcut.Common.Open}
-                  icon="extension-icon.png"
+                  icon="sunflower.png"
                   title="Open in Dashboard"
                   url={`https://app.youform.com/form/${form.slug}/build`}
                 />
