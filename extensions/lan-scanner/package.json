@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lan-scanner",
+  "title": "LAN Scanner",
+  "description": "Scan your local network, identify devices, open ports and IoT firmware, and track when each device was last seen.",
+  "icon": "extension-icon.png",
+  "author": "erik_meliska",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "scan-network",
+      "title": "Scan Network",
+      "subtitle": "LAN Scanner",
+      "description": "Show devices on the local network and run a background scan",
+      "mode": "view"
+    },
+    {
+      "name": "background-scan",
+      "title": "Background Network Scan",
+      "subtitle": "LAN Scanner",
+      "description": "Periodic scan every 30 min (can be turned off in preferences)",
+      "mode": "no-view",
+      "interval": "30m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "backgroundScan",
+      "title": "Background Scan",
+      "label": "Scan every 30 min in the background",
+      "description": "Turn off to stop the periodic background scan. Manual scans still work.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "autoScanMinutes",
+      "title": "Auto-Scan When Older Than (Min)",
+      "description": "Opening the list starts a new scan if the last one is older than this. 0 = never.",
+      "type": "textfield",
+      "default": "15",
+      "required": false,
+      "placeholder": "15"
+    },
+    {
+      "name": "portMaxAgeHours",
+      "title": "Re-Scan Ports After (Hours)",
+      "description": "Ports of a known device are re-scanned only when older than this.",
+      "type": "textfield",
+      "default": "12",
+      "required": false,
+      "placeholder": "12"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
