@@ -8,6 +8,7 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 - [Wispr Flow](https://wisprflow.ai) must be installed on your computer.
 - On macOS, Full Disk Access may be required to read the Wispr Flow database.
+- On macOS, the Start, Stop and Toggle Notetaker commands need Accessibility access for Raycast (System Settings > Privacy & Security > Accessibility).
 
 ## Commands
 
@@ -19,6 +20,10 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 | **Toggle Recording** | Toggle voice dictation on/off with a single hotkey |
 | **Start Recording** | Begin voice dictation instantly |
 | **Stop Recording** | End voice dictation |
+| **Toggle Notetaker** | Start a Notetaker recording, or stop the one in progress |
+| **Start Notetaker** | Start a new Notetaker recording |
+| **Stop Notetaker** | Stop the Notetaker recording in progress |
+| **Open Notetaker** | Open the Notetaker page in Wispr Flow |
 | **Paste Last Transcript** | Paste your latest unarchived transcript into the active app |
 | **Open Wispr Flow** | Launch the Wispr Flow app |
 
@@ -55,6 +60,16 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 - **Toggle Recording** — start or stop dictation with a single command, ideal for binding to one hotkey
 - **Start/Stop Recording** — trigger Wispr Flow dictation via Raycast with no-view commands
 - **Install detection** — commands gracefully handle Wispr Flow not being installed
+
+## Notetaker
+
+Wispr Flow has no deep links that start or stop a Notetaker recording, so these commands use macOS accessibility:
+
+- **Start Notetaker** opens the Notetaker page and presses ⌘N.
+- **Stop Notetaker** presses the Stop button in the meeting recorder. It looks the button up by its English label, so it needs Wispr Flow's interface in English.
+- **Toggle Notetaker** stops the recording in progress, or starts a new one when nothing is recording. Bind it to one hotkey.
+
+On Windows, these commands open the Notetaker page. Press Ctrl+N to start a recording, and stop it in Wispr Flow.
 
 ## Preferences
 

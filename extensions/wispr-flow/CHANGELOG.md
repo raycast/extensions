@@ -1,5 +1,10 @@
 # Wispr Flow Changelog
 
+## [Notetaker Commands] - {PR_MERGE_DATE}
+
+- Added Toggle Notetaker, Start Notetaker and Stop Notetaker commands to control Wispr Flow Notetaker recordings. On macOS they need Accessibility access for Raycast. On Windows they open the Notetaker page.
+- Added an Open Notetaker command that opens the Notetaker page in Wispr Flow
+
 ## [Faster Search Transcripts] - 2026-09-29
 
 - Fixed Search Transcripts opening on the list from the previous run before showing current transcripts
