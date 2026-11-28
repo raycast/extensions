@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { Season, SeasonResponse } from "../types";
-import { BASE_API_URL } from "../constants";
+import { API_HEADERS, BASE_API_URL } from "../constants";
 
 const useSeasons = () => {
   const [seasons, setSeasons] = useState<Season[]>([]);
@@ -15,6 +15,7 @@ const useSeasons = () => {
       try {
         const res = await fetch(`${BASE_API_URL}/f1/seasons.json?limit=100`, {
           method: "get",
+          headers: API_HEADERS,
           signal: cancelRef.current.signal,
         });
         const data = (await res.json()) as SeasonResponse;

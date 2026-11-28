@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { ConstructorStanding, ConstructorStandingResponse } from "../types";
-import { BASE_API_URL } from "../constants";
+import { API_HEADERS, BASE_API_URL } from "../constants";
 
 type State = {
   constructorStandings: ConstructorStanding[];
@@ -28,6 +28,7 @@ const useConstructorStandings = (season: string | null): [ConstructorStanding[],
       try {
         const res = await fetch(`${BASE_API_URL}/f1/${season}/constructorStandings.json`, {
           method: "get",
+          headers: API_HEADERS,
           signal: cancelRef.current.signal,
         });
         const data = (await res.json()) as ConstructorStandingResponse;

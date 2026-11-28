@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { SeasonResponse } from "../types";
-import { BASE_API_URL } from "../constants";
+import { API_HEADERS, BASE_API_URL } from "../constants";
 import { showFailureToast } from "@raycast/utils";
 
 /**
@@ -10,6 +10,7 @@ export default async function currentSeason() {
   try {
     const res = await fetch(`${BASE_API_URL}/f1/current/seasons.json`, {
       method: "get",
+      headers: API_HEADERS,
     });
     if (res.status !== 200) {
       throw new Error("Invalid HTPTS status code");

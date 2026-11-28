@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [🐞 Fixed "Could not load seasons" error] - {PR_MERGE_DATE}
+
+- Send a custom `User-Agent` with API requests, as the Jolpica API now rejects default user agents such as `node-fetch`
+
 ## [🏃‍♂️‍➡️ Added Sprint Qualifying Times] - 2025-07-05
 
 - Added Sprint Qualifying Times

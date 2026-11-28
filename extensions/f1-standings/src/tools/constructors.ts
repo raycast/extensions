@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { ConstructorsResponse } from "../types";
-import { BASE_API_URL } from "../constants";
+import { API_HEADERS, BASE_API_URL } from "../constants";
 import { showFailureToast } from "@raycast/utils";
 import currentSeason from "./current-season";
 
@@ -26,6 +26,7 @@ export default async function constructors(input: Input) {
     }
     const res = await fetch(`${BASE_API_URL}/f1/${year}/constructors.json`, {
       method: "get",
+      headers: API_HEADERS,
     });
     if (res.status !== 200) {
       throw new Error("Invalid HTPTS status code");
