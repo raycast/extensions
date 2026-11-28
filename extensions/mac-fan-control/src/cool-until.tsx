@@ -19,6 +19,8 @@ import {
   setAutomatic,
 } from "macos-fan-control-client";
 import { speedLabel } from "./labels";
+import { needsSetup } from "./install";
+import { openCommand } from "./launch";
 
 // Speeds the cooldown can hold, and the temperatures it releases below. The
 // low speeds ask for confirmation because the SMC honours the forced target
@@ -110,6 +112,22 @@ export default function Command() {
             icon={Icon.ExclamationMark}
             title={error.message}
             subtitle="Retrying automatically."
+            actions={
+              needsSetup(error) ? (
+                <ActionPanel>
+                  <Action
+                    title="Set up Fan Control…"
+                    icon={Icon.Download}
+                    onAction={() =>
+                      openCommand(
+                        "fan-control-setup",
+                        "Could not open Set Up Fan Control",
+                      )
+                    }
+                  />
+                </ActionPanel>
+              ) : undefined
+            }
           />
         </List.Section>
       ) : null}

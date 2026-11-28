@@ -29,6 +29,7 @@ import {
   triggerLabel,
 } from "./labels";
 import { openCommand } from "./launch";
+import { needsSetup } from "./install";
 
 // The trigger must sit under the core's 95 °C safety ceiling, and above the
 // release temperature, so the two dropdowns stay inside those bounds. The low
@@ -155,6 +156,18 @@ export default function Command() {
             icon={Icon.Temperature}
             onSubmit={submit}
           />
+          {error && needsSetup(error) ? (
+            <Action
+              title="Set up Fan Control…"
+              icon={Icon.Download}
+              onAction={() =>
+                openCommand(
+                  "fan-control-setup",
+                  "Could not open Set Up Fan Control",
+                )
+              }
+            />
+          ) : null}
           <Action
             title="Open Fan Status"
             icon={Icon.Gauge}

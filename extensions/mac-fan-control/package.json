@@ -14,6 +14,13 @@
   ],
   "commands": [
     {
+      "name": "fan-control-setup",
+      "title": "Set up Fan Control",
+      "subtitle": "Mac Fan Control",
+      "description": "Install the root-owned fan helper and its passwordless write rule from Raycast.",
+      "mode": "view"
+    },
+    {
       "name": "fan-status",
       "title": "Fan Status",
       "subtitle": "Mac Fan Control",
