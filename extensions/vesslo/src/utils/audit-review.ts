@@ -14,7 +14,36 @@ export const REASON_LABELS: Readonly<Record<string, string>> = {
   homebrewAdoptionAvailable: "Homebrew adoption available",
   noUpdateSource: "No update source",
   previouslyDeletedBundleIDMatch: "Matches a previously deleted app",
+  updateAvailable: "Update available",
+  unusedApp: "Not used recently",
+  intelOnlyApp: "Intel-only app (Rosetta)",
+  duplicateInstall: "Installed in more than one location",
+  signatureVerificationUnavailable: "Security verification unavailable",
+  userConfirmedUpdateEnded: "Recorded as no longer supported",
+  userConfirmedUpdateSupported: "Recorded as still supported",
 };
+
+/** Shown for reason codes added to Vesslo after this extension version. */
+export const UNKNOWN_REASON_LABEL = "Other Vesslo review item";
+
+/** Security reasons that report a confirmed signing problem, not a missing check. */
+const CONFIRMED_SECURITY_REASONS = new Set([
+  "unsignedApp",
+  "invalidSignature",
+  "notNotarized",
+]);
+
+export function reasonLabel(reason: string): string {
+  return Object.prototype.hasOwnProperty.call(REASON_LABELS, reason)
+    ? REASON_LABELS[reason]
+    : UNKNOWN_REASON_LABEL;
+}
+
+export function hasConfirmedSecurityReason(app: VessloApp): boolean {
+  return app.securityReasons.some((reason) =>
+    CONFIRMED_SECURITY_REASONS.has(reason),
+  );
+}
 
 const ACTIVE_UPDATE_HEALTH_STATUSES = new Set([
   "stale",
@@ -47,12 +76,7 @@ export function auditReviewSearchTerms(app: VessloApp): string[] {
     );
   }
   return [
-    ...reasons.flatMap((reason) => [
-      reason,
-      Object.prototype.hasOwnProperty.call(REASON_LABELS, reason)
-        ? REASON_LABELS[reason]
-        : reason,
-    ]),
+    ...reasons.flatMap((reason) => [reason, reasonLabel(reason)]),
     ...sourceTerms.filter((value): value is string => value !== null),
   ];
 }

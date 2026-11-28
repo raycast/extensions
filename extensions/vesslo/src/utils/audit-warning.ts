@@ -2,8 +2,9 @@ import { Color, Icon, List } from "@raycast/api";
 import { VessloApp } from "../types";
 import {
   activeManagementReasons,
+  hasConfirmedSecurityReason,
   isActiveUpdateHealth,
-  REASON_LABELS,
+  reasonLabel,
 } from "./audit-review";
 import {
   displayText,
@@ -13,12 +14,6 @@ import {
 } from "./display-format";
 
 const MAX_REASONS = 20;
-
-function reasonLabel(reason: string): string {
-  return Object.prototype.hasOwnProperty.call(REASON_LABELS, reason)
-    ? REASON_LABELS[reason]
-    : reason;
-}
 
 function reasonList(reasons: string[]): string {
   return displayText(
@@ -85,12 +80,11 @@ export function auditWarningAccessory(
           : "Review",
     icon: {
       source: Icon.Warning,
-      tintColor:
-        app.securityReasons.length > 0
-          ? Color.Red
-          : isActiveUpdateHealth(app) || policyReviewReason
-            ? Color.Orange
-            : Color.SecondaryText,
+      tintColor: hasConfirmedSecurityReason(app)
+        ? Color.Red
+        : isActiveUpdateHealth(app) || policyReviewReason
+          ? Color.Orange
+          : Color.SecondaryText,
     },
     tooltip: explanations.join("\n"),
   };
@@ -99,6 +93,7 @@ export function auditWarningAccessory(
 export function auditReviewMarkdown(
   app: VessloApp,
   priority: "metadata" | "review" = "metadata",
+  layout: "markdown" | "nativeMetadata" = "markdown",
 ): string {
   const metadata = [
     `- **${app.isDeleted ? "Recorded version" : "Installed version"}:** ${markdownText(app.version ?? "Unknown", 120)}`,
@@ -111,14 +106,15 @@ export function auditReviewMarkdown(
     `- **Record:** ${app.isDeleted ? "Deleted app history" : "Installed app"}`,
   ];
   const lines: string[] = [];
+  const sectionHeading = layout === "nativeMetadata" ? "####" : "##";
 
   if (app.securityReasons.length > 0) {
-    lines.push("", "## Security Review");
+    lines.push("", `${sectionHeading} Security Review`);
     appendReasons(lines, app.securityReasons);
   }
 
   if (isActiveUpdateHealth(app)) {
-    lines.push("", "## Update Source Review");
+    lines.push("", `${sectionHeading} Update Source Review`);
     appendReasons(lines, app.updateHealthReasons);
     if (app.updateHealthSource) {
       lines.push(
@@ -138,25 +134,40 @@ export function auditReviewMarkdown(
 
   const managementReasons = activeManagementReasons(app);
   if (managementReasons.length > 0) {
-    lines.push("", "## Management Review");
+    lines.push("", `${sectionHeading} Management Review`);
     appendReasons(lines, managementReasons);
   }
 
   if (!hasAuditReview(app)) {
-    lines.push("", "## Vesslo Review", "No active review items.");
+    if (layout === "nativeMetadata") {
+      lines.push("No active review items.");
+    } else {
+      lines.push(
+        "",
+        `${sectionHeading} Vesslo Review`,
+        "No active review items.",
+      );
+    }
   }
 
   const details =
-    priority === "review"
-      ? [...lines, "", "## App Details", "", ...metadata]
-      : [...metadata, ...lines];
+    layout === "nativeMetadata"
+      ? lines
+      : priority === "review"
+        ? [...lines, "", "## App Details", "", ...metadata]
+        : [...metadata, ...lines];
+  const footer = app.isDeleted
+    ? [
+        "",
+        "This is a deleted app record. Its path and version are historical; no installed app or update action is available from this record.",
+      ]
+    : layout === "nativeMetadata"
+      ? []
+      : ["", "Open the app in Vesslo for full context and actions."];
   return [
-    `# ${markdownText(app.name, 200)}`,
+    `${layout === "nativeMetadata" ? "###" : "#"} ${markdownText(app.name, 200)}`,
     "",
     ...details,
-    "",
-    app.isDeleted
-      ? "This is a deleted app record. Its path and version are historical; no installed app or update action is available from this record."
-      : "Open the app in Vesslo for full context and actions.",
+    ...footer,
   ].join("\n");
 }

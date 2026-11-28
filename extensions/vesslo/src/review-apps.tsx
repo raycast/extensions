@@ -54,7 +54,6 @@ export default function ReviewApps() {
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail && visibleApps.length > 0}
-      navigationTitle={`Review Apps · ${scope === "all" ? "All Apps" : "Update Candidates"}`}
       searchBarPlaceholder="Search app reviews by name, Bundle ID, or review reason..."
       searchText={searchText}
       onSearchTextChange={setSearchText}

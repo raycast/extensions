@@ -9,6 +9,11 @@ import {
 } from "./components/HandoffRequestStatus";
 import { HandoffReceipt } from "./utils/receipt-contract";
 import {
+  filterHandoffReceipts,
+  RECEIPT_STATUS_FILTER_LABELS,
+  ReceiptStatusFilter,
+} from "./utils/receipt-filter";
+import {
   countLabel,
   displayText,
   formatDate,
@@ -21,32 +26,24 @@ export default function HandoffRequests() {
   const { state, isLoading, refresh } = useHandoffReceipts();
   const { data, state: exportState } = useVessloData();
   const [query, setQuery] = useState("");
+  const [status, setStatus] = useState<ReceiptStatusFilter>("all");
   const publisherSession =
     exportState.status === "ready" &&
     (data?.schemaVersion === 2 || data?.schemaVersion === 3)
       ? data.publisherSessionId?.toLowerCase()
       : undefined;
-  const match = (receipt: HandoffReceipt) =>
-    [
-      receipt.request.requestId,
-      receipt.request.publisherSessionId,
-      receipt.phase,
-      receipt.reason,
-      ...receipt.targets.flatMap((entry) => [
-        entry.target.bundleId,
-        entry.target.canonicalPath,
-        entry.target.caskToken,
-        entry.phase,
-        entry.reason,
-      ]),
-    ].some((value) =>
-      value?.toLowerCase().includes(query.trim().toLowerCase()),
-    );
-  const records = state.receipts
-    .filter(match)
-    .sort(
-      (left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt),
-    );
+  const records = filterHandoffReceipts(state.receipts, { query, status });
+  const hasFilters = query.trim().length > 0 || status !== "all";
+  const clearFiltersAction = hasFilters ? (
+    <Action
+      title="Clear Request Filters"
+      icon={Icon.ArrowCounterClockwise}
+      onAction={() => {
+        setQuery("");
+        setStatus("all");
+      }}
+    />
+  ) : null;
   const groups = publisherSession
     ? [
         {
@@ -67,9 +64,14 @@ export default function HandoffRequests() {
         },
       ]
     : [{ title: "Session Unverified", records }];
-  const expired = state.expiredReceipts.filter(match);
+  const expired = filterHandoffReceipts(state.expiredReceipts, {
+    query,
+    status,
+  });
   const item = (receipt: HandoffReceipt, expired: boolean) => {
-    const current = state.status === "ready" && !expired;
+    const sameSession =
+      receipt.request.publisherSessionId.toLowerCase() === publisherSession;
+    const current = state.status === "ready" && !expired && sameSession;
     const warning = `${state.status !== "ready" ? `> ${markdownText(state.reason ?? "Receipt read is unavailable.", 4096)} Cached results are not current confirmation.\n\n` : ""}${expired ? "> Expired receipt. This is history, not current confirmation.\n\n" : ""}${receipt.request.publisherSessionId.toLowerCase() !== publisherSession ? "> This request belongs to a different or unverified export session. It is request history and must not authorize a new request.\n\n" : ""}`;
     return (
       <List.Item
@@ -93,9 +95,11 @@ export default function HandoffRequests() {
             text: !current
               ? expired
                 ? "Expired history"
-                : "Cached · Unconfirmed"
+                : state.status !== "ready"
+                  ? "Cached · Unconfirmed"
+                  : `${publisherSession ? "History" : "Unverified"} · ${RECEIPT_PHASE_LABELS[receipt.phase]}`
               : RECEIPT_PHASE_LABELS[receipt.phase],
-            tooltip: formatDate(receipt.updatedAt) ?? "Unknown time",
+            tooltip: `${current ? "Result" : "Last recorded result"}: ${RECEIPT_PHASE_LABELS[receipt.phase]} · ${formatDate(receipt.updatedAt) ?? "Unknown time"}`,
           },
         ]}
         detail={
@@ -115,6 +119,7 @@ export default function HandoffRequests() {
               title="Copy Request ID"
               content={receipt.request.requestId}
             />
+            {clearFiltersAction}
           </ActionPanel>
         }
       />
@@ -128,6 +133,20 @@ export default function HandoffRequests() {
       searchText={query}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search requests"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Recorded Request Status"
+          value={status}
+          storeValue={false}
+          onChange={(value) => setStatus(value as ReceiptStatusFilter)}
+        >
+          {Object.entries(RECEIPT_STATUS_FILTER_LABELS).map(
+            ([value, title]) => (
+              <List.Dropdown.Item key={value} value={value} title={title} />
+            ),
+          )}
+        </List.Dropdown>
+      }
     >
       {state.status !== "ready" && state.status !== "loading" && (
         <List.Item
@@ -143,6 +162,7 @@ export default function HandoffRequests() {
           actions={
             <ActionPanel>
               <ReloadReceiptsAction refresh={refresh} />
+              {clearFiltersAction}
             </ActionPanel>
           }
         />
@@ -163,11 +183,16 @@ export default function HandoffRequests() {
       )}
       {records.length + expired.length === 0 && state.status === "ready" && (
         <List.EmptyView
-          title={query ? "No Matching Request Receipts" : "No Request Receipts"}
-          description="Only app-owned receipts appear here. URL opening alone does not prove acceptance or completion."
+          title={hasFilters ? "No Matching Requests" : "No Request Receipts"}
+          description={
+            hasFilters
+              ? "Try another search or recorded status, or clear the filters to show all requests."
+              : "Only app-owned receipts appear here. URL opening alone does not prove acceptance or completion."
+          }
           icon={Icon.Document}
           actions={
             <ActionPanel>
+              {clearFiltersAction}
               <ReloadReceiptsAction refresh={refresh} />
             </ActionPanel>
           }

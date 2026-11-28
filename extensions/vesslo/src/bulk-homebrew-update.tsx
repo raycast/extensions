@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { VessloApp, VessloData } from "./types";
 import { useVessloData } from "./utils/useVessloData";
 import {
@@ -10,6 +10,7 @@ import {
 import { openInVesslo } from "./utils/actions";
 import { countLabel, displayText } from "./utils/display-format";
 import { searchApps } from "./utils/search-filter";
+import { reviewSnapshotReason } from "./utils/data-state";
 import { SharedAppListItem } from "./components/SharedAppListItem";
 import {
   DataStateNotice,
@@ -20,18 +21,26 @@ import { TaggedApps } from "./browse-by-tag";
 import HandoffRequests from "./handoff-requests";
 
 type Selection = { data: VessloData; apps: VessloApp[] };
+type CandidateFilter = "all" | "selected";
 export default function BulkHomebrewUpdate() {
   const { data, isLoading, state, refresh } = useVessloData();
   const [searchText, setSearchText] = useState("");
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [selectionError, setSelectionError] = useState<string | null>(null);
+  const [candidateFilter, setCandidateFilter] =
+    useState<CandidateFilter>("all");
   const bulk = resolveBulkAction(data?.apps ?? [], state);
-  const visible = useMemo(
-    () => searchApps(bulk.candidates, searchText).map((result) => result.app),
-    [data, searchText],
-  );
   const selected = selection?.apps ?? [];
+  const selectedIDs = new Set(selected.map((app) => app.id));
+  const filteredCandidates =
+    candidateFilter === "selected"
+      ? bulk.candidates.filter((app) => selectedIDs.has(app.id))
+      : bulk.candidates;
+  const visible = searchApps(filteredCandidates, searchText).map(
+    (result) => result.app,
+  );
+  const counts = `${bulk.candidates.length} candidates · ${selected.length} selected · ${visible.length} shown`;
   const selectionChanged = selection
     ? data
       ? homebrewSelectionDriftReason(
@@ -78,6 +87,23 @@ export default function BulkHomebrewUpdate() {
   ].join("\n");
   const reviewActions = (
     <>
+      {visible.length === 0 && candidateFilter === "selected" && (
+        <Action
+          title="Show All Candidates"
+          icon={Icon.List}
+          onAction={() => {
+            setCandidateFilter("all");
+            setSearchText("");
+          }}
+        />
+      )}
+      {visible.length === 0 && searchText.trim() && (
+        <Action
+          title="Clear Search"
+          icon={Icon.MagnifyingGlass}
+          onAction={() => setSearchText("")}
+        />
+      )}
       {selection &&
         !selectionChanged &&
         bulk.canSelect &&
@@ -90,7 +116,8 @@ export default function BulkHomebrewUpdate() {
             }
           />
         )}
-      {bulk.canSelect &&
+      {candidateFilter === "all" &&
+        bulk.canSelect &&
         visible.length > 0 &&
         visible.length <= 16 &&
         visible.every(
@@ -149,53 +176,78 @@ export default function BulkHomebrewUpdate() {
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search Homebrew candidates…"
+      searchBarPlaceholder={
+        candidateFilter === "selected"
+          ? "Search selected Homebrew candidates…"
+          : "Search Homebrew candidates…"
+      }
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter Homebrew Candidates"
+          value={candidateFilter}
+          storeValue={false}
+          onChange={(value) => {
+            const next = value === "selected" ? "selected" : "all";
+            if (next === "selected" && candidateFilter !== "selected") {
+              setSearchText("");
+            }
+            setCandidateFilter(next);
+          }}
+        >
+          <List.Dropdown.Item title="All Candidates" value="all" />
+          <List.Dropdown.Item title="Selected Only" value="selected" />
+        </List.Dropdown>
+      }
     >
-      <DataStateNotice state={state} refresh={refresh} />
-      <List.Section title="Homebrew Review">
-        <List.Item
-          id="vesslo-homebrew-review"
-          icon={Icon.CheckList}
-          title={`${selected.length} selected`}
-          subtitle={displayText(
-            selectionError ??
-              (selectionChanged ? selectionChanged : "Select up to 16 apps"),
-          )}
-          accessories={[
-            {
-              text: hasReviewableTargets ? "Review in Vesslo" : "Review only",
-              icon: {
-                source: hasReviewableTargets ? Icon.CheckList : Icon.Info,
-                tintColor: hasReviewableTargets
-                  ? Color.SecondaryText
-                  : Color.Orange,
+      {visible.length > 0 && (
+        <DataStateNotice state={state} refresh={refresh} />
+      )}
+      {visible.length > 0 && (
+        <List.Section title="Homebrew Review" subtitle={counts}>
+          <List.Item
+            id="vesslo-homebrew-review"
+            icon={Icon.CheckList}
+            title={`${selected.length} selected`}
+            subtitle={displayText(
+              selectionError ??
+                (selectionChanged ? selectionChanged : "Select up to 16 apps"),
+            )}
+            accessories={[
+              {
+                text: hasReviewableTargets ? "Review in Vesslo" : "Review only",
+                icon: {
+                  source: hasReviewableTargets ? Icon.CheckList : Icon.Info,
+                  tintColor: hasReviewableTargets
+                    ? Color.SecondaryText
+                    : Color.Orange,
+                },
+                tooltip:
+                  selectionError ??
+                  selectionChanged ??
+                  bulk.reason ??
+                  "Vesslo asks for confirmation before updating.",
               },
-              tooltip:
-                selectionError ??
-                selectionChanged ??
-                bulk.reason ??
-                "Vesslo asks for confirmation before updating.",
-            },
-          ]}
-          detail={
-            <List.Item.Detail markdown="Select up to 16 exact Homebrew targets, then review your selection. Vesslo asks for confirmation before updating.\n\nSearch filters do not change your selection. Sending rechecks the current export and every selected identity. Changed targets must be selected again.\n\nURL opening is not acceptance or completion. View Homebrew Requests shows the app’s authoritative receipts." />
-          }
-          actions={
-            <ActionPanel>
-              {reviewActions}
-              <ReloadDataAction refresh={refresh} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+            ]}
+            detail={
+              <List.Item.Detail markdown="Select up to 16 exact Homebrew targets, then review your selection. Vesslo asks for confirmation before updating.\n\nSearch filters do not change your selection. Sending rechecks the current export and every selected identity. Changed targets must be selected again.\n\nURL opening is not acceptance or completion. View Homebrew Requests shows the app’s authoritative receipts." />
+            }
+            actions={
+              <ActionPanel>
+                {reviewActions}
+                <ReloadDataAction refresh={refresh} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       {visible.length > 0 ? (
         <List.Section
-          title="Homebrew candidates"
-          subtitle={
-            visible.length === bulk.candidates.length
-              ? countLabel(visible.length)
-              : `${visible.length} of ${countLabel(bulk.candidates.length)}`
+          title={
+            candidateFilter === "selected"
+              ? "Selected Homebrew candidates"
+              : "Homebrew candidates"
           }
+          subtitle={`${visible.length} of ${countLabel(filteredCandidates.length)} shown`}
         >
           {visible.map((app) => {
             const isSelected = selected.some((item) => item.id === app.id);
@@ -230,14 +282,41 @@ export default function BulkHomebrewUpdate() {
           })}
         </List.Section>
       ) : (
-        <List.Item
-          id="vesslo-homebrew-empty"
-          icon={Icon.MagnifyingGlass}
-          title={
-            searchText
-              ? "No Matching Homebrew Candidates"
-              : "No Homebrew Candidates in This Export"
+        <List.EmptyView
+          icon={
+            candidateFilter === "selected" && selected.length === 0
+              ? Icon.CheckList
+              : Icon.MagnifyingGlass
           }
+          title={
+            candidateFilter === "selected" && selected.length === 0
+              ? "No Apps Selected"
+              : candidateFilter === "selected" &&
+                  filteredCandidates.length === 0
+                ? "Selected Apps Are No Longer Candidates"
+                : searchText.trim()
+                  ? candidateFilter === "selected"
+                    ? "No Matching Selected Apps"
+                    : "No Matching Homebrew Candidates"
+                  : "No Homebrew Candidates in This Export"
+          }
+          description={[
+            counts,
+            selectionError ??
+              selectionChanged ??
+              (candidateFilter === "selected" && selected.length === 0
+                ? "Choose apps in All Candidates to review your selection here."
+                : searchText.trim()
+                  ? "Try a different search. Searching does not change your selection."
+                  : "Reload Vesslo data to check for current candidates."),
+            state.reason ??
+              (data
+                ? reviewSnapshotReason(data, state.checkedAt || Date.now())
+                : null) ??
+              (!bulk.canSelect ? bulk.reason : null),
+          ]
+            .filter(Boolean)
+            .join("\n\n")}
           actions={
             <ActionPanel>
               {reviewActions}

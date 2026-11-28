@@ -1,17 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { VessloApp } from "../types";
 import { isUpdatableApp } from "../utils/update-filter";
-import {
-  auditReviewMarkdown,
-  auditWarningAccessory,
-} from "../utils/audit-warning";
+import { auditWarningAccessory } from "../utils/audit-warning";
 import { resolveAppActions } from "../utils/action-policy";
 import { VessloDataState } from "../utils/data-state";
 import { AppActions } from "./AppActions";
+import { AppDetailMetadata, appDetailMarkdown } from "./AppDetail";
 import {
   displayText,
   installedAppIconPath,
-  markdownText,
   sourceLabel,
 } from "../utils/display-format";
 
@@ -151,7 +148,8 @@ export function SharedAppListItem({
       detail={
         showUpdateDetails || showReviewDetails ? (
           <List.Item.Detail
-            markdown={`${policy.reviewReason ? `> ${markdownText(policy.reviewReason, 640)}\n\n` : ""}${auditReviewMarkdown(app, showReviewDetails ? "review" : "metadata")}`}
+            markdown={appDetailMarkdown(app, policy.reviewReason)}
+            metadata={<AppDetailMetadata app={app} variant="list" />}
           />
         ) : undefined
       }
