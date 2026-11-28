@@ -1,5 +1,11 @@
 # Prayer Times Changelog
 
+## [Reminder Sync Writes Less] - {PR_MERGE_DATE}
+
+- Reminder sync treats times within 2 minutes of the plan as unchanged, so two Macs a minute apart no longer rewrite each other's reminders
+- A reminder's notes and title are written only when they change, never for a due date or alarm change alone
+- Notes that iCloud merged into a doubled copy are left alone for the sync service to repair
+
 ## [Menu Bar Clears After the End] - 2026-10-27
 
 - The menu bar clears once a prayer's time ends, instead of showing `Dhuhr ended`
