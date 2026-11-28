@@ -4,6 +4,10 @@ Practice electrical fundamentals with short quizzes, worked examples, and a loca
 
 Explore electrical courses and further learning with [Elec Training](https://elec.training/).
 
+## Preview
+
+![Electrical revision cards with a worked Ohm’s law example](media/revision-cards.png)
+
 ## Commands
 
 ### Start Revision Quiz
