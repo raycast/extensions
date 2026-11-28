@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+dist/
+*.sock
+.build/
+.swiftpm/
+bin/Dynamic Island
+bin/Dynamic Island.app/
+native-engine/build/
+
