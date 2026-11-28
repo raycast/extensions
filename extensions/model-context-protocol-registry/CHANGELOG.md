@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add InfinityLooper MCP Server] - {PR_MERGE_DATE}
+
+- Add InfinityLooper to the official registry: search and download free looping video backgrounds (MP4, 1080p and 4K) for streams, VTuber scenes and ambient music videos. Hosted Streamable HTTP server at https://infinitylooper.com/mcp; search needs no sign-in, downloads use OAuth 2.1 Google sign-in. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
