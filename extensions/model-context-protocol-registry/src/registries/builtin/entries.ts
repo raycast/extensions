@@ -1891,6 +1891,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api.cactal.ai/v1/mcp",
   },
   {
+    name: "call-me",
+    title: "Call Me",
+    description:
+      "Let your agent call their human. /call-me rings your own phone through the /call-me app for iPhone or Android, reads the agent's message aloud and returns your spoken reply as text; it also sends texts, so Claude Code, Cursor or Raycast AI can reach you when a task is done, blocked or needs a decision. It only ever calls you, never other numbers. 9 tools (call, say, hang_up, text, wait_for_reply and more). Hosted remote Streamable HTTP server at https://callmemcp.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in or API key: pass the 10-digit number from the app's My Number screen as `to`. The demo number 5550001234 answers automatically. Requires the /call-me app subscription (3-day free trial).",
+    icon: "https://callmemcp.com/icon-512.png",
+    homepage: "https://callmemcp.com/?utm_source=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://callmemcp.com/mcp"],
+    },
+    remoteUrl: "https://callmemcp.com/mcp",
+  },
+  {
     name: "callforme",
     title: "CallForMe",
     description:
