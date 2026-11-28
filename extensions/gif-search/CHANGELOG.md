@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Find GIFs by description] - {PR_MERGE_DATE}
+## [Find GIFs by description] - 2026-11-28
 
 - GIPHY and Klipy GIF searches now understand descriptions like "when the build finally passes" or "monday morning no coffee", not only literal words. Short searches work as before.
 
