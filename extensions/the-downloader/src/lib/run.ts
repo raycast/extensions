@@ -27,11 +27,26 @@ const KILL_GRACE_MS = 4_000;
 export const MAX_TIMER_MS = 2_147_483_647;
 
 /**
+ * True when yt-dlp says the link has nothing it can download (no extractor for
+ * the site, or a page without a video) rather than a network, sign-in or tool
+ * failure. The form probes links with yt-dlp, so it knows this before a
+ * download starts.
+ */
+export function isNoMediaError(text: string): boolean {
+  return /Unsupported URL|No video formats found|There's no video in this|No media found/i.test(text);
+}
+
+/** What the form and the download view say when yt-dlp finds nothing to download at the link. */
+export const NO_MEDIA_MESSAGE =
+  "No video or audio on this page that yt-dlp can download. To keep the page, choose Website.";
+
+/**
  * The part of a tool's error output worth showing in a toast: yt-dlp's last
  * `ERROR:` line, or else the last few lines — never the pages of warnings that
  * can come before them. The full text stays available to Copy Error.
  */
 export function errorSummary(text: string, max = 500): string {
+  if (isNoMediaError(text)) return NO_MEDIA_MESSAGE;
   // optparse (yt-dlp) and argparse (gallery-dl, spotDL) on an option they don't know yet.
   const unknown = /(?:no such option|unrecognized arguments?):\s*(--?[\w-]+)/i.exec(text);
   if (unknown) {

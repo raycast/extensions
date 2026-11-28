@@ -46,7 +46,7 @@ import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
 import { GalleryDownloadError, isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
-import { AbortError, errorSummary } from "../lib/run.js";
+import { AbortError, errorSummary, isNoMediaError, NO_MEDIA_MESSAGE } from "../lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { ABOUT_URL, SPOTDL_SETUP_GUIDE_URL, SUPPORTED_SITES_URL } from "../lib/docs.js";
@@ -291,7 +291,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const shouldFetchMeta = ytdlpBound && validUrl && !missingTool;
 
   const {
-    data: video,
+    data: probed,
+    error: metaError,
     isLoading: metaLoading,
     revalidate: refetchMeta,
   } = usePromise(
@@ -314,6 +315,19 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     [url, shouldFetchMeta],
     { onError: () => undefined, abortable: metaAbortable },
   );
+  // A failed probe leaves the previous link's details in `data`: they don't count.
+  const video = metaError ? undefined : probed;
+  // The probe's answer, so the form says before the download that yt-dlp has
+  // nothing to fetch here (a Wikipedia article with Video picked) or couldn't
+  // read the link — instead of the download view failing after it starts.
+  const probeFailure =
+    shouldFetchMeta && !metaLoading && metaError && !(metaError instanceof AbortError) ? metaError : undefined;
+  const noMedia = !!probeFailure && isNoMediaError(probeFailure.message);
+  const websiteOffered = validUrl && supportedFiletypes(source).includes("website");
+  const switchToWebsite = () => {
+    setFiletypeTouched(true);
+    setFiletype("website");
+  };
   // Outdated tools are the usual cause of failed downloads (yt-dlp's HTTP 403s,
   // gallery-dl's broken extractors), so the first time the form needs a set of
   // tools, check them, offer to update, and re-fetch the metadata once an update
@@ -416,6 +430,12 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         .join(" · ");
     } else if (ytdlpBound && metaLoading) {
       statusText = "Fetching details…";
+    } else if (noMedia) {
+      statusText = websiteOffered
+        ? NO_MEDIA_MESSAGE
+        : "No video or audio at this link that yt-dlp can download. Check the link, or try another one.";
+    } else if (probeFailure) {
+      statusText = `Couldn't read this link's details: ${errorSummary(probeFailure.message, 200)} The download may still work.`;
     } else if (ytdlpBound) {
       statusText = "Ready to download.";
     } else {
@@ -465,6 +485,25 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
     if (liveStream && (ft === "video" || ft === "audio" || ft === "transcript")) {
       await showToast({ style: Toast.Style.Failure, title: "Live streams are not supported" });
+      return;
+    }
+    // The probe already found nothing to download: say so here, before an empty
+    // download view. Only for the link and type it probed.
+    if (noMedia && resolveTool(src, ft) === "yt-dlp" && normalizeUrl(url) === submitUrl) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Video on This Page",
+        message: websiteOffered ? "Choose Website to save the page instead." : "yt-dlp found nothing to download here.",
+        primaryAction: websiteOffered
+          ? {
+              title: "Save as Webpage Instead",
+              onAction: (toast) => {
+                switchToWebsite();
+                void toast.hide();
+              },
+            }
+          : undefined,
+      });
       return;
     }
 
@@ -836,6 +875,9 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       isLoading={metaLoading}
       actions={
         <ActionPanel>
+          {noMedia && websiteOffered && filetype !== "website" && (
+            <Action icon={FILETYPE_ICON.website} title="Save as Webpage Instead" onAction={switchToWebsite} />
+          )}
           <Action.SubmitForm icon={Icon.Download} title="Download" onSubmit={handleSubmit} />
           <ActionPanel.Section>
             {metaReady && video && (
@@ -898,6 +940,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             title="Filetype"
             value={filetype}
             info={filetypeGuidance(source)}
+            error={noMedia && ytdlpBound ? "No video on this page" : undefined}
             onChange={(next) => {
               // Only a real pick counts: if Raycast reports the type shown for a new
               // link (Image for Pinterest), the user's own choice must stay, so
