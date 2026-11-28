@@ -1,14 +1,121 @@
 import { open, showToast, Toast } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
 import {
   ensureWisprFlowInstalled,
+  getDbPath,
   openWisprFlow,
   WISPR_FLOW_BUNDLE_ID,
 } from "./db";
 
 export const NOTETAKER_URL = "wispr-flow://open/notetaker";
 
-// Wispr Flow has no deep link that starts a recording, so press ⌘N on the Notetaker page once Wispr Flow is in front.
+const MEETING_SHORTCUT_ACTION = "open_meeting_recorder";
+// Wispr Flow reads fn from the keyboard hardware, so a posted fn press never reaches it.
+const FN_KEY_CODE = 63;
+
+// Event flags for each modifier key code Wispr Flow stores: the shared mask plus the left or right device bit.
+const MODIFIER_FLAGS: Record<number, number> = {
+  55: 0x100008,
+  54: 0x100010,
+  56: 0x20002,
+  60: 0x20004,
+  58: 0x80020,
+  61: 0x80040,
+  59: 0x40001,
+  62: 0x42000,
+};
+
+interface MeetingShortcut {
+  modifiers: number[];
+  key: number;
+}
+
+interface WisprFlowConfig {
+  prefs?: {
+    user?: {
+      shortcuts?: Record<string, string>;
+      meetingRecorderShortcutRemoved?: boolean;
+    };
+  };
+}
+
+// Wispr Flow saves its "Join meeting / start Notetaker" shortcut as key codes, such as "46+58" for Option+M.
+function readMeetingShortcut(): MeetingShortcut | null {
+  try {
+    const configPath = join(dirname(getDbPath()), "config.json");
+    const config = JSON.parse(
+      readFileSync(configPath, "utf8"),
+    ) as WisprFlowConfig;
+    const user = config.prefs?.user;
+    if (!user?.shortcuts || user.meetingRecorderShortcutRemoved) return null;
+    const binding = Object.entries(user.shortcuts).find(
+      ([, action]) => action === MEETING_SHORTCUT_ACTION,
+    )?.[0];
+    if (!binding) return null;
+    const codes = binding.split("+").map(Number);
+    if (!codes.every(Number.isInteger) || codes.includes(FN_KEY_CODE)) {
+      return null;
+    }
+    const modifiers = codes.filter((code) => code in MODIFIER_FLAGS);
+    const keys = codes.filter((code) => !(code in MODIFIER_FLAGS));
+    return keys.length === 1 ? { modifiers, key: keys[0] } : null;
+  } catch {
+    return null;
+  }
+}
+
+// Wispr Flow ignores System Events keystrokes because it tracks each modifier press, so post every key as its own event.
+// Secure input (a password field, some VPN clients) hides keys from Wispr Flow, so skip the shortcut then.
+function pressShortcutScript({ modifiers, key }: MeetingShortcut): string {
+  return `
+ObjC.import("AppKit");
+ObjC.import("Carbon");
+ObjC.import("CoreGraphics");
+(() => {
+  const HID_SYSTEM_STATE = 1;
+  const FLAGS_CHANGED = 12;
+  const HID_EVENT_TAP = 0;
+  const modifiers = ${JSON.stringify(modifiers)};
+  const flagsFor = ${JSON.stringify(MODIFIER_FLAGS)};
+  if ($.NSRunningApplication.runningApplicationsWithBundleIdentifier("${WISPR_FLOW_BUNDLE_ID}").count === 0) return "not running";
+  if ($.IsSecureEventInputEnabled()) return "secure input";
+  const source = $.CGEventSourceCreate(HID_SYSTEM_STATE);
+  let flags = 0;
+  const post = (code, down, isModifier) => {
+    const event = $.CGEventCreateKeyboardEvent(source, code, down);
+    if (isModifier) $.CGEventSetType(event, FLAGS_CHANGED);
+    $.CGEventSetFlags(event, flags);
+    $.CGEventPost(HID_EVENT_TAP, event);
+    delay(0.03);
+  };
+  for (const code of modifiers) {
+    flags |= flagsFor[code];
+    post(code, true, true);
+  }
+  post(${key}, true, false);
+  post(${key}, false, false);
+  for (const code of [...modifiers].reverse()) {
+    flags &= ~flagsFor[code];
+    post(code, false, true);
+  }
+  return "pressed";
+})();
+`;
+}
+
+// Returns false when the shortcut is off, Wispr Flow is not running, or secure input is on.
+async function pressMeetingShortcut(): Promise<boolean> {
+  const shortcut = readMeetingShortcut();
+  if (!shortcut) return false;
+  const result = await runAppleScript(pressShortcutScript(shortcut), {
+    language: "JavaScript",
+  });
+  return result.trim() === "pressed";
+}
+
+// Fallback when the meeting shortcut can't be pressed: press ⌘N on the Notetaker page once Wispr Flow is in front.
 const START_SCRIPT = `
 tell application "System Events"
   repeat 50 times
@@ -90,6 +197,10 @@ async function showWindowsFallback(message: string): Promise<void> {
 export async function startNotetaker(): Promise<void> {
   if (process.platform === "win32") {
     await showWindowsFallback("Press Ctrl+N to start a recording");
+    return;
+  }
+  if (await pressMeetingShortcut()) {
+    await showToast({ style: Toast.Style.Success, title: "Notetaker started" });
     return;
   }
   await openWisprFlow(NOTETAKER_URL);

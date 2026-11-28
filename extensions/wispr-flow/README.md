@@ -65,7 +65,7 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 Wispr Flow has no deep links that start or stop a Notetaker recording, so these commands use macOS accessibility:
 
-- **Start Notetaker** opens the Notetaker page and presses ⌘N.
+- **Start Notetaker** presses Wispr Flow's "Join meeting / start Notetaker" shortcut (Option+M by default), read from Wispr Flow's settings. Wispr Flow stays in the background, and a detected meeting gets joined. If the shortcut is turned off or uses fn, or secure input is on, it opens the Notetaker page and presses ⌘N instead.
 - **Stop Notetaker** presses the Stop button in the meeting recorder. It looks the button up by its English label, so it needs Wispr Flow's interface in English.
 - **Toggle Notetaker** stops the recording in progress, or starts a new one when nothing is recording. Bind it to one hotkey.
 
