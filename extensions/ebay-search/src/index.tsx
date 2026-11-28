@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { getSearchUrl, readHistory, rememberSearch, updateHistory } from "./search";
 
 export default function Command({ arguments: args, fallbackText }: LaunchProps<{ arguments: Arguments.Index }>) {
-  const mode = environment.entryPointName === "searchSold" ? "sold" : "active";
+  const mode = environment.entryPointName === "search-sold" ? "sold" : "active";
   const placeholder = mode === "sold" ? "Search sold items on eBay" : "Search eBay";
   const { marketplace } = getPreferenceValues<Preferences>();
   const launchQuery = args?.query?.trim() || fallbackText?.trim() || "";

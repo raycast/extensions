@@ -13,7 +13,7 @@ import { showFailureToast } from "@raycast/utils";
 import { getSearchUrl, rememberSearch } from "./search";
 
 export default async function Command() {
-  const mode = environment.entryPointName === "searchSoldSelectedText" ? "sold" : "active";
+  const mode = environment.entryPointName === "search-sold-selected-text" ? "sold" : "active";
   const { marketplace, useClipboardFallback } = getPreferenceValues<Preferences.SearchSelectText>();
 
   try {

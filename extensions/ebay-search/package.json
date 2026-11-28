@@ -26,7 +26,7 @@
       ]
     },
     {
-      "name": "searchSold",
+      "name": "search-sold",
       "title": "Search Sold Items on eBay",
       "subtitle": "eBay",
       "description": "Search sold listings in your eBay marketplace",
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "name": "searchSelectText",
+      "name": "search-select-text",
       "title": "Search Selected Text on eBay",
       "subtitle": "eBay",
       "description": "Search eBay for text selected in the frontmost app",
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "name": "searchSoldSelectedText",
+      "name": "search-sold-selected-text",
       "title": "Search Sold Items on eBay for Selected Text",
       "subtitle": "eBay",
       "description": "Search eBay sold listings for text selected in the frontmost app",
@@ -112,7 +112,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "node --test test/*.test.mjs"
   },
   "platforms": [
     "macOS"
