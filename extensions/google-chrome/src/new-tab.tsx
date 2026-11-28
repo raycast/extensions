@@ -33,7 +33,12 @@ export default function Command() {
   const [profileHistories, setProfileHistories] = useState<HistoryContainer[]>([]);
 
   const currentProfileHistory = useHistorySearch(profile, searchText);
-  const { data: dataTab, isLoading: isLoadingTab, errorView: errorViewTab } = useTabSearch();
+  const {
+    data: dataTab,
+    isLoading: isLoadingTab,
+    errorView: errorViewTab,
+    revalidate: revalidateTabs,
+  } = useTabSearch();
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
@@ -90,7 +95,12 @@ export default function Command() {
       </List.Section>
       <List.Section key={"open-tabs"} title={"Open Tabs - All"}>
         {dataTab?.map((tab) => (
-          <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+          <ChromeListItems.TabList
+            key={tab.key()}
+            tab={tab}
+            useOriginalFavicon={useOriginalFavicon}
+            onTabsChanged={revalidateTabs}
+          />
         ))}
       </List.Section>
       {orderByLastVisited(profile, profileHistories)

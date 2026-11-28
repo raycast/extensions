@@ -19,7 +19,7 @@ import {
 } from "../actions";
 import { Preferences, SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
-import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
+import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID, TAB_NOT_FOUND_MESSAGE } from "../constants";
 
 export class ChromeActions {
   public static NewTab = NewTabActions;
@@ -46,11 +46,11 @@ function NewTabActions({ query, url }: { query?: string; url?: string }): ReactE
   );
 }
 
-function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () => void }) {
+function TabListItemActions({ tab, onTabsChanged }: { tab: Tab; onTabsChanged?: () => void }) {
   return (
     <ActionPanel title={tab.title}>
-      <GoToTab tab={tab} />
-      <ReloadTab tab={tab} />
+      <GoToTab tab={tab} onTabsChanged={onTabsChanged} />
+      <ReloadTab tab={tab} onTabsChanged={onTabsChanged} />
       <Action
         title="Open in Guest Window"
         icon={{ source: Icon.Person }}
@@ -70,7 +70,7 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
         content={tab.title}
         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       />
-      <CloseTab tab={tab} onTabClosed={onTabClosed} />
+      <CloseTab tab={tab} onTabsChanged={onTabsChanged} />
       <ActionPanel.Section>
         <Action.CreateQuicklink
           quicklink={{ link: tab.url, name: tab.title, application: "Google Chrome" }}
@@ -141,12 +141,26 @@ function HistoryItemActions({
   );
 }
 
-function GoToTab(props: { tab: Tab }) {
+/**
+ * The list can outlive changes to Chrome's tabs, so a row may point at a tab that is gone.
+ * Tell the user and refresh the list instead of failing with a generic error.
+ */
+async function handleMissingTab(e: unknown, onTabsChanged?: () => void): Promise<boolean> {
+  if (e instanceof Error && e.message === TAB_NOT_FOUND_MESSAGE) {
+    onTabsChanged?.();
+    await showToast({ style: Toast.Style.Failure, title: TAB_NOT_FOUND_MESSAGE });
+    return true;
+  }
+  return false;
+}
+
+function GoToTab(props: { tab: Tab; onTabsChanged?: () => void }) {
   async function handleAction() {
     try {
       await setActiveTab(props.tab);
       await closeMainWindow();
     } catch (e) {
+      if (await handleMissingTab(e, props.onTabsChanged)) return;
       if (e instanceof Error) {
         throw new Error("Issue with tab: '" + props.tab.sourceLine + "'\n" + e.message);
       } else {
@@ -158,11 +172,16 @@ function GoToTab(props: { tab: Tab }) {
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
-function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
+function CloseTab(props: { tab: Tab; onTabsChanged?: () => void }) {
   async function handleAction() {
-    await closeActiveTab(props.tab);
+    try {
+      await closeActiveTab(props.tab);
+    } catch (e) {
+      if (await handleMissingTab(e, props.onTabsChanged)) return;
+      throw e;
+    }
     await closeMainWindow();
-    props.onTabClosed?.();
+    props.onTabsChanged?.();
   }
 
   return (
@@ -175,12 +194,13 @@ function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
   );
 }
 
-function ReloadTab(props: { tab: Tab }) {
+function ReloadTab(props: { tab: Tab; onTabsChanged?: () => void }) {
   async function handleAction() {
     try {
       await reloadTab(props.tab);
       await closeMainWindow();
     } catch (e) {
+      if (await handleMissingTab(e, props.onTabsChanged)) return;
       if (e instanceof Error) {
         throw new Error("Issue with tab: '" + props.tab.sourceLine + "'\n" + e.message);
       } else {

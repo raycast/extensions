@@ -12,14 +12,20 @@ import { parseSearchQuery, matchesQuery } from "../util/search-parser";
  * Hook to search Chrome tabs using the search parser.
  * See parseSearchQuery() in search-parser.ts for detailed search syntax and examples.
  */
-export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullable<Tab[]> } {
+export function useTabSearch(
+  query = "",
+): Omit<SearchResult<Tab>, "revalidate"> & { data: NonNullable<Tab[]>; revalidate: () => void } {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
   const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
   // Fetch tabs once (not on every keystroke) and filter in memory.
-  const { isLoading, data: allTabs } = usePromise(
+  const {
+    isLoading,
+    data: allTabs,
+    revalidate,
+  } = usePromise(
     async (useOriginalFavicon: boolean) => {
       const tabs = await getOpenTabs(useOriginalFavicon);
       setErrorView(undefined);
@@ -61,5 +67,5 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
 
   const data = isEmpty ? [] : tabData || [];
 
-  return { data, isLoading, errorView };
+  return { data, isLoading, errorView, revalidate };
 }

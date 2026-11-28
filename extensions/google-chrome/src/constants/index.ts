@@ -48,3 +48,5 @@ export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
 export const NOT_INSTALLED_MESSAGE = "Google Chrome not installed";
 export const NO_BOOKMARKS_MESSAGE = "Google Chrome has no bookmarks.";
+
+export const TAB_NOT_FOUND_MESSAGE = "This tab is no longer open";
