@@ -16,7 +16,13 @@ import { DomainInfo, ResourceRecord, ResourceRecordsListCreateOrUpdateItem } fro
 import { useSpaceship, API_URL, API_HEADERS, parseResponse } from "./spaceship";
 
 export default function ManageDNSRecords({ domain }: { domain: DomainInfo }) {
-  const { isLoading, data: records, mutate, revalidate } = useSpaceship<ResourceRecord>(`dns/records/${domain.name}`);
+  const {
+    isLoading,
+    data: records,
+    mutate,
+    revalidate,
+    pagination,
+  } = useSpaceship<ResourceRecord>(`dns/records/${domain.name}`);
 
   function generateAccessories(record: ResourceRecord) {
     const accessories: List.Item.Accessory[] = [{ tag: record.type, tooltip: "Type" }];
@@ -72,7 +78,7 @@ export default function ManageDNSRecords({ domain }: { domain: DomainInfo }) {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} pagination={pagination}>
       {domain.nameservers.provider === "custom" && (
         <List.EmptyView
           icon={Icon.Store}
