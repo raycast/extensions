@@ -973,13 +973,53 @@ function withoutIdlessStatusEchoes(records: RexStatusRecord[]): RexStatusRecord[
   return records.filter((record) => hasStatusId(record) || !identifiedFingerprints.has(statusFingerprint(record)));
 }
 
+export type RexActivityRead = "status" | "process";
+
+/** A block whose status or process read failed while the rest of the load succeeded. */
+export interface RexActivityReadFailure {
+  session_id: string;
+  session_label: string;
+  window_id: string;
+  window_label: string;
+  block_id: string;
+  block_label: string;
+  reads: RexActivityRead[];
+  message: string;
+}
+
+interface RexActivityLoadBatch {
+  activities: RexActivity[];
+  failedReads: RexActivityReadFailure[];
+}
+
+function describeReadFailure(
+  block: Omit<RexActivityReadFailure, "reads" | "message">,
+  failures: Array<{ read: RexActivityRead; reason: unknown }>,
+): RexActivityReadFailure | undefined {
+  if (failures.length === 0) {
+    return undefined;
+  }
+
+  return {
+    session_id: block.session_id,
+    session_label: block.session_label,
+    window_id: block.window_id,
+    window_label: block.window_label,
+    block_id: block.block_id,
+    block_label: block.block_label,
+    reads: failures.map((failure) => failure.read),
+    // Both reads failing is common when a session stops mid-load, so collapse identical reasons.
+    message: Array.from(new Set(failures.map((failure) => describeError(failure.reason)))).join("; "),
+  };
+}
+
 async function loadBlockActivities(
   sessionId: string,
   sessionLabel: string,
   windowId: string,
   windowLabel: string,
   block: RexPlacedBlock,
-): Promise<RexActivity[]> {
+): Promise<RexActivityLoadBatch> {
   const [statusResult, processResult] = await Promise.allSettled([
     callSessionApi<RexStatusResponse>(sessionId, PROGRAM_STATUS_METHOD, {
       session_id: sessionId,
@@ -995,7 +1035,7 @@ async function loadBlockActivities(
   const records =
     statusResult.status === "fulfilled" && Array.isArray(statusResult.value?.records) ? statusResult.value.records : [];
 
-  const base = {
+  const blockDetails = {
     session_id: sessionId,
     session_label: sessionLabel,
     window_id: windowId,
@@ -1008,33 +1048,47 @@ async function loadBlockActivities(
     owner: block.owner ?? undefined,
   };
 
+  // The fallback row below is still returned so the pane is listed, but the failed reads are
+  // reported so callers can tell unreadable activity apart from genuinely idle panes.
+  const readFailure = describeReadFailure(blockDetails, [
+    ...(statusResult.status === "rejected" ? [{ read: "status" as const, reason: statusResult.reason }] : []),
+    ...(processResult.status === "rejected" ? [{ read: "process" as const, reason: processResult.reason }] : []),
+  ]);
+  const failedReads = readFailure ? [readFailure] : [];
+
   if (records.length === 0) {
-    return [
-      {
-        ...base,
-        id: `${sessionId}:${windowId}:${block.block_id}:process`,
-        process,
-      },
-    ];
+    return {
+      activities: [
+        {
+          ...blockDetails,
+          id: `${sessionId}:${windowId}:${block.block_id}:process`,
+          process,
+        },
+      ],
+      failedReads,
+    };
   }
 
-  return withoutIdlessStatusEchoes(records).map((status) => ({
-    ...base,
-    id: `${sessionId}:${windowId}:${block.block_id}:${status.id || "root"}`,
-    status,
-    process,
-  }));
+  return {
+    activities: withoutIdlessStatusEchoes(records).map((status) => ({
+      ...blockDetails,
+      id: `${sessionId}:${windowId}:${block.block_id}:${status.id || "root"}`,
+      status,
+      process,
+    })),
+    failedReads,
+  };
 }
 
 async function loadWindowActivities(
   sessionId: string,
   sessionLabel: string,
   window: RexViewWindow,
-): Promise<RexActivity[]> {
+): Promise<RexActivityLoadBatch> {
   const windowId = typeof window.window_id === "string" ? window.window_id : "";
 
   if (!windowId) {
-    return [];
+    return { activities: [], failedReads: [] };
   }
 
   const windowLabel = window.label || "Window";
@@ -1058,10 +1112,13 @@ async function loadWindowActivities(
     blocks.map((block) => loadBlockActivities(sessionId, sessionLabel, windowId, windowLabel, block)),
   );
 
-  return activityGroups.flat();
+  return {
+    activities: activityGroups.flatMap((group) => group.activities),
+    failedReads: activityGroups.flatMap((group) => group.failedReads),
+  };
 }
 
-async function loadSessionActivities(session: RexSession): Promise<RexActivity[]> {
+async function loadSessionActivities(session: RexSession): Promise<RexActivityLoadBatch> {
   const view = await callSessionApi<RexView>(session.session_id, "session.view", {
     session_id: session.session_id,
   });
@@ -1071,7 +1128,10 @@ async function loadSessionActivities(session: RexSession): Promise<RexActivity[]
     windows.map((window) => loadWindowActivities(session.session_id, sessionLabel, window)),
   );
 
-  return activityGroups.flat();
+  return {
+    activities: activityGroups.flatMap((group) => group.activities),
+    failedReads: activityGroups.flatMap((group) => group.failedReads),
+  };
 }
 
 /** A session whose activity could not be loaded, while other sessions still loaded. */
@@ -1084,24 +1144,28 @@ export interface RexActivityLoadFailure {
 export interface RexActivityLoadResult {
   activities: RexActivity[];
   failedSessions: RexActivityLoadFailure[];
+  /** Blocks whose status or process read failed; their fallback rows are still in `activities`. */
+  failedReads: RexActivityReadFailure[];
 }
 
 /**
  * Lists every placed block in every session, with one activity per reported
  * program status. Blocks with no reported status get a fallback activity so
- * idle panes still appear. Status and process reads fail independently, and a
- * session that closes mid-load is reported separately instead of hiding the
- * sessions that loaded.
+ * idle panes still appear. Status and process reads fail independently and are
+ * reported in `failedReads`, and a session that closes mid-load is reported
+ * separately instead of hiding the sessions that loaded.
  */
 export async function loadActivities(): Promise<RexActivityLoadResult> {
   const sessions = await listSessions();
   const results = await Promise.allSettled(sessions.map(loadSessionActivities));
   const activities: RexActivity[] = [];
   const failedSessions: RexActivityLoadFailure[] = [];
+  const failedReads: RexActivityReadFailure[] = [];
 
   results.forEach((result, index) => {
     if (result.status === "fulfilled") {
-      activities.push(...result.value);
+      activities.push(...result.value.activities);
+      failedReads.push(...result.value.failedReads);
       return;
     }
 
@@ -1113,7 +1177,7 @@ export async function loadActivities(): Promise<RexActivityLoadResult> {
     });
   });
 
-  return { activities, failedSessions };
+  return { activities, failedSessions, failedReads };
 }
 
 /**

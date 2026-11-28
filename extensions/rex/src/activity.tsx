@@ -13,6 +13,7 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { checkOnlineHosts, focusActivity, loadActivities, loadHosts } from "./lib/rex";
+import type { RexActivityReadFailure } from "./lib/rex";
 import type { RexActivity, RexHost, RexProcessEntry } from "./types";
 
 type Tint = { source: Icon; tintColor: Color };
@@ -55,6 +56,32 @@ function formatTime(value: unknown): string | undefined {
 function exitCode(activity: RexActivity): number | undefined {
   const code = activity.process?.last_exit?.exit_code;
   return typeof code === "number" ? code : undefined;
+}
+
+const MAX_READ_FAILURE_LINES = 5;
+
+function describeReadFailure(failure: RexActivityReadFailure): string {
+  const reads = failure.reads.length === 2 ? "status and process" : failure.reads[0];
+  return `${failure.session_label} · ${failure.window_label} · ${failure.block_label}: could not read ${reads} (${failure.message})`;
+}
+
+// Keeps the toast bounded when a whole session stops mid-load and every block read fails.
+function readFailureLines(failures: RexActivityReadFailure[]): string[] {
+  const lines = failures.slice(0, MAX_READ_FAILURE_LINES).map(describeReadFailure);
+
+  if (failures.length > MAX_READ_FAILURE_LINES) {
+    lines.push(`…and ${failures.length - MAX_READ_FAILURE_LINES} more blocks with failed reads.`);
+  }
+
+  return lines;
+}
+
+function readFailureSummary(failures: RexActivityReadFailure[]): string {
+  // Block ids only need to be unique within a window, so key on the full placement.
+  const blockCount = new Set(
+    failures.map((failure) => `${failure.session_id}:${failure.window_id}:${failure.block_id}`),
+  ).size;
+  return `Activity in ${blockCount} ${blockCount === 1 ? "block" : "blocks"} could not be read, so some panes may be missing.`;
 }
 
 function foregroundName(entry: RexProcessEntry | null | undefined): string | undefined {
@@ -322,6 +349,7 @@ export default function Activity() {
 
   const activities = data?.activities ?? [];
   const failedSessions = data?.failedSessions ?? [];
+  const failedReads = data?.failedReads ?? [];
   const hosts = hostsData ?? [];
   const onlineIds = new Set(onlineData ?? []);
 
@@ -335,21 +363,30 @@ export default function Activity() {
     }
   }, [hostsError]);
 
-  // Session load failures do not block healthy sessions, so report them apart from the list.
+  // Session load failures and per-block read failures do not block healthy data, so report both in
+  // one warning. Without it, unreadable blocks are indistinguishable from genuinely idle panes.
   useEffect(() => {
-    if (failedSessions.length === 0) {
+    if (failedSessions.length === 0 && failedReads.length === 0) {
       return;
     }
+
+    const sessionLines = failedSessions.map((failure) => `${failure.session_label}: ${failure.message}`);
 
     showToast({
       style: Toast.Style.Failure,
       title:
-        failedSessions.length === 1
-          ? `Could Not Load ${failedSessions[0].session_label}`
-          : `Could Not Load ${failedSessions.length} Sessions`,
-      message: failedSessions.map((failure) => `${failure.session_label}: ${failure.message}`).join("\n"),
+        failedReads.length === 0
+          ? failedSessions.length === 1
+            ? `Could Not Load ${failedSessions[0].session_label}`
+            : `Could Not Load ${failedSessions.length} Sessions`
+          : failedSessions.length > 0
+            ? "Could Not Load All Activity"
+            : failedReads.length === 1
+              ? "Some Activity Could Not Be Read"
+              : `Could Not Read Activity in ${failedReads.length} Blocks`,
+      message: [...sessionLines, ...readFailureLines(failedReads)].join("\n"),
     });
-  }, [failedSessions]);
+  }, [failedReads, failedSessions]);
 
   const goToPane = async (activity: RexActivity) => {
     try {
@@ -467,12 +504,19 @@ export default function Activity() {
   const loading = isLoading || (scope === "online" && onlineLoading);
   const isEmpty = !isLoading && !error && activities.length === 0;
 
+  // Fallback rows for blocks whose reads failed are hidden by Active/Idle, so say the data is
+  // missing instead of implying every session is idle.
+  const activeIdleEmpty = view === "active-idle" && !activities.some(isActiveIdleActivity);
+  const readsFailed = failedReads.length > 0;
+
   const filteredEmptyTitle = allServersOff
     ? "No Servers Selected"
     : scope === "online" && onlineIds.size === 0
       ? "No Online Hosts"
-      : view === "active-idle" && !activities.some(isActiveIdleActivity)
-        ? "No Active or Idle Sessions"
+      : activeIdleEmpty
+        ? readsFailed
+          ? "Could Not Read Some Activity"
+          : "No Active or Idle Sessions"
         : !showIdle && activities.some(isIdleActivity)
           ? "Only Idle Sessions Hidden"
           : "No Matching Activity";
@@ -480,8 +524,10 @@ export default function Activity() {
     ? "Turn a server back on from the Servers section of the filter."
     : scope === "online" && onlineIds.size === 0
       ? "None of your servers responded to the check."
-      : view === "active-idle" && !activities.some(isActiveIdleActivity)
-        ? "No session is working or idle right now. Choose All Sessions in the filter to see everything."
+      : activeIdleEmpty
+        ? readsFailed
+          ? `${readFailureSummary(failedReads)} Choose All Sessions to list them, or refresh to try again.`
+          : "No session is working or idle right now. Choose All Sessions in the filter to see everything."
         : !showIdle && activities.some(isIdleActivity)
           ? "Turn on Show Idle Sessions to see them."
           : "Try All Hosts or check the server filters.";
@@ -530,7 +576,7 @@ export default function Activity() {
         />
       ) : visibleActivities.length === 0 && !loading ? (
         <List.EmptyView
-          icon={Icon.Terminal}
+          icon={activeIdleEmpty && readsFailed ? Icon.Warning : Icon.Terminal}
           title={filteredEmptyTitle}
           description={filteredEmptyDescription}
           actions={

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rex",
   "title": "Rex",
-  "description": "Find and manage Rex terminal sessions, inspect pane activity, and jump to panes. Requires Rex and its CLI installed.",
+  "description": "Find and manage Rex terminal sessions, inspect pane activity, and jump to panes; requires Rex and its CLI installed.",
   "icon": "icon.png",
   "author": "jasonshanks",
   "categories": [
