@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "infinitylooper",
+    title: "InfinityLooper",
+    description:
+      "Search and download free, seamlessly looping video backgrounds (MP4, 1080p and 4K) for streams, VTuber scenes, lofi and ambient music videos, wallpapers and presentations. Search by plain words, theme, orientation, resolution and length, then get signed download links. Official server run by InfinityLooper. Hosted Streamable HTTP server: searching needs no sign-in; downloads use a free InfinityLooper account through OAuth 2.1 Google sign-in (dynamic client registration and PKCE) and the same allowance as the website. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://infinitylooper.com/icon-512.png",
+    homepage: "https://infinitylooper.com/developers#mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://infinitylooper.com/mcp"],
+    },
+    remoteUrl: "https://infinitylooper.com/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
