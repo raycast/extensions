@@ -3,7 +3,7 @@ import { isConfiguredProject, toWorkItem, workItemUrl } from "../../lib/sprint-a
 import { SprintItem } from "../../lib/sprint-types";
 import { ChangeStateView } from "../work-item-view";
 import { SprintItemDetail } from "./SprintItemDetail";
-import { isStory } from "../../lib/sprint-utils";
+import { isRequirement, isStory } from "../../lib/sprint-utils";
 import { ExtraActionSections, sc } from "./ExtraActions";
 import { NewTaskForm } from "./NewTaskForm";
 
@@ -50,9 +50,12 @@ export function SprintActions({ item, onDone, extra, parent, inDetail = false }:
             target={
               <NewTaskForm
                 iterationPath={item.iterationPath}
-                // Under the selected story, or under the same parent as the selected task. sprintParentId only
-                // exists in the sprint list; details and search results have the item's own parent.
-                parentId={isStory(item.type) ? item.id : item.sprintParentId ?? item.parentId}
+                // Under the selected story (requirement level), or under the same parent as the selected task.
+                // A Feature or Epic gets no parent: tasks go under requirements. sprintParentId only exists in
+                // the sprint list; details and search results have the item's own parent.
+                parentId={
+                  isRequirement(item) ? item.id : isStory(item) ? undefined : item.sprintParentId ?? item.parentId
+                }
                 onCreated={onDone}
               />
             }
@@ -60,7 +63,7 @@ export function SprintActions({ item, onDone, extra, parent, inDetail = false }:
         )}
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy">
-        <Action.CopyToClipboard title="Copy Id" content={String(item.id)} shortcut={sc(".")} />
+        <Action.CopyToClipboard title="Copy Id" content={String(item.id)} shortcut={sc("n", ["shift"])} />
         <Action.CopyToClipboard title="Copy Title" content={item.title} shortcut={sc(".", ["shift"])} />
         <Action.CopyToClipboard title="Copy URL" content={url} shortcut={sc(",", ["shift"])} />
         <Action.CopyToClipboard

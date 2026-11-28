@@ -32,13 +32,25 @@ export function htmlToText(html?: string): string {
 /** Backlog item types of the standard processes, used until the team's backlog settings are loaded. */
 export const STORY_TYPES = ["User Story", "Product Backlog Item", "Feature", "Epic", "Requirement"];
 
-/** Backlog item types from the team's backlog settings (e.g. "Issue" in the Basic process). */
-let backlogTypes: string[] | undefined;
-export function setBacklogTypes(types: string[]) {
-  backlogTypes = types;
+/**
+ * Backlog item types of each project, from its backlog settings (e.g. "Issue" in the Basic process). Kept per
+ * project because a work item can link to items of another project with another process.
+ */
+const backlogTypes = new Map<string, { requirement: string[]; all: string[] }>();
+export function setBacklogTypes(project: string, types: { requirement: string[]; all: string[] }) {
+  backlogTypes.set(project.trim().toLowerCase(), types);
 }
 
-export const isStory = (type: string) => (backlogTypes ?? STORY_TYPES).includes(type);
+/** Requirement-level types of the standard processes, used until a project's backlog settings are loaded. */
+const REQUIREMENT_TYPES = STORY_TYPES.filter((t) => t !== "Feature" && t !== "Epic");
+
+/** Whether the item is a backlog item (story level or above) in its own project's process. */
+export const isStory = (item: { type: string; project: string }) =>
+  (backlogTypes.get(item.project.trim().toLowerCase())?.all ?? STORY_TYPES).includes(item.type);
+
+/** Whether the item is at the requirement level (where Tasks go), not a Feature or Epic. */
+export const isRequirement = (item: { type: string; project: string }) =>
+  (backlogTypes.get(item.project.trim().toLowerCase())?.requirement ?? REQUIREMENT_TYPES).includes(item.type);
 
 /** Same state colors Azure DevOps uses in the web UI (Agile, Scrum and Basic processes). */
 const STATE_COLORS: Record<string, string> = {
@@ -93,9 +105,9 @@ export function groupByStory(items: SprintItem[], all: Map<number, SprintItem>):
     }
     return g;
   };
-  for (const it of items) if (isStory(it.type)) ensure(it);
+  for (const it of items) if (isStory(it)) ensure(it);
   for (const it of items) {
-    if (isStory(it.type)) continue;
+    if (isStory(it)) continue;
     const parent = it.sprintParentId ? all.get(it.sprintParentId) : undefined;
     if (parent) ensure(parent).tasks.push(it);
     else orphans.push(it);
@@ -107,10 +119,4 @@ export function groupByStory(items: SprintItem[], all: Map<number, SprintItem>):
   // Like the web sprint backlog: unparented items come first, then each story followed by its tasks.
   if (orphans.length) result.unshift({ key: "none", title: "No parent", tasks: orphans });
   return result;
-}
-
-export function matches(it: SprintItem, q: string): boolean {
-  const t = q.trim().toLowerCase().replace(/^#/, "");
-  if (!t) return true;
-  return String(it.id).includes(t) || it.title.toLowerCase().includes(t);
 }

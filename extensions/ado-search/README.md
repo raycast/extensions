@@ -27,7 +27,7 @@ Opening an item shows its parent, description, acceptance criteria, comments (im
 The "Search Work Items" command finds any work item of the project set in the preferences, by number or by words in its title or description, with the same actions as Sprint Work Items.
 
 ## More actions on work items
-My Work Items (list, details and children) also gets the new actions in their own sections at the end of the action panel, so the existing actions and shortcuts don't change: add a comment, log hours (only on types with a Completed Work field), move to another sprint (only for items of the project set in the preferences), show related work items, pull requests and commits, copy `| ID | Title`, and copy the description or comments as Markdown or plain text.
+My Work Items (list, details and children) also gets the new actions in their own sections at the end of the action panel, so the existing actions stay where they were: add a comment, log hours (only on types with a Completed Work field), move to another sprint (only for items of the project set in the preferences), show related work items, pull requests and commits, copy `| ID | Title`, and copy the description or comments as Markdown or plain text. Copy Id now uses ⌘⇧N, because ⌘. is Raycast's Pin shortcut.
 
 ## Create work items
 The "Create Work Item" command opens the same form as the "New Work Item" action of My Work Items, which is still there. Besides the existing fields, the form has these optional ones; left empty, the item is created as before:

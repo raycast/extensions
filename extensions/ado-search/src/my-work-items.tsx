@@ -420,7 +420,11 @@ function WorkItemRow({
             <Action.CopyToClipboard
               title="Copy Id"
               content={String(item.id)}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              // ⌘. is Raycast's Pin shortcut.
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+              }}
             />
             <Action.CopyToClipboard
               title="Copy Title"

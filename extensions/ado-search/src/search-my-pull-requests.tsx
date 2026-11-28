@@ -2,6 +2,7 @@ import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { preparedPersonalAccessToken, baseApiUrl } from "./preferences";
 import { AdoPrResponse } from "./types";
+import { ErrorView } from "./components/sprint/ErrorView";
 
 export default () => {
   // The user the PAT belongs to. connectionData works with any token scope, unlike the identities API.
@@ -18,9 +19,23 @@ export default () => {
     },
   );
 
+  // A failed request (or a token whose user can't be found) shows its error with Retry, never an empty list.
+  const error =
+    entityData.error ??
+    prData.error ??
+    (!entityData.isLoading && entityData.data && !userId
+      ? new Error("Couldn’t find the user of this token")
+      : undefined);
+  const retry = () => {
+    entityData.revalidate();
+    if (userId) prData.revalidate();
+  };
+
   return (
     <List isLoading={prData.isLoading || entityData.isLoading}>
-      {!prData.isLoading && !entityData.isLoading && prData.data?.value.length === 0 ? (
+      {error ? (
+        <ErrorView error={error} retry={retry} title="Couldn’t load your pull requests" />
+      ) : !prData.isLoading && !entityData.isLoading && prData.data?.value.length === 0 ? (
         <List.EmptyView title="No pull requests found" />
       ) : (
         prData?.data?.value.map((pullRequest) => {

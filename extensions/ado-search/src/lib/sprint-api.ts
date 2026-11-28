@@ -147,21 +147,32 @@ function uniqueTypes(types: TypeRef[]): TypeRef[] {
   return [...seen.values()];
 }
 
+/** Requests still in flight, so rows asking for the same type at once share a single request. */
+const typeFieldsPending = new Map<string, Promise<void>>();
+
 /** Loads, once per type, the fields each work item type has (to know where hours can be logged). */
 async function loadTypeFields(types: TypeRef[]) {
   const { base } = prefs();
   await Promise.all(
     uniqueTypes(types)
       .filter((t) => !typeFields.has(typeKey(t)))
-      .map(async (t) => {
-        try {
-          const res = await request<{ value: { referenceName: string }[] }>(
+      .map((t) => {
+        const key = typeKey(t);
+        let pending = typeFieldsPending.get(key);
+        if (!pending) {
+          pending = request<{ value: { referenceName: string }[] }>(
             `${base}/${encodeURIComponent(t.project)}/_apis/wit/workitemtypes/${encodeURIComponent(t.type)}/fields?${API}`,
-          );
-          typeFields.set(typeKey(t), new Set(res.value.map((f) => f.referenceName)));
-        } catch {
-          /* unknown: hours actions stay hidden for this type */
+          )
+            .then((res) => {
+              typeFields.set(key, new Set(res.value.map((f) => f.referenceName)));
+            })
+            .catch(() => {
+              /* unknown: hours actions stay hidden for this type */
+            })
+            .finally(() => typeFieldsPending.delete(key));
+          typeFieldsPending.set(key, pending);
         }
+        return pending;
       }),
   );
 }
@@ -233,39 +244,46 @@ interface BacklogTypes {
   all: string[];
 }
 
-let backlogTypesPromise: Promise<BacklogTypes> | undefined;
+const backlogTypesByProject = new Map<string, Promise<BacklogTypes>>();
 
 /**
- * Work item types of the team's backlogs, from its backlog settings, so any process works (Basic's backlog
- * items are "Issue"). Falls back to the standard processes' types if the settings can't be read.
+ * Work item types of a project's backlogs, from its backlog settings, so any process works (Basic's backlog
+ * items are "Issue"). The configured project uses the Team preference; other projects (items linked from
+ * elsewhere) use their default team. Falls back to the standard processes' types if the settings can't be read.
  */
-export function getBacklogTypes(): Promise<BacklogTypes> {
-  const { base, project, team } = prefs();
-  backlogTypesPromise ??= request<{
-    requirementBacklog?: { workItemTypes?: { name: string }[] };
-    portfolioBacklogs?: { workItemTypes?: { name: string }[] }[];
-  }>(`${base}/${project}${team}/_apis/work/backlogconfiguration?${API}`)
-    .then((res) => {
-      const requirement = (res.requirementBacklog?.workItemTypes ?? []).map((t) => t.name);
-      const portfolio = (res.portfolioBacklogs ?? []).flatMap((b) => (b.workItemTypes ?? []).map((t) => t.name));
-      if (requirement.length === 0) throw new Error("No requirement backlog");
-      return { requirement, all: [...requirement, ...portfolio] };
-    })
-    .catch(() => {
-      backlogTypesPromise = undefined; // look again next time
-      return { requirement: STORY_TYPES.filter((t) => t !== "Feature" && t !== "Epic"), all: STORY_TYPES };
-    })
-    .then((types) => {
-      setBacklogTypes(types.all);
-      return types;
-    });
-  return backlogTypesPromise;
+export function getBacklogTypes(projectName?: string): Promise<BacklogTypes> {
+  const { base, team } = prefs();
+  const configured = getPreferenceValues<Preferences>().projectName.trim();
+  const name = projectName?.trim() || configured;
+  const key = name.toLowerCase();
+  const teamPath = isConfiguredProject(name) ? team : "";
+  let pending = backlogTypesByProject.get(key);
+  if (!pending) {
+    pending = request<{
+      requirementBacklog?: { workItemTypes?: { name: string }[] };
+      portfolioBacklogs?: { workItemTypes?: { name: string }[] }[];
+    }>(`${base}/${encodeURIComponent(name)}${teamPath}/_apis/work/backlogconfiguration?${API}`)
+      .then((res) => {
+        const requirement = (res.requirementBacklog?.workItemTypes ?? []).map((t) => t.name);
+        const portfolio = (res.portfolioBacklogs ?? []).flatMap((b) => (b.workItemTypes ?? []).map((t) => t.name));
+        if (requirement.length === 0) throw new Error("No requirement backlog");
+        return { requirement, all: [...requirement, ...portfolio] };
+      })
+      .catch(() => {
+        backlogTypesByProject.delete(key); // look again next time
+        return { requirement: STORY_TYPES.filter((t) => t !== "Feature" && t !== "Epic"), all: STORY_TYPES };
+      })
+      .then((types) => {
+        setBacklogTypes(name, types);
+        return types;
+      });
+    backlogTypesByProject.set(key, pending);
+  }
+  return pending;
 }
 
 export async function getWorkItems(ids: number[]): Promise<SprintItem[]> {
   if (ids.length === 0) return [];
-  // Know which types are backlog items before the rows are drawn (it decides grouping and New Task's parent).
-  await getBacklogTypes();
   // Organization-level endpoint: items can come from any project (My Work Items spans projects).
   const { base } = prefs();
   const fields = await fieldList();
@@ -278,7 +296,9 @@ export async function getWorkItems(ids: number[]): Promise<SprintItem[]> {
     raws.push(...res.value.filter(Boolean));
   }
   const types = typeRefs(raws);
-  await Promise.all([loadStateColors(types), loadTypeFields(types)]);
+  // Also each project's backlog types, before the rows are drawn (they decide grouping and New Task's parent).
+  const projects = [...new Set(types.map((t) => t.project).filter(Boolean))];
+  await Promise.all([loadStateColors(types), loadTypeFields(types), ...projects.map((p) => getBacklogTypes(p))]);
   const out = raws.map(mapItem);
   const pos = new Map(ids.map((id, i) => [id, i]));
   return out.sort((a, b) => (pos.get(a.id) ?? 0) - (pos.get(b.id) ?? 0));

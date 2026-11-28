@@ -2,6 +2,7 @@ import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { preparedPersonalAccessToken, baseApiUrl } from "./preferences";
 import { AdoWorkItemsResponse, AdoWorkItemDetailsResponse } from "./types";
+import { ErrorView } from "./components/sprint/ErrorView";
 
 export default () => {
   const pbiData = useFetch<AdoWorkItemsResponse>(`${baseApiUrl()}/_apis/wit/wiql?api-version=7.1`, {
@@ -40,11 +41,20 @@ export default () => {
     },
   );
 
+  // A failed request shows its error with Retry, never an empty result.
+  const error = pbiData.error ?? workItemDetails.error;
+  const retry = () => {
+    pbiData.revalidate();
+    if (workItemIds) workItemDetails.revalidate();
+  };
+
   return (
     <List isLoading={pbiData.isLoading || workItemDetails.isLoading}>
-      {!pbiData.isLoading &&
-      !workItemDetails.isLoading &&
-      (!workItemIds || workItemDetails.data?.value.length === 0) ? (
+      {error ? (
+        <ErrorView error={error} retry={retry} title="Couldn’t load your PBIs" />
+      ) : !pbiData.isLoading &&
+        !workItemDetails.isLoading &&
+        (!workItemIds || workItemDetails.data?.value.length === 0) ? (
         <List.EmptyView title="No product backlog items found" />
       ) : (
         workItemDetails?.data?.value?.map((pbi) => (

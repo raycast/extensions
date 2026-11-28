@@ -23,7 +23,7 @@ export function SprintListItem({ item, parent, onDone, showStateTag = true, icon
       keywords={[String(item.id), item.title, item.state, item.type]}
       accessories={[
         ...(showStateTag ? [{ tag: { value: item.state, color: stateColor(item.state) } }] : []),
-        ...(isStory(item.type)
+        ...(isStory(item)
           ? [
               ...(item.storyPoints !== undefined ? [{ text: `${item.storyPoints} pts`, tooltip: "Story points" }] : []),
               ...(completedSum !== undefined

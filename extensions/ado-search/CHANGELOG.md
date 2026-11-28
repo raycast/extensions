@@ -5,7 +5,7 @@
 - Added a "Search Work Items" command to find any work item of the project by number or by words in its title or description.
 - Added a "Create Work Item" command that opens the work item form directly, with optional defaults (project, type, area, sprint, assignee, create branch) that hide those fields. The "New Work Item" action of My Work Items is unchanged.
 - The work item form gets optional Area, Sprint, Parent picker and estimate fields. Left empty, items are created as before.
-- My Work Items gets new actions in their own sections at the end of the action panel: add comment, log hours, move to sprint, related items, pull requests and commits, and copy description or comments. Existing actions and shortcuts are unchanged.
+- My Work Items gets new actions in their own sections at the end of the action panel: add comment, log hours, move to sprint, related items, pull requests and commits, and copy description or comments. Existing actions are unchanged, except that Copy Id moved from ⌘. (now Raycast's Pin shortcut) to ⌘⇧N.
 - New optional preferences: Team (defaults to the project's default team) and Custom Estimate Field.
 - Fixed My Open Pull Requests showing everyone's pull requests: the list was requested before the current user was known. The user now comes from the token itself, so the Identity scope is no longer needed.
 - Fixed My Open PBIs showing an error when there are no open PBIs, and capped its request at 200 items.

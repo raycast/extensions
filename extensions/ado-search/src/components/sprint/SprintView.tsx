@@ -151,7 +151,7 @@ export function SprintView() {
       showStateTag={showState}
       extraActions={viewActions}
       icon={icon}
-      completedSum={isStory(it.type) ? completedOf(it.id) : undefined}
+      completedSum={isStory(it) ? completedOf(it.id) : undefined}
     />
   );
 

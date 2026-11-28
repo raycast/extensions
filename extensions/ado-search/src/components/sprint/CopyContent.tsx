@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { getComments, getWorkItems } from "../../lib/sprint-api";
 import { ItemRef } from "../../lib/sprint-types";
 import { htmlToMarkdown, htmlToText } from "../../lib/sprint-utils";
+import { ErrorView } from "./ErrorView";
 
 interface Entry {
   key: string;
@@ -15,12 +16,21 @@ interface Entry {
 /** Pick the description, acceptance criteria or any comment of a work item and copy it. */
 export function CopyContent({ item }: { item: ItemRef }) {
   // Reload the item like the detail view does, instead of trusting the copy held by the list.
-  const { data: fresh, isLoading: loadingItem } = useCachedPromise(
-    async (id: number) => (await getWorkItems([id]))[0],
-    [item.id],
-  );
-  const { data: comments, isLoading: loadingComments } = useCachedPromise(getComments, [item.id, item.project]);
+  const {
+    data: fresh,
+    isLoading: loadingItem,
+    error: itemError,
+    revalidate: reloadItem,
+  } = useCachedPromise(async (id: number) => (await getWorkItems([id]))[0], [item.id]);
+  const {
+    data: comments,
+    isLoading: loadingComments,
+    error: commentsError,
+    revalidate: reloadComments,
+  } = useCachedPromise(getComments, [item.id, item.project]);
   const isLoading = loadingItem || loadingComments;
+  // A failed load shows its error with Retry, not an empty description.
+  const error = itemError ?? commentsError;
 
   const entries: Entry[] = [];
   // Always listed, so it is visible even when the item has no description.
@@ -51,10 +61,17 @@ export function CopyContent({ item }: { item: ItemRef }) {
       navigationTitle={`#${item.id} · Copy content`}
       searchBarPlaceholder="Pick what to copy…"
     >
-      {!isLoading && entries.length === 0 ? (
-        <List.EmptyView title="No description or comments" icon={Icon.Tray} />
+      {error ? (
+        <ErrorView
+          error={error}
+          title="Couldn’t load the work item"
+          retry={() => {
+            reloadItem();
+            reloadComments();
+          }}
+        />
       ) : null}
-      {entries.map((e) => (
+      {(error ? [] : entries).map((e) => (
         <List.Item
           key={e.key}
           title={e.title}

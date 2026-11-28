@@ -67,7 +67,7 @@ export function SprintItemDetail({
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item text={item.state} color={stateColor(item.state)} />
           </Detail.Metadata.TagList>
-          {!isStory(item.type) && (
+          {!isStory(item) && (
             <>
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label title="Estimated work" text={fmtHours(item.estimate)} />
@@ -93,7 +93,7 @@ export function SprintItemDetail({
                   key={`${r.link}-${r.item.id}`}
                   title={r.link}
                   text={`#${r.item.id} ${r.item.title} · ${r.item.state}${
-                    !isStory(r.item.type) && r.item.estimate !== undefined ? ` · ${fmtHours(r.item.estimate)}` : ""
+                    !isStory(r.item) && r.item.estimate !== undefined ? ` · ${fmtHours(r.item.estimate)}` : ""
                   }`}
                   target={workItemUrl(r.item.id)}
                 />
