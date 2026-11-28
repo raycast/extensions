@@ -242,21 +242,16 @@ private func dueComponents(_ date: Date) -> DateComponents {
   return components
 }
 
-/// Alarms are compared and written only when still in the future: past ones would fire on save,
-/// and dropping them as time passes would otherwise look like a change on every run.
-private func needsUpdate(_ reminder: EKReminder, due: Date, alarms: [Date], notes: String, now: Date) -> Bool {
-  let currentDue = dueDate(of: reminder).map(minuteStamp)
-  let currentAlarms = Set((reminder.alarms ?? []).compactMap { $0.absoluteDate }.filter { $0 > now }.map(minuteStamp))
-  // The status line isn't part of the plan; only the planned lines are compared.
-  return currentDue != minuteStamp(due) || currentAlarms != Set(alarms.map(minuteStamp))
-    || withoutStatus(reminder.notes) != notes
+/// Due date and alarms match the plan (PlanMatch.swift). Alarms are compared and written only when still in the
+/// future: past ones would fire on save, and dropping them as time passes would otherwise look like a change.
+private func scheduleMatches(_ reminder: EKReminder, due: Date, alarms: [Date], now: Date) -> Bool {
+  timesMatch(dueDate(of: reminder), due)
+    && alarmsMatch((reminder.alarms ?? []).compactMap { $0.absoluteDate }.filter { $0 > now }, alarms)
 }
 
-/// Planned notes keep the reminder's status line, if it has one.
-private func apply(_ reminder: EKReminder, due: Date, alarms: [Date], notes: String) {
+private func applySchedule(_ reminder: EKReminder, due: Date, alarms: [Date]) {
   reminder.dueDateComponents = dueComponents(due)
   reminder.alarms = alarms.map { EKAlarm(absoluteDate: $0) }
-  reminder.notes = withStatusLine(notes, statusLine(in: reminder.notes))
 }
 
 /// Runs `body` while holding a lock shared by every process of this extension. The background tick,
@@ -332,12 +327,19 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
       }
       // Matched by key: a title that differs alone is left as it is (other tools match prayers by key and
       // keep their own titles); it follows the plan when the times change.
-      guard needsUpdate(reminder, due: due, alarms: alarms, notes: plan.notes, now: now) else {
+      // Each part is written only when it changed: a notes write that races another writer's gets merged by
+      // iCloud into one doubled note. Doubled notes are left for the hub to repair.
+      let scheduleChanged = !scheduleMatches(reminder, due: due, alarms: alarms, now: now)
+      let notesChanged = !hasDoubledKey(reminder.notes) && !notesMatchPlan(reminder.notes, plan.notes)
+      guard scheduleChanged || notesChanged else {
         unchanged += 1
         continue
       }
-      apply(reminder, due: due, alarms: alarms, notes: plan.notes)
-      reminder.title = plan.title
+      if scheduleChanged { applySchedule(reminder, due: due, alarms: alarms) }
+      // The planned notes keep the reminder's status line, if it has one.
+      if notesChanged { reminder.notes = withStatusLine(plan.notes, statusLine(in: reminder.notes)) }
+      // Titles merge like notes, so an unchanged one isn't written again.
+      if reminder.title != plan.title { reminder.title = plan.title }
       try store.save(reminder, commit: true)
       updated += 1
     } else {
@@ -345,7 +347,8 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
       reminder.calendar = calendar
       reminder.title = plan.title
       reminder.url = URL(string: urlPrefix + plan.key)
-      apply(reminder, due: due, alarms: alarms, notes: plan.notes)
+      applySchedule(reminder, due: due, alarms: alarms)
+      reminder.notes = plan.notes
       try store.save(reminder, commit: true)
       created += 1
     }
