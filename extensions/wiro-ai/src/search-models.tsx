@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { Chat } from "./components/chat";
@@ -120,7 +120,7 @@ export default function SearchModels() {
   const [category, setCategory] = useCachedState<string>("search-category", "");
   const [showingDetail, setShowingDetail] = useCachedState<boolean>("search-detail", true);
 
-  const { data, isLoading, error, pagination } = useCachedPromise(
+  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
     (search: string, filter: string) =>
       async ({ page }: { page: number }) => {
         const { models, total } = await listModels({
@@ -163,7 +163,17 @@ export default function SearchModels() {
       }
     >
       {!isLoading && models.length === 0 && loadError && (
-        <List.EmptyView icon={Icon.Warning} title="Could not load models" description={loadError.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load models"
+          description={loadError.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
       )}
       {!isLoading && models.length === 0 && !loadError && (
         <List.EmptyView

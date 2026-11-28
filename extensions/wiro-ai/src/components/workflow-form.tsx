@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { credentials } from "../lib/preferences";
@@ -21,6 +30,7 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
     data: workflow,
     isLoading,
     error,
+    revalidate,
   } = usePromise(async (slug: string) => parseWorkflow(await getWorkflow(slug, credentials())), [fullSlug], {
     failureToastOptions: { title: "Could not load the workflow" },
   });
@@ -136,6 +146,12 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
         <ActionPanel>
           <Action.SubmitForm title="Run Workflow" icon={Icon.Play} onSubmit={submit} />
           {workflow && <Action.OpenInBrowser title="Open Workflow Page" icon={Icon.Globe} url={workflow.url} />}
+          {error && !workflow && (
+            <>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </>
+          )}
         </ActionPanel>
       }
     >

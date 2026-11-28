@@ -45,6 +45,7 @@ export default function WalletBalance() {
       {error && !data && (
         <MenuBarExtra.Section title="Could not load the balance">
           <MenuBarExtra.Item title={error.message.slice(0, 80)} />
+          <MenuBarExtra.Item title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
           <MenuBarExtra.Item title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </MenuBarExtra.Section>
       )}
