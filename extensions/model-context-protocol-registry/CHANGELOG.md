@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ExpiryRegister MCP Server] - {PR_MERGE_DATE}
+
+- Add ExpiryRegister to the official registry: a register of business expiry and renewal dates whose named owners are emailed before each date, with escalation to the next contact until someone acknowledges. Hosted Streamable HTTP server at https://mcp.expiryregister.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Nana MCP Server] - 2026-11-27
 
 - Add Nana by eezly to the official registry: grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK. Hosted Streamable HTTP server at https://api.eezly.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free.
