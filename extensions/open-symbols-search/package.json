@@ -1,0 +1,323 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-symbols-search",
+  "title": "Open Symbols Search",
+  "description": "Search ~30,000 open-source icons via Open Symbols, and copy or export them as PNG, SVG, PDF or SF Symbol templates.",
+  "icon": "extension-icon.png",
+  "author": "idiux",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "sf symbols",
+    "xcode",
+    "lucide",
+    "tabler",
+    "phosphor",
+    "font awesome",
+    "material design",
+    "heroicons",
+    "hugeicons",
+    "iconoir",
+    "ionicons",
+    "feather"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-open-symbols",
+      "title": "Search Open Symbols",
+      "subtitle": "Open Symbols",
+      "description": "Search Open Symbols across Lucide, Tabler, Phosphor, Material Design Icons and more.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "check-for-updates",
+      "title": "Check for Symbol Updates",
+      "subtitle": "Open Symbols",
+      "description": "Check for a newer Open Symbols release and update the symbol list if any symbols changed.",
+      "mode": "view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "description": "What happens when you press Return on a symbol.",
+      "default": "copy-image",
+      "data": [
+        {
+          "title": "Copy Image",
+          "value": "copy-image"
+        },
+        {
+          "title": "Copy SVG Code",
+          "value": "copy-svg"
+        },
+        {
+          "title": "Copy Xcode Name",
+          "value": "copy-name"
+        },
+        {
+          "title": "Paste Xcode Name",
+          "value": "paste-name"
+        },
+        {
+          "title": "Copy SwiftUI Image",
+          "value": "copy-swiftui"
+        },
+        {
+          "title": "Copy Symbol Template File",
+          "value": "copy-file"
+        }
+      ]
+    },
+    {
+      "name": "gridSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Size",
+      "description": "Default tile size. You can also change it from the action panel.",
+      "default": "small",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "name": "showNames",
+      "type": "checkbox",
+      "required": false,
+      "title": "Display",
+      "label": "Show Symbol Names",
+      "default": true,
+      "description": "Show the symbol name under each tile."
+    },
+    {
+      "name": "showRecents",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Recently Used Symbols",
+      "default": true,
+      "description": "Show a Recently Used section above the results."
+    },
+    {
+      "name": "exportFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Export Folder",
+      "description": "Where exported files are saved.",
+      "default": "~/Downloads/"
+    },
+    {
+      "name": "exportSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Export Size",
+      "description": "Pixels for PNG, points for PDF and SVG. Used by Export Symbol and Copy Image.",
+      "default": "128",
+      "data": [
+        {
+          "title": "16",
+          "value": "16"
+        },
+        {
+          "title": "24",
+          "value": "24"
+        },
+        {
+          "title": "32",
+          "value": "32"
+        },
+        {
+          "title": "48",
+          "value": "48"
+        },
+        {
+          "title": "64",
+          "value": "64"
+        },
+        {
+          "title": "128",
+          "value": "128"
+        },
+        {
+          "title": "256",
+          "value": "256"
+        },
+        {
+          "title": "512",
+          "value": "512"
+        },
+        {
+          "title": "1024",
+          "value": "1024"
+        }
+      ]
+    },
+    {
+      "name": "exportWeight",
+      "type": "dropdown",
+      "required": false,
+      "title": "Export Weight",
+      "description": "The weight of exported files and copied images.",
+      "default": "regular",
+      "data": [
+        {
+          "title": "Ultralight",
+          "value": "ultralight"
+        },
+        {
+          "title": "Thin",
+          "value": "thin"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Regular",
+          "value": "regular"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Semibold",
+          "value": "semibold"
+        },
+        {
+          "title": "Bold",
+          "value": "bold"
+        },
+        {
+          "title": "Heavy",
+          "value": "heavy"
+        },
+        {
+          "title": "Black",
+          "value": "black"
+        }
+      ]
+    },
+    {
+      "name": "exportColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Export Color",
+      "description": "A color name such as blue or gray, a #RRGGBB hex value, or currentColor (SVG only; inherits the CSS text color).",
+      "placeholder": "#RRGGBB, color name or currentColor",
+      "default": "black"
+    },
+    {
+      "name": "exportFrame",
+      "type": "dropdown",
+      "required": false,
+      "title": "Export Frame",
+      "description": "Square keeps the source library's canvas and padding, so icons line up at the same size. Tight crops to the symbol's edges.",
+      "default": "square",
+      "data": [
+        {
+          "title": "Square",
+          "value": "square"
+        },
+        {
+          "title": "Tight",
+          "value": "tight"
+        }
+      ]
+    },
+    {
+      "name": "formatPng",
+      "type": "checkbox",
+      "required": false,
+      "title": "Export Formats",
+      "label": "PNG",
+      "description": "Transparent background.",
+      "default": true
+    },
+    {
+      "name": "formatSvg",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "SVG",
+      "description": "Vector, at the chosen weight and color.",
+      "default": false
+    },
+    {
+      "name": "formatPdf",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "PDF",
+      "description": "Vector, at the chosen size, weight and color.",
+      "default": false
+    },
+    {
+      "name": "formatTemplate",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Custom Symbol Template",
+      "description": "The editable template with every weight, for Xcode asset catalogs.",
+      "default": false
+    },
+    {
+      "name": "autoCheckUpdates",
+      "type": "checkbox",
+      "required": false,
+      "title": "Symbol Updates",
+      "label": "Check for new symbols weekly",
+      "description": "When you open Search Open Symbols, check at most once a week for a newer Open Symbols release and offer to update.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3",
+    "@resvg/resvg-wasm": "^2.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
