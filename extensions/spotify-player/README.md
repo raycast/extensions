@@ -118,7 +118,7 @@ Use this to copy the artist and track title of the current song/episode.
 
 ### Find Lyrics
 
-Use this to find and display lyrics for the currently playing song. The lyrics are fetched and displayed directly within Raycast. Includes options to copy the lyrics or song information.
+Use this to find and display time-synced lyrics (with plain text fallback) for the currently playing song. Synced lyrics follow Spotify playback in real time, let you jump to any line by selecting it, control playback, or copy the lyrics and song information.
 
 ### Just Play (💸)
 

@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Synced Lyrics in Find Lyrics] - {PR_MERGE_DATE}
+
+- Added real-time synced lyrics support to **Find Lyrics** using LRCLIB timestamps with local playback progress extrapolation and automatic track-change updates.
+- Selecting a lyric line seeks Spotify playback to that timestamp, with play/pause, next/previous, auto-follow toggle, and plain-lyrics view switching actions.
+- Added uncached playback lookup for accurate progress sync and rounded seek timestamps to integer milliseconds.
+
 ## [Show the Active Device Reliably] - 2026-11-20
 
 - The device list is no longer cached for 30 seconds. Select Device, and Connect Device in Now Playing and the menu bar, ask Spotify which device is active each time they load, and show the last list until it answers. The menu bar keeps loading until the answer arrives, so it shows it.
