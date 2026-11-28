@@ -1,5 +1,6 @@
 import { ActionPanel, Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 import type { FontInfo } from "../types";
 import { getFontDisplayName } from "../utils/fontActions";
 import { loadFontPreview } from "../utils/fontPreview";
@@ -12,32 +13,23 @@ export function FontPreview({
   font: FontInfo;
   pageUrl: string;
 }) {
-  const [preview, setPreview] =
-    useState<Awaited<ReturnType<typeof loadFontPreview>>>();
-  const [failed, setFailed] = useState(false);
-  useEffect(() => {
-    const controller = new AbortController();
-    setPreview(undefined);
-    setFailed(false);
-    loadFontPreview(font, pageUrl, controller.signal).then(
-      (result) => {
-        if (!controller.signal.aborted) setPreview(result);
-      },
-      () => {
-        if (!controller.signal.aborted) setFailed(true);
-      },
-    );
-    return () => controller.abort();
-  }, [font, pageUrl]);
+  const abortable = useRef<AbortController | null>(null);
+  const { data, error, isLoading } = usePromise(
+    (face: FontInfo, url: string) =>
+      loadFontPreview(face, url, abortable.current?.signal),
+    [font, pageUrl],
+    { abortable, onError: () => {} },
+  );
+  const preview = error ? undefined : data;
 
   return (
     <Detail
       navigationTitle={getFontDisplayName(font)}
-      isLoading={!preview && !failed}
+      isLoading={isLoading}
       markdown={
         preview
           ? `![Font sample](${preview.image})`
-          : failed
+          : error
             ? "## Preview Unavailable\n\nThe font could not be loaded or its outlines are unsupported."
             : ""
       }
