@@ -32,7 +32,7 @@ In Raycast AI Chat, mention **@the-downloader** to download videos, read any lin
 
 Type **@** in the AI Chat composer and choose **Recent Links** to mention a link you downloaded or chatted about before: its transcript, caption or article is attached to your message, so you don't need to paste the link again.
 
-Privacy: when `read-link`, `get-link-info` or a mentioned Recent Link can't read an article (it blocks apps, is gone or needs JavaScript), they look up its saved copy on the Internet Archive automatically, which sends the link to archive.org. In Chat About Link that only happens when you choose **Read Archived Copy**.
+Privacy: when `read-link`, `get-link-info` or a mentioned Recent Link can't read an article (it blocks apps, is gone or needs JavaScript), they look up its saved copy on the Internet Archive automatically, which sends the link to archive.org. Saving or copying a webpage as Markdown does the same when the page blocks apps or is gone. In Chat About Link that only happens when you choose **Read Archived Copy**.
 
 ## What you need
 

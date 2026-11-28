@@ -51,7 +51,7 @@ import {
   runVideoDownload,
 } from "../lib/ytdlp.js";
 import { clipLabel, clipSuffix, parseClip } from "../lib/clip.js";
-import { audioLanguages, languageSuffix } from "../lib/audio-language.js";
+import { audioLanguages, languageSuffix, takesAudioLanguage } from "../lib/audio-language.js";
 import { parseSubtitleValue, subtitleTracks, subtitleValue } from "../lib/subtitles.js";
 import { getVideoExtras } from "../lib/config.js";
 import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
@@ -970,6 +970,16 @@ export function DownloadForm({ initialUrl, initialClip }: DownloadFormProps) {
     const cut = list ? undefined : clip;
     // A soundtrack other than the original, from the ones this link offered.
     const dub = list ? undefined : soundtracks.find((s) => s.code === values.audioLanguage && !s.original);
+    // An exact format with picture and sound in one file carries its own
+    // soundtrack: saying "German" on a file that isn't would be worse than refusing.
+    if (dub && !takesAudioLanguage(format.split("#")[0])) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Audio Language",
+        message: `This exact format has its own soundtrack, so it can't be ${dub.title}. Set Exact Format to Auto, or pick a format without sound.`,
+      });
+      return;
+    }
     const suffix = `${cut ? clipSuffix(cut) : ""}${dub ? languageSuffix(dub) : ""}`;
     const wanted = ft === "video" && !list && !cut ? parseSubtitleValue(values.subtitles) : undefined;
     // Only a track this link offered: the dropdown's value could be an earlier link's.

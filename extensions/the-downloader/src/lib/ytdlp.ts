@@ -543,7 +543,9 @@ export async function runVideoDownload(
   try {
     result = await runWithWatchdog(binaryPath, buildVideoDownloadArgs(options), {
       idleMs: options.idleMs ?? DEFAULT_IDLE_MS,
-      idleScale: () => (postProcessing ? POSTPROCESS_IDLE_SCALE : 1),
+      // A clip is fetched and cut by ffmpeg in one go, without yt-dlp's progress
+      // lines: the whole run gets the window a silent post-processing step has.
+      idleScale: () => (postProcessing || options.clip ? POSTPROCESS_IDLE_SCALE : 1),
       env: { ...process.env, PYTHONUNBUFFERED: "1" },
       onStdoutLine: handleLine,
       abortSignal: options.abortSignal,

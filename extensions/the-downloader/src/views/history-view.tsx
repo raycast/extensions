@@ -21,6 +21,7 @@ import {
   showInFinder,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { CARD_W, historyCardSvg } from "../lib/charts.js";
 import { errorText, escapeMarkdown, formatBytes, formatClock, plural } from "../lib/format.js";
 import {
@@ -31,6 +32,7 @@ import {
   historyCsv,
   loadHistory,
   matchesFilter,
+  matchesSearch,
   removeFromHistory,
   removeManyFromHistory,
   totalBytes,
@@ -142,7 +144,7 @@ async function exportHistory(entries: HistoryEntry[], format: "csv" | "json") {
       secondaryAction: { title: "Open", onAction: () => open(target) },
     });
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Couldn't export the History", message: errorText(error) });
+    await showFailureToast(error, { title: "Couldn't export the History" });
   }
 }
 
@@ -237,14 +239,13 @@ export function DownloadHistory() {
     };
   }, []);
 
-  const visible = (entries ?? []).filter((e) => matchesFilter(e, filter));
-  // What an export holds: the filter's entries, narrowed by the words typed in
-  // the search. Raycast's own search is fuzzy, so this is close to the list, not exactly it.
-  const words = searchText.toLowerCase().split(/\s+/).filter(Boolean);
-  const exported = visible.filter((e) => {
-    const text = [titleOf(e), e.uploader, e.source, hostOf(e.url), e.format, kindTitle(e.kind)].join(" ").toLowerCase();
-    return words.every((word) => text.includes(word));
-  });
+  // The filter's entries, narrowed by the words typed in the search. The list is
+  // searched here rather than by Raycast, so an export holds exactly the rows shown.
+  const visible = (entries ?? []).filter(
+    (e) =>
+      matchesFilter(e, filter) &&
+      matchesSearch(searchText, [titleOf(e), e.uploader, e.source, hostOf(e.url), e.format, kindTitle(e.kind)]),
+  );
   const groups = groupByDay(visible);
   // The detail pane shows type, size and date, and the narrow list beside it would cut them off.
   const split = showingDetail && visible.length > 0;
@@ -275,7 +276,7 @@ export function DownloadHistory() {
       setEntries(await removeManyFromHistory(missing.map((e) => e.id)));
       await showToast({ style: Toast.Style.Success, title: "Removed from History" });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn't remove from History", message: errorText(error) });
+      await showFailureToast(error, { title: "Couldn't remove from History" });
     }
   }
 
@@ -308,7 +309,7 @@ export function DownloadHistory() {
     <List
       isLoading={entries === undefined}
       isShowingDetail={split}
-      filtering
+      filtering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search downloads by title, channel or site"
       searchBarAccessory={
@@ -352,14 +353,9 @@ export function DownloadHistory() {
         <List.Section
           key={group.title}
           title={group.title}
-          // Raycast filters the search after this, so a count would include entries it hides.
-          subtitle={
-            searchText
-              ? undefined
-              : [plural(group.entries.length, "download"), formatBytes(totalBytes(group.entries)).replace("—", "")]
-                  .filter(Boolean)
-                  .join(" · ")
-          }
+          subtitle={[plural(group.entries.length, "download"), formatBytes(totalBytes(group.entries)).replace("—", "")]
+            .filter(Boolean)
+            .join(" · ")}
         >
           {group.entries.map((e) => {
             const fileExists = exists.get(e.id);
@@ -371,9 +367,6 @@ export function DownloadHistory() {
                 key={e.id}
                 title={titleOf(e)}
                 icon={iconOf(e)}
-                keywords={[e.uploader, e.source, hostOf(e.url), e.format, kindTitle(e.kind)].filter((k): k is string =>
-                  Boolean(k),
-                )}
                 accessories={[
                   ...(e.status === "failed" ? [{ tag: { value: "Failed", color: Color.Red } }] : []),
                   ...(fileExists === false ? [{ tag: { value: "Missing", color: Color.Orange } }] : []),
@@ -517,12 +510,12 @@ export function DownloadHistory() {
                       <Action
                         title="Export List as CSV"
                         icon={Icon.Download}
-                        onAction={() => exportHistory(exported, "csv")}
+                        onAction={() => exportHistory(visible, "csv")}
                       />
                       <Action
                         title="Export List as JSON"
                         icon={Icon.Download}
-                        onAction={() => exportHistory(exported, "json")}
+                        onAction={() => exportHistory(visible, "json")}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>

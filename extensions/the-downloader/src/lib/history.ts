@@ -103,6 +103,17 @@ export function matchesFilter(entry: HistoryEntry, filter: HistoryFilter): boole
   }
 }
 
+/**
+ * True when every word of `search` is somewhere in `fields` (case doesn't
+ * matter). The History list and its export both go by this.
+ */
+export function matchesSearch(search: string, fields: (string | undefined)[]): boolean {
+  const words = search.toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const text = fields.filter(Boolean).join(" ").toLowerCase();
+  return words.every((word) => text.includes(word));
+}
+
 /** Bytes of everything in `entries` whose size is known; `undefined` when none is. */
 export function totalBytes(entries: HistoryEntry[]): number | undefined {
   const sizes = entries.map((e) => e.bytes).filter((b): b is number => typeof b === "number");

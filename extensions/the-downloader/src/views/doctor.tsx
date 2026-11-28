@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import fs from "node:fs";
 import os from "node:os";
 import {
@@ -16,6 +16,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import {
   Diagnostics,
   LinkTest,
@@ -134,37 +135,39 @@ const STATE_ICON = {
   checking: Icon.CircleProgress,
 } as const;
 
+type Located = { row: Row; tool: ToolCheck };
+
+/** The versions of the found tools in `list`, by id: spotDL alone, or all the others. */
+async function readVersions(list: Located[], spotdl: boolean): Promise<Record<string, string | undefined>> {
+  const wanted = list.filter(({ tool }) => tool.found && (tool.id === "spotdl") === spotdl);
+  const read = await Promise.all(
+    wanted.map(async ({ row, tool }) => [tool.id, await versionOf(row, tool.path).catch(() => undefined)] as const),
+  );
+  return Object.fromEntries(read);
+}
+
 /**
  * Check Tools: every command-line tool The Downloader uses, where it was
  * found and which version runs, plus a report to paste into a bug report.
  */
 export function Doctor() {
-  const [tools, setTools] = useState<ToolCheck[]>();
   const [linkTest, setLinkTest] = useState<LinkTest>();
   const [testing, setTesting] = useState(false);
+  // Bumped by Check Again: the tools are looked for anew and their versions asked for again.
   const [run, setRun] = useState(0);
 
-  useEffect(() => {
-    let active = true;
-    const all = rows();
-    const located = all.map(locateTool);
-    setTools(located);
-    // Each version arrives on its own, so one slow tool doesn't hold up the list.
-    for (const [index, row] of all.entries()) {
-      if (!located[index].found) continue;
-      void versionOf(row, located[index].path)
-        .catch(() => undefined)
-        .then((version) => {
-          if (!active) return;
-          setTools((current) =>
-            current?.map((tool) => (tool.id === row.id ? { ...tool, version, checking: false } : tool)),
-          );
-        });
-    }
-    return () => {
-      active = false;
-    };
-  }, [run]);
+  // Where each tool is: known at once.
+  const located = useMemo(() => rows().map((row) => ({ row, tool: locateTool(row) })), [run]);
+  // The versions, in two reads: spotDL's bundled program can take half a minute
+  // to answer on its first run, and must not hold up the others. Both run again
+  // whenever the tools were looked for anew.
+  const quick = usePromise((list: Located[]) => readVersions(list, false), [located]);
+  const slow = usePromise((list: Located[]) => readVersions(list, true), [located]);
+  const tools: ToolCheck[] = located.map(({ tool }) => {
+    if (!tool.found) return tool;
+    const read = tool.id === "spotdl" ? slow : quick;
+    return { ...tool, version: read.data?.[tool.id], checking: read.isLoading };
+  });
 
   const now = Date.now();
   const home = os.homedir();
@@ -173,7 +176,7 @@ export function Doctor() {
     system: systemName(),
     raycast: environment.raycastVersion,
     node: process.version,
-    tools: tools ?? [],
+    tools,
     folder,
     settings: settings(),
     linkTest,
@@ -257,12 +260,9 @@ export function Doctor() {
       : { source: Icon.Network, tintColor: Color.SecondaryText };
 
   return (
-    <List
-      isLoading={tools === undefined || tools.some((tool) => tool.checking) || testing}
-      searchBarPlaceholder="Search tools"
-    >
-      <List.Section title="Tools" subtitle={tools ? summary(tools, now) : undefined}>
-        {(tools ?? []).map((tool) => {
+    <List isLoading={tools.some((tool) => tool.checking) || testing} searchBarPlaceholder="Search tools">
+      <List.Section title="Tools" subtitle={summary(tools, now)}>
+        {tools.map((tool) => {
           const verdict = toolVerdict(tool, now);
           return (
             <List.Item
@@ -298,44 +298,42 @@ export function Doctor() {
           );
         })}
       </List.Section>
-      {tools !== undefined && (
-        <List.Section title="This Computer">
-          <List.Item
-            title="Test Link"
-            subtitle={linkTest ? linkTest.detail : "Reads a short YouTube video's details with yt-dlp"}
-            icon={testIcon}
-            accessories={linkTest ? [{ text: `${linkTest.seconds.toFixed(1)}s` }] : [{ text: "Press ↵ to run" }]}
-            actions={
-              <ActionPanel>
-                <Action title="Read a Test Link" icon={Icon.Network} onAction={testLink} />
-                {shared}
-              </ActionPanel>
-            }
-          />
-          <List.Item
-            title="Download Folder"
-            subtitle={withoutHome(folder.path, home)}
-            icon={
-              folder.writable
-                ? { source: Icon.Folder, tintColor: Color.Green }
-                : { source: Icon.ExclamationMark, tintColor: Color.Red }
-            }
-            accessories={[
-              folder.writable
-                ? { tag: { value: "OK", color: Color.Green } }
-                : { tag: { value: "Can't Be Written To", color: Color.Red } },
-            ]}
-            actions={<ActionPanel>{shared}</ActionPanel>}
-          />
-          <List.Item
-            title="System"
-            subtitle={diagnostics.system}
-            icon={Icon.ComputerChip}
-            accessories={[{ text: `Raycast ${diagnostics.raycast}` }]}
-            actions={<ActionPanel>{shared}</ActionPanel>}
-          />
-        </List.Section>
-      )}
+      <List.Section title="This Computer">
+        <List.Item
+          title="Test Link"
+          subtitle={linkTest ? linkTest.detail : "Reads a short YouTube video's details with yt-dlp"}
+          icon={testIcon}
+          accessories={linkTest ? [{ text: `${linkTest.seconds.toFixed(1)}s` }] : [{ text: "Press ↵ to run" }]}
+          actions={
+            <ActionPanel>
+              <Action title="Read a Test Link" icon={Icon.Network} onAction={testLink} />
+              {shared}
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Download Folder"
+          subtitle={withoutHome(folder.path, home)}
+          icon={
+            folder.writable
+              ? { source: Icon.Folder, tintColor: Color.Green }
+              : { source: Icon.ExclamationMark, tintColor: Color.Red }
+          }
+          accessories={[
+            folder.writable
+              ? { tag: { value: "OK", color: Color.Green } }
+              : { tag: { value: "Can't Be Written To", color: Color.Red } },
+          ]}
+          actions={<ActionPanel>{shared}</ActionPanel>}
+        />
+        <List.Item
+          title="System"
+          subtitle={diagnostics.system}
+          icon={Icon.ComputerChip}
+          accessories={[{ text: `Raycast ${diagnostics.raycast}` }]}
+          actions={<ActionPanel>{shared}</ActionPanel>}
+        />
+      </List.Section>
     </List>
   );
 }

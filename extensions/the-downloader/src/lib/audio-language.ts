@@ -63,6 +63,11 @@ export function withAudioLanguage(selector: string, code: string): string {
   return limited.length > 0 ? limited.join("/") : selector;
 }
 
+/** True when `selector` has an audio stream of its own, so a soundtrack can be picked for it. */
+export function takesAudioLanguage(selector: string): boolean {
+  return /(best|worst)audio/.test(selector);
+}
+
 /** What a dubbed download adds to its file name, so it doesn't replace the original: ` [German (Germany)]`. */
 export function languageSuffix(language: AudioLanguage): string {
   return ` [${language.title.replace(/[<>:"/\\|?*%]/g, "").trim()}]`;

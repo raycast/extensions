@@ -54,7 +54,14 @@ import { errorText, escapeMarkdown, withoutImages } from "../lib/format.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
 import { timestampUrl } from "../lib/sources/video.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
-import { downloadPath, getGalleryDlPath, getffmpegPath, getytdlPath, sanitizeVideoTitle } from "../utils.js";
+import {
+  downloadPath,
+  getGalleryDlPath,
+  getffmpegPath,
+  getytdlPath,
+  isValidUrl,
+  sanitizeVideoTitle,
+} from "../utils.js";
 import Installer from "./installer.js";
 
 type Suggestion = { title: string; icon: Icon; prompt: string };
@@ -846,7 +853,13 @@ export function LinkChat({ url, initialQuestion, root }: { url: string; initialQ
                   />
                   {turn.error && <Action.CopyToClipboard title="Copy Error" content={turn.error} />}
                   {ctx?.kind === "video" && turn.status === "done" && (
-                    <MomentActions answer={turn.answer} duration={ctx.video?.duration} url={url} />
+                    <MomentActions
+                      answer={turn.answer}
+                      duration={ctx.video?.duration}
+                      // The video's own link: the chat's may be a playlist or channel
+                      // (read as its first video), which the form would download whole.
+                      url={ctx.video?.webpage_url && isValidUrl(ctx.video.webpage_url) ? ctx.video.webpage_url : url}
+                    />
                   )}
                   {commonActions}
                 </ActionPanel>

@@ -58,26 +58,41 @@ export function sectionArg(clip: Clip): string {
   return `*${clip.start ?? 0}-${clip.end ?? "inf"}`;
 }
 
+/**
+ * A clip's time as a clock, keeping a fraction of a second when it has one
+ * (`1:30.4`): two clips that differ by less than a second must not read, or be
+ * named, the same.
+ */
+function stamp(seconds: number): string {
+  const whole = Math.floor(seconds);
+  const fraction = String(Number((seconds - whole).toFixed(3))).slice(2);
+  return `${formatClock(whole)}${fraction ? `.${fraction}` : ""}`;
+}
+
 /** The clip as people read it: `1:30–2:45`, `from 1:30`, `to 2:45`. */
 export function clipLabel(clip: Clip): string {
-  if (clip.start !== undefined && clip.end !== undefined) return `${formatClock(clip.start)}–${formatClock(clip.end)}`;
-  return clip.start !== undefined ? `from ${formatClock(clip.start)}` : `to ${formatClock(clip.end)}`;
+  if (clip.start !== undefined && clip.end !== undefined) return `${stamp(clip.start)}–${stamp(clip.end)}`;
+  return clip.start !== undefined ? `from ${stamp(clip.start)}` : `to ${stamp(clip.end ?? 0)}`;
 }
 
 /**
  * What a clip adds to its file name, so it doesn't replace the whole video
  * saved in the same folder: ` [1.30-2.45]`. Dots, since a colon can't be in a
- * file name.
+ * file name; a fraction of a second follows a comma (` [1.30,4-2.45]`).
  */
 export function clipSuffix(clip: Clip): string {
-  const stamp = (seconds: number | undefined, missing: string) =>
-    seconds === undefined ? missing : formatClock(seconds).replace(/:/g, ".");
-  return ` [${stamp(clip.start, "0.00")}-${stamp(clip.end, "end")}]`;
+  const side = (seconds: number | undefined, missing: string) => {
+    if (seconds === undefined) return missing;
+    // The clock has colons, so the only dot is the one before the fraction.
+    const [clock, fraction] = stamp(seconds).split(".");
+    return `${clock.replace(/:/g, ".")}${fraction ? `,${fraction}` : ""}`;
+  };
+  return ` [${side(clip.start, "0.00")}-${side(clip.end, "end")}]`;
 }
 
 /** The clip as the Clip field takes it: `1:30-2:45`, `1:30-`. */
 export function clipText(clip: Clip): string {
-  const side = (seconds: number | undefined) => (seconds === undefined ? "" : formatClock(seconds));
+  const side = (seconds: number | undefined) => (seconds === undefined ? "" : stamp(seconds));
   return `${side(clip.start)}-${side(clip.end)}`;
 }
 

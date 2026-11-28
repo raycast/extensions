@@ -172,7 +172,8 @@ export function assetLink(parts: string[]): string {
 export async function saveImages(
   urls: string[],
   dir: string,
-  options: { signal?: AbortSignal } = {},
+  /** `written` collects the files as they are saved, so a caller can take back exactly those. */
+  options: { signal?: AbortSignal; written?: string[] } = {},
 ): Promise<Map<string, string>> {
   const list = urls.slice(0, MAX_PAGE_IMAGES);
   const saved = new Map<string, string>();
@@ -193,7 +194,9 @@ export async function saveImages(
         // Numbered by the image's place on the page, whichever download ends first.
         const name = `image-${String(index + 1).padStart(2, "0")}.${extension}`;
         fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(path.join(dir, name), response.body);
+        // Exclusive: never over a file that is already there.
+        fs.writeFileSync(path.join(dir, name), response.body, { flag: "wx" });
+        options.written?.push(path.join(dir, name));
         saved.set(list[index], name);
       } catch {
         /* this image stays a link to the web */
@@ -228,10 +231,10 @@ export function imagesNote(images: MarkdownSaveResult["images"]): string {
  * name is taken, and created exclusively so two saves started together can't
  * write the same file.
  *
- * With `localImages`, the page's images are saved into `assets/<file name>/`
- * beside it and the Markdown points at those copies, so the note reads the
- * same offline and after the site changes. Stop removes the note and what was
- * fetched for it.
+ * With `localImages`, the page's images are saved into a new
+ * `assets/<file name>/` folder beside it and the Markdown points at those
+ * copies, so the note reads the same offline and after the site changes. Stop
+ * removes the note and the images fetched for it, and nothing else.
  */
 export async function savePageAsMarkdown(
   url: string,
@@ -262,23 +265,59 @@ export async function savePageAsMarkdown(
   const result: MarkdownSaveResult = { filePath, title: page.ctx.title, archive: page.ctx.archive };
   if (!options.localImages || urls.length === 0) return result;
 
-  const name = path.basename(filePath, ".md");
-  const dir = path.join(folder, ASSETS_FOLDER, name);
+  // What this save created, to take back exactly that (and nothing an earlier note owns) if it's stopped.
+  const written: string[] = [];
+  let dir: string | undefined;
+  const removeIfEmpty = (folderPath: string) => {
+    try {
+      fs.rmdirSync(folderPath);
+    } catch {
+      /* something is in it, or it's already gone */
+    }
+  };
   try {
-    const saved = await saveImages(urls, dir, { signal: options.signal });
+    const assets = reserveAssetsDir(folder, path.basename(filePath, ".md"));
+    dir = assets.dir;
+    const saved = await saveImages(urls, dir, { signal: options.signal, written });
     if (saved.size > 0) {
       const local = (address: string) => {
         const file = saved.get(address);
-        return file ? assetLink([ASSETS_FOLDER, name, file]) : address;
+        return file ? assetLink([ASSETS_FOLDER, assets.name, file]) : address;
       };
       fs.writeFileSync(filePath, pageMarkdown(page, now, local));
+    } else {
+      // Nothing to keep: no empty folders left behind.
+      removeIfEmpty(dir);
+      removeIfEmpty(path.join(folder, ASSETS_FOLDER));
     }
     return { ...result, images: { saved: saved.size, total: urls.length } };
   } catch (error) {
     // Stopped (or the disk gave out): no note left pointing at images that aren't there.
     fs.rmSync(filePath, { force: true });
-    fs.rmSync(dir, { recursive: true, force: true });
+    for (const file of written) fs.rmSync(file, { force: true });
+    if (dir) removeIfEmpty(dir);
+    removeIfEmpty(path.join(folder, ASSETS_FOLDER));
     throw error;
+  }
+}
+
+/**
+ * A new, empty folder for a note's images: `assets/<name>`, or `<name> (2)`,
+ * `(3)`… when that one exists. A note that was renamed or deleted leaves its
+ * image folder behind, and another note may still point into it, so an
+ * existing folder is never reused. Created exclusively, like the note itself.
+ */
+function reserveAssetsDir(folder: string, name: string): { dir: string; name: string } {
+  fs.mkdirSync(path.join(folder, ASSETS_FOLDER), { recursive: true });
+  for (let n = 1; ; n++) {
+    const candidate = n === 1 ? name : `${name} (${n})`;
+    const dir = path.join(folder, ASSETS_FOLDER, candidate);
+    try {
+      fs.mkdirSync(dir);
+      return { dir, name: candidate };
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
   }
 }
 
