@@ -1,0 +1,5 @@
+node_modules
+dist
+*.tgz
+raycast-env.d.ts
+test/.build
