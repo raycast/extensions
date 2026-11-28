@@ -7,6 +7,32 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "generatesepa",
+    title: "GenerateSEPA",
+    description:
+      "SEPA payments in English, German, French and Dutch, official server run by GenerateSEPA. Free tools with no sign-in: validate IBANs (bank and BIC), generate test IBANs, validate and generate SEPA creditor identifiers, validate SEPA direct debit XML (pain.008), generate GiroCodes (EPC QR) and search the SEPA help center. Hosted Streamable HTTP server at https://www.generatesepa.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Sign in with OAuth 2.1 at https://www.generatesepa.com/mcp/account to create SEPA credit transfer (pain.001) and direct debit (pain.008) XML files and SEPA mandates from your account.",
+    icon: "https://www.generatesepa.com/favicon/android-chrome-512x512.png",
+    homepage: "https://www.generatesepa.com/blog/sepa-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.generatesepa.com/mcp"],
+    },
+    remoteUrl: "https://www.generatesepa.com/mcp",
+  },
+  {
+    name: "conversorsepa",
+    title: "ConversorSEPA",
+    description:
+      "SEPA payments in Spanish, official server run by ConversorSEPA. Free tools with no sign-in: validate IBANs (bank and BIC), generate IBANs from Spanish CCC numbers and test IBANs, validate and generate SEPA creditor identifiers, validate SEPA direct debit XML (pain.008), generate GiroCodes (EPC QR) and search the SEPA help center. Hosted Streamable HTTP server at https://www.conversorsepa.es/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Sign in with OAuth 2.1 at https://www.conversorsepa.es/mcp/account to create SEPA credit transfer (pain.001) and direct debit (pain.008) XML files and SEPA mandates from your account.",
+    icon: "https://www.conversorsepa.es/favicon/android-chrome-512x512.png",
+    homepage: "https://www.conversorsepa.es/blog/servidor-mcp-sepa",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.conversorsepa.es/mcp"],
+    },
+    remoteUrl: "https://www.conversorsepa.es/mcp",
+  },
+  {
     name: "flypod",
     title: "flypod",
     description:
