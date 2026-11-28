@@ -1,0 +1,16 @@
+key,kmod_class,SC,Permanent,Long-term,Medium-term,Short-term,Instantaneous,reference
+Solid|1,Solid,1,0.60,0.70,0.80,0.90,1.10,EN 1995-1-1 Table 3.1 (solid timber EN 14081-1; glulam EN 14080; LVL EN 14374/14279)
+Solid|2,Solid,2,0.60,0.70,0.80,0.90,1.10,EN 1995-1-1 Table 3.1
+Solid|3,Solid,3,0.50,0.55,0.65,0.70,0.90,EN 1995-1-1 Table 3.1
+CLT|1,CLT,1,0.60,0.70,0.80,0.90,1.10,product ETA (typical - as solid timber)
+CLT|2,CLT,2,0.60,0.70,0.80,0.90,1.10,product ETA (typical)
+CLT|3,CLT,3,0,0,0,0,0,not permitted (typical ETA) - 0 makes every check fail
+Plywood3|1,Plywood3,1,0.60,0.70,0.80,0.90,1.10,EN 1995-1-1 Table 3.1 (EN 636 Part 3)
+Plywood3|2,Plywood3,2,0.60,0.70,0.80,0.90,1.10,EN 1995-1-1 Table 3.1
+Plywood3|3,Plywood3,3,0.50,0.55,0.65,0.70,0.90,EN 1995-1-1 Table 3.1
+OSB3|1,OSB3,1,0.40,0.50,0.70,0.90,1.10,EN 1995-1-1 Table 3.1 (OSB/3 and OSB/4 EN 300)
+OSB3|2,OSB3,2,0.30,0.40,0.55,0.70,0.90,EN 1995-1-1 Table 3.1
+OSB3|3,OSB3,3,0,0,0,0,0,not permitted - 0 makes every check fail
+Particle5|1,Particle5,1,0.30,0.45,0.65,0.85,1.10,EN 1995-1-1 Table 3.1 (particleboard P5 EN 312)
+Particle5|2,Particle5,2,0.20,0.30,0.45,0.60,0.80,EN 1995-1-1 Table 3.1
+Particle5|3,Particle5,3,0,0,0,0,0,not permitted - 0 makes every check fail

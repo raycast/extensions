@@ -1,0 +1,31 @@
+key,description,EN,NL,UK,DE,User,unit,reference,status
+gM_solid,gamma_M solid timber,1.3,1.3,1.3,1.3,1.3,-,EN 1995-1-1 2.4.1 Table 2.3 / NA,NL-UK-DE VERIFY
+gM_glulam,gamma_M glued laminated timber,1.25,1.25,1.25,1.3,1.25,-,EN 1995-1-1 Table 2.3 / NA,NL-UK-DE VERIFY
+gM_lvl,gamma_M LVL / plywood / OSB,1.2,1.2,1.2,1.3,1.2,-,EN 1995-1-1 Table 2.3 / NA,NL-UK-DE VERIFY
+gM_clt,gamma_M CLT (not in Table 2.3 - per ETA / NA),1.25,1.25,1.25,1.3,1.25,-,product ETA / NA,VERIFY
+gM_plywood,gamma_M plywood,1.2,1.2,1.2,1.3,1.2,-,EN 1995-1-1 Table 2.3 / NA,NL-UK-DE VERIFY
+gM_osb,gamma_M OSB,1.2,1.2,1.2,1.3,1.2,-,EN 1995-1-1 Table 2.3 / NA,NL-UK-DE VERIFY
+gM_particle,gamma_M particleboard / fibreboard,1.3,1.3,1.3,1.3,1.3,-,EN 1995-1-1 Table 2.3 / NA,NL-UK-DE VERIFY
+gM_conn,gamma_M connections,1.3,1.3,1.3,1.3,1.3,-,EN 1995-1-1 Table 2.3 / NA,NL-UK-DE VERIFY
+gM_ppmf,gamma_M punched metal plate fasteners,1.25,1.25,1.25,1.25,1.25,-,EN 1995-1-1 Table 2.3,
+gM2_steel,gamma_M2 steel tensile capacity of screws,1.25,1.25,1.25,1.25,1.25,-,EN 1995-1-1 8.7.2(4) (8.40c) -> EN 1993-1-8,
+kcr_solid,k_cr solid timber (0 = ratio method),0.67,1.0,0.67,0,0.67,-,EN 1995-1-1 6.1.7(2) / NA,NL value from user reference - VERIFY against NEN-EN 1995-1-1/NB
+kcr_glulam,k_cr glued laminated timber (0 = ratio method),0.67,1.0,0.67,0,0.67,-,EN 1995-1-1 6.1.7(2) / NA,NL value from user reference - VERIFY
+kcr_lvl,k_cr LVL,1.0,1.0,1.0,1.0,1.0,-,EN 1995-1-1 6.1.7(2) (other wood-based products),
+kcr_one,k_cr other wood-based products / CLT,1.0,1.0,1.0,1.0,1.0,-,EN 1995-1-1 6.1.7(2),
+kcr_num_solid,ratio method numerator solid: k_cr = num / fv_k,2.0,2.0,2.0,2.0,2.0,N/mm2,DIN EN 1995-1-1/NA:2013 NDP 6.1.7(2),used only where kcr = 0
+kcr_num_glulam,ratio method numerator glulam: k_cr = num / fv_k,2.5,2.5,2.5,2.5,2.5,N/mm2,DIN EN 1995-1-1/NA:2013 NDP 6.1.7(2),used only where kcr = 0
+gG_a_CC1,gamma_G sup eq. 6.10a - CC1,1.215,1.2,1.35,1.35,1.35,-,EN 1990 Table A1.2(B) x K_FI (B3.3) / NA,NL-UK-DE VERIFY
+gG_a_CC2,gamma_G sup eq. 6.10a - CC2,1.35,1.35,1.35,1.35,1.35,-,EN 1990 Table A1.2(B) / NA,
+gG_a_CC3,gamma_G sup eq. 6.10a - CC3,1.485,1.5,1.35,1.35,1.35,-,EN 1990 Table A1.2(B) x K_FI / NA,NL-UK-DE VERIFY
+gG_b_CC1,xi x gamma_G sup eq. 6.10b - CC1,1.0328,1.1,1.25,1.35,1.2,-,EN 1990 Table A1.2(B) (xi = 0.85) x K_FI / NA,NL-UK-DE VERIFY
+gG_b_CC2,xi x gamma_G sup eq. 6.10b - CC2,1.1475,1.2,1.25,1.35,1.2,-,EN 1990 Table A1.2(B) (xi = 0.85) / NA,DE uses eq. 6.10 (= 6.10b with 1.35)
+gG_b_CC3,xi x gamma_G sup eq. 6.10b - CC3,1.2623,1.3,1.25,1.35,1.2,-,EN 1990 Table A1.2(B) x K_FI / NA,NL-UK-DE VERIFY
+gQ_CC1,gamma_Q leading/accompanying variable - CC1,1.35,1.35,1.5,1.5,1.5,-,EN 1990 Table A1.2(B) x K_FI / NA,NL-UK-DE VERIFY
+gQ_CC2,gamma_Q leading/accompanying variable - CC2,1.5,1.5,1.5,1.5,1.5,-,EN 1990 Table A1.2(B) / NA,
+gQ_CC3,gamma_Q leading/accompanying variable - CC3,1.65,1.65,1.5,1.5,1.5,-,EN 1990 Table A1.2(B) x K_FI / NA,NL-UK-DE VERIFY
+gG_inf,gamma_G inf favourable permanent,1.0,0.9,1.0,1.0,0.9,-,EN 1990 Table A1.2(B) / NA,
+vib_f1_min,minimum fundamental frequency of residential floors,8,8,8,8,8,Hz,EN 1995-1-1 7.3.3(1),
+vib_zeta,modal damping ratio,0.01,0.01,0.01,0.01,0.01,-,EN 1995-1-1 7.3.3(5),
+roofH_a1,roof cat. H: pitch up to which the full q_k applies,90,15,90,90,15,deg,EN 1991-1-1 6.3.4.2 / NA (NL NB: 15 deg),EN-UK-DE: no slope reduction (90) - VERIFY
+roofH_a2,roof cat. H: pitch from which q_k = 0 (linear between a1 and a2),90,20,90,90,20,deg,EN 1991-1-1 6.3.4.2 / NA (NL NB: 20 deg),EN-UK-DE: no slope reduction (90) - VERIFY
