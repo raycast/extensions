@@ -398,13 +398,13 @@ export function buildVideoQuality<K extends OutputVideoExtension>(
     const crf =
       overrides && typeof overrides.crf === "number"
         ? overrides.crf
-        : (((proto as Record<string, unknown>).crf as number | undefined) ??
-          (base && ((base as Record<string, unknown>).crf as number | undefined)));
+        : ((base && ((base as Record<string, unknown>).crf as number | undefined)) ??
+          ((proto as Record<string, unknown>).crf as number | undefined));
     const preset =
       overrides && overrides.preset
         ? overrides.preset
-        : (((proto as Record<string, unknown>).preset as VideoPreset | undefined) ??
-          (base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)));
+        : ((base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)) ??
+          ((proto as Record<string, unknown>).preset as VideoPreset | undefined));
     return {
       ...(codec ? { codec } : {}),
       encodingMode: "crf",
@@ -417,23 +417,23 @@ export function buildVideoQuality<K extends OutputVideoExtension>(
   const bitrate =
     overrides && overrides.bitrate
       ? overrides.bitrate
-      : (((proto as Record<string, unknown>).bitrate as VideoBitrate | undefined) ??
-        (base && ((base as Record<string, unknown>).bitrate as VideoBitrate | undefined)));
+      : ((base && ((base as Record<string, unknown>).bitrate as VideoBitrate | undefined)) ??
+        ((proto as Record<string, unknown>).bitrate as VideoBitrate | undefined));
   const maxBitrate =
     overrides && overrides.maxBitrate
       ? overrides.maxBitrate
-      : (((proto as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined) ??
-        (base && ((base as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined)));
+      : ((base && ((base as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined)) ??
+        ((proto as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined));
   const preset =
     overrides && overrides.preset
       ? overrides.preset
-      : (((proto as Record<string, unknown>).preset as VideoPreset | undefined) ??
-        (base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)));
+      : ((base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)) ??
+        ((proto as Record<string, unknown>).preset as VideoPreset | undefined));
   const quality =
     overrides && overrides.quality
       ? overrides.quality
-      : (((proto as Record<string, unknown>).quality as VP9Quality | undefined) ??
-        (base && ((base as Record<string, unknown>).quality as VP9Quality | undefined)));
+      : ((base && ((base as Record<string, unknown>).quality as VP9Quality | undefined)) ??
+        ((proto as Record<string, unknown>).quality as VP9Quality | undefined));
 
   const result: Record<string, unknown> = {};
   if (codec) result.codec = codec;

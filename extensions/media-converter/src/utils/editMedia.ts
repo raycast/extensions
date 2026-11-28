@@ -7,9 +7,10 @@ import { inspectMedia } from "./mediaProbe";
 import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
 import { getMediaType, OUTPUT_ALL_EXTENSIONS, type AllOutputExtension } from "../types/media";
 import { recordEditHistory } from "./historyRecording";
-import { buildTrimArgs, preserveFileTimestamps, replaceFileSafely } from "./converter";
+import { buildTrimArgs, preserveFileTimestamps, replaceFileSafely, shouldPreserveFileDates } from "./converter";
 import { resolveTrim } from "./conversionOptions";
 import { trimmedDuration } from "./targetSize";
+import { formatTimeString } from "./time";
 
 export const EDIT_FRAME_RATES = [24, 30, 60] as const;
 
@@ -39,6 +40,7 @@ export type EditOptions = {
 
 export async function editMedia(inputPath: string, request: EditRequest, options: EditOptions = {}): Promise<string> {
   const startedAt = Date.now();
+  const inputBytes = fs.existsSync(inputPath) ? fs.statSync(inputPath).size : 0;
   const ffmpeg = await findFFmpegPath();
   if (!ffmpeg) throw new Error("FFmpeg is not installed or configured.");
   const inspection = await inspectMedia(inputPath);
@@ -88,6 +90,21 @@ export async function editMedia(inputPath: string, request: EditRequest, options
   }
   const spec = buildEditProcessSpec(ffmpeg.path, effectiveInputPath, writeTarget, request, { hasAudio, hasVideo });
   const duration = inspection.durationSec ?? (await probeDurationSec(ffmpeg.path, inputPath)) ?? undefined;
+  if (request.operation === "trim" && duration !== undefined) {
+    const trimResolution = resolveTrim(request.start, request.end);
+    if (trimResolution.startSec !== undefined && trimResolution.startSec >= duration) {
+      if (tempHeicPng && fs.existsSync(tempHeicPng)) {
+        try {
+          fs.unlinkSync(tempHeicPng);
+        } catch {
+          /* ignore temp cleanup error */
+        }
+      }
+      throw new Error(
+        `Trim start time (${formatTimeString(trimResolution.startSec)}) must be before the media duration (${formatTimeString(duration)}).`,
+      );
+    }
+  }
   const expectedDuration =
     request.operation === "speed" && duration !== undefined
       ? duration / request.speed
@@ -101,7 +118,27 @@ export async function editMedia(inputPath: string, request: EditRequest, options
       onProgress: options.onProgress,
       signal: options.signal,
     });
-    preserveFileTimestamps(inputPath, writeTarget);
+    if (request.operation === "trim") {
+      const trimmedSize = fs.existsSync(writeTarget) ? fs.statSync(writeTarget).size : 0;
+      if (trimmedSize <= 0) {
+        throw new Error(
+          "Trim produced an empty file. Check that your start and end times fall within the media duration.",
+        );
+      }
+      const trimmedInspection = await inspectMedia(writeTarget);
+      const hasTrimmedMedia = trimmedInspection.streams.some(
+        (stream) => stream.type === "video" || stream.type === "audio",
+      );
+      const trimmedDur = trimmedInspection.durationSec ?? (await probeDurationSec(ffmpeg.path, writeTarget));
+      if (!hasTrimmedMedia || (trimmedDur !== null && trimmedDur <= 0)) {
+        throw new Error(
+          "Trim produced no playable media. Check that your start and end times fall within the media duration.",
+        );
+      }
+    }
+    if (shouldPreserveFileDates()) {
+      preserveFileTimestamps(inputPath, writeTarget);
+    }
     if (replaceOriginal) {
       await replaceFileSafely(writeTarget, inputPath);
     }
@@ -130,6 +167,7 @@ export async function editMedia(inputPath: string, request: EditRequest, options
       output: outputPath,
       outputFormat: outputExtension,
       durationMs: Date.now() - startedAt,
+      inputBytes,
     });
   } catch (error) {
     console.warn("Failed to write edit history:", error);
@@ -192,7 +230,20 @@ export function buildEditProcessSpec(
       const faststartArgs = ext === ".mp4" || ext === ".m4a" ? ["-movflags", "+faststart"] : [];
       return {
         command: ffmpegPath,
-        args: [...trimArgs, "-i", inputPath, "-c", "copy", ...faststartArgs, "-map_metadata", "0", "-y", outputPath],
+        args: [
+          ...trimArgs,
+          "-i",
+          inputPath,
+          "-map",
+          "0",
+          "-c",
+          "copy",
+          ...faststartArgs,
+          "-map_metadata",
+          "0",
+          "-y",
+          outputPath,
+        ],
       };
     }
     case "speed": {

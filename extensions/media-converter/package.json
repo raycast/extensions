@@ -971,7 +971,7 @@
     {
       "name": "preserveFileDates",
       "type": "checkbox",
-      "title": "Preserve original files' date when modified",
+      "title": "Preserve Original Files' Date When Modified",
       "label": "Preserve original files' date when modified",
       "default": true,
       "required": false,

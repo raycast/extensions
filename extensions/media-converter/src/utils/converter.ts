@@ -40,10 +40,10 @@ function convertQualityToCrf(qualityPercentage: Percentage): number {
   return qualityPercentToCrf(qualityPercentage, 51);
 }
 
-function shouldPreserveFileDates(stripMetadata?: boolean): boolean {
+export function shouldPreserveFileDates(stripMetadata?: boolean): boolean {
   if (stripMetadata) return false;
   try {
-    const prefs = getPreferenceValues<{ preserveFileDates?: boolean }>();
+    const prefs = getPreferenceValues<Preferences>();
     return prefs.preserveFileDates !== false;
   } catch {
     return true;
@@ -61,53 +61,41 @@ export function preserveFileTimestamps(sourcePath: string, targetPath: string): 
 }
 
 /**
- * Replace `targetPath` with `tempPath`, moving the original to the OS Trash / Recycle Bin first
- * when supported, and falling back to an atomic backup-and-swap on volumes without Trash support.
+ * Replace `targetPath` with `tempPath` by moving the original to the OS Trash / Recycle Bin first.
+ * Never permanently deletes the user's original file if Trash is unavailable.
  */
 export async function replaceFileSafely(tempPath: string, targetPath: string): Promise<void> {
   try {
     await trash(targetPath);
-    if (!fs.existsSync(targetPath)) {
-      fs.renameSync(tempPath, targetPath);
-      return;
-    }
-  } catch {
-    // Volumes without Trash / Recycle Bin support (e.g. some network shares) fall back below.
-  }
-
-  try {
-    fs.renameSync(tempPath, targetPath);
-    return;
-  } catch {
-    // On Windows, renaming onto an existing path can fail; fall back to backup swap.
-  }
-  const backupPath = `${targetPath}.bak-${Date.now()}`;
-  fs.renameSync(targetPath, backupPath);
-  try {
-    fs.renameSync(tempPath, targetPath);
-    fs.unlinkSync(backupPath);
   } catch (error) {
-    try {
-      if (!fs.existsSync(targetPath) && fs.existsSync(backupPath)) {
-        fs.renameSync(backupPath, targetPath);
-      }
-    } catch {
-      /* ignore restore error */
-    }
-    throw error;
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin (${String(error)}). The original file was kept.`,
+    );
   }
+  if (fs.existsSync(targetPath)) {
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin. The original file was kept.`,
+    );
+  }
+  fs.renameSync(tempPath, targetPath);
 }
 
-/** Move `targetPath` to the OS Trash / Recycle Bin, falling back to unlink when Trash is unavailable. */
+/**
+ * Move `targetPath` to the OS Trash / Recycle Bin.
+ * Never permanently deletes the user's original file if Trash is unavailable.
+ */
 export async function trashFileSafely(targetPath: string): Promise<void> {
   try {
     await trash(targetPath);
-    if (!fs.existsSync(targetPath)) return;
-  } catch {
-    // Volumes without Trash / Recycle Bin support fall back to unlinking.
+  } catch (error) {
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin (${String(error)}). The original file was kept.`,
+    );
   }
   if (fs.existsSync(targetPath)) {
-    fs.unlinkSync(targetPath);
+    throw new Error(
+      `Could not move "${path.basename(targetPath)}" to the Trash / Recycle Bin. The original file was kept.`,
+    );
   }
 }
 

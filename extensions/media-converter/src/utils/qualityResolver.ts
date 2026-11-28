@@ -151,8 +151,7 @@ export function resolveQualitySettings(
 
   const format = outputFileType as OutputVideoExtension;
   const advanced = Boolean(
-    overrides.videoCodec ||
-      overrides.videoEncodingMode ||
+    overrides.videoEncodingMode ||
       typeof overrides.videoCrf === "number" ||
       overrides.videoBitrate ||
       typeof overrides.videoMaxBitrate === "string" ||

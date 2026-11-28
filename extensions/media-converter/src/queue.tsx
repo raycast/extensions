@@ -35,6 +35,7 @@ export default function Command() {
       await patchQueueJob(job.id, { status: "running", progress: 0, error: undefined, output: undefined });
       await reload();
       const startedAt = Date.now();
+      const inputBytes = fs.existsSync(job.input) ? fs.statSync(job.input).size : 0;
       try {
         const quality = job.targetSizeMb
           ? (await resolveTargetSizeQuality(job.input, job.outputFormat, job.quality, job.targetSizeMb, job.trim))
@@ -65,6 +66,7 @@ export default function Command() {
             stripMetadata: job.stripMetadata,
             outputDir: job.outputDir,
             durationMs: Date.now() - startedAt,
+            inputBytes,
           });
         } catch (historyError) {
           console.warn("Failed to write queue conversion history:", historyError);

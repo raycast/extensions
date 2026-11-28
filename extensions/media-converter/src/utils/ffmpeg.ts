@@ -86,7 +86,7 @@ export async function checkFFmpegVersion(ffmpegPath: string): Promise<number | n
 export async function findFFmpegPath(minimumVersion = 6.0): Promise<FFmpegInfo | null> {
   let customPath: unknown;
   try {
-    customPath = getPreferenceValues().ffmpeg_path;
+    customPath = getPreferenceValues<Preferences>().ffmpeg_path;
   } catch {
     customPath = undefined;
   }

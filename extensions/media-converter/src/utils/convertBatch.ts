@@ -112,6 +112,8 @@ export async function runConversionBatch(files: string[], opts: BatchOptions): P
           stripMetadata: opts.stripMetadata,
           outputDir: opts.outputDir,
           durationMs: Date.now() - started,
+          inputBytes,
+          outputBytes,
         });
       } catch (historyErr) {
         console.warn("Failed to write history entry:", historyErr);

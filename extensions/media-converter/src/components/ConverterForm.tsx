@@ -12,7 +12,7 @@ import {
   launchCommand,
   LaunchType,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
 import path from "path";
 import { convertMedia } from "../utils/converter";
@@ -23,12 +23,7 @@ import { getAllPresets, findPreset } from "../utils/presets";
 import { PresetEditorForm } from "./PresetEditorForm";
 import { enqueueConversionJobs } from "../utils/queue";
 import { resolveTargetSizeQuality, supportsTargetSize } from "../utils/targetSize";
-import {
-  formatQualityCrfHint,
-  getNvencCapabilities,
-  isCodecSupportedByNvenc,
-  type NvencCapabilities,
-} from "../utils/encoders";
+import { formatQualityCrfHint, getNvencCapabilities, isCodecSupportedByNvenc } from "../utils/encoders";
 import { findFFmpegPath, MIN_FFMPEG_HEIC_INPUT_VERSION, supportsHeicInput } from "../utils/ffmpeg";
 import {
   OUTPUT_VIDEO_EXTENSIONS,
@@ -862,23 +857,15 @@ export function QualitySettingsComponent({
   onQualityChange: (quality: QualitySettings) => void;
 }) {
   const currentMediaType = getMediaType(outputFormat)!;
-  const [nvencCaps, setNvencCaps] = useState<NvencCapabilities | null>(null);
-
-  useEffect(() => {
-    if (currentMediaType !== "video" || (outputFormat !== ".mp4" && outputFormat !== ".mkv")) return;
-    let cancelled = false;
-    findFFmpegPath()
-      .then((found) => (found ? getNvencCapabilities(found.path) : null))
-      .then((caps) => {
-        if (!cancelled) setNvencCaps(caps);
-      })
-      .catch(() => {
-        if (!cancelled) setNvencCaps({ h264: false, hevc: false, av1: false });
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [currentMediaType, outputFormat]);
+  const needsNvencProbe = currentMediaType === "video" && (outputFormat === ".mp4" || outputFormat === ".mkv");
+  const { data: nvencCaps } = usePromise(
+    async () => {
+      const found = await findFFmpegPath();
+      return found ? getNvencCapabilities(found.path) : { h264: false, hevc: false, av1: false };
+    },
+    [],
+    { execute: needsNvencProbe },
+  );
 
   const getCurrentSettings = () => {
     return (currentQuality as Record<string, unknown>)[outputFormat];
@@ -1174,27 +1161,27 @@ export function QualitySettingsComponent({
                 onChange={(codec: string) => onSettingsChange({ ...settingsObj, codec: codec as VideoCodec })}
                 info="Choose the video encoder for MP4/MKV. AV1 produces smaller files; NVIDIA NVENC options appear automatically when supported by your GPU."
               >
-                {VIDEO_CODECS.filter((codec) => codec === activeCodec || isCodecSupportedByNvenc(codec, nvencCaps)).map(
-                  (codec) => (
-                    <Form.Dropdown.Item
-                      key={codec}
-                      value={codec}
-                      title={
-                        codec === "av1-nvenc"
-                          ? "AV1 (NVIDIA NVENC)"
-                          : codec === "av1"
-                            ? "AV1 (CPU)"
-                            : codec === "hevc-nvenc"
-                              ? "H.265 / HEVC (NVIDIA NVENC)"
-                              : codec === "hevc"
-                                ? "H.265 / HEVC (libx265)"
-                                : codec === "h264-nvenc"
-                                  ? "H.264 (NVIDIA NVENC)"
-                                  : "H.264 (libx264)"
-                      }
-                    />
-                  ),
-                )}
+                {VIDEO_CODECS.filter(
+                  (codec) => codec === activeCodec || isCodecSupportedByNvenc(codec, nvencCaps ?? null),
+                ).map((codec) => (
+                  <Form.Dropdown.Item
+                    key={codec}
+                    value={codec}
+                    title={
+                      codec === "av1-nvenc"
+                        ? "AV1 (NVIDIA NVENC)"
+                        : codec === "av1"
+                          ? "AV1 (CPU)"
+                          : codec === "hevc-nvenc"
+                            ? "H.265 / HEVC (NVIDIA NVENC)"
+                            : codec === "hevc"
+                              ? "H.265 / HEVC (libx265)"
+                              : codec === "h264-nvenc"
+                                ? "H.264 (NVIDIA NVENC)"
+                                : "H.264 (libx264)"
+                    }
+                  />
+                ))}
               </Form.Dropdown>
             );
 
