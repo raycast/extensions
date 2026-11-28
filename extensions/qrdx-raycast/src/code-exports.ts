@@ -6,6 +6,7 @@ import { writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { buildPNGBuffer, buildSVGString, type QRRenderProps, withLogoData } from "./qr-engine";
 
 function errorText(error: unknown): string {
@@ -42,7 +43,7 @@ export async function copySVG(props: QRRenderProps) {
     await Clipboard.copy(buildSVGString(await withLogoData(props)));
     await showHUD("SVG copied to clipboard");
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to copy SVG", message: errorText(error) });
+    await showFailureToast(error, { title: "Failed to copy SVG" });
   }
 }
 
@@ -68,6 +69,6 @@ export async function saveSVG(props: QRRenderProps, prefix = "qrdx") {
     writeFileSync(outPath, svgFile(buildSVGString(await withLogoData(props))), "utf-8");
     await showHUD(`SVG saved → ${outPath}`);
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to save SVG", message: errorText(error) });
+    await showFailureToast(error, { title: "Failed to save SVG" });
   }
 }

@@ -72,11 +72,37 @@ async function fetchLogo(url: string): Promise<string> {
   if (!type.startsWith("image/")) {
     throw new Error(`Couldn't load the logo from ${url}: it isn't an image (${type || "no content type"})`);
   }
-  const bytes = Buffer.from(await response.arrayBuffer());
-  if (bytes.length > MAX_LOGO_BYTES) {
+  const bytes = await readAtMost(response, MAX_LOGO_BYTES);
+  if (!bytes) {
     throw new Error(`Couldn't load the logo from ${url}: it's larger than 5 MB`);
   }
   return `data:${type};base64,${bytes.toString("base64")}`;
+}
+
+/**
+ * The body of `response`, or null once it passes `limit` bytes: the download
+ * stops there, so a large file is never held whole in memory.
+ */
+async function readAtMost(response: Response, limit: number): Promise<Buffer | null> {
+  if (Number(response.headers.get("content-length")) > limit) {
+    await response.body?.cancel();
+    return null;
+  }
+  if (!response.body) return Buffer.alloc(0);
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > limit) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks);
 }
 
 /** The logo at `url` as a data URL; fetched once, and again after a failure. */
