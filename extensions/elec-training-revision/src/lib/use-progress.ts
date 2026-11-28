@@ -1,4 +1,5 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import { emptyProgress, parseProgress, Progress, recordAnswer } from "./progress";
 import { Question } from "../data/questions";
@@ -34,11 +35,7 @@ export function useProgress() {
       setProgress(next);
       return true;
     } catch (cause) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Answer was not saved",
-        message: cause instanceof Error ? cause.message : "Please try again.",
-      });
+      await showFailureToast(cause, { title: "Answer was not saved" });
       return false;
     }
   }
@@ -49,8 +46,8 @@ export function useProgress() {
       setProgress(emptyProgress());
       setError(undefined);
       await showToast({ style: Toast.Style.Success, title: "Revision progress reset" });
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Could not reset progress" });
+    } catch (cause) {
+      await showFailureToast(cause, { title: "Could not reset progress" });
     }
   }
 

@@ -1,6 +1,6 @@
 # Elec Training Revision
 
-Practise electrical fundamentals with short quizzes, worked examples, and a local revision history. No account, API key, or subscription is required.
+Practice electrical fundamentals with short quizzes, worked examples, and a local revision history. No account, API key, or subscription is required.
 
 Explore electrical courses and further learning with [Elec Training](https://elec.training/).
 
@@ -8,7 +8,7 @@ Explore electrical courses and further learning with [Elec Training](https://ele
 
 ### Start Revision Quiz
 
-Choose mixed practice, Ohm’s Law, Power and Energy, or Series and Parallel. Each session contains up to eight randomly ordered questions. Select an answer and press Return to save it and see the explanation. Press Return again to move to the next question.
+Choose mixed practice, Ohm’s Law, Power and Energy, or Series and Parallel. Each session contains up to eight randomly ordered questions. Select an answer and press Return to save it and see the explanation. Press Return again to move to the next question. Press Escape to return to the topic list; submitted answers stay saved.
 
 Review Mistakes selects questions whose most recent answer was incorrect. Correctly answering a question removes it from that review pool. Each question is scored once per session; browsing answer choices after submitting does not change your score.
 
