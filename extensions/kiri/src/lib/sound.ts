@@ -4,7 +4,8 @@ import { existsSync, mkdirSync, renameSync, statSync, writeFileSync } from "node
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { KiriApi } from "./api";
-import { getConnection, getPlayer, setPlayer } from "./storage";
+import { getConnection, getPlayer, getTimer, setPlayer } from "./storage";
+import { remainingMs } from "./timer";
 
 /**
  * Kiri sounds are downloaded once into the extension's support folder and played with macOS's
@@ -63,11 +64,21 @@ export async function ensureSound(key: string): Promise<string> {
   return file;
 }
 
-/** Play a cached sound on a loop for `seconds`, replacing any sound that is playing. */
-export async function playSound(key: string, seconds: number): Promise<void> {
+/**
+ * Play a cached sound on a loop for `seconds`, replacing any sound that is playing.
+ * With `timerId`, the block is read again after the download: if it was stopped, paused or
+ * replaced meanwhile, nothing plays, and otherwise it plays for the time the block has left.
+ */
+export async function playSound(key: string, seconds: number, timerId?: string): Promise<void> {
   await stopSound();
   if (!key || seconds < 1) return;
   const file = await ensureSound(key);
+  if (timerId) {
+    const t = await getTimer();
+    if (!t || t.id !== timerId || t.pausedAt) return;
+    seconds = remainingMs(t, Date.now()) / 1000;
+    if (seconds < 1) return;
+  }
   const child = spawn("/bin/sh", ["-c", LOOP_SCRIPT, PLAYER_TAG, file, String(Math.ceil(seconds))], {
     detached: true,
     stdio: "ignore",

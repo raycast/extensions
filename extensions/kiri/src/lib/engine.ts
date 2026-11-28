@@ -69,6 +69,8 @@ export async function notify(title: string, message: string, silent = false): Pr
 
 /** Start a focus block, replacing whatever runs. The sound starts when given. */
 export async function startFocus(minutes: number, task: string, sound: string): Promise<RunningTimer> {
+  // Save a block that already ended (but no command has noticed yet) before replacing it.
+  await tick();
   await stopSound();
   const t = startTimer("focus", minutes, Date.now(), newId(), task, sound);
   await setTimer(t);
@@ -76,7 +78,7 @@ export async function startFocus(minutes: number, task: string, sound: string): 
   await noteCallAtStart(t);
   if (sound) {
     try {
-      await playSound(sound, t.minutes * 60);
+      await playSound(sound, t.minutes * 60, t.id);
     } catch (err) {
       await refreshMenuBar();
       throw err;
@@ -122,7 +124,7 @@ export async function resume(): Promise<void> {
   await noteCallAtStart(next);
   if (next.phase === "focus" && next.sound) {
     try {
-      await playSound(next.sound, remainingMs(next, Date.now()) / 1000);
+      await playSound(next.sound, remainingMs(next, Date.now()) / 1000, next.id);
     } catch {
       // Keep the timer running without the sound.
     }
@@ -147,7 +149,9 @@ export async function tick(): Promise<void> {
       if (t.phase === "focus") await finishFocus(t);
       else await notify("Break over", "Start the next block when you are ready.");
     } else {
-      await setTimer(null);
+      // Another command handled it; clear only this timer, not a break that just started.
+      const current = await getTimer();
+      if (current?.id === t.id) await setTimer(null);
     }
   }
   // Blocks that could not be saved earlier (offline), and a connection started in Focus History.

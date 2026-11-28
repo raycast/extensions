@@ -41,6 +41,15 @@ import {
   type RunningTimer,
 } from "./lib/timer";
 
+/** Open another command from the menu bar. It can throw (e.g. the command is disabled); toasts don't work here. */
+async function openCommand(name: string, title: string, context?: Record<string, unknown>): Promise<void> {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated, context });
+  } catch {
+    await showHUD(`Could not open ${title}`);
+  }
+}
+
 interface Snapshot {
   timer: RunningTimer | null;
   pendingBreak: PendingBreak | null;
@@ -184,7 +193,7 @@ export default function Command() {
           <MenuBarExtra.Item
             title="Start Focus Block…"
             icon={Icon.Pencil}
-            onAction={() => launchCommand({ name: "start-focus-block", type: LaunchType.UserInitiated })}
+            onAction={() => openCommand("start-focus-block", "Start Focus Block")}
           />
         </MenuBarExtra.Section>
       )}
@@ -195,7 +204,7 @@ export default function Command() {
             title={`Today: ${snap.today.blocks} ${snap.today.blocks === 1 ? "block" : "blocks"}`}
             subtitle={snap.today.minutes ? formatMinutes(snap.today.minutes) : undefined}
             icon={Icon.BarChart}
-            onAction={() => launchCommand({ name: "focus-history", type: LaunchType.UserInitiated })}
+            onAction={() => openCommand("focus-history", "Focus History")}
           />
           {snap.connection ? (
             <MenuBarExtra.Item
@@ -208,9 +217,7 @@ export default function Command() {
             <MenuBarExtra.Item
               title={snap.connecting ? "Connecting to Kiri…" : "Connect Kiri Account…"}
               icon={Icon.Link}
-              onAction={() =>
-                launchCommand({ name: "focus-history", type: LaunchType.UserInitiated, context: { connect: true } })
-              }
+              onAction={() => openCommand("focus-history", "Focus History", { connect: true })}
             />
           )}
           {!snap.connection && (
