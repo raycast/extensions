@@ -219,11 +219,27 @@ export async function openItems(items: ExtractedItem[], opts: OpenOptions): Prom
   return result;
 }
 
-/**
- * Thin wrapper: extract URLs from text, then delegate to openItems.
- * Public signature preserved from P3 — existing cmd files keep working unchanged.
- */
+function recoverFlattenedSelection(text: string): ExtractedItem[] {
+  const selection = text.trim();
+  if (!/^https?:\/\/[^\s<>"'`[\]]+$/i.test(selection)) return [];
+  if (/,https?:\/\//i.test(selection)) return [];
+
+  const parts = selection.split(/(?=https?:\/\/)/i);
+  if (parts.length < 2) return [];
+
+  const items: ExtractedItem[] = [];
+  let index = text.indexOf(selection);
+  for (const [position, raw] of parts.entries()) {
+    if (!URL.canParse(raw)) return [];
+    // A scheme inside a query value can be part of a single URL.
+    if (position < parts.length - 1 && /\?[^#]*$/.test(raw)) return [];
+    items.push({ raw, url: raw, type: "web", index });
+    index += raw.length;
+  }
+  return items;
+}
+
 export async function openLinks(text: string, opts: OpenOptions): Promise<OpenResult> {
-  const items = extractUrls(text);
-  return openItems(items, opts);
+  const recovered = opts.source === "selection" ? recoverFlattenedSelection(text) : [];
+  return openItems(recovered.length > 0 ? recovered : extractUrls(text), opts);
 }

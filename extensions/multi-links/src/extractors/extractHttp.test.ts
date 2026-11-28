@@ -17,6 +17,11 @@ describe("extractHttp (EXT-01)", () => {
     expect(result.map((i) => i.url)).toEqual(["https://a.com", "https://b.com"]);
   });
 
+  it("keeps comma-separated URLs distinct after a text fragment", () => {
+    const result = extractHttp("https://a.com/#:~:text=first,https://b.com");
+    expect(result.map((i) => i.url)).toEqual(["https://a.com/#:~:text=first", "https://b.com"]);
+  });
+
   it("captures correct index", () => {
     const result = extractHttp("xx https://a.com");
     expect(result[0].index).toBe(3);

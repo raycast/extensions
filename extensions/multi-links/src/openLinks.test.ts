@@ -48,6 +48,46 @@ beforeEach(() => {
   vi.mocked(open).mockResolvedValue(undefined);
 });
 
+describe("openLinks — flattened selection", () => {
+  const urls = [
+    "https://en.wikipedia.org/wiki/Ernest_Hemingway",
+    "https://en.wikipedia.org/wiki/The_Old_Man_and_the_Sea#:~:text=It%20was%20the%20last,work%20of%20fiction",
+    "https://www.nobelprize.org/prizes/literature/1954/hemingway/facts/",
+    "https://www.britannica.com/biography/Ernest-Hemingway#:~:text=American%20novelist%20and%20short%2Dstory%20writer",
+  ];
+
+  it("opens the exact recovered URLs in selection order without a prompt below the batch threshold", async () => {
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs());
+
+    const result = await openLinks(urls.join(""), { source: "selection" });
+
+    expect(confirmAlert).not.toHaveBeenCalled();
+    expect(vi.mocked(open).mock.calls.map(([url]) => url)).toEqual(urls);
+    expect(result.opened).toBe(urls.length);
+  });
+
+  it.each([
+    ["blank lines", urls.join("\n\n"), urls],
+    [
+      "a nested query URL",
+      "https://example.com/?next=https://other.example/page",
+      ["https://example.com/?next=https://other.example/page"],
+    ],
+    [
+      "a comma separator",
+      "https://a.com/#:~:text=first,https://b.com",
+      ["https://a.com/#:~:text=first", "https://b.com"],
+    ],
+  ])("opens a selection with %s without recovery", async (_label, selection, expected) => {
+    vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs());
+
+    await openLinks(selection, { source: "selection" });
+
+    expect(confirmAlert).not.toHaveBeenCalled();
+    expect(vi.mocked(open).mock.calls.map(([url]) => url)).toEqual(expected);
+  });
+});
+
 describe("openLinks — confirm gate (SAFE-01..04)", () => {
   it("LD-P3-02: triggers confirmAlert when count >= threshold and confirmEnabled=true", async () => {
     vi.mocked(getPreferenceValues).mockReturnValue(rawPrefs({ confirmEnabled: true, confirmThreshold: "5" }));

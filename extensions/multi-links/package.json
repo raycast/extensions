@@ -6,12 +6,15 @@
   "icon": "extension-icon.png",
   "author": "wrick17",
   "contributors": [
-    "tim_gailey"
+    "tim_gailey",
+    "alexi.build"
   ],
   "categories": [
     "Productivity"
   ],
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
